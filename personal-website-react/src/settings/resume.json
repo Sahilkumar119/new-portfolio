@@ -1,0 +1,132 @@
+{
+  "basics": {
+    "name": "Sahil Kumar",
+    "label": "Electronics and Communication Engineering student",
+    "email": "sahil115jangid@gmail.com",
+    "phone": "",
+    "picture": "jl.png",
+    "x_title": "Hey, I'm",
+    "job": "ECE student",
+    "description": "Hey, I'm Sahil Kumar, an Electronics and Communication Engineering student based in India. Feel free to reach out at sahil115jangid@gmail.com.",
+    "summary": "based in India.",
+    "keywords": "personal,website,portfolio,sahil,kumar,ece,student,india,engineering",
+    "url": "https://sahilkumar.dev",
+    "location": {
+      "address": "",
+      "postalCode": "",
+      "city": "",
+      "country": "India",
+      "countryCode": "IND",
+      "region": ""
+    },
+    "profiles": [
+      {
+        "network": "Email",
+        "username": "sahil115jangid@gmail.com",
+        "url": "mailto:sahil115jangid@gmail.com",
+        "x_icon": "far fa-envelope"
+      },
+      {
+        "network": "LinkedIn",
+        "username": "Sahil kumar",
+        "url": "https://www.linkedin.com/in/sahilkumar119/",
+        "x_icon": "fab fa-linkedin-in"
+      },
+      {
+        "network": "GitHub",
+        "username": "Sahil kumar",
+        "url": "https://github.com/Sahiljangra115",
+        "x_icon": "fab fa-github"
+      },
+      {
+        "network": "Custom",
+        "username": "add-your-link",
+        "url": "https://your-link.example",
+        "x_icon": "fas fa-link"
+      }
+    ]
+  },
+  "work": [
+    {
+      "company": "Company",
+      "position": "President",
+      "website": "http://company.com",
+      "startDate": "2013-01-01",
+      "endDate": "2014-01-01",
+      "summary": "Description...",
+      "highlights": ["Started the company"]
+    }
+  ],
+  "volunteer": [
+    {
+      "organization": "Organization",
+      "position": "Volunteer",
+      "website": "http://organization.com/",
+      "startDate": "2012-01-01",
+      "endDate": "2013-01-01",
+      "summary": "Description...",
+      "highlights": ["Awarded 'Volunteer of the Month'"]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University",
+      "area": "Software Development",
+      "studyType": "Bachelor",
+      "startDate": "2011-01-01",
+      "endDate": "2013-01-01",
+      "gpa": "4.0",
+      "courses": ["DB1101 - Basic SQL"]
+    }
+  ],
+  "awards": [
+    {
+      "title": "Award",
+      "date": "2014-11-01",
+      "awarder": "Company",
+      "summary": "There is no spoon."
+    }
+  ],
+  "publications": [
+    {
+      "name": "Publication",
+      "publisher": "Company",
+      "releaseDate": "2014-10-01",
+      "website": "http://publication.com",
+      "summary": "Description..."
+    }
+  ],
+  "skills": [
+    {
+      "name": "Web Development",
+      "level": "Master",
+      "keywords": ["HTML", "CSS", "Javascript"]
+    }
+  ],
+  "languages": [
+    {
+      "language": "German",
+      "fluency": "Native speaker"
+    },
+    {
+      "language": "English",
+      "fluency": "Fluent speaker"
+    },
+    {
+      "language": "French",
+      "fluency": "Good knowledge"
+    }
+  ],
+  "interests": [
+    {
+      "name": "Wildlife",
+      "keywords": ["Ferrets", "Unicorns"]
+    }
+  ],
+  "references": [
+    {
+      "name": "Jane Doe",
+      "reference": "Reference..."
+    }
+  ]
+}

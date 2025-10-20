@@ -43,14 +43,15 @@ const useStyles = makeStyles((theme) => ({
   },
   blogCard: {
     marginBottom: theme.spacing(3),
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
     backdropFilter: "blur(10px)",
-    border: `1px solid ${theme.palette.divider}`,
-    transition: "all 0.3s ease",
+    border: `1px solid rgba(255, 255, 255, 0.08)`,
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
     "&:hover": {
-      transform: "translateY(-4px)",
-      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
-      border: `1px solid ${theme.palette.primary.main}`,
+      transform: "translateY(-2px)",
+      backgroundColor: "rgba(255, 255, 255, 0.06)",
+      border: `1px solid rgba(255, 255, 255, 0.15)`,
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
     },
   },
   cardContent: {
@@ -60,11 +61,18 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     marginBottom: theme.spacing(1),
     color: theme.palette.text.primary,
+    transition: "color 0.2s ease",
+    ".MuiCardActionArea-root:hover &": {
+      color: theme.palette.primary.light,
+    },
   },
   blogDate: {
     display: "inline-block",
     fontSize: "0.875rem",
     marginBottom: theme.spacing(2),
+    color: theme.palette.text.secondary,
+    border: "none",
+    backgroundColor: "transparent",
   },
   blogExcerpt: {
     lineHeight: 1.7,
@@ -79,20 +87,29 @@ const useStyles = makeStyles((theme) => ({
   chip: {
     fontSize: "0.75rem",
     height: "24px",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    border: `1px solid rgba(255, 255, 255, 0.1)`,
+    color: theme.palette.text.secondary,
+    transition: "all 0.2s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      border: `1px solid rgba(255, 255, 255, 0.2)`,
+    },
   },
   readMore: {
-    color: theme.palette.primary.main,
-    fontWeight: 600,
+    color: theme.palette.primary.light,
+    fontWeight: 500,
     display: "inline-flex",
     alignItems: "center",
     marginTop: theme.spacing(1),
+    transition: "color 0.2s ease",
     "&:after": {
       content: '"→"',
       marginLeft: theme.spacing(1),
-      transition: "margin-left 0.3s ease",
+      transition: "margin-left 0.2s ease",
     },
     "&:hover:after": {
-      marginLeft: theme.spacing(2),
+      marginLeft: theme.spacing(1.5),
     },
   },
 }));
@@ -140,7 +157,6 @@ export const Blogs = () => {
                     label={blog.date}
                     size="small"
                     className={classes.blogDate}
-                    variant="outlined"
                   />
                   <Typography
                     variant="body1"
@@ -156,8 +172,6 @@ export const Blogs = () => {
                         label={tag}
                         size="small"
                         className={classes.chip}
-                        color="primary"
-                        variant="outlined"
                       />
                     ))}
                   </Box>

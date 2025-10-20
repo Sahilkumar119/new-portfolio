@@ -132,7 +132,7 @@ Karpathy's talk confirmed what many of us have been feeling: the ground is shift
 
 It's a massive challenge, but I find it incredibly exciting.
 
-**What do you think?** Are you already building "Iron Man suits"? Is Software 3.0 just hype, or is it the future? **Drop your thoughts in the comments—I'd love to discuss it.**
+**What do you think?** Are you already building "Iron Man suits"? Is Software 3.0 just hype, or is it the future?
 `,
   },
 };

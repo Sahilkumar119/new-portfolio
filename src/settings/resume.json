@@ -39,10 +39,10 @@
         "x_icon": "fab fa-github"
       },
       {
-        "network": "Custom",
-        "username": "sahilkumar.dev",
-        "url": "https://sahilkumar.dev",
-        "x_icon": "fas fa-link"
+        "network": "Dev.to",
+        "username": "archie_btw",
+        "url": "https://dev.to/archie_btw",
+        "x_icon": "fab fa-dev"
       }
     ]
   },

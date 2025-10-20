@@ -88,7 +88,9 @@ I just watched a talk by Andrej Karpathy (formerly of Tesla and OpenAI), and I h
 
 If you're a developer, an engineering student, or just tech savvy, this is a concept you need to understand.
 
-<iframe width="100%" height="400" src="https://www.youtube.com/embed/LCEmiRjPEtQ" title="Andrej Karpathy on Software 3.0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/LCEmiRjPEtQ" title="Andrej Karpathy on Software 3.0" style="border: 0;" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+  <p>Your browser does not support iframes. <a href="https://www.youtube.com/watch?v=LCEmiRjPEtQ" target="_blank" rel="noopener noreferrer">Watch the video on YouTube</a>.</p>
+</iframe>
 
 ## The Evolution: From 1.0 to 3.0
 

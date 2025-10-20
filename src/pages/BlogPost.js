@@ -15,7 +15,6 @@ import { SocialIcons } from "../components/content/SocialIcons";
 import { NavigationButtons } from "../components/navigation/NavigationButtons";
 import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
-import { TextDecrypt } from "../components/content/TextDecrypt";
 import { blogPosts } from "../data/blogPosts";
 
 const useStyles = makeStyles((theme) => ({
@@ -365,7 +364,7 @@ export const BlogPost = () => {
           <Box className={classes.article}>
             <Box className={classes.header}>
               <Typography variant="h3" component="h1" className={classes.title}>
-                <TextDecrypt text={post.title} />
+                {post.title}
               </Typography>
 
               <Box className={classes.meta}>

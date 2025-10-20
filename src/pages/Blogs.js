@@ -144,7 +144,7 @@ export const Blogs = () => {
 
           {blogs.map((blog) => (
             <Card key={blog.id} className={classes.blogCard}>
-              <CardActionArea href={blog.link}>
+              <CardActionArea href={`/blog/${blog.slug}`}>
                 <CardContent className={classes.cardContent}>
                   <Typography
                     variant="h5"

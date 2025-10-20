@@ -218,6 +218,31 @@ export const BlogPost = () => {
       // Skip empty sections
       if (!section.trim()) return null;
 
+      // Handle iframes (YouTube embeds, etc.)
+      if (section.trim().startsWith("<iframe")) {
+        return (
+          <Box
+            key={index}
+            sx={{
+              position: "relative",
+              paddingBottom: "56.25%",
+              height: 0,
+              overflow: "hidden",
+              marginY: 3,
+              borderRadius: 2,
+              "& iframe": {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              },
+            }}
+            dangerouslySetInnerHTML={{ __html: section }}
+          />
+        );
+      }
+
       // Handle code blocks
       if (section.trim().startsWith("```")) {
         const lines = section.trim().split("\n");

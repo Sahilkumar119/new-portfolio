@@ -167,6 +167,21 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(8, 2),
     color: theme.palette.text.secondary,
   },
+  iframeWrapper: {
+    position: "relative",
+    paddingBottom: "56.25%",
+    height: 0,
+    overflow: "hidden",
+    margin: theme.spacing(3, 0),
+    borderRadius: theme.spacing(1),
+    "& iframe": {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+    },
+  },
 }));
 
 export const BlogPost = () => {
@@ -223,21 +238,7 @@ export const BlogPost = () => {
         return (
           <Box
             key={index}
-            sx={{
-              position: "relative",
-              paddingBottom: "56.25%",
-              height: 0,
-              overflow: "hidden",
-              marginY: 3,
-              borderRadius: 2,
-              "& iframe": {
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-              },
-            }}
+            className={classes.iframeWrapper}
             dangerouslySetInnerHTML={{ __html: section }}
           />
         );

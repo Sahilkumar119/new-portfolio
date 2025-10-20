@@ -5,10 +5,12 @@
 3. The resume will be downloadable from the lower-left corner button
 
 ## File Location:
+
 /public/resume.pdf
 
 ## Download Name:
-When users click the button, the file will download as "Sahil_Kumar_Resume.pdf"
+
+When users click the button, the file will download as "Your_Name_Resume.pdf" (customize in FooterText.js)
 
 You can customize the download name by editing:
 /src/components/footer/FooterText.js

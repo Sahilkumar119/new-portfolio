@@ -31,7 +31,7 @@ export const FooterText = () => {
       color="inherit"
       underline="none"
       href="/resume.pdf"
-      download="Sahil_Kumar_Resume.pdf"
+      download="Your_Name_Resume.pdf"
       className={classes.footerText}
     >
       <GetAppIcon className={classes.icon} />

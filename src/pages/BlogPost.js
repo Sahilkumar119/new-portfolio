@@ -1,14 +1,6 @@
 import React from "react";
-import {
-  Container,
-  Typography,
-  Box,
-  Chip,
-  Hidden,
-  Divider,
-} from "@material-ui/core";
+import { Container, Hidden } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
-import { LogoLink } from "../components/logo/LogoLink";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { FooterText } from "../components/footer/FooterText";
 import { SocialIcons } from "../components/content/SocialIcons";
@@ -17,398 +9,330 @@ import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
 import { blogPosts } from "../data/blogPosts";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-  },
-  content: {
-    marginTop: "auto",
-    marginBottom: "auto",
-    paddingTop: theme.spacing(8),
-    paddingBottom: theme.spacing(8),
-    zIndex: 1,
-  },
-  article: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    backdropFilter: "blur(10px)",
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.spacing(2),
-    padding: theme.spacing(4),
-    marginTop: theme.spacing(4),
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(3),
+const useStyles = makeStyles(() => ({
+    root: {
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
     },
-  },
-  header: {
-    marginBottom: theme.spacing(4),
-  },
-  title: {
-    fontWeight: 700,
-    marginBottom: theme.spacing(3),
-    lineHeight: 1.3,
-  },
-  meta: {
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-    flexWrap: "wrap",
-  },
-  tagContainer: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
-  chip: {
-    fontSize: "0.75rem",
-    height: "24px",
-  },
-  backButton: {
-    color: theme.palette.primary.main,
-    cursor: "pointer",
-    fontWeight: 600,
-    display: "inline-flex",
-    alignItems: "center",
-    marginBottom: theme.spacing(3),
-    transition: "all 0.3s ease",
-    "&:hover": {
-      textDecoration: "underline",
-      transform: "translateX(-5px)",
+    glowBlue: {
+        position: "fixed",
+        top: "-20vh", right: "-15vw",
+        width: "clamp(400px,60vw,900px)", height: "clamp(400px,60vw,900px)",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, var(--glow-blue) 0%, transparent 70%)",
+        filter: "blur(60px)", zIndex: 0, pointerEvents: "none",
+        animation: "$glowPulse 9s ease-in-out infinite",
     },
-    "&:before": {
-      content: '"← "',
-      marginRight: theme.spacing(1),
+    glowPurple: {
+        position: "fixed",
+        bottom: "-20vh", left: "-10vw",
+        width: "clamp(300px,50vw,700px)", height: "clamp(300px,50vw,700px)",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, var(--glow-purple) 0%, transparent 70%)",
+        filter: "blur(60px)", zIndex: 0, pointerEvents: "none",
+        animation: "$glowPulse 11s ease-in-out 2s infinite",
     },
-  },
-  contentText: {
-    lineHeight: 1.8,
-    fontSize: "1.1rem",
-    marginTop: theme.spacing(4),
-    "& p": {
-      marginBottom: theme.spacing(3),
+    "@keyframes glowPulse": {
+        "0%, 100%": { opacity: 0.6, transform: "scale(1)" },
+        "50%":       { opacity: 0.95, transform: "scale(1.08)" },
     },
-    "& h2": {
-      marginTop: theme.spacing(5),
-      marginBottom: theme.spacing(2),
-      fontWeight: 600,
-      fontSize: "2rem",
+
+    content: {
+        paddingTop: "7rem",
+        paddingBottom: "6rem",
+        zIndex: 10,
+        flex: 1,
     },
-    "& h3": {
-      marginTop: theme.spacing(4),
-      marginBottom: theme.spacing(2),
-      fontWeight: 600,
-      fontSize: "1.5rem",
-    },
-    "& code": {
-      backgroundColor: "rgba(0, 0, 0, 0.3)",
-      padding: "3px 8px",
-      borderRadius: "4px",
-      fontFamily: "'Courier New', monospace",
-      fontSize: "0.9em",
-      color: theme.palette.primary.light,
-    },
-    "& pre": {
-      backgroundColor: "rgba(0, 0, 0, 0.4)",
-      padding: theme.spacing(3),
-      borderRadius: theme.spacing(1),
-      overflow: "auto",
-      marginTop: theme.spacing(2),
-      marginBottom: theme.spacing(3),
-      border: `1px solid ${theme.palette.divider}`,
-      "& code": {
-        backgroundColor: "transparent",
+
+    backBtn: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        fontSize: "0.8rem",
+        fontWeight: 500,
+        color: "var(--text-secondary)",
+        cursor: "pointer",
+        background: "none",
+        border: "none",
         padding: 0,
-        color: theme.palette.text.primary,
-      },
+        marginBottom: "2.5rem",
+        fontFamily: "inherit",
+        transition: "color 180ms ease, transform 200ms cubic-bezier(0.34,1.56,0.64,1)",
+        "&:hover": {
+            color: "var(--text-primary)",
+            transform: "translateX(-3px)",
+        },
     },
-    "& ul": {
-      marginBottom: theme.spacing(3),
-      paddingLeft: theme.spacing(4),
-      "& li": {
-        marginBottom: theme.spacing(1),
+
+    article: {
+        position: "relative",
+        background: "var(--glass-bg)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        border: "1px solid var(--glass-border)",
+        boxShadow: "var(--glass-shadow)",
+        borderRadius: "20px",
+        padding: "clamp(2rem, 5vw, 3.5rem)",
+        overflow: "hidden",
+        animation: "fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0, left: "8%", right: "8%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
+        },
+    },
+
+    articleTitle: {
+        fontSize: "clamp(1.6rem, 4vw, 2.4rem)",
+        fontWeight: 700,
+        letterSpacing: "-0.03em",
+        lineHeight: 1.15,
+        color: "var(--text-primary)",
+        marginBottom: "1.5rem",
+    },
+
+    articleMeta: {
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        flexWrap: "wrap",
+        paddingBottom: "1.5rem",
+        marginBottom: "2rem",
+        borderBottom: "1px solid var(--divider)",
+    },
+    metaItem: {
+        fontSize: "0.75rem",
+        fontWeight: 500,
+        letterSpacing: "0.04em",
+        color: "var(--text-tertiary)",
+        textTransform: "uppercase",
+    },
+    metaDot: {
+        width: "3px",
+        height: "3px",
+        borderRadius: "50%",
+        background: "var(--divider)",
+        flexShrink: 0,
+    },
+
+    // Blog content rendering
+    bodyText: {
+        fontSize: "1.02rem",
         lineHeight: 1.8,
-      },
+        color: "var(--text-secondary)",
+        "& p": {
+            marginBottom: "1.5rem",
+            color: "var(--text-secondary)",
+        },
+        "& h2": {
+            fontSize: "1.4rem",
+            fontWeight: 700,
+            letterSpacing: "-0.025em",
+            color: "var(--text-primary)",
+            marginTop: "2.5rem",
+            marginBottom: "1rem",
+        },
+        "& h3": {
+            fontSize: "1.1rem",
+            fontWeight: 600,
+            letterSpacing: "-0.015em",
+            color: "var(--text-primary)",
+            marginTop: "2rem",
+            marginBottom: "0.75rem",
+        },
+        "& code": {
+            fontFamily: "'SF Mono','Fira Code','Fira Mono',monospace",
+            fontSize: "0.88em",
+            background: "var(--glass-bg)",
+            border: "1px solid var(--glass-border)",
+            padding: "2px 7px",
+            borderRadius: "5px",
+            color: "var(--accent-primary)",
+        },
+        "& pre": {
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid var(--glass-border)",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            overflow: "auto",
+            margin: "1.5rem 0",
+            "& code": {
+                background: "none",
+                border: "none",
+                padding: 0,
+                color: "var(--text-primary)",
+            },
+        },
+        "& ul, & ol": {
+            paddingLeft: "1.5rem",
+            marginBottom: "1.5rem",
+            "& li": { marginBottom: "0.5rem", lineHeight: 1.75 },
+        },
+        "& blockquote": {
+            borderLeft: "3px solid var(--accent-primary)",
+            marginLeft: 0,
+            padding: "0.75rem 1.5rem",
+            marginTop: "1.5rem",
+            marginBottom: "1.5rem",
+            background: "var(--glass-bg)",
+            borderRadius: "0 10px 10px 0",
+            fontStyle: "italic",
+            "& p": { marginBottom: 0, color: "var(--text-secondary)" },
+        },
+        "& strong": {
+            fontWeight: 700,
+            color: "var(--text-primary)",
+        },
+        "& a": {
+            color: "var(--accent-primary)",
+            textDecoration: "none",
+            "&:hover": { textDecoration: "underline" },
+        },
     },
-    "& ol": {
-      marginBottom: theme.spacing(3),
-      paddingLeft: theme.spacing(4),
-      "& li": {
-        marginBottom: theme.spacing(1),
-        lineHeight: 1.8,
-      },
+
+    // iframe embeds
+    iframeWrapper: {
+        position: "relative",
+        paddingBottom: "56.25%",
+        height: 0,
+        overflow: "hidden",
+        margin: "2rem 0",
+        borderRadius: "12px",
+        border: "1px solid var(--glass-border)",
+        "& iframe": {
+            position: "absolute",
+            top: 0, left: 0,
+            width: "100%", height: "100%",
+        },
     },
-    "& blockquote": {
-      borderLeft: `4px solid ${theme.palette.primary.main}`,
-      paddingLeft: theme.spacing(3),
-      marginLeft: 0,
-      marginRight: 0,
-      marginTop: theme.spacing(3),
-      marginBottom: theme.spacing(3),
-      fontStyle: "italic",
-      backgroundColor: "rgba(0, 0, 0, 0.2)",
-      padding: theme.spacing(2, 3),
-      borderRadius: theme.spacing(1),
-      "& p": {
-        marginBottom: 0,
-      },
+
+    notFound: {
+        textAlign: "center",
+        padding: "6rem 2rem",
+        color: "var(--text-tertiary)",
     },
-    "& strong": {
-      fontWeight: 700,
-      color: theme.palette.primary.light,
+    notFoundTitle: {
+        fontSize: "1.5rem",
+        fontWeight: 600,
+        color: "var(--text-primary)",
+        marginBottom: "0.75rem",
     },
-  },
-  notFound: {
-    textAlign: "center",
-    padding: theme.spacing(8, 2),
-    color: theme.palette.text.secondary,
-  },
-  iframeWrapper: {
-    position: "relative",
-    paddingBottom: "56.25%",
-    height: 0,
-    overflow: "hidden",
-    margin: theme.spacing(3, 0),
-    borderRadius: theme.spacing(1),
-    "& iframe": {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
+    notFoundSub: {
+        fontSize: "0.95rem",
+        lineHeight: 1.6,
     },
-  },
 }));
 
 export const BlogPost = () => {
-  const classes = useStyles();
-  const { slug } = useParams();
-  const history = useHistory();
-  const post = blogPosts[slug];
+    const classes = useStyles();
+    const { slug } = useParams();
+    const history  = useHistory();
+    const post     = blogPosts[slug];
 
-  const handleBack = () => {
-    history.push("/blogs");
-  };
+    const formatInlineText = (text) => {
+        text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
+        text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        return text;
+    };
 
-  if (!post) {
-    return (
-      <>
-        <div className={classes.root}>
-          <DisplacementSphere />
-          <LogoLink />
-          <ThemeToggle />
-          <Hidden smDown>
-            <SocialIcons />
-            <NavigationButtons />
-          </Hidden>
+    const renderContent = () => {
+        if (!post?.content) return null;
+        return post.content.split("\n\n").map((section, idx) => {
+            if (!section.trim()) return null;
+            if (section.trim().startsWith("<iframe")) {
+                return <div key={idx} className={classes.iframeWrapper} dangerouslySetInnerHTML={{ __html: section }} />;
+            }
+            if (section.trim().startsWith("```")) {
+                const lines = section.trim().split("\n");
+                const code  = lines.slice(1, -1).join("\n");
+                return <pre key={idx}><code>{code}</code></pre>;
+            }
+            if (section.startsWith("## "))  return <h2 key={idx}>{section.replace("## ", "")}</h2>;
+            if (section.startsWith("### ")) return <h3 key={idx}>{section.replace("### ", "")}</h3>;
+            if (section.startsWith("> ")) {
+                const text = section.replace(/^> /gm, "");
+                return <blockquote key={idx}><p dangerouslySetInnerHTML={{ __html: formatInlineText(text) }} /></blockquote>;
+            }
+            if (section.includes("\n- ") || section.startsWith("- ")) {
+                const items = section.split("\n").filter(l => l.trim().startsWith("- "));
+                return <ul key={idx}>{items.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: formatInlineText(item.replace(/^- /, "")) }} />)}</ul>;
+            }
+            if (/^\d+\. /.test(section)) {
+                const items = section.split("\n").filter(l => /^\d+\. /.test(l.trim()));
+                return <ol key={idx}>{items.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: formatInlineText(item.replace(/^\d+\. /, "")) }} />)}</ol>;
+            }
+            return <p key={idx} dangerouslySetInnerHTML={{ __html: formatInlineText(section) }} />;
+        });
+    };
 
-          <Container className={classes.content} maxWidth="md">
-            <Typography className={classes.backButton} onClick={handleBack}>
-              Back to Blogs
-            </Typography>
-            <Box className={classes.notFound}>
-              <Typography variant="h4" gutterBottom>
-                Blog Post Not Found
-              </Typography>
-              <Typography variant="body1">
-                The blog post you're looking for doesn't exist.
-              </Typography>
-            </Box>
-          </Container>
-
-          <FooterText />
-        </div>
-      </>
+    const chrome = (
+        <>
+            <DisplacementSphere />
+            <Hidden smDown><NavigationButtons /></Hidden>
+            <ThemeToggle />
+            <Hidden smDown><SocialIcons /></Hidden>
+        </>
     );
-  }
 
-  // Parse and render content
-  const renderContent = () => {
-    const sections = post.content.split("\n\n");
-    return sections.map((section, index) => {
-      // Skip empty sections
-      if (!section.trim()) return null;
-
-      // Handle iframes (YouTube embeds, etc.)
-      if (section.trim().startsWith("<iframe")) {
+    if (!post) {
         return (
-          <Box
-            key={index}
-            className={classes.iframeWrapper}
-            dangerouslySetInnerHTML={{ __html: section }}
-          />
+            <div className={classes.root}>
+                <div className={classes.glowBlue} aria-hidden="true" />
+                <div className={classes.glowPurple} aria-hidden="true" />
+                {chrome}
+                <Container className={classes.content} maxWidth="md" component="main">
+                    <button className={classes.backBtn} onClick={() => history.push("/blogs")}>
+                        ← Back to Blog
+                    </button>
+                    <div className={classes.notFound}>
+                        <p className={classes.notFoundTitle}>Post not found</p>
+                        <p className={classes.notFoundSub}>This post doesn't exist or may have moved.</p>
+                    </div>
+                </Container>
+                <FooterText />
+            </div>
         );
-      }
+    }
 
-      // Handle code blocks
-      if (section.trim().startsWith("```")) {
-        const lines = section.trim().split("\n");
-        const language = lines[0].replace("```", "");
-        const code = lines.slice(1, -1).join("\n");
-        return (
-          <pre key={index}>
-            <code>{code}</code>
-          </pre>
-        );
-      }
+    return (
+        <div className={classes.root}>
+            <div className={classes.glowBlue} aria-hidden="true" />
+            <div className={classes.glowPurple} aria-hidden="true" />
+            {chrome}
 
-      // Handle H2 headings
-      if (section.startsWith("## ")) {
-        return (
-          <Typography key={index} variant="h4" component="h2">
-            {section.replace("## ", "")}
-          </Typography>
-        );
-      }
+            <Container className={classes.content} maxWidth="md" component="main">
+                <button className={classes.backBtn} onClick={() => history.push("/blogs")}>
+                    ← Back to Blog
+                </button>
 
-      // Handle H3 headings
-      if (section.startsWith("### ")) {
-        return (
-          <Typography key={index} variant="h5" component="h3">
-            {section.replace("### ", "")}
-          </Typography>
-        );
-      }
+                <article className={classes.article}>
+                    <h1 className={classes.articleTitle}>{post.title}</h1>
+                    <div className={classes.articleMeta}>
+                        <span className={classes.metaItem}>{post.date}</span>
+                        <span className={classes.metaDot} />
+                        <span className={classes.metaItem}>{post.readTime}</span>
+                        <span className={classes.metaDot} />
+                        <span className={classes.metaItem}>By {post.author}</span>
+                        {post.tags?.length > 0 && (
+                            <>
+                                <span className={classes.metaDot} />
+                                <span className={classes.metaItem}>{post.tags.join(" · ")}</span>
+                            </>
+                        )}
+                    </div>
+                    <div className={classes.bodyText}>{renderContent()}</div>
+                </article>
+            </Container>
 
-      // Handle blockquotes
-      if (section.startsWith("> ")) {
-        const text = section.replace(/^> /gm, "");
-        return (
-          <blockquote key={index}>
-            <Typography
-              variant="body1"
-              dangerouslySetInnerHTML={{ __html: formatInlineText(text) }}
-            />
-          </blockquote>
-        );
-      }
-
-      // Handle unordered lists
-      if (section.includes("\n- ") || section.startsWith("- ")) {
-        const items = section
-          .split("\n")
-          .filter((line) => line.trim().startsWith("- "));
-        return (
-          <ul key={index}>
-            {items.map((item, i) => (
-              <li
-                key={i}
-                dangerouslySetInnerHTML={{
-                  __html: formatInlineText(item.replace(/^- /, "")),
-                }}
-              />
-            ))}
-          </ul>
-        );
-      }
-
-      // Handle ordered lists
-      if (/^\d+\. /.test(section)) {
-        const items = section
-          .split("\n")
-          .filter((line) => /^\d+\. /.test(line.trim()));
-        return (
-          <ol key={index}>
-            {items.map((item, i) => (
-              <li
-                key={i}
-                dangerouslySetInnerHTML={{
-                  __html: formatInlineText(item.replace(/^\d+\. /, "")),
-                }}
-              />
-            ))}
-          </ol>
-        );
-      }
-
-      // Handle regular paragraphs
-      return (
-        <Typography
-          key={index}
-          variant="body1"
-          paragraph
-          dangerouslySetInnerHTML={{ __html: formatInlineText(section) }}
-        />
-      );
-    });
-  };
-
-  // Format inline text (bold, inline code)
-  const formatInlineText = (text) => {
-    // Handle inline code
-    text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
-    // Handle bold
-    text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-    return text;
-  };
-
-  return (
-    <>
-      <div className={classes.root}>
-        <DisplacementSphere />
-        <LogoLink />
-        <ThemeToggle />
-        <Hidden smDown>
-          <SocialIcons />
-          <NavigationButtons />
-        </Hidden>
-
-        <Container className={classes.content} maxWidth="md">
-          <Typography className={classes.backButton} onClick={handleBack}>
-            Back to Blogs
-          </Typography>
-
-          <Box className={classes.article}>
-            <Box className={classes.header}>
-              <Typography variant="h3" component="h1" className={classes.title}>
-                {post.title}
-              </Typography>
-
-              <Box className={classes.meta}>
-                <Chip
-                  label={post.date}
-                  size="small"
-                  className={classes.chip}
-                  variant="outlined"
-                />
-                <Chip
-                  label={post.readTime}
-                  size="small"
-                  className={classes.chip}
-                  variant="outlined"
-                />
-                <Typography variant="body2" color="textSecondary">
-                  By {post.author}
-                </Typography>
-              </Box>
-
-              <Box className={classes.tagContainer}>
-                {post.tags.map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={tag}
-                    size="small"
-                    className={classes.chip}
-                    color="primary"
-                    variant="outlined"
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            <Divider />
-
-            <Box className={classes.contentText}>{renderContent()}</Box>
-          </Box>
-        </Container>
-
-        <FooterText />
-      </div>
-    </>
-  );
+            <FooterText />
+        </div>
+    );
 };
 
 export default BlogPost;

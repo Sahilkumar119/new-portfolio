@@ -1,92 +1,50 @@
 import React from "react";
-import { Container, Hidden } from "@material-ui/core";
+import { Container } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import { LogoLink } from "../components/logo/LogoLink";
-import { ThemeToggle } from "../components/theme/ThemeToggle";
-import { FooterText } from "../components/footer/FooterText";
-import { SocialIcons } from "../components/content/SocialIcons";
-import { NavigationButtons } from "../components/navigation/NavigationButtons";
-import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
-import { TextDecrypt } from "../components/content/TextDecrypt";
-import { blogs } from "../data/blogs";
+import { blogs } from "../../data/blogs";
 
 const useStyles = makeStyles(() => ({
-    root: {
+    section: {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        position: "relative",
-        overflow: "hidden",
-    },
-    glowBlue: {
-        position: "fixed",
-        top: "-20vh", right: "-15vw",
-        width: "clamp(400px,60vw,900px)", height: "clamp(400px,60vw,900px)",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, var(--glow-blue) 0%, transparent 70%)",
-        filter: "blur(60px)", zIndex: 0, pointerEvents: "none",
-        animation: "$glowPulse 9s ease-in-out infinite",
-    },
-    glowPurple: {
-        position: "fixed",
-        bottom: "-20vh", left: "-10vw",
-        width: "clamp(300px,50vw,700px)", height: "clamp(300px,50vw,700px)",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, var(--glow-purple) 0%, transparent 70%)",
-        filter: "blur(60px)", zIndex: 0, pointerEvents: "none",
-        animation: "$glowPulse 11s ease-in-out 2s infinite",
-    },
-    "@keyframes glowPulse": {
-        "0%, 100%": { opacity: 0.6, transform: "scale(1)" },
-        "50%":       { opacity: 0.95, transform: "scale(1.08)" },
-    },
-
-    content: {
+        justifyContent: "flex-start",
         paddingTop: "8rem",
-        paddingBottom: "6rem",
-        zIndex: 10,
-        flex: 1,
+        paddingBottom: "4rem",
+        paddingLeft: "clamp(4rem, 8vw, 8rem)",
+        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        position: "relative",
     },
-
-    pageHeader: {
-        marginBottom: "3.5rem",
-        animation: "fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
+    header: {
+        marginBottom: "3rem",
+        textAlign: "center",
+        flexShrink: 0,
     },
-    pageEyebrow: {
-        fontSize: "0.7rem",
+    eyebrow: {
+        fontSize: "0.75rem",
         fontWeight: 600,
-        letterSpacing: "0.14em",
+        letterSpacing: "0.15em",
         textTransform: "uppercase",
-        color: "var(--text-tertiary)",
+        color: "var(--accent-primary)",
         display: "block",
         marginBottom: "0.75rem",
     },
-    pageTitle: {
+    title: {
         fontSize: "clamp(2.5rem, 6vw, 4rem)",
         fontWeight: 800,
         letterSpacing: "-0.04em",
         lineHeight: 1.0,
         color: "var(--text-primary)",
-        marginBottom: "0.75rem",
-        "& p": { margin: 0 },
-    },
-    pageSubtitle: {
-        fontSize: "1rem",
-        color: "var(--text-secondary)",
-        fontWeight: 400,
-        lineHeight: 1.6,
-        maxWidth: "480px",
         margin: 0,
     },
-
+    
     list: {
         display: "flex",
         flexDirection: "column",
         gap: "1px",
     },
 
-    // Blog entry — editorial list format, not a card grid
     entry: {
         display: "block",
         textDecoration: "none",
@@ -141,6 +99,7 @@ const useStyles = makeStyles(() => ({
         lineHeight: 1.3,
         flex: 1,
         transition: "color 180ms ease",
+        margin: 0,
     },
     entryArrow: {
         fontSize: "1.1rem",
@@ -157,7 +116,6 @@ const useStyles = makeStyles(() => ({
         marginTop: "0.5rem",
         maxWidth: "640px",
     },
-
     emptyState: {
         padding: "3rem 0",
         color: "var(--text-tertiary)",
@@ -166,28 +124,15 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-export const Blogs = () => {
+export const LatestBlogs = () => {
     const classes = useStyles();
 
     return (
-        <div className={classes.root}>
-            <div className={classes.glowBlue}  aria-hidden="true" />
-            <div className={classes.glowPurple} aria-hidden="true" />
-            <DisplacementSphere />
-            <LogoLink />
-            <Hidden smDown><NavigationButtons /></Hidden>
-            <ThemeToggle />
-            <Hidden smDown><SocialIcons /></Hidden>
-
-            <Container className={classes.content} maxWidth="md" component="main">
-                <header className={classes.pageHeader}>
-                    <span className={classes.pageEyebrow}>Writing</span>
-                    <div className={classes.pageTitle}>
-                        <TextDecrypt text="Blog" />
-                    </div>
-                    <p className={classes.pageSubtitle}>
-                        Thoughts, tutorials, and explorations on my learning journey.
-                    </p>
+        <section className={classes.section} aria-label="Latest Writing">
+            <Container maxWidth="md">
+                <header className={classes.header}>
+                    <span className={classes.eyebrow}>Writing</span>
+                    <h2 className={classes.title}>Latest Explorations</h2>
                 </header>
 
                 {blogs.length === 0 ? (
@@ -212,7 +157,7 @@ export const Blogs = () => {
                                     )}
                                 </div>
                                 <div className={classes.entryRow}>
-                                    <h2 className={classes.entryTitle}>{blog.title}</h2>
+                                    <h3 className={classes.entryTitle}>{blog.title}</h3>
                                     <span className={classes.entryArrow} aria-hidden="true">→</span>
                                 </div>
                                 <p className={classes.entryExcerpt}>{blog.excerpt}</p>
@@ -221,10 +166,6 @@ export const Blogs = () => {
                     </div>
                 )}
             </Container>
-
-            <FooterText />
-        </div>
+        </section>
     );
 };
-
-export default Blogs;

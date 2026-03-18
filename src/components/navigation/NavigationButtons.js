@@ -1,71 +1,100 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Box, Button, Tooltip, Zoom } from "@material-ui/core";
+import React, { useState, useEffect } from "react";
+import { Tooltip, Zoom } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles((theme) => ({
-  navContainer: {
-    position: "absolute",
-    // Position below social icons: top spacing (6) + (4 icons * 2.5rem) + (4 * spacing(2) for margins)
-    top: `calc(${theme.spacing(6)}px + 10rem + ${theme.spacing(8)}px)`,
-    right: theme.spacing(6),
-    display: "flex",
-    flexDirection: "column",
-    zIndex: 10,
-  },
-  navButton: {
-    backgroundColor: "transparent",
-    color: "inherit",
-    border: `2px solid ${
-      theme.palette.foreground?.default || theme.palette.text.primary
-    }`,
-    borderRadius: "25px",
-    minWidth: "auto",
-    fontSize: "1rem",
-    fontWeight: 600,
-    letterSpacing: "2px",
-    textTransform: "none",
-    writingMode: "vertical-rl",
-    padding: theme.spacing(1.5, 1),
-    marginBottom: theme.spacing(2),
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-      transform: "translateX(-5px)",
-      boxShadow:
-        "0 10px 15px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.1)",
+const NAV_LINKS = [
+    { label: "Terminal", to: "#terminal" },
+    { label: "Projects", to: "#projects" },
+    { label: "Certifications", to: "#certifications" },
+    { label: "Blog", to: "#blogs" },
+    { label: "Connect", to: "#connect" },
+];
+
+const useStyles = makeStyles(() => ({
+    nav: {
+        position: "fixed",
+        top: "50%",
+        transform: "translateY(-50%)",
+        right: "2.5rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "12px",
+        zIndex: 9999,
+        animation: "slideInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both",
     },
-  },
+    pill: {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px 10px",
+        borderRadius: "11px",
+        fontSize: "0.85rem",
+        fontWeight: 600,
+        letterSpacing: "0.05em",
+        color: "var(--text-secondary)",
+        background: "var(--glass-bg)",
+        backdropFilter: "blur(16px) saturate(180%)",
+        WebkitBackdropFilter: "blur(16px) saturate(180%)",
+        border: "1px solid var(--glass-border)",
+        boxShadow: "var(--glass-shadow)",
+        textDecoration: "none",
+        writingMode: "vertical-rl",
+        transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "&:hover": {
+            background: "var(--glass-bg-hover)",
+            boxShadow: "var(--glass-shadow-hover)",
+            color: "var(--text-primary)",
+            transform: "translateX(-4px)",
+            textDecoration: "none",
+        },
+    },
+    pillActive: {
+        color: "var(--accent-primary)",
+        background: "var(--glass-bg-hover)",
+        borderColor: "rgba(10,132,255,0.25)",
+    },
 }));
 
 export const NavigationButtons = () => {
-  const classes = useStyles();
+    const classes = useStyles();
+    const [activeHash, setActiveHash] = useState("");
 
-  return (
-    <Box className={classes.navContainer}>
-      <Tooltip title="Projects" placement="left" TransitionComponent={Zoom}>
-        <Button
-          component={Link}
-          to="/projects"
-          className={classes.navButton}
-          aria-label="Navigate to Projects"
-        >
-          Projects
-        </Button>
-      </Tooltip>
-      <Tooltip title="Blogs" placement="left" TransitionComponent={Zoom}>
-        <Button
-          component={Link}
-          to="/blogs"
-          className={classes.navButton}
-          aria-label="Navigate to Blogs"
-        >
-          Blogs
-        </Button>
-      </Tooltip>
-    </Box>
-  );
+    useEffect(() => {
+        const handleScroll = () => {
+            const sections = NAV_LINKS.map(l => l.to.replace("#", ""));
+            let current = "";
+            for (const section of sections) {
+                const element = document.getElementById(section);
+                if (element && window.scrollY >= element.offsetTop - 300) {
+                    current = "#" + section;
+                }
+            }
+            setActiveHash(current);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    return (
+        <nav className={classes.nav} aria-label="Main navigation">
+            {NAV_LINKS.map(({ label, to }) => (
+                <Tooltip title={label} placement="left" arrow key={to}>
+                    <a
+                        href={to}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            document.querySelector(to)?.scrollIntoView({ behavior: 'smooth' });
+                            window.history.pushState(null, '', to);
+                        }}
+                        className={`${classes.pill} ${activeHash === to ? classes.pillActive : ""}`}
+                    >
+                        {label}
+                    </a>
+                </Tooltip>
+            ))}
+        </nav>
+    );
 };
 
 export default NavigationButtons;

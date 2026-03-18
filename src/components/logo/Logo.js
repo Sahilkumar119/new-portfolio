@@ -6,10 +6,10 @@ const useStyles = makeStyles(() => ({
     width: "100%",
     height: "100%",
     display: "block",
-    borderRadius: "50%",
-    transition: "transform 0.5s ease",
+    borderRadius: "12%",
+    transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
     "&:hover": {
-      transform: "scale(1.05)",
+      transform: "scale(1.08)",
     },
   },
 }));

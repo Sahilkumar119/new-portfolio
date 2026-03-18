@@ -1,16 +1,17 @@
 {
   "basics": {
     "name": "Sahil Kumar",
-    "label": "Electronics and Communication Engineering student",
+    "label": "Developer & Linux Enthusiast",
     "email": "hello@sahilkumar.dev",
     "phone": "",
     "picture": "jl.png",
     "x_title": "Hey, I'm",
-    "job": "ECE student",
-    "description": "Hey, I'm Sahil Kumar, an Electronics and Communication Engineering student based in India. Feel free to reach out at hello@sahilkumar.dev.",
+    "job": "Developer & Linux Enthusiast",
+    "description": "Hey, I'm Sahil Kumar, a developer and Linux enthusiast based in India who loves exploring every bit of technology. Let's build something great together.",
     "summary": "based in India.",
     "keywords": "personal,website,portfolio,Sahil,kumar,ece,student,india,engineering",
     "url": "https://sahilkumar.dev",
+    "resume": "/resume.pdf",
     "location": {
       "address": "",
       "postalCode": "",

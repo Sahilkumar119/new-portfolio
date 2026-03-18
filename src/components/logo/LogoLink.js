@@ -1,41 +1,56 @@
 import React from "react";
-import { Link, Tooltip, Zoom } from "@material-ui/core";
+import { Tooltip, Zoom } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Resume from "../../settings/resume.json";
 import { Logo } from "./Logo";
 
-const useStyles = makeStyles((theme) => ({
-    svg: {
-        width: "40px",
-        height: "40px",
-        position: "absolute",
-        top: theme.spacing(6),
-        left: theme.spacing(6),
-        boxShadow:
-            "0px 3px 5px -1px rgba(0,0,0,0.2),0px 6px 10px 0px rgba(0,0,0,0.14),0px 1px 18px 0px rgba(0,0,0,0.12)",
-        borderRadius: "50%",
+const useStyles = makeStyles(() => ({
+    wrapper: {
+        position: "fixed",
+        top: "clamp(1.5rem, 4vw, 3rem)",
+        left: "clamp(1.5rem, 4vw, 3rem)",
+        zIndex: 20,
+        animation: "scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0s both",
+    },
+    link: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "44px",
+        height: "44px",
+        borderRadius: "12px",
+        background: "var(--glass-bg)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        border: "1px solid var(--glass-border)",
+        boxShadow: "var(--glass-shadow)",
+        textDecoration: "none",
+        padding: "9px",
+        transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "& svg": { width: "100%", height: "100%" },
+        "&:hover": {
+            transform: "scale(1.1) rotate(-4deg)",
+            background: "var(--glass-bg-hover)",
+            boxShadow: "var(--glass-shadow-hover)",
+        },
+        "&:active": { transform: "scale(0.93) rotate(0deg)" },
     },
 }));
 
 export const LogoLink = () => {
     const classes = useStyles();
-
     return (
-        <Tooltip
-            title={Resume.basics.name}
-            placement="right"
-            TransitionComponent={Zoom}
-        >
-            <Link
-                variant="h6"
-                href={Resume.basics.url}
-                underline="none"
-                color="inherit"
-                noWrap
-                className={classes.svg}
-            >
-                <Logo />
-            </Link>
-        </Tooltip>
+        <div className={classes.wrapper}>
+            <Tooltip title={Resume.basics.name} placement="right" TransitionComponent={Zoom} arrow>
+                <a
+                    href={Resume.basics.url}
+                    aria-label={`${Resume.basics.name} — home`}
+                    className={classes.link}
+                    rel="noopener noreferrer"
+                >
+                    <Logo />
+                </a>
+            </Tooltip>
+        </div>
     );
 };

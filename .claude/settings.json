@@ -1,0 +1,17 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:4141",
+    "ANTHROPIC_AUTH_TOKEN": "dummy"
+  },
+  "mcpServers": {
+    "memory-keeper": {
+      "command": "npx",
+      "args": [
+        "mcp-memory-keeper"
+      ],
+      "env": {
+        "DATA_DIR": "/home/ladliju/mcp-data/memory-keeper"
+      }
+    }
+  }
+}

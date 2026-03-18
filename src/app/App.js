@@ -25,9 +25,6 @@ export const App = () => {
         <Suspense fallback={<div />}>
           <Switch>
             <Route path="/" exact component={Home} />
-            <Route path="/resume" component={Resume} />
-            <Route path="/projects" component={Projects} />
-            <Route path="/blogs" exact component={Blogs} />
             <Route path="/blog/:slug" component={BlogPost} />
             <Route path="*" component={PageNotFound} />
           </Switch>

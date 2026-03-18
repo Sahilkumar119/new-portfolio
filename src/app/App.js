@@ -8,9 +8,6 @@ import { logCredits } from "../utils/logCredits";
 
 import { Home } from "../pages/Home";
 
-const Resume = lazy(() => import("../pages/Resume"));
-const Projects = lazy(() => import("../pages/Projects"));
-const Blogs = lazy(() => import("../pages/Blogs"));
 const BlogPost = lazy(() => import("../pages/BlogPost"));
 const PageNotFound = lazy(() => import("../pages/PageNotFound"));
 

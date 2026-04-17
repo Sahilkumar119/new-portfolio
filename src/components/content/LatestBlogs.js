@@ -135,7 +135,7 @@ export const LatestBlogs = () => {
                     <h2 className={classes.title}>Latest Explorations</h2>
                 </header>
 
-                {blogs.length === 0 ? (
+                {(!Array.isArray(blogs) || blogs.length === 0) ? (
                     <p className={classes.emptyState}>No posts yet — check back soon.</p>
                 ) : (
                     <div className={classes.list} role="list">
@@ -148,7 +148,7 @@ export const LatestBlogs = () => {
                             >
                                 <div className={classes.entryMeta}>
                                     <span className={classes.entryDate}>{blog.date}</span>
-                                    {blog.tags?.length > 0 && (
+                                    {Array.isArray(blog.tags) && blog.tags.length > 0 && (
                                         <div className={classes.entryTags}>
                                             {blog.tags.slice(0, 3).map(tag => (
                                                 <span key={tag} className={classes.entryTag}>{tag}</span>

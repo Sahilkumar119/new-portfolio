@@ -1,0 +1,14 @@
+export const terminalData = {
+  "user": "sahil",
+  "host": "archlinux",
+  "commands": [
+    {
+      "input": "cat whoami.txt",
+      "output": "Linux Enthusiast | Developer | Lifelong Learner\nI thrive in the terminal, optimizing workflows and building robust software.\nArch Linux is my daily driver because absolute control is beautiful."
+    },
+    {
+      "input": "neofetch --skills",
+      "output": "> Core: C++, Python, JavaScript\n> ML/AI: TensorFlow, PyTorch\n> Embedded: Robotics control, IoT protocols\n> OS: Linux (Arch, Debian), Shell Scripting"
+    }
+  ]
+};

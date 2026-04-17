@@ -152,6 +152,26 @@ const syncCertifications = () => {
 
   console.log(`Successfully synced ${certifications.length} certifications.`);
 };
+/**
+ * Sync Terminal
+ */
+const syncTerminal = () => {
+  const terminalFile = path.join(CONTENT_DIR, 'terminal.json');
+  if (!fs.existsSync(terminalFile)) return;
+
+  try {
+    const rawTerminal = JSON.parse(fs.readFileSync(terminalFile, 'utf-8'));
+    const terminal = {
+      user: rawTerminal.user || 'sahil',
+      host: rawTerminal.host || 'archlinux',
+      commands: Array.isArray(rawTerminal.commands) ? rawTerminal.commands : []
+    };
+    fs.writeFileSync(path.join(DATA_DIR, 'terminal.js'), `export const terminalData = ${JSON.stringify(terminal, null, 2)};\n`);
+    console.log(`Successfully synced terminal data.`);
+  } catch (error) {
+    console.error(`Error processing terminal file:`, error.message);
+  }
+};
 
 // Execute
 console.log('Starting content synchronization...');
@@ -159,6 +179,7 @@ try {
   syncBlogs();
   syncProjects();
   syncCertifications();
+  syncTerminal();
   console.log('Content synchronization complete.');
 } catch (error) {
   console.error('Fatal sync error:', error.message);

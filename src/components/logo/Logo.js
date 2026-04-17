@@ -19,7 +19,7 @@ export const Logo = () => {
 
   return (
     <img
-      src={`${process.env.PUBLIC_URL}/favicon.svg`}
+      src={`${process.env.PUBLIC_URL}/favicon-96x96.png`}
       alt="Site logo"
       className={classes.image}
       loading="lazy"

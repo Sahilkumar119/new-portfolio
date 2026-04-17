@@ -1,0 +1,8 @@
+{
+  "title": "AI Voice Assistant",
+  "description": "A cross-platform desktop application that uses OpenAI's Whisper and GPT-4 for low-latency voice-to-text and intelligent task automation.",
+  "technologies": ["Python", "OpenAI API", "PyQt6", "Whisper"],
+  "link": "https://github.com/Sahiljangra115/ai-voice-assistant",
+  "github": "https://github.com/Sahiljangra115/ai-voice-assistant",
+  "type": "top"
+}

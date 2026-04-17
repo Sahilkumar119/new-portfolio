@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Hidden } from "@material-ui/core";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { FooterText } from "../components/footer/FooterText";
 import { SocialIcons } from "../components/content/SocialIcons";
@@ -232,12 +232,17 @@ const useStyles = makeStyles(() => ({
 export const BlogPost = () => {
     const classes = useStyles();
     const { slug } = useParams();
-    const history  = useHistory();
     const post     = blogPosts[slug];
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [slug]);
+
     const formatInlineText = (text) => {
+        text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius:12px; margin:1.5rem 0;" />');
         text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
         text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        text = text.replace(/\*([^*]+)\*/g, "<em>$1</em>");
         return text;
     };
 
@@ -287,9 +292,9 @@ export const BlogPost = () => {
                 <div className={classes.glowPurple} aria-hidden="true" />
                 {chrome}
                 <Container className={classes.content} maxWidth="md" component="main">
-                    <button className={classes.backBtn} onClick={() => history.push("/blogs")}>
+                    <Link to="/#blogs" className={classes.backBtn}>
                         ← Back to Blog
-                    </button>
+                    </Link>
                     <div className={classes.notFound}>
                         <p className={classes.notFoundTitle}>Post not found</p>
                         <p className={classes.notFoundSub}>This post doesn't exist or may have moved.</p>
@@ -307,9 +312,9 @@ export const BlogPost = () => {
             {chrome}
 
             <Container className={classes.content} maxWidth="md" component="main">
-                <button className={classes.backBtn} onClick={() => history.push("/blogs")}>
+                <Link to="/#blogs" className={classes.backBtn}>
                     ← Back to Blog
-                </button>
+                </Link>
 
                 <article className={classes.article}>
                     <h1 className={classes.articleTitle}>{post.title}</h1>

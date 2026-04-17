@@ -29,8 +29,9 @@
     "use-dencrypt-effect": "1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "sync": "node scripts/sync-content.js",
+    "start": "npm run sync && react-scripts start",
+    "build": "npm run sync && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -54,5 +55,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3"
   }
 }

@@ -1,12 +1,6 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-
-const certs = [
-    { title: "Deep Learning Specialization", issuer: "DeepLearning.AI", date: "2023" },
-    { title: "Robotics: Aerial Robotics", issuer: "University of Pennsylvania", date: "2023" },
-    { title: "TensorFlow Developer Certificate", issuer: "Google", date: "2022" },
-    { title: "Linux Foundation Certified Systems Administrator", issuer: "Linux Foundation", date: "2022" },
-];
+import { certifications } from "../../data/certifications";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -97,7 +91,7 @@ export const Certifications = () => {
             </div>
             
             <div className={classes.list}>
-                {certs.map((cert, i) => (
+                {certifications.map((cert, i) => (
                     <div key={i} className={classes.item}>
                         <div>
                             <h3 className={classes.itemTitle}>{cert.title}</h3>

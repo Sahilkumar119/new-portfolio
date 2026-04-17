@@ -1,9 +1,9 @@
 {
   "name": "personal-website-react",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "homepage": "https://sahilkumar.dev",
   "description": "This is a clean customizable portfolio template for developers.",
-  "repository": "https://github.com/JoHoop/personal-website-react",
+  "repository": "https://github.com/Sahiljangra115/new-portfolio",
   "author": "Sahil Kumar <sahil115jangid@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -17,8 +17,10 @@
     "dompurify": "^3.3.0",
     "ios-inner-height": "^1.1.1",
     "popmotion": "^8.7.3",
+    "prop-types": "^15.8.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-ga4": "^3.0.1",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.1",

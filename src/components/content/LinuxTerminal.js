@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { TextDecrypt } from "./TextDecrypt";
+import { terminalData } from "../../data/terminal";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -92,15 +93,21 @@ export const LinuxTerminal = () => {
     const classes = useStyles();
     const [step, setStep] = useState(0);
 
+    const { user, host, commands } = terminalData;
+    const identifier = `${user}@${host}:~`;
+
     useEffect(() => {
-        // Simple sequence to reveal lines over time
-        const timers = [
-            setTimeout(() => setStep(1), 800),
-            setTimeout(() => setStep(2), 2000),
-            setTimeout(() => setStep(3), 3200),
-        ];
+        if (!Array.isArray(commands) || commands.length === 0) return;
+        
+        const timers = commands.flatMap((_, i) => [
+            setTimeout(() => setStep(i * 2 + 1), (i * 1200) + 800), // Input
+            setTimeout(() => setStep(i * 2 + 2), (i * 1200) + 2000), // Output
+        ]);
+        
+        timers.push(setTimeout(() => setStep(commands.length * 2 + 1), (commands.length * 1200) + 1200));
+
         return () => timers.forEach(clearTimeout);
-    }, []);
+    }, [commands]);
 
     return (
         <section id="terminal" className={classes.section}>
@@ -111,42 +118,34 @@ export const LinuxTerminal = () => {
                         <div className={`${classes.dot} ${classes.dotYellow}`} />
                         <div className={`${classes.dot} ${classes.dotGreen}`} />
                     </div>
-                    <div className={classes.title}>sahil@archlinux:~</div>
+                    <div className={classes.title}>{identifier}</div>
                 </div>
                 <div className={classes.content}>
-                    
-                    <div className={classes.promptRow}>
-                        <span className={classes.pathInfo}>sahil@archlinux:~</span>
-                        <span>$ cat whoami.txt</span>
-                    </div>
-                    {step >= 1 && (
-                        <div className={classes.responseText}>
-                            <TextDecrypt text="Linux Enthusiast | Developer | Lifelong Learner" />
-                            <br />
-                            I thrive in the terminal, optimizing workflows and building robust software. 
-                            Arch Linux is my daily driver because absolute control is beautiful.
-                        </div>
-                    )}
+                    {Array.isArray(commands) && commands.map((cmd, i) => (
+                        <React.Fragment key={i}>
+                            {step >= (i * 2 + 1) && (
+                                <div className={classes.promptRow}>
+                                    <span className={classes.pathInfo}>{identifier}</span>
+                                    <span>$ {cmd.input}</span>
+                                </div>
+                            )}
+                            {step >= (i * 2 + 2) && (
+                                <div className={classes.responseText}>
+                                    <TextDecrypt text={cmd.output.split('\n')[0]} />
+                                    {cmd.output.split('\n').length > 1 && (
+                                        <>
+                                            <br />
+                                            {cmd.output.split('\n').slice(1).join('\n')}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </React.Fragment>
+                    ))}
 
-                    {step >= 2 && (
-                        <>
-                            <div className={classes.promptRow}>
-                                <span className={classes.pathInfo}>sahil@archlinux:~</span>
-                                <span>$ neofetch --skills</span>
-                            </div>
-                            <div className={classes.responseText}>
-                                <TextDecrypt text="> Core: C++, Python, JavaScript" />
-                                <br />
-                                {">"} ML/AI: TensorFlow, PyTorch<br />
-                                {">"} Embedded: Robotics control, IoT protocols<br />
-                                {">"} OS: Linux (Arch, Debian), Shell Scripting
-                            </div>
-                        </>
-                    )}
-
-                    {step >= 3 && (
+                    {step >= (commands.length * 2 + 1) && (
                         <div className={classes.promptRow}>
-                            <span className={classes.pathInfo}>sahil@archlinux:~</span>
+                            <span className={classes.pathInfo}>{identifier}</span>
                             <span>$ <span className={classes.cursor} /></span>
                         </div>
                     )}

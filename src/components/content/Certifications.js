@@ -51,10 +51,12 @@ const useStyles = makeStyles(() => ({
         backdropFilter: "blur(12px)",
         border: "1px solid var(--glass-border)",
         borderRadius: "12px",
+        textDecoration: "none",
         transition: "transform 200ms ease, background 200ms ease",
         "&:hover": {
             transform: "translateX(8px)",
             background: "var(--glass-bg-hover)",
+            textDecoration: "none",
         },
         "@media (max-width: 600px)": {
             flexDirection: "column",
@@ -91,14 +93,20 @@ export const Certifications = () => {
             </div>
             
             <div className={classes.list}>
-                {certifications.map((cert, i) => (
-                    <div key={i} className={classes.item}>
+                {Array.isArray(certifications) && certifications.map((cert, i) => (
+                    <a 
+                        key={i} 
+                        href={cert.link || "#"} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={classes.item}
+                    >
                         <div>
                             <h3 className={classes.itemTitle}>{cert.title}</h3>
                             <span className={classes.itemIssuer}>{cert.issuer}</span>
                         </div>
                         <span className={classes.itemDate}>{cert.date}</span>
-                    </div>
+                    </a>
                 ))}
             </div>
         </section>

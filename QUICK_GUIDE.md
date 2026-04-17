@@ -1,91 +1,60 @@
-# 🎯 Super Simple Method: Adding Content
+# 🎯 Quick Guide: Content Automation
 
-## Adding a Project (30 seconds!)
+Adding content to your portfolio is now fully automated! Just drop files into the `content/` folder.
 
+## 1. Adding a Project (JSON)
+
+Create a file like `content/projects/my-project.json`:
+
+```json
+{
+  "title": "My Awesome App",
+  "description": "What it does...",
+  "technologies": ["React", "Node.js"],
+  "link": "https://myapp.com",
+  "github": "https://github.com/me/app",
+  "type": "top" 
+}
 ```
-Step 1: Open src/data/projects.js
-   ↓
-Step 2: Copy this:
-   {
-     id: 1,
-     title: "My Project",
-     description: "What it does...",
-     technologies: ["React", "Node.js"],
-     link: "https://myproject.com",
-     github: "https://github.com/me/project",
-   },
-   ↓
-Step 3: Change the values to YOUR project
-   ↓
-Step 4: Save file
-   ↓
-✅ DONE! Your project appears instantly!
+*(Use `"type": "step"` for minor/learning projects)*
+
+---
+
+## 2. Adding a Blog Post (Markdown)
+
+Create a file like `content/blogs/my-blog.md`:
+
+```markdown
+---
+title: "My Awesome Blog Post"
+date: "2026-04-17"
+tags: ["React", "Coding"]
+---
+
+Write your full blog content here using **standard Markdown**!
 ```
 
 ---
 
-## Adding a Blog Post (1 minute!)
+## 3. Adding a Certification (JSON)
 
-```
-Step 1: Open src/data/blogs.js
-   ↓
-Step 2: Add this:
-   {
-     id: 1,
-     title: "My Blog Title",
-     date: "October 19, 2025",
-     excerpt: "Summary...",
-     slug: "my-blog-title",  ← Remember this!
-     tags: ["JavaScript"],
-   },
-   ↓
-Step 3: Open src/data/blogPosts.js
-   ↓
-Step 4: Add this (use SAME slug):
-   "my-blog-title": {  ← Same as above!
-     id: 1,
-     title: "My Blog Title",
-     date: "October 19, 2025",
-     author: "Your Name",
-     tags: ["JavaScript"],
-     readTime: "5 min read",
-     content: `Your blog text here...`,
-   },
-   ↓
-Step 5: Save both files
-   ↓
-✅ DONE! Your blog is live!
+Create a file like `content/certifications/my-cert.json`:
+
+```json
+{
+  "title": "React Developer Certificate",
+  "issuer": "Meta",
+  "date": "2026"
+}
 ```
 
 ---
 
-## File Locations (Quick Reference)
+## Syncing Changes
+You don't need to run any special commands. Just start your development server as usual:
 
-```
-new-portfolio/
-└── src/
-    └── data/
-        ├── projects.js       ← Add projects here
-        ├── blogs.js          ← Add blog summaries here
-        └── blogPosts.js      ← Add full blog content here
+```bash
+npm start
 ```
 
----
-
-## Rules (Only 3!)
-
-1. **Use unique IDs** - Each item needs different number (1, 2, 3...)
-2. **Match slugs** - Blog slug must be same in both files
-3. **Save files** - Remember to save after editing!
-
----
-
-## That's It!
-
-No complicated setup. No database. Just:
-
-1. Open file
-2. Add content
-3. Save
-
-**Need detailed examples?** Check `ADDING_CONTENT.md`
+The sync script (`scripts/sync-content.js`) runs automatically and securely updates the frontend data. If you make a mistake in a file, the terminal will warn you without crashing the app.

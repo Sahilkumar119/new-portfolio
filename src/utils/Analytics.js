@@ -31,8 +31,10 @@ export const AnalyticsTracker = () => {
   return null;
 };
 
-export default {
+const analytics = {
   initGA,
   trackPageView,
   AnalyticsTracker,
 };
+
+export default analytics;

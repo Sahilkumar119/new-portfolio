@@ -1,6 +1,10 @@
 # Progress
 
 ## Recent Changes
+- **Backend Assistant Service**: Added a FastAPI backend in `backend/app/` with ingestion (`/api/assistant/ingest`), grounded chat (`/api/assistant/chat`), and health checks (`/api/assistant/health`).
+- **Raw Source Ingestion**: Implemented direct ingestion from `content/blogs/*.md`, `content/projects/*.json`, `content/certifications/*.json`, `content/terminal.json`, and `public/resume.pdf` using `pdfplumber`.
+- **Hybrid Retrieval Stack**: Added lightweight dense lexical retrieval, BM25 sparse retrieval, reciprocal rank fusion, and a deterministic reranker for citation-grounded responses.
+- **Backend Test Coverage**: Added unit, service, and end-to-end API tests under `backend/tests/`; full backend suite passes locally.
 - **Content Automation System**: Implemented a folder-based sync script (`scripts/sync-content.js`) that converts Markdown and JSON files in `content/` into React data files in `src/data/`.
 - **Navigation Fix**: Corrected the "Back to Blog" button in `BlogPost.js` to link to `/#blogs` and added `window.scrollTo(0,0)` on mount.
 - **Enhanced Interactivity**: Made Certification and AI Project cards clickable, linking to external URLs or repository pages.
@@ -14,6 +18,11 @@
 - **Documentation**: Overhauled `ADDING_CONTENT.md` and `QUICK_GUIDE.md` to reflect the new automated workflow.
 
 ## Completed Tasks
+- [x] Build backend assistant service with FastAPI.
+- [x] Implement raw-source ingestion pipeline from `content/` and `public/resume.pdf`.
+- [x] Implement hybrid retrieval (dense + BM25 + RRF) and reranking.
+- [x] Add API endpoints for chat, ingest, and health.
+- [x] Add and run backend unit/integration/e2e tests.
 - [x] Initial codebase analysis.
 - [x] Create `GEMINI.md` context file.
 - [x] Initialize Obsidian LLM Wiki.

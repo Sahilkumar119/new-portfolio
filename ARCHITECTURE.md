@@ -3,6 +3,16 @@
 ## System Overview
 The project is a React-based single-page application (SPA) designed as a personal portfolio. It features a heavy emphasis on visual aesthetics through Three.js and Material UI.
 
+## Assistant Backend Architecture
+- **Service Runtime**: A Python FastAPI service lives in `backend/app/` and runs alongside the frontend deployment for server-side assistant workflows.
+- **API Surface**:
+  - `POST /api/assistant/ingest` triggers ingestion from raw source files.
+  - `POST /api/assistant/chat` returns grounded answers with citations.
+  - `GET /api/assistant/health` reports backend readiness and corpus size.
+- **Ingestion Sources**: Reads source-of-truth content directly from `content/` plus `public/resume.pdf` (via `pdfplumber`), avoiding compiled frontend data artifacts.
+- **Retrieval Pipeline**: Uses hybrid retrieval (dense lexical + BM25 sparse) with reciprocal rank fusion and a lightweight reranker to improve final context quality.
+- **Grounding Model**: Chat responses are generated only from retrieved chunks and include citation metadata (`source_path`, title, snippet).
+
 ## Data Layer
 - **Automated Ingestion**: Content is authored in Markdown (blogs) and JSON (projects, certifications) within the root `content/` directory.
 - **Sync Script**: `scripts/sync-content.js` runs pre-build to transform raw content into ESM-compatible JavaScript files in `src/data/`.

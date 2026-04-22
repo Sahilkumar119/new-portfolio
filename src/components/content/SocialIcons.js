@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, Tooltip, Zoom } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Resume from '../../settings/resume.json';
+import { MorphPanel } from '../ui/ai-input';
 
 const useStyles = makeStyles(() => ({
     rail: {
@@ -50,25 +51,41 @@ const useStyles = makeStyles(() => ({
             textDecoration: 'none',
         },
     },
+    aiWrap: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 2px',
+    },
 }));
 
 export const SocialIcons = () => {
     const classes = useStyles();
+    const profiles = Resume.basics.profiles || [];
+    const insertAt = Math.ceil(profiles.length / 2);
+
     return (
         <div className={classes.rail}>
-            {Resume.basics.profiles.map((item) => (
-                <Tooltip title={item.network} placement="top" TransitionComponent={Zoom} arrow key={item.network}>
-                    <Link
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="none"
-                        className={classes.iconLink}
-                        aria-label={item.network}
-                    >
-                        <i className={item.x_icon} aria-hidden="true" />
-                    </Link>
-                </Tooltip>
+            {profiles.map((item, index) => (
+                <React.Fragment key={item.network}>
+                    {index === insertAt && (
+                        <div className={classes.aiWrap}>
+                            <MorphPanel />
+                        </div>
+                    )}
+                    <Tooltip title={item.network} placement="top" TransitionComponent={Zoom} arrow>
+                        <Link
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            underline="none"
+                            className={classes.iconLink}
+                            aria-label={item.network}
+                        >
+                            <i className={item.x_icon} aria-hidden="true" />
+                        </Link>
+                    </Tooltip>
+                </React.Fragment>
             ))}
         </div>
     );

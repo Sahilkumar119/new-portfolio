@@ -82,13 +82,30 @@ describe('MorphPanel AI integration', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/assistant/chat',
+      expect.stringContaining('/api/assistant/chat'),
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: 'What projects are most relevant to ML?', top_k: 4 }),
       })
     );
+  });
+
+  test('submits with Enter and allows newline on Shift+Enter', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ answer: 'Enter submit works', citations: [] }),
+    });
+
+    const textarea = openPanel();
+    fireEvent.change(textarea, { target: { value: 'Line one' } });
+
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter', charCode: 13, shiftKey: true });
+    expect(global.fetch).toHaveBeenCalledTimes(0);
+
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter', charCode: 13 });
+    expect(await screen.findByText('Enter submit works')).toBeInTheDocument();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   test('renders answer and citation list from successful response', async () => {

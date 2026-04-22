@@ -13,6 +13,12 @@ service = AssistantService(settings=settings)
 app = FastAPI(title="Portfolio Assistant Backend", version="0.1.0")
 
 
+@app.on_event("startup")
+def startup_ingest() -> None:
+    if settings.auto_ingest:
+        service.ingest_all()
+
+
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000)
     top_k: int | None = Field(default=None, ge=1, le=20)
@@ -29,6 +35,16 @@ class ChatResponse(BaseModel):
     confidence: float
     used_fallback: bool
     citations: list[CitationResponse]
+
+
+@app.get("/")
+def root() -> dict:
+    return {
+        "message": "Portfolio Assistant backend is running.",
+        "health": "/api/assistant/health",
+        "ingest": "/api/assistant/ingest",
+        "chat": "/api/assistant/chat",
+    }
 
 
 @app.get("/api/assistant/health")

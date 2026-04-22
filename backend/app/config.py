@@ -13,6 +13,7 @@ class Settings:
     confidence_threshold: float
     top_k: int
     candidate_k: int
+    auto_ingest: bool
 
 
 def get_settings() -> Settings:
@@ -25,4 +26,5 @@ def get_settings() -> Settings:
         confidence_threshold=float(os.getenv("ASSISTANT_CONFIDENCE_THRESHOLD", "0.28")),
         top_k=int(os.getenv("ASSISTANT_TOP_K", "6")),
         candidate_k=int(os.getenv("ASSISTANT_CANDIDATE_K", "24")),
+        auto_ingest=os.getenv("ASSISTANT_AUTO_INGEST", "true").lower() in {"1", "true", "yes", "on"},
     )

@@ -10,6 +10,7 @@ def make_settings() -> Settings:
         confidence_threshold=0.25,
         top_k=3,
         candidate_k=10,
+        auto_ingest=False,
     )
 
 

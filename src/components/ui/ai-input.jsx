@@ -3,12 +3,13 @@ import { cx } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Button } from './button';
+import { getAssistantChatUrl } from '../../lib/assistant-api';
 import { cn } from '../../lib/utils';
 
 const SPEED_FACTOR = 1;
 const FORM_WIDTH = 320;
-const FORM_HEIGHT = 220;
-const PANEL_OFFSET = 8;
+const FORM_HEIGHT = 260;
+const PANEL_OFFSET = 10;
 
 function ColorOrb({
   dimension = '192px',
@@ -74,7 +75,7 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
     if (!message) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/assistant/chat', {
+      const response = await fetch(getAssistantChatUrl(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: message, top_k: 4 }),
@@ -96,7 +97,7 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
 
   function handleKeys(e) {
     if (e.key === 'Escape') triggerClose();
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       btnRef.current?.click();
     }
@@ -111,6 +112,7 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
         height: FORM_HEIGHT,
         pointerEvents: showForm ? 'all' : 'none',
         bottom: 44 + PANEL_OFFSET,
+        zIndex: 20,
       }}
     >
       <AnimatePresence>
@@ -123,29 +125,29 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
             className="flex h-full flex-col p-2"
           >
             <div className="flex items-center justify-between py-1">
-              <p className="text-foreground ml-7 flex items-center gap-1 text-xs select-none">Ask AI</p>
+              <p className="text-foreground ml-7 flex items-center gap-1 text-xs font-semibold select-none">Ask AI</p>
               <button
                 type="submit"
                 ref={btnRef}
                 className="text-foreground mt-1 mr-1 flex items-center justify-center gap-1 rounded-[12px] bg-transparent text-center select-none"
                 disabled={isLoading}
               >
-                <KeyHint>Ctrl</KeyHint>
-                <KeyHint className="w-fit">Enter</KeyHint>
+                <KeyHint>Enter</KeyHint>
+                <KeyHint className="w-fit">Shift+Enter</KeyHint>
               </button>
             </div>
             <textarea
               ref={textareaRef}
               placeholder="Ask me anything about my work..."
               name="message"
-              className="h-[120px] w-full resize-none rounded-md p-3 text-sm outline-0"
+              className="h-[130px] w-full resize-none rounded-md p-3 text-sm outline-0"
               style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
               required
               onKeyDown={handleKeys}
               spellCheck={false}
             />
             <div
-              className="mt-2 h-[52px] overflow-y-auto rounded-md p-2 text-[11px]"
+              className="mt-2 h-[72px] overflow-y-auto rounded-md p-2 text-[11px]"
               style={{ background: 'var(--card-bg)', border: '1px solid var(--glass-border)' }}
             >
               {isLoading ? (
@@ -194,7 +196,7 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
             transition={{ duration: 0.2 }}
             className="absolute top-3 left-3"
           >
-            <ColorOrb dimension="16px" tones={{ base: 'oklch(22.64% 0 0)' }} />
+            <ColorOrb dimension="14px" tones={{ base: 'oklch(22.64% 0 0)' }} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -334,20 +336,25 @@ function DockBar() {
   return (
     <footer className="mt-auto flex h-[44px] items-center justify-center whitespace-nowrap select-none">
       <div className="flex items-center justify-center gap-2 px-3">
-        <div className="flex w-fit items-center gap-2" style={{ transform: 'translateY(1px)' }}>
+        <div className="flex w-fit items-center justify-center" style={{ width: 18, height: 18 }}>
           <AnimatePresence mode="wait">
             {showForm ? (
-              <motion.div key="blank" initial={{ opacity: 0 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} className="h-5 w-5" />
+              <motion.div key="blank" initial={{ opacity: 0 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} className="h-4 w-4" />
             ) : (
               <motion.div key="orb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <ColorOrb dimension="18px" tones={{ base: 'oklch(22.64% 0 0)' }} />
+                <ColorOrb dimension="16px" tones={{ base: 'oklch(22.64% 0 0)' }} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <Button type="button" className="flex h-7 items-center justify-center rounded-full px-3 text-xs" variant="ghost" onClick={triggerOpen}>
-          <span className="truncate">Ask AI</span>
+        <Button
+          type="button"
+          className="flex h-8 min-w-[84px] items-center justify-center rounded-full px-3 text-xs font-medium leading-none"
+          variant="ghost"
+          onClick={triggerOpen}
+        >
+          <span className="truncate leading-none">Ask AI</span>
         </Button>
       </div>
     </footer>

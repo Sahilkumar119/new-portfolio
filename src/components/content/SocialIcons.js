@@ -56,6 +56,8 @@ const useStyles = makeStyles(() => ({
         alignItems: 'center',
         justifyContent: 'center',
         margin: '0 2px',
+        position: 'relative',
+        zIndex: 2,
     },
 }));
 

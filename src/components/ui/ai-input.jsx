@@ -7,7 +7,8 @@ import { cn } from '../../lib/utils';
 
 const SPEED_FACTOR = 1;
 const FORM_WIDTH = 320;
-const FORM_HEIGHT = 240;
+const FORM_HEIGHT = 220;
+const PANEL_OFFSET = 8;
 
 function ColorOrb({
   dimension = '192px',
@@ -104,8 +105,13 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
   return (
     <form
       onSubmit={handleSubmit}
-      className="absolute bottom-0 left-0"
-      style={{ width: FORM_WIDTH, height: FORM_HEIGHT, pointerEvents: showForm ? 'all' : 'none' }}
+      className="absolute left-0"
+      style={{
+        width: FORM_WIDTH,
+        height: FORM_HEIGHT,
+        pointerEvents: showForm ? 'all' : 'none',
+        bottom: 44 + PANEL_OFFSET,
+      }}
     >
       <AnimatePresence>
         {showForm && (
@@ -132,12 +138,49 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
               ref={textareaRef}
               placeholder="Ask me anything about my work..."
               name="message"
-              className="h-full w-full resize-none rounded-md p-3 text-sm outline-0"
+              className="h-[120px] w-full resize-none rounded-md p-3 text-sm outline-0"
               style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
               required
               onKeyDown={handleKeys}
               spellCheck={false}
             />
+            <div
+              className="mt-2 h-[52px] overflow-y-auto rounded-md p-2 text-[11px]"
+              style={{ background: 'var(--card-bg)', border: '1px solid var(--glass-border)' }}
+            >
+              {isLoading ? (
+                'Thinking...'
+              ) : answer ? (
+                <>
+                  <p className="leading-snug">{answer}</p>
+                  {citations.length > 0 && (
+                    <ul className="mt-2 list-disc space-y-1 pl-4">
+                      {citations.map((citation, index) => {
+                        const isObject = typeof citation === 'object' && citation !== null;
+                        const label = isObject
+                          ? citation.title || citation.label || citation.url || `Source ${index + 1}`
+                          : String(citation);
+                        const url = isObject && citation.url ? citation.url : null;
+
+                        return (
+                          <li key={`${label}-${index}`}>
+                            {url ? (
+                              <a href={url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                                {label}
+                              </a>
+                            ) : (
+                              <span>{label}</span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <span className="opacity-70">Send a question to see the answer here.</span>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -156,52 +199,6 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {answer && showForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute -top-28 left-0 w-[320px] rounded-md p-3 text-xs"
-            style={{
-              background: 'var(--card-bg)',
-              border: '1px solid var(--glass-border)',
-              boxShadow: 'var(--glass-shadow)',
-            }}
-          >
-            {isLoading ? (
-              'Thinking...'
-            ) : (
-              <>
-                <p>{answer}</p>
-                {citations.length > 0 && (
-                  <ul className="mt-2 list-disc space-y-1 pl-4">
-                    {citations.map((citation, index) => {
-                      const isObject = typeof citation === 'object' && citation !== null;
-                      const label = isObject
-                        ? citation.title || citation.label || citation.url || `Source ${index + 1}`
-                        : String(citation);
-                      const url = isObject && citation.url ? citation.url : null;
-
-                      return (
-                        <li key={`${label}-${index}`}>
-                          {url ? (
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-                              {label}
-                            </a>
-                          ) : (
-                            <span>{label}</span>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </form>
   );
 });
@@ -313,7 +310,7 @@ export function MorphPanel() {
             borderRadius: showForm ? 14 : 20,
           }}
           initial={false}
-          animate={{ width: showForm ? FORM_WIDTH : 92, height: showForm ? FORM_HEIGHT : 44 }}
+          animate={{ width: showForm ? FORM_WIDTH : 92, height: 44 }}
           transition={{
             type: 'spring',
             stiffness: 550 / SPEED_FACTOR,
@@ -337,20 +334,20 @@ function DockBar() {
   return (
     <footer className="mt-auto flex h-[44px] items-center justify-center whitespace-nowrap select-none">
       <div className="flex items-center justify-center gap-2 px-3">
-        <div className="flex w-fit items-center gap-2">
+        <div className="flex w-fit items-center gap-2" style={{ transform: 'translateY(1px)' }}>
           <AnimatePresence mode="wait">
             {showForm ? (
               <motion.div key="blank" initial={{ opacity: 0 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} className="h-5 w-5" />
             ) : (
               <motion.div key="orb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <ColorOrb dimension="20px" tones={{ base: 'oklch(22.64% 0 0)' }} />
+                <ColorOrb dimension="18px" tones={{ base: 'oklch(22.64% 0 0)' }} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <Button type="button" className="flex h-fit flex-1 justify-end rounded-full px-2 py-0.5" variant="ghost" onClick={triggerOpen}>
-          <span className="truncate text-xs">Ask AI</span>
+        <Button type="button" className="flex h-7 items-center justify-center rounded-full px-3 text-xs" variant="ghost" onClick={triggerOpen}>
+          <span className="truncate">Ask AI</span>
         </Button>
       </div>
     </footer>

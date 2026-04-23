@@ -1,10 +1,19 @@
 # Progress
 
 ## Recent Changes
+- **Glassmorphism UI**: Applied Apple-style glassmorphism (backdrop blur, saturate, shadow system, top-edge shimmer) to all interactive surfaces: Certifications, Blogs, Projects, Connect, Hero CTAs, Social dock, and Terminal.
+- **Scroll-Reveal Animations**: Implemented a lightweight, zero-dependency `useScrollReveal` hook (IntersectionObserver) and applied staggered reveal animations to all major content sections.
+- **Ask AI UI Fixes**: Fixed the AI button overflow issue and refactored the `MorphPanel` structure so the popup form renders outside the animated `motion.div`, preventing visibility clipping.
+- **Robust Markdown Parsing**: Replaced manual regex-based markdown parsing in `BlogPost.js` with `marked` and `DOMPurify` for robust and secure rendering.
+- **Navigation Anchors**: Added `scroll-margin-top` to all sections so that deep links resolve with a correct offset below the sticky header.
+- **Backend CORS Configuration**: Added `CORSMiddleware` to the FastAPI backend to allow cross-origin requests from the Vercel frontend.
 - **Backend Assistant Service**: Added a FastAPI backend in `backend/app/` with ingestion (`/api/assistant/ingest`), grounded chat (`/api/assistant/chat`), and health checks (`/api/assistant/health`).
+- **Backend Root Route**: Added a friendly `GET /` response plus optional auto-ingest on startup via `ASSISTANT_AUTO_INGEST`.
 - **Raw Source Ingestion**: Implemented direct ingestion from `content/blogs/*.md`, `content/projects/*.json`, `content/certifications/*.json`, `content/terminal.json`, and `public/resume.pdf` using `pdfplumber`.
 - **Hybrid Retrieval Stack**: Added lightweight dense lexical retrieval, BM25 sparse retrieval, reciprocal rank fusion, and a deterministic reranker for citation-grounded responses.
 - **Backend Test Coverage**: Added unit, service, and end-to-end API tests under `backend/tests/`; full backend suite passes locally.
+- **Frontend Assistant Connectivity**: Added an API URL helper, CRA dev proxy, and dependency to route `/api/assistant/*` to the backend during development.
+- **Assistant UI Fixes**: Updated AI panel sizing, alignment, and keyboard behavior (Enter submit, Shift+Enter newline) with refreshed tests.
 - **Content Automation System**: Implemented a folder-based sync script (`scripts/sync-content.js`) that converts Markdown and JSON files in `content/` into React data files in `src/data/`.
 - **Navigation Fix**: Corrected the "Back to Blog" button in `BlogPost.js` to link to `/#blogs` and added `window.scrollTo(0,0)` on mount.
 - **Enhanced Interactivity**: Made Certification and AI Project cards clickable, linking to external URLs or repository pages.
@@ -18,6 +27,12 @@
 - **Documentation**: Overhauled `ADDING_CONTENT.md` and `QUICK_GUIDE.md` to reflect the new automated workflow.
 
 ## Completed Tasks
+- [x] Upgrade Markdown parsing in `BlogPost.js` with `marked` and `DOMPurify`.
+- [x] Add `scroll-margin-top` to fix mobile header offsets for navigation links.
+- [x] Apply Apple Glassmorphism UI across all components.
+- [x] Implement site-wide scroll-reveal animations.
+- [x] Fix Ask AI panel visibility and button overflow.
+- [x] Configure CORS on FastAPI backend.
 - [x] Build backend assistant service with FastAPI.
 - [x] Implement raw-source ingestion pipeline from `content/` and `public/resume.pdf`.
 - [x] Implement hybrid retrieval (dense + BM25 + RRF) and reranking.

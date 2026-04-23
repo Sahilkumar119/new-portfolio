@@ -25,7 +25,19 @@ const useStyles = makeStyles(() => ({
         border: '1px solid rgba(255, 255, 255, 0.08)',
         boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
         zIndex: 9999,
+        overflow: 'visible',
         animation: 'fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both',
+        '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '8%',
+            right: '8%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+        },
     },
     iconLink: {
         display: 'flex',
@@ -44,7 +56,7 @@ const useStyles = makeStyles(() => ({
         textDecoration: 'none',
         transition: 'all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)',
         '&:hover': {
-            transform: 'scale(1.12) translateX(-3px)',
+            transform: 'scale(1.12) translateY(-2px)',
             background: 'var(--glass-bg-hover)',
             boxShadow: 'var(--glass-shadow-hover)',
             color: 'var(--accent-primary)',
@@ -57,7 +69,7 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         margin: '0 2px',
         position: 'relative',
-        zIndex: 2,
+        zIndex: 10000,
     },
 }));
 

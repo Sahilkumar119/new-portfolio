@@ -116,3 +116,69 @@ p {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50%       { opacity: 1;   transform: scale(1.4); }
 }
+
+/* ── Scroll-reveal system ────────────────────────────────────── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes revealScale {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Section wrapper: hidden until .is-visible is toggled by IntersectionObserver */
+.reveal-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  will-change: opacity, transform;
+}
+.reveal-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered children — each child uses --reveal-delay for sequential entrance */
+.reveal-child {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
+  transition-delay: calc(var(--reveal-delay, 0) * 70ms);
+  will-change: opacity, transform;
+}
+.is-visible .reveal-child {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scale variant for cards */
+.reveal-child-scale {
+  opacity: 0;
+  transform: scale(0.92) translateY(16px);
+  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-spring);
+  transition-delay: calc(var(--reveal-delay, 0) * 90ms);
+  will-change: opacity, transform;
+}
+.is-visible .reveal-child-scale {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Terminal scale-in variant */
+.reveal-terminal {
+  opacity: 0;
+  transform: scale(0.88) translateY(40px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-spring);
+  will-change: opacity, transform;
+}
+.reveal-terminal.is-visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* ── Navigation Offsets ────────────────────────────────────── */
+section[id] {
+  scroll-margin-top: 80px;
+}

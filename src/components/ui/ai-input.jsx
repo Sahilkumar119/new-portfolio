@@ -113,15 +113,22 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
         pointerEvents: showForm ? 'all' : 'none',
         bottom: 44 + PANEL_OFFSET,
         zIndex: 20,
+        background: showForm ? 'var(--glass-bg)' : 'transparent',
+        backdropFilter: showForm ? 'blur(24px) saturate(180%)' : 'none',
+        WebkitBackdropFilter: showForm ? 'blur(24px) saturate(180%)' : 'none',
+        border: showForm ? '1px solid var(--glass-border)' : 'none',
+        borderRadius: '14px',
+        boxShadow: showForm ? 'var(--glass-shadow)' : 'none',
+        overflow: 'hidden',
       }}
     >
       <AnimatePresence>
         {showForm && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 550 / SPEED_FACTOR, damping: 45, mass: 0.7 }}
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 32, mass: 0.8 }}
             className="flex h-full flex-col p-2"
           >
             <div className="flex items-center justify-between py-1">
@@ -300,33 +307,35 @@ export function MorphPanel() {
           }
         }
       `}</style>
-      <div className="flex items-center justify-center" style={{ width: showForm ? FORM_WIDTH : 92, height: 44 }}>
-        <motion.div
-          ref={wrapperRef}
-          data-panel
-          className={cx('bg-background relative z-10 flex flex-col items-center overflow-visible border')}
-          style={{
-            background: 'var(--glass-bg)',
-            borderColor: 'var(--glass-border)',
-            backdropFilter: 'blur(16px) saturate(180%)',
-            borderRadius: showForm ? 14 : 20,
-          }}
-          initial={false}
-          animate={{ width: showForm ? FORM_WIDTH : 92, height: 44 }}
-          transition={{
-            type: 'spring',
-            stiffness: 550 / SPEED_FACTOR,
-            damping: 45,
-            mass: 0.7,
-            delay: showForm ? 0 : 0.08,
-          }}
-        >
-          <FormContext.Provider value={ctx}>
+      <FormContext.Provider value={ctx}>
+        <div ref={wrapperRef} style={{ position: 'relative', width: showForm ? FORM_WIDTH : 116, height: 44, overflow: 'visible', transition: 'width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+          {/* Dock bar (the pill button) — animated by framer-motion */}
+          <motion.div
+            data-panel
+            className={cx('bg-background relative z-10 flex flex-col items-center border')}
+            style={{
+              background: 'var(--glass-bg)',
+              borderColor: 'var(--glass-border)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              borderRadius: showForm ? 14 : 20,
+            }}
+            initial={false}
+            animate={{ width: showForm ? FORM_WIDTH : 116, height: 44 }}
+            transition={{
+              type: 'spring',
+              stiffness: 550 / SPEED_FACTOR,
+              damping: 45,
+              mass: 0.7,
+              delay: showForm ? 0 : 0.08,
+            }}
+          >
             <DockBar />
-            <InputForm ref={textareaRef} onSuccess={handleSuccess} />
-          </FormContext.Provider>
-        </motion.div>
-      </div>
+          </motion.div>
+
+          {/* Form panel — sits OUTSIDE motion.div so it's never clipped */}
+          <InputForm ref={textareaRef} onSuccess={handleSuccess} />
+        </div>
+      </FormContext.Provider>
     </>
   );
 }
@@ -350,11 +359,11 @@ function DockBar() {
 
         <Button
           type="button"
-          className="flex h-8 min-w-[84px] items-center justify-center rounded-full px-3 text-xs font-medium leading-none"
+          className="flex h-8 items-center justify-center rounded-full px-3 text-xs font-medium leading-none"
           variant="ghost"
           onClick={triggerOpen}
         >
-          <span className="truncate leading-none">Ask AI</span>
+          <span className="leading-none">Ask AI</span>
         </Button>
       </div>
     </footer>

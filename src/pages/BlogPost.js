@@ -8,6 +8,8 @@ import { NavigationButtons } from "../components/navigation/NavigationButtons";
 import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
 import { blogPosts } from "../data/blogPosts";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -169,6 +171,11 @@ const useStyles = makeStyles(() => ({
                 color: "var(--text-primary)",
             },
         },
+        "& img": {
+            maxWidth: "100%",
+            borderRadius: "12px",
+            margin: "1.5rem 0",
+        },
         "& ul, & ol": {
             paddingLeft: "1.5rem",
             marginBottom: "1.5rem",
@@ -238,42 +245,13 @@ export const BlogPost = () => {
         window.scrollTo(0, 0);
     }, [slug]);
 
-    const formatInlineText = (text) => {
-        text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius:12px; margin:1.5rem 0;" />');
-        text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
-        text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-        text = text.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-        return text;
-    };
-
     const renderContent = () => {
         if (!post?.content) return null;
-        return post.content.split("\n\n").map((section, idx) => {
-            if (!section.trim()) return null;
-            if (section.trim().startsWith("<iframe")) {
-                return <div key={idx} className={classes.iframeWrapper} dangerouslySetInnerHTML={{ __html: section }} />;
-            }
-            if (section.trim().startsWith("```")) {
-                const lines = section.trim().split("\n");
-                const code  = lines.slice(1, -1).join("\n");
-                return <pre key={idx}><code>{code}</code></pre>;
-            }
-            if (section.startsWith("## "))  return <h2 key={idx}>{section.replace("## ", "")}</h2>;
-            if (section.startsWith("### ")) return <h3 key={idx}>{section.replace("### ", "")}</h3>;
-            if (section.startsWith("> ")) {
-                const text = section.replace(/^> /gm, "");
-                return <blockquote key={idx}><p dangerouslySetInnerHTML={{ __html: formatInlineText(text) }} /></blockquote>;
-            }
-            if (section.includes("\n- ") || section.startsWith("- ")) {
-                const items = section.split("\n").filter(l => l.trim().startsWith("- "));
-                return <ul key={idx}>{items.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: formatInlineText(item.replace(/^- /, "")) }} />)}</ul>;
-            }
-            if (/^\d+\. /.test(section)) {
-                const items = section.split("\n").filter(l => /^\d+\. /.test(l.trim()));
-                return <ol key={idx}>{items.map((item, i) => <li key={i} dangerouslySetInnerHTML={{ __html: formatInlineText(item.replace(/^\d+\. /, "")) }} />)}</ol>;
-            }
-            return <p key={idx} dangerouslySetInnerHTML={{ __html: formatInlineText(section) }} />;
-        });
+        // Parse markdown to HTML and sanitize
+        const rawHtml = marked.parse(post.content);
+        // Allow iframes (e.g. youtube) while avoiding XSS
+        const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_TAGS: ["iframe"], ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling"] });
+        return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
     };
 
     const chrome = (

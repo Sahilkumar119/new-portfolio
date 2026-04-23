@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { TextDecrypt } from "./TextDecrypt";
 import { terminalData } from "../../data/terminal";
+import { useScrollReveal } from "../../hooks/useScrollReveal";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -16,18 +17,30 @@ const useStyles = makeStyles(() => ({
         position: "relative",
     },
     terminalBox: {
+        position: "relative",
         width: "100%",
         maxWidth: "800px",
-        background: "rgba(10, 10, 12, 0.8)",
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        background: "rgba(10, 10, 12, 0.82)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
         border: "1px solid var(--glass-border)",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-        borderRadius: "12px",
+        boxShadow: "var(--glass-shadow), 0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+        borderRadius: "14px",
         overflow: "hidden",
         fontFamily: "'SF Mono', 'Fira Code', 'Menlo', monospace",
         color: "#e2e8f0",
-        animation: "fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
+        animation: 'none',
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "8%",
+            right: "8%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+            pointerEvents: "none",
+            zIndex: 2,
+        },
     },
     topBar: {
         display: "flex",
@@ -92,11 +105,13 @@ const useStyles = makeStyles(() => ({
 export const LinuxTerminal = () => {
     const classes = useStyles();
     const [step, setStep] = useState(0);
+    const [sectionRef, visible] = useScrollReveal({ threshold: 0.2 });
 
     const { user, host, commands } = terminalData;
     const identifier = `${user}@${host}:~`;
 
     useEffect(() => {
+        if (!visible) return;
         if (!Array.isArray(commands) || commands.length === 0) return;
         
         const timers = commands.flatMap((_, i) => [
@@ -107,11 +122,14 @@ export const LinuxTerminal = () => {
         timers.push(setTimeout(() => setStep(commands.length * 2 + 1), (commands.length * 1200) + 1200));
 
         return () => timers.forEach(clearTimeout);
-    }, [commands]);
+    }, [commands, visible]);
 
     return (
         <section id="terminal" className={classes.section}>
-            <div className={classes.terminalBox}>
+            <div
+                ref={sectionRef}
+                className={`${classes.terminalBox} reveal-terminal${visible ? ' is-visible' : ''}`}
+            >
                 <div className={classes.topBar}>
                     <div className={classes.dots}>
                         <div className={`${classes.dot} ${classes.dotRed}`} />

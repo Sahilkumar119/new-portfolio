@@ -1,6 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { certifications } from "../../data/certifications";
+import { useScrollReveal } from "../../hooks/useScrollReveal";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -43,19 +44,34 @@ const useStyles = makeStyles(() => ({
         gap: "1rem",
     },
     item: {
+        position: "relative",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         padding: "1.5rem 2rem",
         background: "var(--glass-bg)",
-        backdropFilter: "blur(12px)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
         border: "1px solid var(--glass-border)",
-        borderRadius: "12px",
+        borderRadius: "14px",
+        boxShadow: "var(--glass-shadow)",
         textDecoration: "none",
-        transition: "transform 200ms ease, background 200ms ease",
+        overflow: "hidden",
+        transition: "all 280ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "8%",
+            right: "8%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
+            pointerEvents: "none",
+        },
         "&:hover": {
-            transform: "translateX(8px)",
+            transform: "translateY(-3px) translateX(4px)",
             background: "var(--glass-bg-hover)",
+            boxShadow: "var(--glass-shadow-hover)",
             textDecoration: "none",
         },
         "@media (max-width: 600px)": {
@@ -84,9 +100,14 @@ const useStyles = makeStyles(() => ({
 
 export const Certifications = () => {
     const classes = useStyles();
+    const [sectionRef, visible] = useScrollReveal({ threshold: 0.1 });
 
     return (
-        <section id="certifications" className={classes.section}>
+        <section
+            id="certifications"
+            ref={sectionRef}
+            className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
+        >
             <div className={classes.header}>
                 <span className={classes.eyebrow}>Verified Credentials</span>
                 <h2 className={classes.title}>Certifications</h2>
@@ -99,7 +120,8 @@ export const Certifications = () => {
                         href={cert.link || "#"} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className={classes.item}
+                        className={`${classes.item} reveal-child`}
+                        style={{ '--reveal-delay': i }}
                     >
                         <div>
                             <h3 className={classes.itemTitle}>{cert.title}</h3>

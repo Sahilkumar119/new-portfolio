@@ -1,6 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Resume from "../../settings/resume.json";
+import { useScrollReveal } from "../../hooks/useScrollReveal";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -47,57 +48,92 @@ const useStyles = makeStyles(() => ({
         justifyContent: "center",
     },
     btnPrimary: {
+        position: "relative",
         display: "inline-flex",
         alignItems: "center",
         gap: "8px",
         padding: "14px 28px",
-        borderRadius: "12px",
+        borderRadius: "14px",
         fontSize: "0.95rem",
         fontWeight: 600,
         letterSpacing: "-0.01em",
         color: "#fff",
         background: "var(--accent-primary)",
-        boxShadow: "0 4px 14px rgba(10,132,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
+        backdropFilter: "blur(8px) saturate(180%)",
+        WebkitBackdropFilter: "blur(8px) saturate(180%)",
+        border: "1px solid rgba(255,255,255,0.15)",
+        boxShadow: "0 4px 14px rgba(10,132,255,0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
         textDecoration: "none",
+        overflow: "hidden",
         transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "10%",
+            right: "10%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
+            pointerEvents: "none",
+        },
         "&:hover": {
             transform: "translateY(-2px)",
-            boxShadow: "0 6px 22px rgba(10,132,255,0.45), inset 0 1px 0 rgba(255,255,255,0.25)",
+            boxShadow: "0 8px 28px rgba(10,132,255,0.45), inset 0 1px 0 rgba(255,255,255,0.3)",
             color: "#fff",
             textDecoration: "none",
         },
+        "&:active": { transform: "scale(0.97)" },
     },
     btnSecondary: {
+        position: "relative",
         display: "inline-flex",
         alignItems: "center",
         gap: "8px",
         padding: "13px 26px",
-        borderRadius: "12px",
+        borderRadius: "14px",
         fontSize: "0.95rem",
         fontWeight: 600,
         letterSpacing: "-0.01em",
         color: "var(--text-primary)",
         background: "var(--glass-bg)",
-        backdropFilter: "blur(12px)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
         border: "1px solid var(--glass-border)",
         boxShadow: "var(--glass-shadow)",
         textDecoration: "none",
+        overflow: "hidden",
         transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "8%",
+            right: "8%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
+            pointerEvents: "none",
+        },
         "&:hover": {
             transform: "translateY(-2px)",
             background: "var(--glass-bg-hover)",
             boxShadow: "var(--glass-shadow-hover)",
             textDecoration: "none",
         },
+        "&:active": { transform: "scale(0.97)" },
     },
 }));
 
 export const Connect = () => {
     const classes = useStyles();
     const github = Resume.basics.profiles.find(p => p.network === "GitHub")?.url || "#";
+    const [sectionRef, visible] = useScrollReveal({ threshold: 0.15 });
 
     return (
-        <section id="connect" className={classes.section}>
+        <section
+            id="connect"
+            ref={sectionRef}
+            className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
+        >
             <span className={classes.eyebrow}>Open Source & Collaboration</span>
             <h2 className={classes.title}>Let's build<br />the future.</h2>
             <p className={classes.subtitle}>

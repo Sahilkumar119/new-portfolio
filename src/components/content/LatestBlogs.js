@@ -3,6 +3,7 @@ import { Container } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { blogs } from "../../data/blogs";
+import { useScrollReveal } from "../../hooks/useScrollReveal";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -42,19 +43,40 @@ const useStyles = makeStyles(() => ({
     list: {
         display: "flex",
         flexDirection: "column",
-        gap: "1px",
+        gap: "1rem",
     },
 
     entry: {
+        position: "relative",
         display: "block",
         textDecoration: "none",
-        padding: "1.75rem 0",
-        borderBottom: "1px solid var(--divider)",
-        transition: "all 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-        "&:first-child": { borderTop: "1px solid var(--divider)" },
+        padding: "1.75rem 2rem",
+        background: "var(--glass-bg)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        border: "1px solid var(--glass-border)",
+        borderRadius: "14px",
+        boxShadow: "var(--glass-shadow)",
+        overflow: "hidden",
+        transition: "all 280ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "8%",
+            right: "8%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
+            pointerEvents: "none",
+        },
         "&:hover $entryTitle": { color: "var(--accent-primary)" },
         "&:hover $entryArrow": { transform: "translateX(4px)", opacity: 1 },
-        "&:hover": { textDecoration: "none" },
+        "&:hover": {
+            textDecoration: "none",
+            transform: "translateY(-3px)",
+            background: "var(--glass-bg-hover)",
+            boxShadow: "var(--glass-shadow-hover)",
+        },
     },
     entryMeta: {
         display: "flex",
@@ -126,9 +148,14 @@ const useStyles = makeStyles(() => ({
 
 export const LatestBlogs = () => {
     const classes = useStyles();
+    const [sectionRef, visible] = useScrollReveal({ threshold: 0.08 });
 
     return (
-        <section className={classes.section} aria-label="Latest Writing">
+        <section
+            ref={sectionRef}
+            className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
+            aria-label="Latest Writing"
+        >
             <Container maxWidth="md">
                 <header className={classes.header}>
                     <span className={classes.eyebrow}>Writing</span>
@@ -139,11 +166,12 @@ export const LatestBlogs = () => {
                     <p className={classes.emptyState}>No posts yet — check back soon.</p>
                 ) : (
                     <div className={classes.list} role="list">
-                        {blogs.map((blog) => (
+                        {blogs.map((blog, i) => (
                             <Link
                                 key={blog.id}
                                 to={`/blog/${blog.slug}`}
-                                className={classes.entry}
+                                className={`${classes.entry} reveal-child`}
+                                style={{ '--reveal-delay': i }}
                                 role="listitem"
                             >
                                 <div className={classes.entryMeta}>

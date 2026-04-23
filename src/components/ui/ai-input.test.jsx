@@ -144,4 +144,31 @@ describe('MorphPanel AI integration', () => {
 
     expect(await screen.findByText(/unable to reach assistant backend right now/i)).toBeInTheDocument();
   });
+
+  // --- New tests for button overflow and glassmorphism ---
+
+  test('Ask AI button text is fully visible (no min-w-[84px] forcing overflow)', () => {
+    render(<MorphPanel />);
+    const askButton = screen.getAllByText(/ask ai/i)[0].closest('button');
+    // The button should NOT have the min-w-[84px] class that caused the overflow
+    expect(askButton.className).not.toContain('min-w-[84px]');
+  });
+
+  test('collapsed panel width accommodates Ask AI button and orb', () => {
+    render(<MorphPanel />);
+    // Verify the button renders with full text (not truncated)
+    const buttonSpan = screen.getAllByText(/ask ai/i)[0];
+    expect(buttonSpan).toBeInTheDocument();
+    expect(buttonSpan.textContent).toBe('Ask AI');
+    // The span should NOT have truncate class (which caused clipping)
+    expect(buttonSpan.className).not.toContain('truncate');
+  });
+
+  test('MorphPanel renders glass backdrop style on wrapper', () => {
+    const { container } = render(<MorphPanel />);
+    const panel = container.querySelector('[data-panel]');
+    expect(panel).toBeInTheDocument();
+    // The panel should have backdrop-filter inline style
+    expect(panel.style.backdropFilter).toContain('blur');
+  });
 });

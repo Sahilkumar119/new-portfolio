@@ -1,6 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { topProjects } from "../../data/projects";
+import { useScrollReveal } from "../../hooks/useScrollReveal";
 
 const useStyles = makeStyles(() => ({
     section: {
@@ -47,29 +48,41 @@ const useStyles = makeStyles(() => ({
         position: "relative",
         display: "block",
         textDecoration: "none",
-        background: "rgba(20, 20, 25, 0.4)", // slightly darker/blueish for AI vibe
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--glass-bg)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        border: "1px solid var(--glass-border)",
         borderRadius: "16px",
         padding: "2rem",
         overflow: "hidden",
+        boxShadow: "var(--glass-shadow)",
         transition: "all 300ms cubic-bezier(0.34, 1.56, 0.64, 1)",
         "&::before": {
-            // subtle neural grid or data line aesthetic
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "8%",
+            right: "8%",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
+            pointerEvents: "none",
+            zIndex: 1,
+        },
+        "&::after": {
             content: '""',
             position: "absolute",
             top: 0, left: 0, right: 0, bottom: 0,
             backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
             backgroundSize: "20px 20px",
             zIndex: -1,
-            opacity: 0.5,
+            opacity: 0.4,
+            pointerEvents: "none",
         },
         "&:hover": {
             transform: "translateY(-5px)",
-            background: "rgba(30, 30, 40, 0.6)",
+            background: "var(--glass-bg-hover)",
             border: "1px solid rgba(10, 132, 255, 0.3)",
-            boxShadow: "0 10px 40px -10px rgba(10, 132, 255, 0.15)",
+            boxShadow: "var(--glass-shadow-hover)",
             textDecoration: "none",
         },
     },
@@ -118,9 +131,14 @@ const useStyles = makeStyles(() => ({
 
 export const AIProjects = () => {
     const classes = useStyles();
+    const [sectionRef, visible] = useScrollReveal({ threshold: 0.1 });
 
     return (
-        <section id="projects" className={classes.section}>
+        <section
+            id="projects"
+            ref={sectionRef}
+            className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
+        >
             <div className={classes.header}>
                 <span className={classes.eyebrow}>Architecture & Algorithms</span>
                 <h2 className={classes.title}>Selected Systems</h2>
@@ -133,7 +151,8 @@ export const AIProjects = () => {
                         href={project.link || "#"} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className={classes.card}
+                        className={`${classes.card} reveal-child-scale`}
+                        style={{ '--reveal-delay': i }}
                     >
                         <div className={classes.cardHeader}>
                             <h3 className={classes.cardTitle}>{project.title}</h3>

@@ -29,6 +29,10 @@ yarn-error.log*
 *.swo
 *~
 
+# AI tool configs (local only)
+.claude/
+.opencode/
+
 # Optional npm cache directory
 .npm
 

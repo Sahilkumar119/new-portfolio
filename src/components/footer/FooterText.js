@@ -7,7 +7,7 @@ const useStyles = makeStyles(() => ({
         position: "fixed",
         top: "auto",
         bottom: "2.5rem",
-        left: "2.5rem",
+        left: "clamp(4rem, 8vw, 8rem)",
         zIndex: 9999,
         animation: "fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both",
     },

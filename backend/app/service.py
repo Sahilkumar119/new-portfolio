@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
+
+import httpx
 
 from .config import Settings
 from .loaders import load_all_sources
 from .models import ContentChunk, DocumentRecord
 from .retrieval import hybrid_rank, tokenize
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -47,6 +52,7 @@ class AssistantService:
         self.chunk_records: list[dict] = []
         self.documents_by_id: dict[str, DocumentRecord] = {}
         self.reranker = LightweightReranker()
+        self._openrouter_key = settings.openrouter_api_key
 
     def ingest_all(self) -> dict:
         documents, chunks = load_all_sources(self.settings.project_root)
@@ -114,11 +120,46 @@ class AssistantService:
         return round(min(1.0, 0.8 * coverage + 0.2 * normalized + bonus), 4)
 
     def _compose_answer(self, question: str, items: list[dict]) -> str:
-        _ = question
-        selected = []
-        for item in items[:3]:
-            selected.append(item["text"].strip().replace("\n", " "))
-        return " ".join(selected)[:900]
+        context_blocks = []
+        for i, item in enumerate(items[:5], 1):
+            source = item["metadata"].get("source_path", "unknown")
+            context_blocks.append(f"[{i}] ({source})\n{item['text'].strip()}")
+        context = "\n\n".join(context_blocks)
+
+        if not self._openrouter_key:
+            logger.warning("OPENROUTER_API_KEY not set; falling back to raw context")
+            return context[:900]
+
+        system = (
+            "You are an assistant for Sahil's personal portfolio website. "
+            "Answer the visitor's question using ONLY the provided context excerpts. "
+            "Be concise, friendly, and factual. If the context doesn't contain enough "
+            "information to answer, say so honestly rather than guessing."
+        )
+        prompt = f"Context:\n{context}\n\nQuestion: {question}"
+
+        try:
+            resp = httpx.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {self._openrouter_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "anthropic/claude-haiku-4-5",
+                    "max_tokens": 512,
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": prompt},
+                    ],
+                },
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"].strip()
+        except Exception as exc:
+            logger.error("OpenRouter API error: %s", exc)
+            return context[:900]
 
     def _build_citations(self, items: list[dict]) -> list[Citation]:
         citations: list[Citation] = []

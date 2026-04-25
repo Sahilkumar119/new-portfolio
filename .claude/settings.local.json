@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git -C /home/ladliju/new-portfolio show HEAD:src/components/content/AIProjects.js 2>/dev/null | head -10; git -C /home/ladliju/new-portfolio show HEAD:src/components/content/LinuxTerminal.js 2>/dev/null | head -10)"
-    ]
-  }
-}

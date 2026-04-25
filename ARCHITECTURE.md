@@ -29,4 +29,17 @@ The project is a React-based single-page application (SPA) designed as a persona
 - **Assistant Connectivity**: `src/lib/assistant-api.js` resolves the chat endpoint and `src/setupProxy.js` proxies `/api/assistant/*` to the backend in development.
 
 ## Deployment
-- Optimized for **Vercel** with static snapshots (`react-snapshot`) for SEO.
+- **Frontend**: Optimized for **Vercel** with static snapshots (`react-snapshot`) for SEO. Vercel routes all traffic to `index.html` via `vercel.json`.
+- **Backend**: Currently hosted on **Render** using the included `render.yaml`. (Alternative configurations via `Procfile` and `Dockerfile` are also supported for other platforms).
+
+### Environment Variables
+When deploying, you must configure the following environment variables to connect the frontend and backend:
+
+**Frontend (Vercel)**:
+- `REACT_APP_ASSISTANT_API_URL`: The public URL of the backend (e.g., `https://my-portfolio-backend.onrender.com`).
+
+**Backend**:
+- `CORS_ALLOWED_ORIGINS`: Comma-separated list of allowed frontend origins (e.g., `https://your-vercel-domain.vercel.app`). Defaults to `http://localhost:3000`.
+- `ASSISTANT_PROJECT_ROOT`: The path to the root directory containing `content/` and `public/`. If deploying the whole repository, the default works out of the box.
+- `PYTHON_VERSION`: Required by some platforms (e.g., Render) to specify the Python runtime (e.g., `3.11.0`).
+- `ASSISTANT_AUTO_INGEST`: Set to `true` to build the knowledge base index on startup.

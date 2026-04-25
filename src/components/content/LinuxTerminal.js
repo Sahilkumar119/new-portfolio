@@ -197,12 +197,13 @@ const useStyles = makeStyles(() => ({
     muted: { color: "#94a3b8" },
     cursor: {
         display: "inline-block",
-        width: "8px",
-        height: "1em",
+        width: "0.5ch",
+        height: "1.1em",
         background: "var(--accent-primary, #10b981)",
-        verticalAlign: "text-bottom",
+        verticalAlign: "middle",
         animation: "$blink 1s step-end infinite",
-        marginLeft: "1px",
+        marginLeft: "2px",
+        borderRadius: "1px",
     },
     hiddenInput: {
         position: "absolute",

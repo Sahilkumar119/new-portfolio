@@ -14,6 +14,7 @@ class Settings:
     top_k: int
     candidate_k: int
     auto_ingest: bool
+    openrouter_api_key: str | None
 
 
 def get_settings() -> Settings:
@@ -27,4 +28,5 @@ def get_settings() -> Settings:
         top_k=int(os.getenv("ASSISTANT_TOP_K", "6")),
         candidate_k=int(os.getenv("ASSISTANT_CANDIDATE_K", "24")),
         auto_ingest=os.getenv("ASSISTANT_AUTO_INGEST", "true").lower() in {"1", "true", "yes", "on"},
+        openrouter_api_key=os.getenv("OPENROUTER_API_KEY"),
     )

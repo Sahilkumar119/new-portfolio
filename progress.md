@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **Production Wiring Fix**: Fixed `vercel.json` rewrites that were swallowing `/api` requests and added `render.yaml`, `Dockerfile`, and `Procfile` to seamlessly deploy the backend on Render.
 - **Glassmorphism UI**: Applied Apple-style glassmorphism (backdrop blur, saturate, shadow system, top-edge shimmer) to all interactive surfaces: Certifications, Blogs, Projects, Connect, Hero CTAs, Social dock, and Terminal.
 - **Scroll-Reveal Animations**: Implemented a lightweight, zero-dependency `useScrollReveal` hook (IntersectionObserver) and applied staggered reveal animations to all major content sections.
 - **Ask AI UI Fixes**: Fixed the AI button overflow issue and refactored the `MorphPanel` structure so the popup form renders outside the animated `motion.div`, preventing visibility clipping.
@@ -27,6 +28,7 @@
 - **Documentation**: Overhauled `ADDING_CONTENT.md` and `QUICK_GUIDE.md` to reflect the new automated workflow.
 
 ## Completed Tasks
+- [x] Configure backend deployment wiring (Vercel frontend + Render backend).
 - [x] Upgrade Markdown parsing in `BlogPost.js` with `marked` and `DOMPurify`.
 - [x] Add `scroll-margin-top` to fix mobile header offsets for navigation links.
 - [x] Apply Apple Glassmorphism UI across all components.

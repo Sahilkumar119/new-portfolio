@@ -13,7 +13,7 @@ The project is a React-based single-page application (SPA) designed as a persona
 - **Ingestion Sources**: Reads source-of-truth content directly from `content/` plus `public/resume.pdf` (via `pdfplumber`), avoiding compiled frontend data artifacts.
 - **Retrieval Pipeline**: Uses hybrid retrieval (dense lexical + BM25 sparse) with reciprocal rank fusion and a lightweight reranker to improve final context quality.
 - **Grounding Model**: Chat responses are generated only from retrieved chunks and include citation metadata (`source_path`, title, snippet).
-- **Startup Behavior**: Optional auto-ingest on startup controlled by `ASSISTANT_AUTO_INGEST`.
+- **Startup Behavior**: Optional auto-ingest on startup controlled by `ASSISTANT_AUTO_INGEST`, using FastAPI's lifespan context manager.
 
 ## Data Layer
 - **Automated Ingestion**: Content is authored in Markdown (blogs) and JSON (projects, certifications) within the root `content/` directory.

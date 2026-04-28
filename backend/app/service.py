@@ -157,8 +157,14 @@ class AssistantService:
             )
             resp.raise_for_status()
             return resp.json()["choices"][0]["message"]["content"].strip()
-        except Exception as exc:
-            logger.error("OpenRouter API error: %s", exc)
+        except httpx.TimeoutException as exc:
+            logger.error("OpenRouter API timeout: %s", exc)
+            return context[:900]
+        except httpx.HTTPStatusError as exc:
+            logger.error("OpenRouter API HTTP error %s: %s", exc.response.status_code, exc)
+            return context[:900]
+        except httpx.RequestError as exc:
+            logger.error("OpenRouter API request error: %s", exc)
             return context[:900]
 
     def _build_citations(self, items: list[dict]) -> list[Citation]:

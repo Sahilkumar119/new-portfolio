@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **End-to-End Codebase Audit (2026-04-28)**: Full graph-driven audit via graphify. Fixed broken `test_service.py` (missing `openrouter_api_key` param), migrated FastAPI startup from deprecated `@app.on_event("startup")` to lifespan context manager, replaced bare `except Exception` in OpenRouter API call with specific `httpx.TimeoutException`/`HTTPStatusError`/`RequestError` handlers. All 7 backend tests pass, frontend build clean.
 - **Production Wiring Fix**: Fixed `vercel.json` rewrites that were swallowing `/api` requests and added `render.yaml`, `Dockerfile`, and `Procfile` to seamlessly deploy the backend on Render.
 - **Glassmorphism UI**: Applied Apple-style glassmorphism (backdrop blur, saturate, shadow system, top-edge shimmer) to all interactive surfaces: Certifications, Blogs, Projects, Connect, Hero CTAs, Social dock, and Terminal.
 - **Scroll-Reveal Animations**: Implemented a lightweight, zero-dependency `useScrollReveal` hook (IntersectionObserver) and applied staggered reveal animations to all major content sections.

@@ -11,6 +11,7 @@ def make_settings() -> Settings:
         top_k=3,
         candidate_k=10,
         auto_ingest=False,
+        openrouter_api_key=None,
     )
 
 

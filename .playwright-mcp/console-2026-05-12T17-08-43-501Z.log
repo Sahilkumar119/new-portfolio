@@ -1,0 +1,4 @@
+[     985ms] [ERROR] Material-UI: the createMuiTheme function was renamed to createTheme.
+
+You should use `import { createTheme } from '@material-ui/core/styles'` @ http://localhost:3000/static/js/bundle.js:9648
+[    1018ms] [LOG] %c © 2026 sahilkumar.dev ✌ color: #0A84FF;font-size: 3em;font-weight: 300;padding: 100px 0px 100px 0px @ http://localhost:3000/static/js/bundle.js:4454

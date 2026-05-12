@@ -36,19 +36,6 @@ const useStyles = makeStyles(() => ({
         paddingBottom: "clamp(3rem, 8vh, 6rem)",
         textAlign: "center",
     },
-    errorCode: {
-        fontSize: "clamp(5rem, 15vw, 10rem)",
-        fontWeight: 800,
-        letterSpacing: "-0.04em",
-        lineHeight: 1,
-        marginBottom: "0.5rem",
-        background: "linear-gradient(135deg, #0A84FF, #BF5AF2)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        textShadow: "none",
-        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
-    },
     title: {
         fontSize: "clamp(1.2rem, 3vw, 1.6rem)",
         fontWeight: 600,
@@ -56,16 +43,6 @@ const useStyles = makeStyles(() => ({
         letterSpacing: "-0.02em",
         marginBottom: "0.5rem",
         animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
-    },
-    description: {
-        fontSize: "clamp(0.85rem, 2vw, 1rem)",
-        lineHeight: 1.7,
-        color: "rgba(255,255,255,0.7)",
-        fontWeight: 400,
-        marginBottom: "2rem",
-        maxWidth: "400px",
-        padding: "0 1.5rem",
-        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both",
     },
     buttonRow: {
         display: "flex",
@@ -150,11 +127,7 @@ const PageNotFound = () => {
             <ThemeToggle />
 
             <div className={classes.content}>
-                <div className={classes.errorCode}>404</div>
                 <div className={classes.title}>Page not found</div>
-                <p className={classes.description}>
-                    The page you're looking for doesn't exist or has been moved.
-                </p>
                 <div className={classes.buttonRow}>
                     <button
                         className={classes.btnPrimary}

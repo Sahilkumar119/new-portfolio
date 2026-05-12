@@ -5,111 +5,67 @@ import { ThemeToggle } from "../components/theme/ThemeToggle";
 
 const useStyles = makeStyles(() => ({
     root: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
         position: "relative",
+        width: "100vw",
+        height: "100vh",
         overflow: "hidden",
-        padding: "2rem",
     },
-    glowBlue: {
-        position: "fixed",
-        top: "-20vh",
-        right: "-15vw",
-        width: "clamp(400px, 60vw, 900px)",
-        height: "clamp(400px, 60vw, 900px)",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, var(--glow-blue) 0%, transparent 70%)",
-        filter: "blur(60px)",
+    bgImage: {
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        objectPosition: "center",
         zIndex: 0,
-        pointerEvents: "none",
-        animation: "$glowPulse 9s ease-in-out infinite",
     },
-    glowPurple: {
-        position: "fixed",
-        bottom: "-20vh",
-        left: "-10vw",
-        width: "clamp(300px, 50vw, 700px)",
-        height: "clamp(300px, 50vw, 700px)",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, var(--glow-purple) 0%, transparent 70%)",
-        filter: "blur(60px)",
-        zIndex: 0,
-        pointerEvents: "none",
-        animation: "$glowPulse 11s ease-in-out 2s infinite",
+    overlay: {
+        position: "absolute",
+        inset: 0,
+        background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.05) 100%)",
+        zIndex: 1,
     },
-    "@keyframes glowPulse": {
-        "0%, 100%": { opacity: 0.6, transform: "scale(1)" },
-        "50%": { opacity: 0.95, transform: "scale(1.08)" },
-    },
-    card: {
+    content: {
         position: "relative",
         zIndex: 10,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "flex-end",
+        height: "100%",
+        paddingBottom: "clamp(3rem, 8vh, 6rem)",
         textAlign: "center",
-        maxWidth: "520px",
-        width: "100%",
-        background: "var(--glass-bg)",
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        border: "1px solid var(--glass-border)",
-        boxShadow: "var(--glass-shadow)",
-        borderRadius: "24px",
-        padding: "3rem 2.5rem",
-        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
-        overflow: "hidden",
-        "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: "8%",
-            right: "8%",
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
-        },
-    },
-    "@keyframes fadeInUp": {
-        from: { opacity: 0, transform: "translateY(24px)" },
-        to: { opacity: 1, transform: "translateY(0)" },
-    },
-    illustration: {
-        width: "clamp(180px, 40vw, 260px)",
-        height: "auto",
-        marginBottom: "2rem",
-        opacity: 0.92,
-        filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.15))",
     },
     errorCode: {
-        fontSize: "clamp(4rem, 12vw, 7rem)",
+        fontSize: "clamp(5rem, 15vw, 10rem)",
         fontWeight: 800,
         letterSpacing: "-0.04em",
         lineHeight: 1,
-        color: "var(--text-primary)",
         marginBottom: "0.5rem",
-        background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary, #BF5AF2))",
+        background: "linear-gradient(135deg, #0A84FF, #BF5AF2)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
+        textShadow: "none",
+        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
     },
     title: {
-        fontSize: "clamp(1.1rem, 3vw, 1.4rem)",
+        fontSize: "clamp(1.2rem, 3vw, 1.6rem)",
         fontWeight: 600,
-        color: "var(--text-primary)",
+        color: "#fff",
         letterSpacing: "-0.02em",
-        marginBottom: "0.75rem",
+        marginBottom: "0.5rem",
+        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
     },
     description: {
-        fontSize: "0.95rem",
+        fontSize: "clamp(0.85rem, 2vw, 1rem)",
         lineHeight: 1.7,
-        color: "var(--text-secondary)",
+        color: "rgba(255,255,255,0.7)",
         fontWeight: 400,
-        letterSpacing: "-0.005em",
         marginBottom: "2rem",
-        maxWidth: "380px",
+        maxWidth: "400px",
+        padding: "0 1.5rem",
+        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both",
     },
     buttonRow: {
         display: "flex",
@@ -117,6 +73,11 @@ const useStyles = makeStyles(() => ({
         gap: "0.75rem",
         flexWrap: "wrap",
         justifyContent: "center",
+        animation: "$fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both",
+    },
+    "@keyframes fadeInUp": {
+        from: { opacity: 0, transform: "translateY(24px)" },
+        to: { opacity: 1, transform: "translateY(0)" },
     },
     btnPrimary: {
         position: "relative",
@@ -129,28 +90,18 @@ const useStyles = makeStyles(() => ({
         fontWeight: 600,
         letterSpacing: "-0.01em",
         color: "#fff",
-        background: "var(--accent-primary)",
-        backdropFilter: "blur(8px) saturate(180%)",
-        WebkitBackdropFilter: "blur(8px) saturate(180%)",
-        border: "1px solid rgba(255,255,255,0.15)",
-        boxShadow: "0 2px 12px rgba(10,132,255,0.28), inset 0 1px 0 rgba(255,255,255,0.25)",
+        background: "rgba(10,132,255,0.85)",
+        backdropFilter: "blur(12px) saturate(180%)",
+        WebkitBackdropFilter: "blur(12px) saturate(180%)",
+        border: "1px solid rgba(255,255,255,0.2)",
+        boxShadow: "0 2px 16px rgba(10,132,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
         textDecoration: "none",
         cursor: "pointer",
         overflow: "hidden",
         transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-        "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: "10%",
-            right: "10%",
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
-            pointerEvents: "none",
-        },
         "&:hover": {
             transform: "translateY(-2px)",
-            boxShadow: "0 8px 28px rgba(10,132,255,0.42), inset 0 1px 0 rgba(255,255,255,0.3)",
+            boxShadow: "0 8px 28px rgba(10,132,255,0.5), inset 0 1px 0 rgba(255,255,255,0.3)",
         },
         "&:active": { transform: "scale(0.97)" },
     },
@@ -164,31 +115,20 @@ const useStyles = makeStyles(() => ({
         fontSize: "0.85rem",
         fontWeight: 500,
         letterSpacing: "-0.01em",
-        color: "var(--text-secondary)",
-        background: "var(--glass-bg)",
+        color: "rgba(255,255,255,0.9)",
+        background: "rgba(255,255,255,0.1)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        border: "1px solid var(--glass-border)",
-        boxShadow: "var(--glass-shadow)",
+        border: "1px solid rgba(255,255,255,0.2)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
         textDecoration: "none",
         cursor: "pointer",
         overflow: "hidden",
         transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-        "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: "8%",
-            right: "8%",
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
-            pointerEvents: "none",
-        },
         "&:hover": {
             transform: "translateY(-2px)",
-            background: "var(--glass-bg-hover)",
-            boxShadow: "var(--glass-shadow-hover)",
-            color: "var(--text-primary)",
+            background: "rgba(255,255,255,0.18)",
+            color: "#fff",
         },
         "&:active": { transform: "scale(0.97)" },
     },
@@ -200,22 +140,20 @@ const PageNotFound = () => {
 
     return (
         <div className={classes.root}>
-            <div className={classes.glowBlue} aria-hidden="true" />
-            <div className={classes.glowPurple} aria-hidden="true" />
+            <img
+                src="/images/404.png"
+                alt=""
+                className={classes.bgImage}
+                onError={(e) => { e.target.style.display = "none"; }}
+            />
+            <div className={classes.overlay} />
             <ThemeToggle />
 
-            <div className={classes.card}>
-                <img
-                    src="/images/404.png"
-                    alt="Page not found"
-                    className={classes.illustration}
-                    onError={(e) => { e.target.style.display = "none"; }}
-                />
+            <div className={classes.content}>
                 <div className={classes.errorCode}>404</div>
                 <div className={classes.title}>Page not found</div>
                 <p className={classes.description}>
                     The page you're looking for doesn't exist or has been moved.
-                    Let's get you back on track.
                 </p>
                 <div className={classes.buttonRow}>
                     <button

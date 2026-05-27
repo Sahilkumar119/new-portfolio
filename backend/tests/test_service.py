@@ -58,8 +58,38 @@ def test_chat_returns_citations_when_confident() -> None:
     }
 
     response = service.chat("Which specialization did you do from Stanford?", top_k=2)
-
+    
     assert response.used_fallback is False
     assert response.confidence >= 0.25
     assert len(response.citations) >= 1
     assert "Stanford" in response.answer
+
+
+def test_conversational_greetings_bypass_fallback() -> None:
+    service = AssistantService(settings=make_settings())
+    service.chunk_records = [
+        {
+            "id": "c1",
+            "text": "Machine Learning Specialization issued by Stanford Online in 2024.",
+            "metadata": {"source_path": "content/certifications/machine-learning-stanford.json", "title": "Machine Learning Specialization"},
+            "document_id": "d1",
+        }
+    ]
+    service.documents_by_id = {
+        "d1": __import__("types").SimpleNamespace(title="Machine Learning Specialization")
+    }
+
+    # Test "hi"
+    res1 = service.chat("hi")
+    assert res1.used_fallback is False
+    assert res1.citations == []
+
+    # Test "who are you"
+    res2 = service.chat("who are you?")
+    assert res2.used_fallback is False
+    assert res2.citations == []
+
+    # Test normal factual query with no match still falls back
+    res3 = service.chat("what is your favorite food?")
+    assert res3.used_fallback is True
+

@@ -80,6 +80,44 @@ class AssistantService:
             "chunks": len(self.chunks),
         }
 
+    def _is_conversational_query(self, query: str) -> bool:
+        import re
+        norm = query.lower().strip()
+        norm = re.sub(r"[^\w\s]", "", norm)
+        
+        # Exact match greetings
+        greetings = {
+            "hi", "hello", "hey", "hola", "yo", "sup", "greetings", "hey there", "hello there", "test",
+            "good morning", "good afternoon", "good evening", "howdy", "hi there", "namaste", "wasup", "whats up"
+        }
+        if norm in greetings:
+            return True
+            
+        # Common small talk and meta-questions
+        small_talk_patterns = [
+            "how are you",
+            "how is it going",
+            "hows it going",
+            "who are you",
+            "what is your name",
+            "what are you",
+            "who is this",
+            "what can you do",
+            "help me",
+            "what is this site",
+            "what is this website",
+            "tell me about this assistant",
+            "tell me about this site",
+            "tell me about this website",
+            "tell me about yourself",
+            "introduce yourself"
+        ]
+        for pattern in small_talk_patterns:
+            if pattern in norm:
+                return True
+                
+        return False
+
     def chat(self, question: str, top_k: int | None = None) -> ChatResult:
         if not self.chunk_records:
             return ChatResult(
@@ -89,12 +127,14 @@ class AssistantService:
                 used_fallback=True,
             )
 
+        is_conv = self._is_conversational_query(question)
+
         max_context = top_k or self.settings.top_k
         candidates = hybrid_rank(question, self.chunk_records, self.settings.candidate_k)
         reranked = self.reranker.rerank(question, candidates, max_context)
         confidence = self._confidence(question, reranked)
 
-        if confidence < self.settings.confidence_threshold or not reranked:
+        if not is_conv and (confidence < self.settings.confidence_threshold or not reranked):
             return ChatResult(
                 answer="I do not have enough verified information to answer that confidently yet.",
                 citations=[],
@@ -103,7 +143,7 @@ class AssistantService:
             )
 
         answer = self._compose_answer(question, reranked)
-        citations = self._build_citations(reranked)
+        citations = self._build_citations(reranked) if not is_conv else []
         return ChatResult(answer=answer, citations=citations, confidence=confidence, used_fallback=False)
 
     def _confidence(self, question: str, items: list[dict]) -> float:
@@ -128,13 +168,17 @@ class AssistantService:
 
         if not self._openrouter_key:
             logger.warning("OPENROUTER_API_KEY not set; falling back to raw context")
+            if self._is_conversational_query(question):
+                return "Hello! I am Sahil's AI assistant. How can I help you today?"
             return context[:900]
 
         system = (
-            "You are an assistant for Sahil's personal portfolio website. "
-            "Answer the visitor's question using ONLY the provided context excerpts. "
-            "Be concise, friendly, and factual. If the context doesn't contain enough "
-            "information to answer, say so honestly rather than guessing."
+            "You are a friendly, intelligent, and conversational AI assistant for Sahil Kumar's personal portfolio website (sahilkumar.dev).\n"
+            "Your goal is to help visitors learn about Sahil, his projects, experience, skills, and the blog posts he has written.\n\n"
+            "Guidelines:\n"
+            "1. For greetings, pleasantries, or general chat (e.g., 'hi', 'hello', 'who are you?', 'how are you?'), respond warmly and naturally as Sahil's AI assistant. Introduce yourself, invite them to ask questions about Sahil, and keep the tone conversational, helpful, and polite.\n"
+            "2. For specific questions about Sahil's professional experience, skills, projects, or blogs, use the provided context excerpts to construct a precise, factual, and concise answer. Do NOT state 'Based on the provided context...' or 'According to the excerpts...' or mention 'context' or 'rules' to the visitor. Answer directly, factually, and naturally.\n"
+            "3. If a visitor asks a factual question about Sahil that is not covered by the context, explain politely that you do not have that information in your current database, but invite them to ask about his other projects, blogs, or background."
         )
         prompt = f"Context:\n{context}\n\nQuestion: {question}"
 

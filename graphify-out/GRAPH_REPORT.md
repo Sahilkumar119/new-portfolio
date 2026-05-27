@@ -1,12 +1,12 @@
 # Graph Report - new-portfolio  (2026-05-27)
 
 ## Corpus Check
-- 68 files · ~182,480 words
+- 68 files · ~182,920 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 237 nodes · 260 edges · 26 communities detected
-- Extraction: 75% EXTRACTED · 25% INFERRED · 0% AMBIGUOUS · INFERRED: 64 edges (avg confidence: 0.76)
+- 239 nodes · 267 edges · 26 communities detected
+- Extraction: 75% EXTRACTED · 25% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.76)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -38,7 +38,7 @@
 - [[_COMMUNITY_Community 67|Community 67]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `AssistantService` - 16 edges
+1. `AssistantService` - 18 edges
 2. `DocumentRecord` - 9 edges
 3. `ContentChunk` - 9 edges
 4. `_load_blogs()` - 8 edges
@@ -69,16 +69,16 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.14
-Nodes (14): BaseModel, get_settings(), Settings, chat(), ChatRequest, ChatResponse, CitationResponse, ingest() (+6 more)
+Cohesion: 0.21
+Nodes (18): get_settings(), Settings, _chunk_markdown(), _deterministic_id(), load_all_sources(), _load_blogs(), _load_json_collection(), _load_resume() (+10 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.13
-Nodes (11): AIProjects(), Certifications(), Connect(), LatestBlogs(), displayCwd(), isDir(), LinuxTerminal(), lookup() (+3 more)
+Cohesion: 0.18
+Nodes (12): BaseModel, chat(), ChatRequest, ChatResponse, CitationResponse, ingest(), lifespan(), AssistantService (+4 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.29
-Nodes (15): _chunk_markdown(), _deterministic_id(), load_all_sources(), _load_blogs(), _load_json_collection(), _load_resume(), _load_terminal(), _parse_frontmatter() (+7 more)
+Cohesion: 0.13
+Nodes (11): AIProjects(), Certifications(), Connect(), LatestBlogs(), displayCwd(), isDir(), LinuxTerminal(), lookup() (+3 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.21
@@ -213,12 +213,12 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Public Resume PDF Asset` and `Root Resume PDF Asset`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AssistantService` connect `Community 0` to `Community 2`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Why does `DocumentRecord` connect `Community 2` to `Community 0`?**
+- **Why does `AssistantService` connect `Community 1` to `Community 0`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `DocumentRecord` connect `Community 0` to `Community 1`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Are the 8 inferred relationships involving `AssistantService` (e.g. with `ChatRequest` and `CitationResponse`) actually correct?**
-  _`AssistantService` has 8 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `AssistantService` (e.g. with `ChatRequest` and `CitationResponse`) actually correct?**
+  _`AssistantService` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 8 inferred relationships involving `DocumentRecord` (e.g. with `Citation` and `ChatResult`) actually correct?**
   _`DocumentRecord` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 8 inferred relationships involving `ContentChunk` (e.g. with `Citation` and `ChatResult`) actually correct?**

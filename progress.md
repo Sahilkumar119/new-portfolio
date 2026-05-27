@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **Conversational AI Assistant Improvements (2026-05-27)**: Enhanced the portfolio's built-in RAG assistant to distinguish greetings and small talk (e.g. "hi", "who are you") from factual queries. Bypassed strict RAG confidence thresholds for conversational queries, updated system prompt guidelines to construct warm and natural LLM-like responses without robotic prefix boilerplate, and added a static offline fallback when the API key is not present. Added robust unit test coverage.
 - **Site-Wide Text Contrast Improvements (2026-05-27)**: Increased the opacity and contrast of `--text-primary`, `--text-secondary`, and `--text-tertiary` variables for both Light and Dark modes in `index.css`. Also improved the terminal window header text contrast. This ensures premium visual clarity across the entire site while preserving the glassmorphic backdrop filters.
 - **Added Micro-ROS and XRCE-DDS Blog Post (2026-05-27)**: Published a new blog post explaining why ROS2 is too heavy for microcontrollers (ESP32), how Micro XRCE-DDS Client-Agent architecture works, and how UDP/Serial transport translates to standard DDS. Fully synchronized assets and updated sitemap/pre-rendered SEO page.
 - **Blog Layout & Button Contrast Improvements (2026-05-27)**: Redesigned the blog post list to match a split 2-column layout (horizontal on desktop, vertical on mobile) with animated vector network graphics (acting like dynamic GIFs), tag icons, outline pills, and featured badges. Improved readability and contrast of primary/secondary menu text, theme icons, and control buttons without changing the glassmorphism parameters.
@@ -33,6 +34,7 @@
 - **Documentation**: Overhauled `ADDING_CONTENT.md` and `QUICK_GUIDE.md` to reflect the new automated workflow.
 
 ## Completed Tasks
+- [x] Conversational AI Assistant upgrades (warm greetings, natural response logic, unit tests).
 - [x] Author and publish blog post: "Micro-ROS and XRCE-DDS: How ROS2 Fits into Microcontrollers".
 - [x] Configure backend deployment wiring (Vercel frontend + Render backend).
 - [x] Upgrade Markdown parsing in `BlogPost.js` with `marked` and `DOMPurify`.

@@ -225,7 +225,7 @@
       "source_file": "src/components/content/Certifications.js",
       "source_location": "L1",
       "id": "src_components_content_certifications_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "certifications.js"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "src/components/content/Certifications.js",
       "source_location": "L101",
       "id": "certifications_certifications",
-      "community": 1,
+      "community": 2,
       "norm_label": "certifications()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "src/components/content/Connect.js",
       "source_location": "L1",
       "id": "src_components_content_connect_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "connect.js"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "src/components/content/Connect.js",
       "source_location": "L126",
       "id": "connect_connect",
-      "community": 1,
+      "community": 2,
       "norm_label": "connect()"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "src/components/content/LatestBlogs.js",
       "source_location": "L1",
       "id": "src_components_content_latestblogs_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "latestblogs.js"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "src/components/content/LatestBlogs.js",
       "source_location": "L197",
       "id": "latestblogs_networksvg",
-      "community": 1,
+      "community": 2,
       "norm_label": "networksvg()"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "src/components/content/LatestBlogs.js",
       "source_location": "L284",
       "id": "latestblogs_latestblogs",
-      "community": 1,
+      "community": 2,
       "norm_label": "latestblogs()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "src/components/content/AIProjects.js",
       "source_location": "L1",
       "id": "src_components_content_aiprojects_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "aiprojects.js"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "src/components/content/AIProjects.js",
       "source_location": "L132",
       "id": "aiprojects_aiprojects",
-      "community": 1,
+      "community": 2,
       "norm_label": "aiprojects()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L1",
       "id": "src_components_content_linuxterminal_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "linuxterminal.js"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L26",
       "id": "linuxterminal_buildfs",
-      "community": 1,
+      "community": 2,
       "norm_label": "buildfs()"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L58",
       "id": "linuxterminal_isdir",
-      "community": 1,
+      "community": 2,
       "norm_label": "isdir()"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L62",
       "id": "linuxterminal_splitpath",
-      "community": 1,
+      "community": 2,
       "norm_label": "splitpath()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L66",
       "id": "linuxterminal_resolvepath",
-      "community": 1,
+      "community": 2,
       "norm_label": "resolvepath()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L82",
       "id": "linuxterminal_lookup",
-      "community": 1,
+      "community": 2,
       "norm_label": "lookup()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L95",
       "id": "linuxterminal_displaycwd",
-      "community": 1,
+      "community": 2,
       "norm_label": "displaycwd()"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L223",
       "id": "linuxterminal_linuxterminal",
-      "community": 1,
+      "community": 2,
       "norm_label": "linuxterminal()"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "src/hooks/useScrollReveal.js",
       "source_location": "L1",
       "id": "src_hooks_usescrollreveal_js",
-      "community": 1,
+      "community": 2,
       "norm_label": "usescrollreveal.js"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "src/hooks/useScrollReveal.js",
       "source_location": "L14",
       "id": "usescrollreveal_usescrollreveal",
-      "community": 1,
+      "community": 2,
       "norm_label": "usescrollreveal()"
     },
     {
@@ -1287,7 +1287,7 @@
       "source_file": "backend/app/models.py",
       "source_location": "L1",
       "id": "backend_app_models_py",
-      "community": 2,
+      "community": 0,
       "norm_label": "models.py"
     },
     {
@@ -1296,7 +1296,7 @@
       "source_file": "backend/app/models.py",
       "source_location": "L8",
       "id": "models_documentrecord",
-      "community": 2,
+      "community": 0,
       "norm_label": "documentrecord"
     },
     {
@@ -1305,7 +1305,7 @@
       "source_file": "backend/app/models.py",
       "source_location": "L17",
       "id": "models_contentchunk",
-      "community": 2,
+      "community": 0,
       "norm_label": "contentchunk"
     },
     {
@@ -1314,7 +1314,7 @@
       "source_file": "backend/app/models.py",
       "source_location": "L25",
       "id": "models_retrievedchunk",
-      "community": 2,
+      "community": 0,
       "norm_label": "retrievedchunk"
     },
     {
@@ -1323,7 +1323,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L1",
       "id": "backend_app_loaders_py",
-      "community": 2,
+      "community": 0,
       "norm_label": "loaders.py"
     },
     {
@@ -1332,7 +1332,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L13",
       "id": "loaders_load_all_sources",
-      "community": 2,
+      "community": 0,
       "norm_label": "load_all_sources()"
     },
     {
@@ -1341,7 +1341,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L44",
       "id": "loaders_load_blogs",
-      "community": 2,
+      "community": 0,
       "norm_label": "_load_blogs()"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L91",
       "id": "loaders_load_json_collection",
-      "community": 2,
+      "community": 0,
       "norm_label": "_load_json_collection()"
     },
     {
@@ -1359,7 +1359,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L126",
       "id": "loaders_load_terminal",
-      "community": 2,
+      "community": 0,
       "norm_label": "_load_terminal()"
     },
     {
@@ -1368,7 +1368,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L169",
       "id": "loaders_load_resume",
-      "community": 2,
+      "community": 0,
       "norm_label": "_load_resume()"
     },
     {
@@ -1377,7 +1377,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L224",
       "id": "loaders_parse_frontmatter",
-      "community": 2,
+      "community": 0,
       "norm_label": "_parse_frontmatter()"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L254",
       "id": "loaders_chunk_markdown",
-      "community": 2,
+      "community": 0,
       "norm_label": "_chunk_markdown()"
     },
     {
@@ -1395,7 +1395,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L296",
       "id": "loaders_split_with_overlap",
-      "community": 2,
+      "community": 0,
       "norm_label": "_split_with_overlap()"
     },
     {
@@ -1404,7 +1404,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L316",
       "id": "loaders_deterministic_id",
-      "community": 2,
+      "community": 0,
       "norm_label": "_deterministic_id()"
     },
     {
@@ -1413,7 +1413,7 @@
       "source_file": "backend/app/loaders.py",
       "source_location": "L320",
       "id": "loaders_rel",
-      "community": 2,
+      "community": 0,
       "norm_label": "_rel()"
     },
     {
@@ -1449,7 +1449,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L1",
       "id": "backend_app_main_py",
-      "community": 0,
+      "community": 1,
       "norm_label": "main.py"
     },
     {
@@ -1458,7 +1458,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L19",
       "id": "main_lifespan",
-      "community": 0,
+      "community": 1,
       "norm_label": "lifespan()"
     },
     {
@@ -1467,7 +1467,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L42",
       "id": "main_chatrequest",
-      "community": 0,
+      "community": 1,
       "norm_label": "chatrequest"
     },
     {
@@ -1476,7 +1476,7 @@
       "source_file": "",
       "source_location": "",
       "id": "basemodel",
-      "community": 0,
+      "community": 1,
       "norm_label": "basemodel"
     },
     {
@@ -1485,7 +1485,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L47",
       "id": "main_citationresponse",
-      "community": 0,
+      "community": 1,
       "norm_label": "citationresponse"
     },
     {
@@ -1494,7 +1494,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L53",
       "id": "main_chatresponse",
-      "community": 0,
+      "community": 1,
       "norm_label": "chatresponse"
     },
     {
@@ -1503,7 +1503,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L61",
       "id": "main_root",
-      "community": 0,
+      "community": 1,
       "norm_label": "root()"
     },
     {
@@ -1512,7 +1512,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L71",
       "id": "main_health",
-      "community": 0,
+      "community": 1,
       "norm_label": "health()"
     },
     {
@@ -1521,7 +1521,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L76",
       "id": "main_ingest",
-      "community": 0,
+      "community": 1,
       "norm_label": "ingest()"
     },
     {
@@ -1530,7 +1530,7 @@
       "source_file": "backend/app/main.py",
       "source_location": "L81",
       "id": "main_chat",
-      "community": 0,
+      "community": 1,
       "norm_label": "chat()"
     },
     {
@@ -1539,7 +1539,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L1",
       "id": "backend_app_service_py",
-      "community": 2,
+      "community": 0,
       "norm_label": "service.py"
     },
     {
@@ -1548,7 +1548,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L17",
       "id": "service_citation",
-      "community": 2,
+      "community": 0,
       "norm_label": "citation"
     },
     {
@@ -1557,7 +1557,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L24",
       "id": "service_chatresult",
-      "community": 2,
+      "community": 0,
       "norm_label": "chatresult"
     },
     {
@@ -1584,7 +1584,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L47",
       "id": "service_assistantservice",
-      "community": 0,
+      "community": 1,
       "norm_label": "assistantservice"
     },
     {
@@ -1602,7 +1602,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L57",
       "id": "service_assistantservice_ingest_all",
-      "community": 0,
+      "community": 1,
       "norm_label": ".ingest_all()"
     },
     {
@@ -1611,43 +1611,52 @@
       "source_file": "backend/app/service.py",
       "source_location": "L76",
       "id": "service_assistantservice_health",
-      "community": 0,
+      "community": 1,
       "norm_label": ".health()"
+    },
+    {
+      "label": "._is_conversational_query()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L83",
+      "id": "service_assistantservice_is_conversational_query",
+      "community": 1,
+      "norm_label": "._is_conversational_query()"
     },
     {
       "label": ".chat()",
       "file_type": "code",
       "source_file": "backend/app/service.py",
-      "source_location": "L83",
+      "source_location": "L121",
       "id": "service_assistantservice_chat",
-      "community": 0,
+      "community": 1,
       "norm_label": ".chat()"
     },
     {
       "label": "._confidence()",
       "file_type": "code",
       "source_file": "backend/app/service.py",
-      "source_location": "L109",
+      "source_location": "L149",
       "id": "service_assistantservice_confidence",
-      "community": 0,
+      "community": 1,
       "norm_label": "._confidence()"
     },
     {
       "label": "._compose_answer()",
       "file_type": "code",
       "source_file": "backend/app/service.py",
-      "source_location": "L122",
+      "source_location": "L162",
       "id": "service_assistantservice_compose_answer",
-      "community": 0,
+      "community": 1,
       "norm_label": "._compose_answer()"
     },
     {
       "label": "._build_citations()",
       "file_type": "code",
       "source_file": "backend/app/service.py",
-      "source_location": "L170",
+      "source_location": "L214",
       "id": "service_assistantservice_build_citations",
-      "community": 0,
+      "community": 1,
       "norm_label": "._build_citations()"
     },
     {
@@ -1746,7 +1755,7 @@
       "source_file": "backend/tests/test_service.py",
       "source_location": "L1",
       "id": "backend_tests_test_service_py",
-      "community": 0,
+      "community": 1,
       "norm_label": "test_service.py"
     },
     {
@@ -1755,7 +1764,7 @@
       "source_file": "backend/tests/test_service.py",
       "source_location": "L5",
       "id": "test_service_make_settings",
-      "community": 0,
+      "community": 1,
       "norm_label": "make_settings()"
     },
     {
@@ -1764,7 +1773,7 @@
       "source_file": "backend/tests/test_service.py",
       "source_location": "L18",
       "id": "test_service_test_low_confidence_fallback",
-      "community": 0,
+      "community": 1,
       "norm_label": "test_low_confidence_fallback()"
     },
     {
@@ -1773,8 +1782,17 @@
       "source_file": "backend/tests/test_service.py",
       "source_location": "L39",
       "id": "test_service_test_chat_returns_citations_when_confident",
-      "community": 0,
+      "community": 1,
       "norm_label": "test_chat_returns_citations_when_confident()"
+    },
+    {
+      "label": "test_conversational_greetings_bypass_fallback()",
+      "file_type": "code",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L68",
+      "id": "test_service_test_conversational_greetings_bypass_fallback",
+      "community": 1,
+      "norm_label": "test_conversational_greetings_bypass_fallback()"
     },
     {
       "label": "Adding Content Automated Workflow Guide",
@@ -4671,7 +4689,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L177",
+      "source_location": "L221",
       "weight": 1.0,
       "_src": "service_assistantservice_build_citations",
       "_tgt": "service_citation",
@@ -4683,7 +4701,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L85",
+      "source_location": "L123",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_chatresult",
@@ -4719,7 +4737,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L94",
+      "source_location": "L134",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_lightweightreranker_rerank",
@@ -4770,6 +4788,18 @@
       "source_location": "L83",
       "weight": 1.0,
       "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_is_conversational_query",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_is_conversational_query",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L121",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
       "_tgt": "service_assistantservice_chat",
       "source": "service_assistantservice",
       "target": "service_assistantservice_chat",
@@ -4779,7 +4809,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L109",
+      "source_location": "L149",
       "weight": 1.0,
       "_src": "service_assistantservice",
       "_tgt": "service_assistantservice_confidence",
@@ -4791,7 +4821,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L122",
+      "source_location": "L162",
       "weight": 1.0,
       "_src": "service_assistantservice",
       "_tgt": "service_assistantservice_compose_answer",
@@ -4803,7 +4833,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L170",
+      "source_location": "L214",
       "weight": 1.0,
       "_src": "service_assistantservice",
       "_tgt": "service_assistantservice_build_citations",
@@ -4837,9 +4867,45 @@
     },
     {
       "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_src": "test_service_test_conversational_greetings_bypass_fallback",
+      "_tgt": "service_assistantservice",
+      "source": "service_assistantservice",
+      "target": "test_service_test_conversational_greetings_bypass_fallback"
+    },
+    {
+      "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L95",
+      "source_location": "L130",
+      "weight": 1.0,
+      "_src": "service_assistantservice_chat",
+      "_tgt": "service_assistantservice_is_conversational_query",
+      "source": "service_assistantservice_is_conversational_query",
+      "target": "service_assistantservice_chat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_src": "service_assistantservice_compose_answer",
+      "_tgt": "service_assistantservice_is_conversational_query",
+      "source": "service_assistantservice_is_conversational_query",
+      "target": "service_assistantservice_compose_answer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L135",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_assistantservice_confidence",
@@ -4851,7 +4917,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L105",
+      "source_location": "L145",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_assistantservice_compose_answer",
@@ -4863,7 +4929,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L106",
+      "source_location": "L146",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_assistantservice_build_citations",
@@ -4894,6 +4960,18 @@
       "_tgt": "test_service_test_chat_returns_citations_when_confident",
       "source": "service_assistantservice_chat",
       "target": "test_service_test_chat_returns_citations_when_confident"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "_src": "test_service_test_conversational_greetings_bypass_fallback",
+      "_tgt": "service_assistantservice_chat",
+      "source": "service_assistantservice_chat",
+      "target": "test_service_test_conversational_greetings_bypass_fallback"
     },
     {
       "relation": "contains",
@@ -5040,6 +5118,18 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_src": "backend_tests_test_service_py",
+      "_tgt": "test_service_test_conversational_greetings_bypass_fallback",
+      "source": "backend_tests_test_service_py",
+      "target": "test_service_test_conversational_greetings_bypass_fallback",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/tests/test_service.py",
@@ -5061,6 +5151,18 @@
       "_tgt": "test_service_make_settings",
       "source": "test_service_make_settings",
       "target": "test_service_test_chat_returns_citations_when_confident",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_src": "test_service_test_conversational_greetings_bypass_fallback",
+      "_tgt": "test_service_make_settings",
+      "source": "test_service_make_settings",
+      "target": "test_service_test_conversational_greetings_bypass_fallback",
       "confidence_score": 1.0
     },
     {

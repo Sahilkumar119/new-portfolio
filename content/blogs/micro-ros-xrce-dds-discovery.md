@@ -82,4 +82,3 @@ Micro-ROS and XRCE-DDS are brilliant compromises. By offloading the heavy memory
 
 If you're building a robot with an ESP32 and want to keep it in the ROS2 ecosystem, setting up a micro-ROS UDP/Serial agent is the way to go.
 
-*What are you building with micro-ROS? Let me know in the comments!*

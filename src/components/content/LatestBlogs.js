@@ -76,6 +76,7 @@ const useStyles = makeStyles(() => ({
             boxShadow: "var(--glass-shadow-hover)",
         },
         "&:hover $entryArrow": { transform: "translateX(4px)", opacity: 1 },
+        "&:hover $entryTitle": { color: "#ff9f1c" },
         "@media (max-width: 767px)": {
             flexDirection: "column",
         },
@@ -143,7 +144,7 @@ const useStyles = makeStyles(() => ({
         fontSize: "clamp(1.15rem, 2.4vw, 1.4rem)",
         fontWeight: 700,
         letterSpacing: "-0.025em",
-        color: "#ff9f1c", // High contrast orange-yellow title matching screenshot
+        color: "var(--text-primary)",
         lineHeight: 1.25,
         margin: "0 0 0.6rem 0",
         transition: "color 180ms ease",

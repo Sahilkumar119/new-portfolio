@@ -147,14 +147,14 @@ const InputForm = React.forwardRef(function InputForm({ onSuccess }, textareaRef
               ref={textareaRef}
               placeholder="Ask me anything about my work..."
               name="message"
-              className="h-[130px] w-full resize-none rounded-md p-3 text-sm outline-0"
+              className="h-[70px] w-full resize-none rounded-md p-3 text-sm outline-0"
               style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
               required
               onKeyDown={handleKeys}
               spellCheck={false}
             />
             <div
-              className="mt-2 h-[72px] overflow-y-auto rounded-md p-2 text-[11px]"
+              className="mt-2 h-[130px] overflow-y-auto rounded-md p-2 text-[11px]"
               style={{ background: 'var(--card-bg)', border: '1px solid var(--glass-border)' }}
             >
               {isLoading ? (

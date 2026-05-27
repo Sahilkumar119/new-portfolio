@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **Added Micro-ROS and XRCE-DDS Blog Post (2026-05-27)**: Published a new blog post explaining why ROS2 is too heavy for microcontrollers (ESP32), how Micro XRCE-DDS Client-Agent architecture works, and how UDP/Serial transport translates to standard DDS. Fully synchronized assets and updated sitemap/pre-rendered SEO page.
 - **Blog Layout & Button Contrast Improvements (2026-05-27)**: Redesigned the blog post list to match a split 2-column layout (horizontal on desktop, vertical on mobile) with animated vector network graphics (acting like dynamic GIFs), tag icons, outline pills, and featured badges. Improved readability and contrast of primary/secondary menu text, theme icons, and control buttons without changing the glassmorphism parameters.
 - **Portfolio SEO Optimization (2026-05-27)**: Designed a portfolio-specific SEO optimization plan based on white-hat SEO best practices, focusing on dynamic sitemap generation, structured JSON-LD schemas (Person and BlogPosting), and dynamic page metadata in React Helmet. Created the implementation plan for user review.
 - **End-to-End Codebase Audit (2026-04-28)**: Full graph-driven audit via graphify. Fixed broken `test_service.py` (missing `openrouter_api_key` param), migrated FastAPI startup from deprecated `@app.on_event("startup")` to lifespan context manager, replaced bare `except Exception` in OpenRouter API call with specific `httpx.TimeoutException`/`HTTPStatusError`/`RequestError` handlers. All 7 backend tests pass, frontend build clean.
@@ -31,6 +32,7 @@
 - **Documentation**: Overhauled `ADDING_CONTENT.md` and `QUICK_GUIDE.md` to reflect the new automated workflow.
 
 ## Completed Tasks
+- [x] Author and publish blog post: "Micro-ROS and XRCE-DDS: How ROS2 Fits into Microcontrollers".
 - [x] Configure backend deployment wiring (Vercel frontend + Render backend).
 - [x] Upgrade Markdown parsing in `BlogPost.js` with `marked` and `DOMPurify`.
 - [x] Add `scroll-margin-top` to fix mobile header offsets for navigation links.

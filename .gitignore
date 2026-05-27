@@ -32,6 +32,9 @@ yarn-error.log*
 # AI tool configs (local only)
 .claude/
 .opencode/
+.antigravitycli/
+CLAUDE.md
+GEMINI.md
 
 # Optional npm cache directory
 .npm

@@ -1,7 +1,7 @@
 # Project Status
 
 ## Current State
-Functional prototype with automated content management. All core sections (Terminal, Projects, Certifications, Blogs) are implemented and data-driven. The entire UI features consistent Apple-style glassmorphism with optimized visual contrast. Recent updates include a premium horizontal blog card split layout with animated vector network graphics covers (matching user screenshot spec) and high-contrast control and action buttons.
+Functional prototype with automated content management. All core sections (Terminal, Projects, Certifications, Blogs) are implemented and data-driven. The entire UI features consistent Apple-style glassmorphism with optimized visual contrast. Recent updates include a premium horizontal blog card split layout with animated vector network graphics covers (matching user screenshot spec), high-contrast control/action buttons, and a new blog post explaining micro-ROS and XRCE-DDS.
 
 Backend assistant service is implemented under `backend/` with working ingest/chat/health endpoints, a root info route, CORS support, and passing backend tests.
 

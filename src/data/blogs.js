@@ -1,5 +1,20 @@
 export const blogs = [
   {
+    "id": 3,
+    "title": "Micro-ROS and XRCE-DDS: How ROS2 Fits into Microcontrollers",
+    "date": "May 27, 2026",
+    "excerpt": "How do you run a resource-heavy middleware like ROS2 on a tiny microcontroller like an ESP32? Enter micro-ROS and XRCE-DDS: the client-agent bridge that offloads heavy discovery to the host.",
+    "slug": "micro-ros-xrce-dds",
+    "tags": [
+      "ROS2",
+      "micro-ROS",
+      "Robotics",
+      "Embedded",
+      "UDP",
+      "DDS"
+    ]
+  },
+  {
     "id": 1217435008,
     "title": "The Constant",
     "date": "May 16, 2026",

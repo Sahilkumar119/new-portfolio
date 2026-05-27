@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { Content } from '../components/content/Content';
 import { Hidden } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,11 +9,11 @@ import { SocialIcons } from '../components/content/SocialIcons';
 import { SpeedDials } from '../components/speedDial/SpeedDial';
 import { NavigationButtons } from '../components/navigation/NavigationButtons';
 
-const LinuxTerminal = lazy(() => import('../components/content/LinuxTerminal').then(module => ({ default: module.LinuxTerminal })));
-const AIProjects = lazy(() => import('../components/content/AIProjects').then(module => ({ default: module.AIProjects })));
-const Certifications = lazy(() => import('../components/content/Certifications').then(module => ({ default: module.Certifications })));
-const LatestBlogs = lazy(() => import('../components/content/LatestBlogs').then(module => ({ default: module.LatestBlogs })));
-const Connect = lazy(() => import('../components/content/Connect').then(module => ({ default: module.Connect })));
+import { LinuxTerminal } from '../components/content/LinuxTerminal';
+import { AIProjects } from '../components/content/AIProjects';
+import { Certifications } from '../components/content/Certifications';
+import { LatestBlogs } from '../components/content/LatestBlogs';
+import { Connect } from '../components/content/Connect';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -82,13 +82,11 @@ export const Home = () => {
                 <Content /> {/* Hero content */}
             </div>
             
-            <Suspense fallback={<div />}>
-                <LinuxTerminal />
-                <AIProjects />
-                <Certifications />
-                <section id="blogs"><LatestBlogs /></section>
-                <Connect />
-            </Suspense>
+            <LinuxTerminal />
+            <AIProjects />
+            <Certifications />
+            <section id="blogs"><LatestBlogs /></section>
+            <Connect />
             
             <FooterText />
         </div>

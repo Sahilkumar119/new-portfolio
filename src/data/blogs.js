@@ -1,14 +1,14 @@
 export const blogs = [
   {
-    "id": 72318979,
-    "title": "Automation is Here",
-    "date": "April 17, 2026",
-    "excerpt": "We just automated the portfolio content management system. No more manual JS editing!",
-    "slug": "automation-is-here",
+    "id": 1217435008,
+    "title": "The Constant",
+    "date": "May 16, 2026",
+    "excerpt": "Models get bigger, context windows grow, memory improves. But the underlying mechanics haven't changed. Understanding them is more useful than waiting for the next upgrade.",
+    "slug": "the-constant",
     "tags": [
-      "Automation",
-      "Workflow",
-      "Efficiency"
+      "AI",
+      "LLM",
+      "Fundamentals"
     ]
   },
   {

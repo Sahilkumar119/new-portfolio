@@ -4,6 +4,28 @@ import Resume from "../settings/resume.json";
 import Settings from "../settings/settings.json";
 
 export const HelmetMeta = () => {
+    const personSchema = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": Resume.basics.name,
+        "jobTitle": Resume.basics.label,
+        "url": Resume.basics.url,
+        "email": Resume.basics.email,
+        "description": Resume.basics.description,
+        "sameAs": Resume.basics.profiles ? Resume.basics.profiles.map(profile => profile.url) : []
+    };
+
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": `${Resume.basics.name} | Portfolio`,
+        "url": Resume.basics.url,
+        "author": {
+            "@type": "Person",
+            "name": Resume.basics.name
+        }
+    };
+
     return (
         <Helmet>
             <meta name="theme-color" content={Settings.colors.primary} />
@@ -30,6 +52,14 @@ export const HelmetMeta = () => {
             <meta name="robots" content="index, follow" />
             <meta name="language" content="English" />
             <link rel="canonical" href={Resume.basics.url} />
+
+            {/* Structured Data Schemas */}
+            <script type="application/ld+json">
+                {JSON.stringify(personSchema)}
+            </script>
+            <script type="application/ld+json">
+                {JSON.stringify(websiteSchema)}
+            </script>
         </Helmet>
     );
 };

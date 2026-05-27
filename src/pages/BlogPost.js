@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Container, Hidden } from "@material-ui/core";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { FooterText } from "../components/footer/FooterText";
 import { SocialIcons } from "../components/content/SocialIcons";
@@ -8,6 +9,7 @@ import { NavigationButtons } from "../components/navigation/NavigationButtons";
 import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
 import { blogPosts } from "../data/blogPosts";
+import Resume from "../settings/resume.json";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
@@ -283,8 +285,65 @@ export const BlogPost = () => {
         );
     }
 
+    const blogUrl = `${Resume.basics.url}/blog/${slug}`;
+    const siteTitle = `${post.title} | ${Resume.basics.name}`;
+    let isoDate = post.date;
+    try {
+        isoDate = new Date(post.date).toISOString();
+    } catch (e) {}
+
+    const schemaJson = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "image": `${Resume.basics.url}/android-chrome-512x512.png`,
+        "datePublished": isoDate,
+        "author": {
+            "@type": "Person",
+            "name": post.author,
+            "url": Resume.basics.url
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": Resume.basics.name,
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${Resume.basics.url}/apple-touch-icon.png`
+            }
+        },
+        "description": post.excerpt,
+        "keywords": post.tags ? post.tags.join(", ") : ""
+    };
+
     return (
         <div className={classes.root}>
+            <Helmet>
+                <title>{siteTitle}</title>
+                <meta name="description" content={post.excerpt} />
+                {post.tags?.length > 0 && <meta name="keywords" content={`${post.tags.join(",")},${Resume.basics.keywords}`} />}
+                <link rel="canonical" href={blogUrl} />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="article" />
+                <meta property="og:url" content={blogUrl} />
+                <meta property="og:title" content={siteTitle} />
+                <meta property="og:description" content={post.excerpt} />
+                <meta property="og:image" content={`${Resume.basics.url}/android-chrome-512x512.png`} />
+                <meta property="article:published_time" content={isoDate} />
+                <meta property="article:author" content={post.author} />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:url" content={blogUrl} />
+                <meta property="twitter:title" content={siteTitle} />
+                <meta property="twitter:description" content={post.excerpt} />
+                <meta property="twitter:image" content={`${Resume.basics.url}/android-chrome-512x512.png`} />
+
+                {/* Structured Data Schema */}
+                <script type="application/ld+json">
+                    {JSON.stringify(schemaJson)}
+                </script>
+            </Helmet>
             <div className={classes.glowBlue} aria-hidden="true" />
             <div className={classes.glowPurple} aria-hidden="true" />
             {chrome}

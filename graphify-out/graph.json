@@ -54,7 +54,7 @@
       "source_file": "tailwind.config.js",
       "source_location": "L1",
       "id": "tailwind_config_js",
-      "community": 46,
+      "community": 48,
       "norm_label": "tailwind.config.js"
     },
     {
@@ -63,8 +63,26 @@
       "source_file": "postcss.config.js",
       "source_location": "L1",
       "id": "postcss_config_js",
-      "community": 47,
+      "community": 49,
       "norm_label": "postcss.config.js"
+    },
+    {
+      "label": "main.py",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "id": "main_py",
+      "community": 23,
+      "norm_label": "main.py"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "id": "main_main",
+      "community": 23,
+      "norm_label": "main()"
     },
     {
       "label": "index.js",
@@ -72,7 +90,7 @@
       "source_file": "src/index.js",
       "source_location": "L1",
       "id": "src_index_js",
-      "community": 48,
+      "community": 50,
       "norm_label": "index.js"
     },
     {
@@ -81,7 +99,7 @@
       "source_file": "src/setupProxy.js",
       "source_location": "L1",
       "id": "src_setupproxy_js",
-      "community": 49,
+      "community": 51,
       "norm_label": "setupproxy.js"
     },
     {
@@ -90,7 +108,7 @@
       "source_file": "src/app/HelmetMeta.js",
       "source_location": "L1",
       "id": "src_app_helmetmeta_js",
-      "community": 22,
+      "community": 24,
       "norm_label": "helmetmeta.js"
     },
     {
@@ -99,7 +117,7 @@
       "source_file": "src/app/HelmetMeta.js",
       "source_location": "L6",
       "id": "helmetmeta_helmetmeta",
-      "community": 22,
+      "community": 24,
       "norm_label": "helmetmeta()"
     },
     {
@@ -108,16 +126,16 @@
       "source_file": "src/app/App.js",
       "source_location": "L1",
       "id": "src_app_app_js",
-      "community": 9,
+      "community": 10,
       "norm_label": "app.js"
     },
     {
       "label": "App()",
       "file_type": "code",
       "source_file": "src/app/App.js",
-      "source_location": "L15",
+      "source_location": "L14",
       "id": "app_app",
-      "community": 9,
+      "community": 10,
       "norm_label": "app()"
     },
     {
@@ -126,7 +144,7 @@
       "source_file": "src/components/background/DisplacementSphere.js",
       "source_location": "L1",
       "id": "src_components_background_displacementsphere_js",
-      "community": 7,
+      "community": 8,
       "norm_label": "displacementsphere.js"
     },
     {
@@ -135,7 +153,7 @@
       "source_file": "src/components/background/DisplacementSphere.js",
       "source_location": "L30",
       "id": "displacementsphere_displacementsphere",
-      "community": 7,
+      "community": 8,
       "norm_label": "displacementsphere()"
     },
     {
@@ -144,7 +162,7 @@
       "source_file": "src/components/background/sphereFragShader.js",
       "source_location": "L1",
       "id": "src_components_background_spherefragshader_js",
-      "community": 50,
+      "community": 52,
       "norm_label": "spherefragshader.js"
     },
     {
@@ -153,7 +171,7 @@
       "source_file": "src/components/background/sphereVertShader.js",
       "source_location": "L1",
       "id": "src_components_background_spherevertshader_js",
-      "community": 51,
+      "community": 53,
       "norm_label": "spherevertshader.js"
     },
     {
@@ -162,7 +180,7 @@
       "source_file": "src/components/content/SponsorButton.js",
       "source_location": "L1",
       "id": "src_components_content_sponsorbutton_js",
-      "community": 52,
+      "community": 54,
       "norm_label": "sponsorbutton.js"
     },
     {
@@ -171,7 +189,7 @@
       "source_file": "src/components/content/TextDecrypt.js",
       "source_location": "L1",
       "id": "src_components_content_textdecrypt_js",
-      "community": 23,
+      "community": 25,
       "norm_label": "textdecrypt.js"
     },
     {
@@ -180,7 +198,7 @@
       "source_file": "src/components/content/TextDecrypt.js",
       "source_location": "L67",
       "id": "textdecrypt_textdecrypt",
-      "community": 23,
+      "community": 25,
       "norm_label": "textdecrypt()"
     },
     {
@@ -189,7 +207,7 @@
       "source_file": "src/components/content/Today.js",
       "source_location": "L1",
       "id": "src_components_content_today_js",
-      "community": 24,
+      "community": 26,
       "norm_label": "today.js"
     },
     {
@@ -198,7 +216,7 @@
       "source_file": "src/components/content/Today.js",
       "source_location": "L4",
       "id": "today_today",
-      "community": 24,
+      "community": 26,
       "norm_label": "today()"
     },
     {
@@ -207,7 +225,7 @@
       "source_file": "src/components/content/Certifications.js",
       "source_location": "L1",
       "id": "src_components_content_certifications_js",
-      "community": 3,
+      "community": 1,
       "norm_label": "certifications.js"
     },
     {
@@ -216,7 +234,7 @@
       "source_file": "src/components/content/Certifications.js",
       "source_location": "L101",
       "id": "certifications_certifications",
-      "community": 3,
+      "community": 1,
       "norm_label": "certifications()"
     },
     {
@@ -225,7 +243,7 @@
       "source_file": "src/components/content/Connect.js",
       "source_location": "L1",
       "id": "src_components_content_connect_js",
-      "community": 3,
+      "community": 1,
       "norm_label": "connect.js"
     },
     {
@@ -234,7 +252,7 @@
       "source_file": "src/components/content/Connect.js",
       "source_location": "L126",
       "id": "connect_connect",
-      "community": 3,
+      "community": 1,
       "norm_label": "connect()"
     },
     {
@@ -243,7 +261,7 @@
       "source_file": "src/components/content/Content.js",
       "source_location": "L1",
       "id": "src_components_content_content_js",
-      "community": 25,
+      "community": 27,
       "norm_label": "content.js"
     },
     {
@@ -252,7 +270,7 @@
       "source_file": "src/components/content/Content.js",
       "source_location": "L229",
       "id": "content_content",
-      "community": 25,
+      "community": 27,
       "norm_label": "content()"
     },
     {
@@ -261,7 +279,7 @@
       "source_file": "src/components/content/LatestBlogs.js",
       "source_location": "L1",
       "id": "src_components_content_latestblogs_js",
-      "community": 3,
+      "community": 1,
       "norm_label": "latestblogs.js"
     },
     {
@@ -270,7 +288,7 @@
       "source_file": "src/components/content/LatestBlogs.js",
       "source_location": "L149",
       "id": "latestblogs_latestblogs",
-      "community": 3,
+      "community": 1,
       "norm_label": "latestblogs()"
     },
     {
@@ -279,7 +297,7 @@
       "source_file": "src/components/content/SocialIcons.js",
       "source_location": "L1",
       "id": "src_components_content_socialicons_js",
-      "community": 26,
+      "community": 28,
       "norm_label": "socialicons.js"
     },
     {
@@ -288,7 +306,7 @@
       "source_file": "src/components/content/SocialIcons.js",
       "source_location": "L76",
       "id": "socialicons_socialicons",
-      "community": 26,
+      "community": 28,
       "norm_label": "socialicons()"
     },
     {
@@ -297,7 +315,7 @@
       "source_file": "src/components/content/AIProjects.js",
       "source_location": "L1",
       "id": "src_components_content_aiprojects_js",
-      "community": 3,
+      "community": 1,
       "norm_label": "aiprojects.js"
     },
     {
@@ -306,7 +324,7 @@
       "source_file": "src/components/content/AIProjects.js",
       "source_location": "L132",
       "id": "aiprojects_aiprojects",
-      "community": 3,
+      "community": 1,
       "norm_label": "aiprojects()"
     },
     {
@@ -315,16 +333,70 @@
       "source_file": "src/components/content/LinuxTerminal.js",
       "source_location": "L1",
       "id": "src_components_content_linuxterminal_js",
-      "community": 3,
+      "community": 1,
       "norm_label": "linuxterminal.js"
+    },
+    {
+      "label": "buildFs()",
+      "file_type": "code",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L26",
+      "id": "linuxterminal_buildfs",
+      "community": 1,
+      "norm_label": "buildfs()"
+    },
+    {
+      "label": "isDir()",
+      "file_type": "code",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L58",
+      "id": "linuxterminal_isdir",
+      "community": 1,
+      "norm_label": "isdir()"
+    },
+    {
+      "label": "splitPath()",
+      "file_type": "code",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L62",
+      "id": "linuxterminal_splitpath",
+      "community": 1,
+      "norm_label": "splitpath()"
+    },
+    {
+      "label": "resolvePath()",
+      "file_type": "code",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L66",
+      "id": "linuxterminal_resolvepath",
+      "community": 1,
+      "norm_label": "resolvepath()"
+    },
+    {
+      "label": "lookup()",
+      "file_type": "code",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L82",
+      "id": "linuxterminal_lookup",
+      "community": 1,
+      "norm_label": "lookup()"
+    },
+    {
+      "label": "displayCwd()",
+      "file_type": "code",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L95",
+      "id": "linuxterminal_displaycwd",
+      "community": 1,
+      "norm_label": "displaycwd()"
     },
     {
       "label": "LinuxTerminal()",
       "file_type": "code",
       "source_file": "src/components/content/LinuxTerminal.js",
-      "source_location": "L105",
+      "source_location": "L223",
       "id": "linuxterminal_linuxterminal",
-      "community": 3,
+      "community": 1,
       "norm_label": "linuxterminal()"
     },
     {
@@ -333,7 +405,7 @@
       "source_file": "src/components/footer/FooterText.js",
       "source_location": "L1",
       "id": "src_components_footer_footertext_js",
-      "community": 27,
+      "community": 29,
       "norm_label": "footertext.js"
     },
     {
@@ -342,7 +414,7 @@
       "source_file": "src/components/footer/FooterText.js",
       "source_location": "L49",
       "id": "footertext_footertext",
-      "community": 27,
+      "community": 29,
       "norm_label": "footertext()"
     },
     {
@@ -351,7 +423,7 @@
       "source_file": "src/components/logo/Logo.js",
       "source_location": "L1",
       "id": "src_components_logo_logo_js",
-      "community": 28,
+      "community": 30,
       "norm_label": "logo.js"
     },
     {
@@ -360,7 +432,7 @@
       "source_file": "src/components/logo/Logo.js",
       "source_location": "L17",
       "id": "logo_logo",
-      "community": 28,
+      "community": 30,
       "norm_label": "logo()"
     },
     {
@@ -369,7 +441,7 @@
       "source_file": "src/components/logo/LogoLink.js",
       "source_location": "L1",
       "id": "src_components_logo_logolink_js",
-      "community": 29,
+      "community": 31,
       "norm_label": "logolink.js"
     },
     {
@@ -378,7 +450,7 @@
       "source_file": "src/components/logo/LogoLink.js",
       "source_location": "L40",
       "id": "logolink_logolink",
-      "community": 29,
+      "community": 31,
       "norm_label": "logolink()"
     },
     {
@@ -387,7 +459,7 @@
       "source_file": "src/components/speedDial/SpeedDial.js",
       "source_location": "L1",
       "id": "src_components_speeddial_speeddial_js",
-      "community": 30,
+      "community": 32,
       "norm_label": "speeddial.js"
     },
     {
@@ -396,7 +468,7 @@
       "source_file": "src/components/speedDial/SpeedDial.js",
       "source_location": "L35",
       "id": "speeddial_speeddials",
-      "community": 30,
+      "community": 32,
       "norm_label": "speeddials()"
     },
     {
@@ -405,7 +477,7 @@
       "source_file": "src/components/theme/ThemeProvider.js",
       "source_location": "L1",
       "id": "src_components_theme_themeprovider_js",
-      "community": 31,
+      "community": 33,
       "norm_label": "themeprovider.js"
     },
     {
@@ -414,7 +486,7 @@
       "source_file": "src/components/theme/ThemeProvider.js",
       "source_location": "L7",
       "id": "themeprovider_themeprovider",
-      "community": 31,
+      "community": 33,
       "norm_label": "themeprovider()"
     },
     {
@@ -423,7 +495,7 @@
       "source_file": "src/components/theme/ThemeToggle.js",
       "source_location": "L1",
       "id": "src_components_theme_themetoggle_js",
-      "community": 10,
+      "community": 11,
       "norm_label": "themetoggle.js"
     },
     {
@@ -432,7 +504,7 @@
       "source_file": "src/components/theme/ThemeToggle.js",
       "source_location": "L46",
       "id": "themetoggle_sunicon",
-      "community": 10,
+      "community": 11,
       "norm_label": "sunicon()"
     },
     {
@@ -441,7 +513,7 @@
       "source_file": "src/components/theme/ThemeToggle.js",
       "source_location": "L56",
       "id": "themetoggle_moonicon",
-      "community": 10,
+      "community": 11,
       "norm_label": "moonicon()"
     },
     {
@@ -450,7 +522,7 @@
       "source_file": "src/components/theme/ThemeToggle.js",
       "source_location": "L62",
       "id": "themetoggle_themetoggle",
-      "community": 10,
+      "community": 11,
       "norm_label": "themetoggle()"
     },
     {
@@ -459,7 +531,7 @@
       "source_file": "src/components/theme/Themes.js",
       "source_location": "L1",
       "id": "src_components_theme_themes_js",
-      "community": 32,
+      "community": 34,
       "norm_label": "themes.js"
     },
     {
@@ -468,7 +540,7 @@
       "source_file": "src/components/theme/Themes.js",
       "source_location": "L20",
       "id": "themes_overrides",
-      "community": 32,
+      "community": 34,
       "norm_label": "overrides()"
     },
     {
@@ -477,7 +549,7 @@
       "source_file": "src/components/navigation/NavigationButtons.js",
       "source_location": "L1",
       "id": "src_components_navigation_navigationbuttons_js",
-      "community": 33,
+      "community": 35,
       "norm_label": "navigationbuttons.js"
     },
     {
@@ -486,7 +558,7 @@
       "source_file": "src/components/navigation/NavigationButtons.js",
       "source_location": "L59",
       "id": "navigationbuttons_navigationbuttons",
-      "community": 33,
+      "community": 35,
       "norm_label": "navigationbuttons()"
     },
     {
@@ -495,7 +567,7 @@
       "source_file": "src/components/ui/button.jsx",
       "source_location": "L1",
       "id": "src_components_ui_button_jsx",
-      "community": 53,
+      "community": 55,
       "norm_label": "button.jsx"
     },
     {
@@ -558,7 +630,7 @@
       "source_file": "src/components/ui/ai-input.test.jsx",
       "source_location": "L1",
       "id": "src_components_ui_ai_input_test_jsx",
-      "community": 16,
+      "community": 17,
       "norm_label": "ai-input.test.jsx"
     },
     {
@@ -567,7 +639,7 @@
       "source_file": "src/components/ui/ai-input.test.jsx",
       "source_location": "L10",
       "id": "ai_input_test_makemotiontag",
-      "community": 16,
+      "community": 17,
       "norm_label": "makemotiontag()"
     },
     {
@@ -576,7 +648,7 @@
       "source_file": "src/components/ui/ai-input.test.jsx",
       "source_location": "L54",
       "id": "ai_input_test_openpanel",
-      "community": 16,
+      "community": 17,
       "norm_label": "openpanel()"
     },
     {
@@ -585,7 +657,7 @@
       "source_file": "src/hooks/useInViewport.js",
       "source_location": "L1",
       "id": "src_hooks_useinviewport_js",
-      "community": 7,
+      "community": 8,
       "norm_label": "useinviewport.js"
     },
     {
@@ -594,7 +666,7 @@
       "source_file": "src/hooks/useInViewport.js",
       "source_location": "L3",
       "id": "useinviewport_useinviewport",
-      "community": 7,
+      "community": 8,
       "norm_label": "useinviewport()"
     },
     {
@@ -603,7 +675,7 @@
       "source_file": "src/hooks/usePrefersReducedMotion.js",
       "source_location": "L1",
       "id": "src_hooks_useprefersreducedmotion_js",
-      "community": 7,
+      "community": 8,
       "norm_label": "useprefersreducedmotion.js"
     },
     {
@@ -612,7 +684,7 @@
       "source_file": "src/hooks/usePrefersReducedMotion.js",
       "source_location": "L1",
       "id": "useprefersreducedmotion_useprefersreducedmotion",
-      "community": 7,
+      "community": 8,
       "norm_label": "useprefersreducedmotion()"
     },
     {
@@ -621,7 +693,7 @@
       "source_file": "src/hooks/useScrollReveal.js",
       "source_location": "L1",
       "id": "src_hooks_usescrollreveal_js",
-      "community": 3,
+      "community": 1,
       "norm_label": "usescrollreveal.js"
     },
     {
@@ -630,26 +702,8 @@
       "source_file": "src/hooks/useScrollReveal.js",
       "source_location": "L14",
       "id": "usescrollreveal_usescrollreveal",
-      "community": 3,
+      "community": 1,
       "norm_label": "usescrollreveal()"
-    },
-    {
-      "label": "PageNotFound.js",
-      "file_type": "code",
-      "source_file": "src/pages/PageNotFound.js",
-      "source_location": "L1",
-      "id": "src_pages_pagenotfound_js",
-      "community": 34,
-      "norm_label": "pagenotfound.js"
-    },
-    {
-      "label": "PageNotFound()",
-      "file_type": "code",
-      "source_file": "src/pages/PageNotFound.js",
-      "source_location": "L3",
-      "id": "pagenotfound_pagenotfound",
-      "community": 34,
-      "norm_label": "pagenotfound()"
     },
     {
       "label": "Resume.js",
@@ -657,7 +711,7 @@
       "source_file": "src/pages/Resume.js",
       "source_location": "L1",
       "id": "src_pages_resume_js",
-      "community": 35,
+      "community": 36,
       "norm_label": "resume.js"
     },
     {
@@ -666,7 +720,7 @@
       "source_file": "src/pages/Resume.js",
       "source_location": "L3",
       "id": "resume_resume",
-      "community": 35,
+      "community": 36,
       "norm_label": "resume()"
     },
     {
@@ -675,16 +729,16 @@
       "source_file": "src/pages/BlogPost.js",
       "source_location": "L1",
       "id": "src_pages_blogpost_js",
-      "community": 36,
+      "community": 37,
       "norm_label": "blogpost.js"
     },
     {
       "label": "BlogPost()",
       "file_type": "code",
       "source_file": "src/pages/BlogPost.js",
-      "source_location": "L239",
+      "source_location": "L241",
       "id": "blogpost_blogpost",
-      "community": 36,
+      "community": 37,
       "norm_label": "blogpost()"
     },
     {
@@ -693,7 +747,7 @@
       "source_file": "src/pages/Blogs.js",
       "source_location": "L1",
       "id": "src_pages_blogs_js",
-      "community": 37,
+      "community": 38,
       "norm_label": "blogs.js"
     },
     {
@@ -702,7 +756,7 @@
       "source_file": "src/pages/Blogs.js",
       "source_location": "L169",
       "id": "blogs_blogs",
-      "community": 37,
+      "community": 38,
       "norm_label": "blogs()"
     },
     {
@@ -711,7 +765,7 @@
       "source_file": "src/pages/Home.js",
       "source_location": "L1",
       "id": "src_pages_home_js",
-      "community": 38,
+      "community": 39,
       "norm_label": "home.js"
     },
     {
@@ -720,7 +774,7 @@
       "source_file": "src/pages/Home.js",
       "source_location": "L66",
       "id": "home_home",
-      "community": 38,
+      "community": 39,
       "norm_label": "home()"
     },
     {
@@ -729,7 +783,7 @@
       "source_file": "src/pages/Projects.js",
       "source_location": "L1",
       "id": "src_pages_projects_js",
-      "community": 17,
+      "community": 18,
       "norm_label": "projects.js"
     },
     {
@@ -738,7 +792,7 @@
       "source_file": "src/pages/Projects.js",
       "source_location": "L219",
       "id": "projects_projectcard",
-      "community": 17,
+      "community": 18,
       "norm_label": "projectcard()"
     },
     {
@@ -747,8 +801,26 @@
       "source_file": "src/pages/Projects.js",
       "source_location": "L264",
       "id": "projects_projects",
-      "community": 17,
+      "community": 18,
       "norm_label": "projects()"
+    },
+    {
+      "label": "PageNotFound.js",
+      "file_type": "code",
+      "source_file": "src/pages/PageNotFound.js",
+      "source_location": "L1",
+      "id": "src_pages_pagenotfound_js",
+      "community": 40,
+      "norm_label": "pagenotfound.js"
+    },
+    {
+      "label": "PageNotFound()",
+      "file_type": "code",
+      "source_file": "src/pages/PageNotFound.js",
+      "source_location": "L114",
+      "id": "pagenotfound_pagenotfound",
+      "community": 40,
+      "norm_label": "pagenotfound()"
     },
     {
       "label": "data.js",
@@ -756,7 +828,7 @@
       "source_file": "src/utils/data.js",
       "source_location": "L1",
       "id": "src_utils_data_js",
-      "community": 54,
+      "community": 56,
       "norm_label": "data.js"
     },
     {
@@ -765,7 +837,7 @@
       "source_file": "src/utils/getName.js",
       "source_location": "L1",
       "id": "src_utils_getname_js",
-      "community": 55,
+      "community": 57,
       "norm_label": "getname.js"
     },
     {
@@ -774,7 +846,7 @@
       "source_file": "src/utils/logCredits.js",
       "source_location": "L1",
       "id": "src_utils_logcredits_js",
-      "community": 9,
+      "community": 10,
       "norm_label": "logcredits.js"
     },
     {
@@ -783,7 +855,7 @@
       "source_file": "src/utils/logCredits.js",
       "source_location": "L3",
       "id": "logcredits_logcredits",
-      "community": 9,
+      "community": 10,
       "norm_label": "logcredits()"
     },
     {
@@ -855,7 +927,7 @@
       "source_file": "src/utils/three.js",
       "source_location": "L1",
       "id": "src_utils_three_js",
-      "community": 8,
+      "community": 9,
       "norm_label": "three.js"
     },
     {
@@ -864,7 +936,7 @@
       "source_file": "src/utils/three.js",
       "source_location": "L4",
       "id": "three_cleanscene",
-      "community": 8,
+      "community": 9,
       "norm_label": "cleanscene()"
     },
     {
@@ -873,7 +945,7 @@
       "source_file": "src/utils/three.js",
       "source_location": "L25",
       "id": "three_cleanmaterial",
-      "community": 8,
+      "community": 9,
       "norm_label": "cleanmaterial()"
     },
     {
@@ -882,7 +954,7 @@
       "source_file": "src/utils/three.js",
       "source_location": "L39",
       "id": "three_cleanrenderer",
-      "community": 8,
+      "community": 9,
       "norm_label": "cleanrenderer()"
     },
     {
@@ -891,7 +963,7 @@
       "source_file": "src/utils/three.js",
       "source_location": "L48",
       "id": "three_removelights",
-      "community": 8,
+      "community": 9,
       "norm_label": "removelights()"
     },
     {
@@ -900,7 +972,7 @@
       "source_file": "src/utils/transition.js",
       "source_location": "L1",
       "id": "src_utils_transition_js",
-      "community": 11,
+      "community": 12,
       "norm_label": "transition.js"
     },
     {
@@ -909,7 +981,7 @@
       "source_file": "src/utils/transition.js",
       "source_location": "L6",
       "id": "transition_isvisible",
-      "community": 11,
+      "community": 12,
       "norm_label": "isvisible()"
     },
     {
@@ -918,7 +990,7 @@
       "source_file": "src/utils/transition.js",
       "source_location": "L11",
       "id": "transition_ishidden",
-      "community": 11,
+      "community": 12,
       "norm_label": "ishidden()"
     },
     {
@@ -927,7 +999,7 @@
       "source_file": "src/utils/transition.js",
       "source_location": "L16",
       "id": "transition_reflow",
-      "community": 11,
+      "community": 12,
       "norm_label": "reflow()"
     },
     {
@@ -936,7 +1008,7 @@
       "source_file": "src/utils/Analytics.js",
       "source_location": "L1",
       "id": "src_utils_analytics_js",
-      "community": 12,
+      "community": 13,
       "norm_label": "analytics.js"
     },
     {
@@ -945,7 +1017,7 @@
       "source_file": "src/utils/Analytics.js",
       "source_location": "L9",
       "id": "analytics_initga",
-      "community": 12,
+      "community": 13,
       "norm_label": "initga()"
     },
     {
@@ -954,7 +1026,7 @@
       "source_file": "src/utils/Analytics.js",
       "source_location": "L17",
       "id": "analytics_trackpageview",
-      "community": 12,
+      "community": 13,
       "norm_label": "trackpageview()"
     },
     {
@@ -963,7 +1035,7 @@
       "source_file": "src/utils/Analytics.js",
       "source_location": "L24",
       "id": "analytics_analyticstracker",
-      "community": 12,
+      "community": 13,
       "norm_label": "analyticstracker()"
     },
     {
@@ -972,7 +1044,7 @@
       "source_file": "src/data/blogPosts.js",
       "source_location": "L1",
       "id": "src_data_blogposts_js",
-      "community": 56,
+      "community": 58,
       "norm_label": "blogposts.js"
     },
     {
@@ -981,7 +1053,7 @@
       "source_file": "src/data/blogs.js",
       "source_location": "L1",
       "id": "src_data_blogs_js",
-      "community": 57,
+      "community": 59,
       "norm_label": "blogs.js"
     },
     {
@@ -990,7 +1062,7 @@
       "source_file": "src/data/projects.js",
       "source_location": "L1",
       "id": "src_data_projects_js",
-      "community": 58,
+      "community": 60,
       "norm_label": "projects.js"
     },
     {
@@ -999,7 +1071,7 @@
       "source_file": "src/data/certifications.js",
       "source_location": "L1",
       "id": "src_data_certifications_js",
-      "community": 59,
+      "community": 61,
       "norm_label": "certifications.js"
     },
     {
@@ -1008,7 +1080,7 @@
       "source_file": "src/data/terminal.js",
       "source_location": "L1",
       "id": "src_data_terminal_js",
-      "community": 60,
+      "community": 62,
       "norm_label": "terminal.js"
     },
     {
@@ -1035,7 +1107,7 @@
       "source_file": "src/lib/assistant-api.js",
       "source_location": "L1",
       "id": "src_lib_assistant_api_js",
-      "community": 18,
+      "community": 19,
       "norm_label": "assistant-api.js"
     },
     {
@@ -1044,7 +1116,7 @@
       "source_file": "src/lib/assistant-api.js",
       "source_location": "L3",
       "id": "assistant_api_normalizebaseurl",
-      "community": 18,
+      "community": 19,
       "norm_label": "normalizebaseurl()"
     },
     {
@@ -1053,21 +1125,71 @@
       "source_file": "src/lib/assistant-api.js",
       "source_location": "L8",
       "id": "assistant_api_getassistantchaturl",
-      "community": 18,
+      "community": 19,
       "norm_label": "getassistantchaturl()"
     },
     {
-      "label": "sync-content Script",
+      "label": "sync-content.js",
       "file_type": "code",
       "source_file": "scripts/sync-content.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "sync_content_script",
-      "community": 61,
-      "norm_label": "sync-content script"
+      "source_location": "L1",
+      "id": "scripts_sync_content_js",
+      "community": 7,
+      "norm_label": "sync-content.js"
+    },
+    {
+      "label": "generateSlug()",
+      "file_type": "code",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L11",
+      "id": "sync_content_generateslug",
+      "community": 7,
+      "norm_label": "generateslug()"
+    },
+    {
+      "label": "syncBlogs()",
+      "file_type": "code",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L23",
+      "id": "sync_content_syncblogs",
+      "community": 7,
+      "norm_label": "syncblogs()"
+    },
+    {
+      "label": "generateSitemap()",
+      "file_type": "code",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L90",
+      "id": "sync_content_generatesitemap",
+      "community": 7,
+      "norm_label": "generatesitemap()"
+    },
+    {
+      "label": "syncProjects()",
+      "file_type": "code",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L139",
+      "id": "sync_content_syncprojects",
+      "community": 7,
+      "norm_label": "syncprojects()"
+    },
+    {
+      "label": "syncCertifications()",
+      "file_type": "code",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L181",
+      "id": "sync_content_synccertifications",
+      "community": 7,
+      "norm_label": "synccertifications()"
+    },
+    {
+      "label": "syncTerminal()",
+      "file_type": "code",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L211",
+      "id": "sync_content_syncterminal",
+      "community": 7,
+      "norm_label": "syncterminal()"
     },
     {
       "label": "__init__.py",
@@ -1075,7 +1197,7 @@
       "source_file": "backend/__init__.py",
       "source_location": "L1",
       "id": "backend_init_py",
-      "community": 13,
+      "community": 14,
       "norm_label": "__init__.py"
     },
     {
@@ -1083,7 +1205,7 @@
       "file_type": "rationale",
       "source_file": "backend/tests/__init__.py",
       "source_location": "L1",
-      "community": 13,
+      "community": 14,
       "norm_label": "test package for backend.",
       "id": "init_rationale_1"
     },
@@ -1147,8 +1269,143 @@
       "source_file": "backend/app/__init__.py",
       "source_location": "L1",
       "id": "backend_app_init_py",
-      "community": 13,
+      "community": 14,
       "norm_label": "__init__.py"
+    },
+    {
+      "label": "models.py",
+      "file_type": "code",
+      "source_file": "backend/app/models.py",
+      "source_location": "L1",
+      "id": "backend_app_models_py",
+      "community": 2,
+      "norm_label": "models.py"
+    },
+    {
+      "label": "DocumentRecord",
+      "file_type": "code",
+      "source_file": "backend/app/models.py",
+      "source_location": "L8",
+      "id": "models_documentrecord",
+      "community": 2,
+      "norm_label": "documentrecord"
+    },
+    {
+      "label": "ContentChunk",
+      "file_type": "code",
+      "source_file": "backend/app/models.py",
+      "source_location": "L17",
+      "id": "models_contentchunk",
+      "community": 2,
+      "norm_label": "contentchunk"
+    },
+    {
+      "label": "RetrievedChunk",
+      "file_type": "code",
+      "source_file": "backend/app/models.py",
+      "source_location": "L25",
+      "id": "models_retrievedchunk",
+      "community": 2,
+      "norm_label": "retrievedchunk"
+    },
+    {
+      "label": "loaders.py",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L1",
+      "id": "backend_app_loaders_py",
+      "community": 2,
+      "norm_label": "loaders.py"
+    },
+    {
+      "label": "load_all_sources()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L13",
+      "id": "loaders_load_all_sources",
+      "community": 2,
+      "norm_label": "load_all_sources()"
+    },
+    {
+      "label": "_load_blogs()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L44",
+      "id": "loaders_load_blogs",
+      "community": 2,
+      "norm_label": "_load_blogs()"
+    },
+    {
+      "label": "_load_json_collection()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L91",
+      "id": "loaders_load_json_collection",
+      "community": 2,
+      "norm_label": "_load_json_collection()"
+    },
+    {
+      "label": "_load_terminal()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L126",
+      "id": "loaders_load_terminal",
+      "community": 2,
+      "norm_label": "_load_terminal()"
+    },
+    {
+      "label": "_load_resume()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L169",
+      "id": "loaders_load_resume",
+      "community": 2,
+      "norm_label": "_load_resume()"
+    },
+    {
+      "label": "_parse_frontmatter()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L224",
+      "id": "loaders_parse_frontmatter",
+      "community": 2,
+      "norm_label": "_parse_frontmatter()"
+    },
+    {
+      "label": "_chunk_markdown()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L254",
+      "id": "loaders_chunk_markdown",
+      "community": 2,
+      "norm_label": "_chunk_markdown()"
+    },
+    {
+      "label": "_split_with_overlap()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L296",
+      "id": "loaders_split_with_overlap",
+      "community": 2,
+      "norm_label": "_split_with_overlap()"
+    },
+    {
+      "label": "_deterministic_id()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L316",
+      "id": "loaders_deterministic_id",
+      "community": 2,
+      "norm_label": "_deterministic_id()"
+    },
+    {
+      "label": "_rel()",
+      "file_type": "code",
+      "source_file": "backend/app/loaders.py",
+      "source_location": "L320",
+      "id": "loaders_rel",
+      "community": 2,
+      "norm_label": "_rel()"
     },
     {
       "label": "config.py",
@@ -1172,262 +1429,10 @@
       "label": "get_settings()",
       "file_type": "code",
       "source_file": "backend/app/config.py",
-      "source_location": "L19",
+      "source_location": "L20",
       "id": "config_get_settings",
       "community": 0,
       "norm_label": "get_settings()"
-    },
-    {
-      "label": "models.py",
-      "file_type": "code",
-      "source_file": "backend/app/models.py",
-      "source_location": "L1",
-      "id": "backend_app_models_py",
-      "community": 1,
-      "norm_label": "models.py"
-    },
-    {
-      "label": "DocumentRecord",
-      "file_type": "code",
-      "source_file": "backend/app/models.py",
-      "source_location": "L8",
-      "id": "models_documentrecord",
-      "community": 1,
-      "norm_label": "documentrecord"
-    },
-    {
-      "label": "ContentChunk",
-      "file_type": "code",
-      "source_file": "backend/app/models.py",
-      "source_location": "L17",
-      "id": "models_contentchunk",
-      "community": 1,
-      "norm_label": "contentchunk"
-    },
-    {
-      "label": "RetrievedChunk",
-      "file_type": "code",
-      "source_file": "backend/app/models.py",
-      "source_location": "L25",
-      "id": "models_retrievedchunk",
-      "community": 1,
-      "norm_label": "retrievedchunk"
-    },
-    {
-      "label": "loaders.py",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L1",
-      "id": "backend_app_loaders_py",
-      "community": 1,
-      "norm_label": "loaders.py"
-    },
-    {
-      "label": "load_all_sources()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L13",
-      "id": "loaders_load_all_sources",
-      "community": 1,
-      "norm_label": "load_all_sources()"
-    },
-    {
-      "label": "_load_blogs()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L44",
-      "id": "loaders_load_blogs",
-      "community": 1,
-      "norm_label": "_load_blogs()"
-    },
-    {
-      "label": "_load_json_collection()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L91",
-      "id": "loaders_load_json_collection",
-      "community": 1,
-      "norm_label": "_load_json_collection()"
-    },
-    {
-      "label": "_load_terminal()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L126",
-      "id": "loaders_load_terminal",
-      "community": 1,
-      "norm_label": "_load_terminal()"
-    },
-    {
-      "label": "_load_resume()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L169",
-      "id": "loaders_load_resume",
-      "community": 1,
-      "norm_label": "_load_resume()"
-    },
-    {
-      "label": "_parse_frontmatter()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L224",
-      "id": "loaders_parse_frontmatter",
-      "community": 1,
-      "norm_label": "_parse_frontmatter()"
-    },
-    {
-      "label": "_chunk_markdown()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L254",
-      "id": "loaders_chunk_markdown",
-      "community": 1,
-      "norm_label": "_chunk_markdown()"
-    },
-    {
-      "label": "_split_with_overlap()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L296",
-      "id": "loaders_split_with_overlap",
-      "community": 1,
-      "norm_label": "_split_with_overlap()"
-    },
-    {
-      "label": "_deterministic_id()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L316",
-      "id": "loaders_deterministic_id",
-      "community": 1,
-      "norm_label": "_deterministic_id()"
-    },
-    {
-      "label": "_rel()",
-      "file_type": "code",
-      "source_file": "backend/app/loaders.py",
-      "source_location": "L320",
-      "id": "loaders_rel",
-      "community": 1,
-      "norm_label": "_rel()"
-    },
-    {
-      "label": "service.py",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L1",
-      "id": "backend_app_service_py",
-      "community": 0,
-      "norm_label": "service.py"
-    },
-    {
-      "label": "Citation",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L12",
-      "id": "service_citation",
-      "community": 0,
-      "norm_label": "citation"
-    },
-    {
-      "label": "ChatResult",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L19",
-      "id": "service_chatresult",
-      "community": 0,
-      "norm_label": "chatresult"
-    },
-    {
-      "label": "LightweightReranker",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L26",
-      "id": "service_lightweightreranker",
-      "community": 0,
-      "norm_label": "lightweightreranker"
-    },
-    {
-      "label": ".rerank()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L27",
-      "id": "service_lightweightreranker_rerank",
-      "community": 0,
-      "norm_label": ".rerank()"
-    },
-    {
-      "label": "AssistantService",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L42",
-      "id": "service_assistantservice",
-      "community": 0,
-      "norm_label": "assistantservice"
-    },
-    {
-      "label": ".__init__()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L43",
-      "id": "service_assistantservice_init",
-      "community": 0,
-      "norm_label": ".__init__()"
-    },
-    {
-      "label": ".ingest_all()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L51",
-      "id": "service_assistantservice_ingest_all",
-      "community": 0,
-      "norm_label": ".ingest_all()"
-    },
-    {
-      "label": ".health()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L70",
-      "id": "service_assistantservice_health",
-      "community": 0,
-      "norm_label": ".health()"
-    },
-    {
-      "label": ".chat()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L77",
-      "id": "service_assistantservice_chat",
-      "community": 0,
-      "norm_label": ".chat()"
-    },
-    {
-      "label": "._confidence()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L103",
-      "id": "service_assistantservice_confidence",
-      "community": 0,
-      "norm_label": "._confidence()"
-    },
-    {
-      "label": "._compose_answer()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L116",
-      "id": "service_assistantservice_compose_answer",
-      "community": 0,
-      "norm_label": "._compose_answer()"
-    },
-    {
-      "label": "._build_citations()",
-      "file_type": "code",
-      "source_file": "backend/app/service.py",
-      "source_location": "L123",
-      "id": "service_assistantservice_build_citations",
-      "community": 0,
-      "norm_label": "._build_citations()"
     },
     {
       "label": "main.py",
@@ -1439,19 +1444,19 @@
       "norm_label": "main.py"
     },
     {
-      "label": "startup_ingest()",
+      "label": "lifespan()",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L35",
-      "id": "main_startup_ingest",
+      "source_location": "L19",
+      "id": "main_lifespan",
       "community": 0,
-      "norm_label": "startup_ingest()"
+      "norm_label": "lifespan()"
     },
     {
       "label": "ChatRequest",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L40",
+      "source_location": "L42",
       "id": "main_chatrequest",
       "community": 0,
       "norm_label": "chatrequest"
@@ -1469,7 +1474,7 @@
       "label": "CitationResponse",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L45",
+      "source_location": "L47",
       "id": "main_citationresponse",
       "community": 0,
       "norm_label": "citationresponse"
@@ -1478,7 +1483,7 @@
       "label": "ChatResponse",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L51",
+      "source_location": "L53",
       "id": "main_chatresponse",
       "community": 0,
       "norm_label": "chatresponse"
@@ -1487,7 +1492,7 @@
       "label": "root()",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L59",
+      "source_location": "L61",
       "id": "main_root",
       "community": 0,
       "norm_label": "root()"
@@ -1496,7 +1501,7 @@
       "label": "health()",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L69",
+      "source_location": "L71",
       "id": "main_health",
       "community": 0,
       "norm_label": "health()"
@@ -1505,7 +1510,7 @@
       "label": "ingest()",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L74",
+      "source_location": "L76",
       "id": "main_ingest",
       "community": 0,
       "norm_label": "ingest()"
@@ -1514,10 +1519,127 @@
       "label": "chat()",
       "file_type": "code",
       "source_file": "backend/app/main.py",
-      "source_location": "L79",
+      "source_location": "L81",
       "id": "main_chat",
       "community": 0,
       "norm_label": "chat()"
+    },
+    {
+      "label": "service.py",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L1",
+      "id": "backend_app_service_py",
+      "community": 0,
+      "norm_label": "service.py"
+    },
+    {
+      "label": "Citation",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L17",
+      "id": "service_citation",
+      "community": 0,
+      "norm_label": "citation"
+    },
+    {
+      "label": "ChatResult",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L24",
+      "id": "service_chatresult",
+      "community": 0,
+      "norm_label": "chatresult"
+    },
+    {
+      "label": "LightweightReranker",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L31",
+      "id": "service_lightweightreranker",
+      "community": 0,
+      "norm_label": "lightweightreranker"
+    },
+    {
+      "label": ".rerank()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L32",
+      "id": "service_lightweightreranker_rerank",
+      "community": 4,
+      "norm_label": ".rerank()"
+    },
+    {
+      "label": "AssistantService",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L47",
+      "id": "service_assistantservice",
+      "community": 0,
+      "norm_label": "assistantservice"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L48",
+      "id": "service_assistantservice_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".ingest_all()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L57",
+      "id": "service_assistantservice_ingest_all",
+      "community": 0,
+      "norm_label": ".ingest_all()"
+    },
+    {
+      "label": ".health()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L76",
+      "id": "service_assistantservice_health",
+      "community": 0,
+      "norm_label": ".health()"
+    },
+    {
+      "label": ".chat()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L83",
+      "id": "service_assistantservice_chat",
+      "community": 0,
+      "norm_label": ".chat()"
+    },
+    {
+      "label": "._confidence()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L109",
+      "id": "service_assistantservice_confidence",
+      "community": 0,
+      "norm_label": "._confidence()"
+    },
+    {
+      "label": "._compose_answer()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L122",
+      "id": "service_assistantservice_compose_answer",
+      "community": 0,
+      "norm_label": "._compose_answer()"
+    },
+    {
+      "label": "._build_citations()",
+      "file_type": "code",
+      "source_file": "backend/app/service.py",
+      "source_location": "L170",
+      "id": "service_assistantservice_build_citations",
+      "community": 0,
+      "norm_label": "._build_citations()"
     },
     {
       "label": "__init__.py",
@@ -1525,7 +1647,7 @@
       "source_file": "backend/tests/__init__.py",
       "source_location": "L1",
       "id": "backend_tests_init_py",
-      "community": 13,
+      "community": 14,
       "norm_label": "__init__.py"
     },
     {
@@ -1574,6 +1696,42 @@
       "norm_label": "test_rrf_promotes_consensus_result()"
     },
     {
+      "label": "test_api_e2e.py",
+      "file_type": "code",
+      "source_file": "backend/tests/test_api_e2e.py",
+      "source_location": "L1",
+      "id": "backend_tests_test_api_e2e_py",
+      "community": 41,
+      "norm_label": "test_api_e2e.py"
+    },
+    {
+      "label": "test_e2e_ingest_and_chat_flow()",
+      "file_type": "code",
+      "source_file": "backend/tests/test_api_e2e.py",
+      "source_location": "L11",
+      "id": "test_api_e2e_test_e2e_ingest_and_chat_flow",
+      "community": 41,
+      "norm_label": "test_e2e_ingest_and_chat_flow()"
+    },
+    {
+      "label": "test_main_root.py",
+      "file_type": "code",
+      "source_file": "backend/tests/test_main_root.py",
+      "source_location": "L1",
+      "id": "backend_tests_test_main_root_py",
+      "community": 42,
+      "norm_label": "test_main_root.py"
+    },
+    {
+      "label": "test_root_route_exposes_backend_info()",
+      "file_type": "code",
+      "source_file": "backend/tests/test_main_root.py",
+      "source_location": "L6",
+      "id": "test_main_root_test_root_route_exposes_backend_info",
+      "community": 42,
+      "norm_label": "test_root_route_exposes_backend_info()"
+    },
+    {
       "label": "test_service.py",
       "file_type": "code",
       "source_file": "backend/tests/test_service.py",
@@ -1595,7 +1753,7 @@
       "label": "test_low_confidence_fallback()",
       "file_type": "code",
       "source_file": "backend/tests/test_service.py",
-      "source_location": "L17",
+      "source_location": "L18",
       "id": "test_service_test_low_confidence_fallback",
       "community": 0,
       "norm_label": "test_low_confidence_fallback()"
@@ -1604,46 +1762,10 @@
       "label": "test_chat_returns_citations_when_confident()",
       "file_type": "code",
       "source_file": "backend/tests/test_service.py",
-      "source_location": "L38",
+      "source_location": "L39",
       "id": "test_service_test_chat_returns_citations_when_confident",
       "community": 0,
       "norm_label": "test_chat_returns_citations_when_confident()"
-    },
-    {
-      "label": "test_api_e2e.py",
-      "file_type": "code",
-      "source_file": "backend/tests/test_api_e2e.py",
-      "source_location": "L1",
-      "id": "backend_tests_test_api_e2e_py",
-      "community": 39,
-      "norm_label": "test_api_e2e.py"
-    },
-    {
-      "label": "test_e2e_ingest_and_chat_flow()",
-      "file_type": "code",
-      "source_file": "backend/tests/test_api_e2e.py",
-      "source_location": "L11",
-      "id": "test_api_e2e_test_e2e_ingest_and_chat_flow",
-      "community": 39,
-      "norm_label": "test_e2e_ingest_and_chat_flow()"
-    },
-    {
-      "label": "test_main_root.py",
-      "file_type": "code",
-      "source_file": "backend/tests/test_main_root.py",
-      "source_location": "L1",
-      "id": "backend_tests_test_main_root_py",
-      "community": 40,
-      "norm_label": "test_main_root.py"
-    },
-    {
-      "label": "test_root_route_exposes_backend_info()",
-      "file_type": "code",
-      "source_file": "backend/tests/test_main_root.py",
-      "source_location": "L6",
-      "id": "test_main_root_test_root_route_exposes_backend_info",
-      "community": 40,
-      "norm_label": "test_root_route_exposes_backend_info()"
     },
     {
       "label": "Adding Content Automated Workflow Guide",
@@ -1654,7 +1776,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "adding content automated workflow guide",
       "id": "adding_content_guide"
     },
@@ -1667,7 +1789,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "quick guide content automation",
       "id": "quick_guide_automation"
     },
@@ -1680,7 +1802,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "claude content management workflow",
       "id": "claude_content_management_workflow"
     },
@@ -1693,7 +1815,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "gemini content automation system",
       "id": "gemini_content_automation_system"
     },
@@ -1706,7 +1828,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "portfolio content automation system",
       "id": "content_automation_system"
     },
@@ -1719,7 +1841,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "content directory raw sources",
       "id": "content_directory"
     },
@@ -1732,7 +1854,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 62,
+      "community": 63,
       "norm_label": "npm start command",
       "id": "npm_start_command"
     },
@@ -1745,7 +1867,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 63,
+      "community": 64,
       "norm_label": "npm run build command",
       "id": "npm_build_command"
     },
@@ -1758,7 +1880,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 64,
+      "community": 65,
       "norm_label": "assistant backend architecture",
       "id": "architecture_assistant_backend"
     },
@@ -1771,7 +1893,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 65,
+      "community": 66,
       "norm_label": "hybrid retrieval rrf reranker pipeline",
       "id": "retrieval_hybrid_rrf_reranker"
     },
@@ -1784,7 +1906,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 67,
       "norm_label": "citation grounded response model",
       "id": "grounding_citations"
     },
@@ -1797,7 +1919,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 19,
+      "community": 20,
       "norm_label": "public resume pdf asset",
       "id": "public_resume_pdf_asset"
     },
@@ -1810,7 +1932,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 19,
+      "community": 20,
       "norm_label": "root resume pdf asset",
       "id": "root_resume_pdf_asset"
     },
@@ -1823,7 +1945,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 19,
+      "community": 20,
       "norm_label": "resume download instructions",
       "id": "resume_download_instructions"
     },
@@ -1836,7 +1958,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 41,
+      "community": 43,
       "norm_label": "seo metadata and structured data",
       "id": "seo_metadata"
     },
@@ -1849,7 +1971,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 41,
+      "community": 43,
       "norm_label": "robots sitemap declaration",
       "id": "robots_sitemap"
     },
@@ -1862,7 +1984,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 42,
+      "community": 44,
       "norm_label": "graphify agent rules",
       "id": "agents_graphify_rules"
     },
@@ -1875,7 +1997,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 42,
+      "community": 44,
       "norm_label": "graph report summary",
       "id": "graph_report_summary"
     },
@@ -1888,7 +2010,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 21,
       "norm_label": "project status known issues",
       "id": "project_status_known_issues"
     },
@@ -1901,7 +2023,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 21,
       "norm_label": "frontend chat widget integration pending",
       "id": "frontend_chat_widget_pending"
     },
@@ -1914,7 +2036,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 21,
       "norm_label": "backend deployment wiring pending",
       "id": "backend_deployment_pending"
     },
@@ -1927,7 +2049,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "software 3.0 karpathy blog post",
       "id": "karpathy_blog_post"
     },
@@ -1940,7 +2062,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "software 3.0 concept",
       "id": "software3_concept"
     },
@@ -1953,7 +2075,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "llms as new operating system concept",
       "id": "llm_as_os_concept"
     },
@@ -1966,7 +2088,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 21,
+      "community": 22,
       "norm_label": "human ai augmentation",
       "id": "human_ai_augmentation"
     },
@@ -1979,7 +2101,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 21,
+      "community": 22,
       "norm_label": "generation verification loop",
       "id": "generation_verification_loop"
     },
@@ -1992,7 +2114,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "software evolution 1.0 to 3.0 rationale",
       "id": "software_evolution_rationale"
     },
@@ -2005,7 +2127,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 21,
+      "community": 22,
       "norm_label": "iron man suits not robot army rationale",
       "id": "iron_man_suits_rationale"
     },
@@ -2018,7 +2140,7 @@
       "captured_at": null,
       "author": "Archie",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "andrej karpathy software 3.0 talk video",
       "id": "karpathy_talk_video"
     },
@@ -2031,7 +2153,7 @@
       "captured_at": null,
       "author": "Gemini CLI",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "automation is here blog post",
       "id": "automation_blog_post"
     },
@@ -2044,7 +2166,7 @@
       "captured_at": null,
       "author": "Gemini CLI",
       "contributor": null,
-      "community": 2,
+      "community": 3,
       "norm_label": "markdown drop in workflow",
       "id": "markdown_dropin_workflow"
     },
@@ -2057,7 +2179,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 16,
       "norm_label": "retro crt 'sahil' icon (apple touch)",
       "id": "apple_touch_icon_favicon1"
     },
@@ -2070,7 +2192,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 43,
+      "community": 46,
       "norm_label": "retro crt 'sahil' icon (16x16 favicon)",
       "id": "favicon_16x16_favicon1"
     },
@@ -2083,7 +2205,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 16,
       "norm_label": "retro crt 'sahil' icon (32x32 favicon)",
       "id": "favicon_32x32_favicon1"
     },
@@ -2096,7 +2218,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 47,
       "norm_label": "retro crt 'sahil' icon (96x96 favicon)",
       "id": "favicon_96x96_favicon1"
     },
@@ -2109,7 +2231,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 44,
+      "community": 45,
       "norm_label": "retro crt 'sahil' icon (svg with embedded raster image)",
       "id": "favicon_svg_favicon1"
     },
@@ -2122,7 +2244,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 15,
       "norm_label": "retro crt 'sahil' icon (web app manifest 192x192)",
       "id": "web_app_manifest_192x192_favicon1"
     },
@@ -2135,7 +2257,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 15,
       "norm_label": "retro crt 'sahil' icon (web app manifest 512x512)",
       "id": "web_app_manifest_512x512_favicon1"
     },
@@ -2148,7 +2270,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 15,
       "norm_label": "retro crt 'sahil' icon (android chrome 192x192)",
       "id": "android_chrome_192x192_public"
     },
@@ -2161,7 +2283,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 15,
       "norm_label": "retro crt 'sahil' icon (android chrome 512x512)",
       "id": "android_chrome_512x512_public"
     },
@@ -2174,7 +2296,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 16,
       "norm_label": "retro crt 'sahil' icon (apple touch)",
       "id": "apple_touch_icon_public"
     },
@@ -2187,7 +2309,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 43,
+      "community": 46,
       "norm_label": "retro crt 'sahil' icon (16x16 favicon)",
       "id": "favicon_16x16_public"
     },
@@ -2200,7 +2322,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 16,
       "norm_label": "retro crt 'sahil' icon (32x32 favicon)",
       "id": "favicon_32x32_public"
     },
@@ -2213,7 +2335,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 47,
       "norm_label": "retro crt 'sahil' icon (96x96 favicon)",
       "id": "favicon_96x96_public"
     },
@@ -2226,12 +2348,24 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 44,
+      "community": 45,
       "norm_label": "retro crt 'sahil' icon (svg with embedded raster image)",
       "id": "favicon_svg_public"
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "main_py",
+      "_tgt": "main_main",
+      "source": "main_py",
+      "target": "main_main",
+      "confidence_score": 1.0
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -2248,7 +2382,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/App.js",
-      "source_location": "L15",
+      "source_location": "L14",
       "weight": 1.0,
       "_src": "src_app_app_js",
       "_tgt": "app_app",
@@ -2452,11 +2586,131 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/content/LinuxTerminal.js",
-      "source_location": "L105",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "src_components_content_linuxterminal_js",
+      "_tgt": "linuxterminal_buildfs",
+      "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_buildfs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "src_components_content_linuxterminal_js",
+      "_tgt": "linuxterminal_isdir",
+      "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_isdir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L62",
+      "weight": 1.0,
+      "_src": "src_components_content_linuxterminal_js",
+      "_tgt": "linuxterminal_splitpath",
+      "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_splitpath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_src": "src_components_content_linuxterminal_js",
+      "_tgt": "linuxterminal_resolvepath",
+      "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_resolvepath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_src": "src_components_content_linuxterminal_js",
+      "_tgt": "linuxterminal_lookup",
+      "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_lookup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_src": "src_components_content_linuxterminal_js",
+      "_tgt": "linuxterminal_displaycwd",
+      "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_displaycwd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L223",
       "weight": 1.0,
       "_src": "src_components_content_linuxterminal_js",
       "_tgt": "linuxterminal_linuxterminal",
       "source": "src_components_content_linuxterminal_js",
+      "target": "linuxterminal_linuxterminal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_src": "linuxterminal_lookup",
+      "_tgt": "linuxterminal_isdir",
+      "source": "linuxterminal_isdir",
+      "target": "linuxterminal_lookup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_src": "linuxterminal_resolvepath",
+      "_tgt": "linuxterminal_splitpath",
+      "source": "linuxterminal_splitpath",
+      "target": "linuxterminal_resolvepath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_src": "linuxterminal_lookup",
+      "_tgt": "linuxterminal_splitpath",
+      "source": "linuxterminal_splitpath",
+      "target": "linuxterminal_lookup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LinuxTerminal.js",
+      "source_location": "L430",
+      "weight": 1.0,
+      "_src": "linuxterminal_linuxterminal",
+      "_tgt": "linuxterminal_displaycwd",
+      "source": "linuxterminal_displaycwd",
       "target": "linuxterminal_linuxterminal",
       "confidence_score": 1.0
     },
@@ -2739,18 +2993,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/pages/PageNotFound.js",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_src": "src_pages_pagenotfound_js",
-      "_tgt": "pagenotfound_pagenotfound",
-      "source": "src_pages_pagenotfound_js",
-      "target": "pagenotfound_pagenotfound",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "src/pages/Resume.js",
       "source_location": "L3",
       "weight": 1.0,
@@ -2764,7 +3006,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/BlogPost.js",
-      "source_location": "L239",
+      "source_location": "L241",
       "weight": 1.0,
       "_src": "src_pages_blogpost_js",
       "_tgt": "blogpost_blogpost",
@@ -2818,6 +3060,18 @@
       "_tgt": "projects_projects",
       "source": "src_pages_projects_js",
       "target": "projects_projects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PageNotFound.js",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_src": "src_pages_pagenotfound_js",
+      "_tgt": "pagenotfound_pagenotfound",
+      "source": "src_pages_pagenotfound_js",
+      "target": "pagenotfound_pagenotfound",
       "confidence_score": 1.0
     },
     {
@@ -3073,6 +3327,90 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "scripts_sync_content_js",
+      "_tgt": "sync_content_generateslug",
+      "source": "scripts_sync_content_js",
+      "target": "sync_content_generateslug",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "scripts_sync_content_js",
+      "_tgt": "sync_content_syncblogs",
+      "source": "scripts_sync_content_js",
+      "target": "sync_content_syncblogs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "scripts_sync_content_js",
+      "_tgt": "sync_content_generatesitemap",
+      "source": "scripts_sync_content_js",
+      "target": "sync_content_generatesitemap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L139",
+      "weight": 1.0,
+      "_src": "scripts_sync_content_js",
+      "_tgt": "sync_content_syncprojects",
+      "source": "scripts_sync_content_js",
+      "target": "sync_content_syncprojects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L181",
+      "weight": 1.0,
+      "_src": "scripts_sync_content_js",
+      "_tgt": "sync_content_synccertifications",
+      "source": "scripts_sync_content_js",
+      "target": "sync_content_synccertifications",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L211",
+      "weight": 1.0,
+      "_src": "scripts_sync_content_js",
+      "_tgt": "sync_content_syncterminal",
+      "source": "scripts_sync_content_js",
+      "target": "sync_content_syncterminal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sync-content.js",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_src": "sync_content_syncblogs",
+      "_tgt": "sync_content_generatesitemap",
+      "source": "sync_content_syncblogs",
+      "target": "sync_content_generatesitemap",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "backend/__init__.py",
@@ -3172,7 +3510,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L8",
+      "source_location": "L11",
       "weight": 1.0,
       "_src": "backend_app_service_py",
       "_tgt": "backend_app_retrieval_py",
@@ -3315,126 +3653,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "backend/app/config.py",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_src": "backend_app_config_py",
-      "_tgt": "config_settings",
-      "source": "backend_app_config_py",
-      "target": "config_settings",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/config.py",
-      "source_location": "L19",
-      "weight": 1.0,
-      "_src": "backend_app_config_py",
-      "_tgt": "config_get_settings",
-      "source": "backend_app_config_py",
-      "target": "config_get_settings",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_src": "backend_app_service_py",
-      "_tgt": "backend_app_config_py",
-      "source": "backend_app_config_py",
-      "target": "backend_app_service_py",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "backend_app_config_py",
-      "source": "backend_app_config_py",
-      "target": "backend_app_main_py",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/config.py",
-      "source_location": "L22",
-      "weight": 1.0,
-      "_src": "config_get_settings",
-      "_tgt": "config_settings",
-      "source": "config_settings",
-      "target": "config_get_settings",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L5",
-      "weight": 0.8,
-      "_src": "config_settings",
-      "_tgt": "service_citation",
-      "confidence_score": 0.5,
-      "source": "config_settings",
-      "target": "service_citation"
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L5",
-      "weight": 0.8,
-      "_src": "config_settings",
-      "_tgt": "service_chatresult",
-      "confidence_score": 0.5,
-      "source": "config_settings",
-      "target": "service_chatresult"
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L5",
-      "weight": 0.8,
-      "_src": "config_settings",
-      "_tgt": "service_lightweightreranker",
-      "confidence_score": 0.5,
-      "source": "config_settings",
-      "target": "service_lightweightreranker"
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L5",
-      "weight": 0.8,
-      "_src": "config_settings",
-      "_tgt": "service_assistantservice",
-      "confidence_score": 0.5,
-      "source": "config_settings",
-      "target": "service_assistantservice"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "backend/tests/test_service.py",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_src": "config_settings",
-      "_tgt": "test_service_make_settings",
-      "source": "config_settings",
-      "target": "test_service_make_settings"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "backend/app/models.py",
       "source_location": "L8",
       "weight": 1.0,
@@ -3484,7 +3702,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L7",
+      "source_location": "L10",
       "weight": 1.0,
       "_src": "backend_app_service_py",
       "_tgt": "backend_app_models_py",
@@ -3808,7 +4026,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L6",
+      "source_location": "L9",
       "weight": 1.0,
       "_src": "backend_app_service_py",
       "_tgt": "backend_app_loaders_py",
@@ -4011,49 +4229,25 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L12",
+      "source_file": "backend/app/config.py",
+      "source_location": "L9",
       "weight": 1.0,
-      "_src": "backend_app_service_py",
-      "_tgt": "service_citation",
-      "source": "backend_app_service_py",
-      "target": "service_citation",
+      "_src": "backend_app_config_py",
+      "_tgt": "config_settings",
+      "source": "backend_app_config_py",
+      "target": "config_settings",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L19",
+      "source_file": "backend/app/config.py",
+      "source_location": "L20",
       "weight": 1.0,
-      "_src": "backend_app_service_py",
-      "_tgt": "service_chatresult",
-      "source": "backend_app_service_py",
-      "target": "service_chatresult",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L26",
-      "weight": 1.0,
-      "_src": "backend_app_service_py",
-      "_tgt": "service_lightweightreranker",
-      "source": "backend_app_service_py",
-      "target": "service_lightweightreranker",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L42",
-      "weight": 1.0,
-      "_src": "backend_app_service_py",
-      "_tgt": "service_assistantservice",
-      "source": "backend_app_service_py",
-      "target": "service_assistantservice",
+      "_src": "backend_app_config_py",
+      "_tgt": "config_get_settings",
+      "source": "backend_app_config_py",
+      "target": "config_get_settings",
       "confidence_score": 1.0
     },
     {
@@ -4063,153 +4257,225 @@
       "source_location": "L10",
       "weight": 1.0,
       "_src": "backend_app_main_py",
-      "_tgt": "backend_app_service_py",
-      "source": "backend_app_service_py",
+      "_tgt": "backend_app_config_py",
+      "source": "backend_app_config_py",
       "target": "backend_app_main_py",
       "confidence_score": 1.0
     },
     {
-      "relation": "calls",
+      "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L130",
+      "source_location": "L8",
       "weight": 1.0,
-      "_src": "service_assistantservice_build_citations",
+      "_src": "backend_app_service_py",
+      "_tgt": "backend_app_config_py",
+      "source": "backend_app_config_py",
+      "target": "backend_app_service_py",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/config.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "config_get_settings",
+      "_tgt": "config_settings",
+      "source": "config_settings",
+      "target": "config_get_settings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L5",
+      "weight": 0.8,
+      "_src": "config_settings",
       "_tgt": "service_citation",
-      "source": "service_citation",
-      "target": "service_assistantservice_build_citations",
-      "confidence_score": 1.0
+      "confidence_score": 0.5,
+      "source": "config_settings",
+      "target": "service_citation"
     },
     {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
+      "relation": "uses",
+      "confidence": "INFERRED",
       "source_file": "backend/app/service.py",
-      "source_location": "L79",
-      "weight": 1.0,
-      "_src": "service_assistantservice_chat",
+      "source_location": "L5",
+      "weight": 0.8,
+      "_src": "config_settings",
       "_tgt": "service_chatresult",
-      "source": "service_chatresult",
-      "target": "service_assistantservice_chat",
-      "confidence_score": 1.0
+      "confidence_score": 0.5,
+      "source": "config_settings",
+      "target": "service_chatresult"
     },
     {
-      "relation": "method",
-      "confidence": "EXTRACTED",
+      "relation": "uses",
+      "confidence": "INFERRED",
       "source_file": "backend/app/service.py",
-      "source_location": "L27",
-      "weight": 1.0,
-      "_src": "service_lightweightreranker",
-      "_tgt": "service_lightweightreranker_rerank",
-      "source": "service_lightweightreranker",
-      "target": "service_lightweightreranker_rerank",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L49",
-      "weight": 1.0,
-      "_src": "service_assistantservice_init",
+      "source_location": "L5",
+      "weight": 0.8,
+      "_src": "config_settings",
       "_tgt": "service_lightweightreranker",
-      "source": "service_lightweightreranker",
-      "target": "service_assistantservice_init",
+      "confidence_score": 0.5,
+      "source": "config_settings",
+      "target": "service_lightweightreranker"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L5",
+      "weight": 0.8,
+      "_src": "config_settings",
+      "_tgt": "service_assistantservice",
+      "confidence_score": 0.5,
+      "source": "config_settings",
+      "target": "service_assistantservice"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "config_settings",
+      "_tgt": "test_service_make_settings",
+      "source": "config_settings",
+      "target": "test_service_make_settings"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "backend_app_service_py",
+      "source": "backend_app_main_py",
+      "target": "backend_app_service_py",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_lifespan",
+      "source": "backend_app_main_py",
+      "target": "main_lifespan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_chatrequest",
+      "source": "backend_app_main_py",
+      "target": "main_chatrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_citationresponse",
+      "source": "backend_app_main_py",
+      "target": "main_citationresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_chatresponse",
+      "source": "backend_app_main_py",
+      "target": "main_chatresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_root",
+      "source": "backend_app_main_py",
+      "target": "main_root",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_health",
+      "source": "backend_app_main_py",
+      "target": "main_health",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_ingest",
+      "source": "backend_app_main_py",
+      "target": "main_ingest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_src": "backend_app_main_py",
+      "_tgt": "main_chat",
+      "source": "backend_app_main_py",
+      "target": "main_chat",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L88",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/app/main.py",
+      "source_location": "L21",
       "weight": 1.0,
-      "_src": "service_assistantservice_chat",
-      "_tgt": "service_lightweightreranker_rerank",
-      "source": "service_lightweightreranker_rerank",
-      "target": "service_assistantservice_chat",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L43",
-      "weight": 1.0,
-      "_src": "service_assistantservice",
-      "_tgt": "service_assistantservice_init",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_init",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_src": "service_assistantservice",
+      "_src": "main_lifespan",
       "_tgt": "service_assistantservice_ingest_all",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_ingest_all",
-      "confidence_score": 1.0
+      "source": "main_lifespan",
+      "target": "service_assistantservice_ingest_all"
     },
     {
-      "relation": "method",
+      "relation": "inherits",
       "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L70",
+      "source_file": "backend/app/main.py",
+      "source_location": "L42",
       "weight": 1.0,
-      "_src": "service_assistantservice",
-      "_tgt": "service_assistantservice_health",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_health",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L77",
-      "weight": 1.0,
-      "_src": "service_assistantservice",
-      "_tgt": "service_assistantservice_chat",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_chat",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L103",
-      "weight": 1.0,
-      "_src": "service_assistantservice",
-      "_tgt": "service_assistantservice_confidence",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_confidence",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L116",
-      "weight": 1.0,
-      "_src": "service_assistantservice",
-      "_tgt": "service_assistantservice_compose_answer",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_compose_answer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/service.py",
-      "source_location": "L123",
-      "weight": 1.0,
-      "_src": "service_assistantservice",
-      "_tgt": "service_assistantservice_build_citations",
-      "source": "service_assistantservice",
-      "target": "service_assistantservice_build_citations",
+      "_src": "main_chatrequest",
+      "_tgt": "basemodel",
+      "source": "main_chatrequest",
+      "target": "basemodel",
       "confidence_score": 1.0
     },
     {
@@ -4221,8 +4487,44 @@
       "_src": "service_assistantservice",
       "_tgt": "main_chatrequest",
       "confidence_score": 0.5,
-      "source": "service_assistantservice",
-      "target": "main_chatrequest"
+      "source": "main_chatrequest",
+      "target": "service_assistantservice"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_src": "main_citationresponse",
+      "_tgt": "basemodel",
+      "source": "basemodel",
+      "target": "main_citationresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_src": "main_chatresponse",
+      "_tgt": "basemodel",
+      "source": "basemodel",
+      "target": "main_chatresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_src": "main_chat",
+      "_tgt": "main_citationresponse",
+      "source": "main_citationresponse",
+      "target": "main_chat",
+      "confidence_score": 1.0
     },
     {
       "relation": "uses",
@@ -4233,8 +4535,20 @@
       "_src": "service_assistantservice",
       "_tgt": "main_citationresponse",
       "confidence_score": 0.5,
-      "source": "service_assistantservice",
-      "target": "main_citationresponse"
+      "source": "main_citationresponse",
+      "target": "service_assistantservice"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/main.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "_src": "main_chat",
+      "_tgt": "main_chatresponse",
+      "source": "main_chatresponse",
+      "target": "main_chat",
+      "confidence_score": 1.0
     },
     {
       "relation": "uses",
@@ -4245,8 +4559,236 @@
       "_src": "service_assistantservice",
       "_tgt": "main_chatresponse",
       "confidence_score": 0.5,
+      "source": "main_chatresponse",
+      "target": "service_assistantservice"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/app/main.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_src": "service_assistantservice_ingest_all",
+      "_tgt": "main_ingest",
+      "source": "main_ingest",
+      "target": "service_assistantservice_ingest_all"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "main_chat",
+      "_tgt": "test_service_test_low_confidence_fallback",
+      "source": "main_chat",
+      "target": "test_service_test_low_confidence_fallback"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "main_chat",
+      "_tgt": "test_service_test_chat_returns_citations_when_confident",
+      "source": "main_chat",
+      "target": "test_service_test_chat_returns_citations_when_confident"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_src": "backend_app_service_py",
+      "_tgt": "service_citation",
+      "source": "backend_app_service_py",
+      "target": "service_citation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "backend_app_service_py",
+      "_tgt": "service_chatresult",
+      "source": "backend_app_service_py",
+      "target": "service_chatresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_src": "backend_app_service_py",
+      "_tgt": "service_lightweightreranker",
+      "source": "backend_app_service_py",
+      "target": "service_lightweightreranker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_src": "backend_app_service_py",
+      "_tgt": "service_assistantservice",
+      "source": "backend_app_service_py",
+      "target": "service_assistantservice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L177",
+      "weight": 1.0,
+      "_src": "service_assistantservice_build_citations",
+      "_tgt": "service_citation",
+      "source": "service_citation",
+      "target": "service_assistantservice_build_citations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_src": "service_assistantservice_chat",
+      "_tgt": "service_chatresult",
+      "source": "service_chatresult",
+      "target": "service_assistantservice_chat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "service_lightweightreranker",
+      "_tgt": "service_lightweightreranker_rerank",
+      "source": "service_lightweightreranker",
+      "target": "service_lightweightreranker_rerank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "service_assistantservice_init",
+      "_tgt": "service_lightweightreranker",
+      "source": "service_lightweightreranker",
+      "target": "service_assistantservice_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L94",
+      "weight": 1.0,
+      "_src": "service_assistantservice_chat",
+      "_tgt": "service_lightweightreranker_rerank",
+      "source": "service_lightweightreranker_rerank",
+      "target": "service_assistantservice_chat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_init",
       "source": "service_assistantservice",
-      "target": "main_chatresponse"
+      "target": "service_assistantservice_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_ingest_all",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_ingest_all",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_health",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_health",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_chat",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_chat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_confidence",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_confidence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L122",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_compose_answer",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_compose_answer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/service.py",
+      "source_location": "L170",
+      "weight": 1.0,
+      "_src": "service_assistantservice",
+      "_tgt": "service_assistantservice_build_citations",
+      "source": "service_assistantservice",
+      "target": "service_assistantservice_build_citations",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4274,33 +4816,9 @@
     },
     {
       "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "backend/app/main.py",
-      "source_location": "L19",
-      "weight": 1.0,
-      "_src": "service_assistantservice_ingest_all",
-      "_tgt": "main_startup_ingest",
-      "source": "service_assistantservice_ingest_all",
-      "target": "main_startup_ingest"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "backend/app/main.py",
-      "source_location": "L41",
-      "weight": 1.0,
-      "_src": "service_assistantservice_ingest_all",
-      "_tgt": "main_ingest",
-      "source": "service_assistantservice_ingest_all",
-      "target": "main_ingest"
-    },
-    {
-      "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L89",
+      "source_location": "L95",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_assistantservice_confidence",
@@ -4312,7 +4830,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L99",
+      "source_location": "L105",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_assistantservice_compose_answer",
@@ -4324,7 +4842,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/service.py",
-      "source_location": "L100",
+      "source_location": "L106",
       "weight": 1.0,
       "_src": "service_assistantservice_chat",
       "_tgt": "service_assistantservice_build_citations",
@@ -4333,171 +4851,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L35",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_startup_ingest",
-      "source": "backend_app_main_py",
-      "target": "main_startup_ingest",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L40",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_chatrequest",
-      "source": "backend_app_main_py",
-      "target": "main_chatrequest",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L45",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_citationresponse",
-      "source": "backend_app_main_py",
-      "target": "main_citationresponse",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_chatresponse",
-      "source": "backend_app_main_py",
-      "target": "main_chatresponse",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L59",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_root",
-      "source": "backend_app_main_py",
-      "target": "main_root",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L69",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_health",
-      "source": "backend_app_main_py",
-      "target": "main_health",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L74",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_ingest",
-      "source": "backend_app_main_py",
-      "target": "main_ingest",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L79",
-      "weight": 1.0,
-      "_src": "backend_app_main_py",
-      "_tgt": "main_chat",
-      "source": "backend_app_main_py",
-      "target": "main_chat",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L40",
-      "weight": 1.0,
-      "_src": "main_chatrequest",
-      "_tgt": "basemodel",
-      "source": "main_chatrequest",
-      "target": "basemodel",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L45",
-      "weight": 1.0,
-      "_src": "main_citationresponse",
-      "_tgt": "basemodel",
-      "source": "basemodel",
-      "target": "main_citationresponse",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_src": "main_chatresponse",
-      "_tgt": "basemodel",
-      "source": "basemodel",
-      "target": "main_chatresponse",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L86",
-      "weight": 1.0,
-      "_src": "main_chat",
-      "_tgt": "main_citationresponse",
-      "source": "main_citationresponse",
-      "target": "main_chat",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/main.py",
-      "source_location": "L81",
-      "weight": 1.0,
-      "_src": "main_chat",
-      "_tgt": "main_chatresponse",
-      "source": "main_chatresponse",
-      "target": "main_chat",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "backend/tests/test_service.py",
-      "source_location": "L30",
+      "source_location": "L32",
       "weight": 1.0,
-      "_src": "main_chat",
-      "_tgt": "test_service_test_low_confidence_fallback",
-      "source": "main_chat",
+      "_src": "test_service_test_low_confidence_fallback",
+      "_tgt": "service_assistantservice_chat",
+      "source": "service_assistantservice_chat",
       "target": "test_service_test_low_confidence_fallback"
     },
     {
@@ -4505,11 +4867,11 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "backend/tests/test_service.py",
-      "source_location": "L58",
+      "source_location": "L60",
       "weight": 1.0,
-      "_src": "main_chat",
-      "_tgt": "test_service_test_chat_returns_citations_when_confident",
-      "source": "main_chat",
+      "_src": "test_service_test_chat_returns_citations_when_confident",
+      "_tgt": "service_assistantservice_chat",
+      "source": "service_assistantservice_chat",
       "target": "test_service_test_chat_returns_citations_when_confident"
     },
     {
@@ -4599,66 +4961,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "backend/tests/test_service.py",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_src": "backend_tests_test_service_py",
-      "_tgt": "test_service_make_settings",
-      "source": "backend_tests_test_service_py",
-      "target": "test_service_make_settings",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/tests/test_service.py",
-      "source_location": "L17",
-      "weight": 1.0,
-      "_src": "backend_tests_test_service_py",
-      "_tgt": "test_service_test_low_confidence_fallback",
-      "source": "backend_tests_test_service_py",
-      "target": "test_service_test_low_confidence_fallback",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/tests/test_service.py",
-      "source_location": "L38",
-      "weight": 1.0,
-      "_src": "backend_tests_test_service_py",
-      "_tgt": "test_service_test_chat_returns_citations_when_confident",
-      "source": "backend_tests_test_service_py",
-      "target": "test_service_test_chat_returns_citations_when_confident",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/tests/test_service.py",
-      "source_location": "L18",
-      "weight": 1.0,
-      "_src": "test_service_test_low_confidence_fallback",
-      "_tgt": "test_service_make_settings",
-      "source": "test_service_make_settings",
-      "target": "test_service_test_low_confidence_fallback",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/tests/test_service.py",
-      "source_location": "L39",
-      "weight": 1.0,
-      "_src": "test_service_test_chat_returns_citations_when_confident",
-      "_tgt": "test_service_make_settings",
-      "source": "test_service_make_settings",
-      "target": "test_service_test_chat_returns_citations_when_confident",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "backend/tests/test_api_e2e.py",
       "source_location": "L11",
       "weight": 1.0,
@@ -4678,6 +4980,66 @@
       "_tgt": "test_main_root_test_root_route_exposes_backend_info",
       "source": "backend_tests_test_main_root_py",
       "target": "test_main_root_test_root_route_exposes_backend_info",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "backend_tests_test_service_py",
+      "_tgt": "test_service_make_settings",
+      "source": "backend_tests_test_service_py",
+      "target": "test_service_make_settings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "backend_tests_test_service_py",
+      "_tgt": "test_service_test_low_confidence_fallback",
+      "source": "backend_tests_test_service_py",
+      "target": "test_service_test_low_confidence_fallback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_src": "backend_tests_test_service_py",
+      "_tgt": "test_service_test_chat_returns_citations_when_confident",
+      "source": "backend_tests_test_service_py",
+      "target": "test_service_test_chat_returns_citations_when_confident",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "test_service_test_low_confidence_fallback",
+      "_tgt": "test_service_make_settings",
+      "source": "test_service_make_settings",
+      "target": "test_service_test_low_confidence_fallback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/tests/test_service.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_src": "test_service_test_chat_returns_citations_when_confident",
+      "_tgt": "test_service_make_settings",
+      "source": "test_service_make_settings",
+      "target": "test_service_test_chat_returns_citations_when_confident",
       "confidence_score": 1.0
     },
     {

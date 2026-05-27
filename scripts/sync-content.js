@@ -60,6 +60,7 @@ const syncBlogs = () => {
         author: data.author || 'Archie',
         tags: data.tags || [],
         readTime: data.readTime || `${Math.ceil(content.split(/\s+/).length / 200)} min read`,
+        excerpt: blogSummary.excerpt,
         content: content.trim(),
       };
 
@@ -78,6 +79,58 @@ const syncBlogs = () => {
   fs.writeFileSync(path.join(DATA_DIR, 'blogPosts.js'), `export const blogPosts = ${JSON.stringify(blogPosts, null, 2)};\n`);
 
   console.log(`Successfully synced ${blogs.length} blogs.`);
+
+  // Generate dynamic sitemap
+  generateSitemap(blogs);
+};
+
+/**
+ * Generate XML Sitemap
+ */
+const generateSitemap = (blogs) => {
+  let baseUrl = 'https://sahilkumar.dev';
+  try {
+    const resumePath = path.join(__dirname, '../src/settings/resume.json');
+    if (fs.existsSync(resumePath)) {
+      const resume = JSON.parse(fs.readFileSync(resumePath, 'utf-8'));
+      if (resume.basics && resume.basics.url) {
+        baseUrl = resume.basics.url.replace(/\/$/, '');
+      }
+    }
+  } catch (error) {
+    console.warn('Warning: Failed to load resume.json for sitemap base URL:', error.message);
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+  
+  // Homepage
+  xml += `  <url>\n`;
+  xml += `    <loc>${baseUrl}</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>weekly</changefreq>\n`;
+  xml += `    <priority>1.0</priority>\n`;
+  xml += `  </url>\n`;
+
+  // Blog pages
+  blogs.forEach((blog) => {
+    const blogUrl = `${baseUrl}/blog/${blog.slug}`;
+    const lastMod = blog.date ? new Date(blog.date).toISOString().split('T')[0] : today;
+    xml += `  <url>\n`;
+    xml += `    <loc>${blogUrl}</loc>\n`;
+    xml += `    <lastmod>${lastMod}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.8</priority>\n`;
+    xml += `  </url>\n`;
+  });
+
+  xml += `</urlset>\n`;
+
+  const sitemapPath = path.join(__dirname, '../public/sitemap.xml');
+  fs.writeFileSync(sitemapPath, xml);
+  console.log(`Successfully generated dynamic sitemap at public/sitemap.xml with ${blogs.length + 1} URLs.`);
 };
 
 /**

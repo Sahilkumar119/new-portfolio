@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **Portfolio SEO Optimization (2026-05-27)**: Designed a portfolio-specific SEO optimization plan based on white-hat SEO best practices, focusing on dynamic sitemap generation, structured JSON-LD schemas (Person and BlogPosting), and dynamic page metadata in React Helmet. Created the implementation plan for user review.
 - **End-to-End Codebase Audit (2026-04-28)**: Full graph-driven audit via graphify. Fixed broken `test_service.py` (missing `openrouter_api_key` param), migrated FastAPI startup from deprecated `@app.on_event("startup")` to lifespan context manager, replaced bare `except Exception` in OpenRouter API call with specific `httpx.TimeoutException`/`HTTPStatusError`/`RequestError` handlers. All 7 backend tests pass, frontend build clean.
 - **Production Wiring Fix**: Fixed `vercel.json` rewrites that were swallowing `/api` requests and added `render.yaml`, `Dockerfile`, and `Procfile` to seamlessly deploy the backend on Render.
 - **Glassmorphism UI**: Applied Apple-style glassmorphism (backdrop blur, saturate, shadow system, top-edge shimmer) to all interactive surfaces: Certifications, Blogs, Projects, Connect, Hero CTAs, Social dock, and Terminal.
@@ -53,3 +54,8 @@
 - [x] Setup CI/CD for automatic deployment.
 - [x] Add Page speed optimizations.
 - [x] Setup analytics (Google Analytics 4).
+- [x] Dynamic sitemap generation in `sync-content.js`.
+- [x] Dynamic React Helmet metadata for dynamic blog posts.
+- [x] Structured JSON-LD schemas (`Person`, `WebSite`, `BlogPosting`) inside Helmet.
+- [x] Converted lazy page imports to static imports to fix Suspense SSR errors during crawl.
+- [x] Automated `react-snapshot` crawling inside production build.

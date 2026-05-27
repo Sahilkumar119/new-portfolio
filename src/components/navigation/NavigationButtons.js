@@ -32,7 +32,7 @@ const useStyles = makeStyles(() => ({
         fontSize: "0.85rem",
         fontWeight: 600,
         letterSpacing: "0.05em",
-        color: "var(--text-secondary)",
+        color: "var(--text-primary)",
         background: "var(--glass-bg)",
         backdropFilter: "blur(16px) saturate(180%)",
         WebkitBackdropFilter: "blur(16px) saturate(180%)",

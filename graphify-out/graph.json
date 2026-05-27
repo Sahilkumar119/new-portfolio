@@ -283,10 +283,19 @@
       "norm_label": "latestblogs.js"
     },
     {
+      "label": "NetworkSvg()",
+      "file_type": "code",
+      "source_file": "src/components/content/LatestBlogs.js",
+      "source_location": "L197",
+      "id": "latestblogs_networksvg",
+      "community": 1,
+      "norm_label": "networksvg()"
+    },
+    {
       "label": "LatestBlogs()",
       "file_type": "code",
       "source_file": "src/components/content/LatestBlogs.js",
-      "source_location": "L149",
+      "source_location": "L284",
       "id": "latestblogs_latestblogs",
       "community": 1,
       "norm_label": "latestblogs()"
@@ -1530,7 +1539,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L1",
       "id": "backend_app_service_py",
-      "community": 0,
+      "community": 2,
       "norm_label": "service.py"
     },
     {
@@ -1539,7 +1548,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L17",
       "id": "service_citation",
-      "community": 0,
+      "community": 2,
       "norm_label": "citation"
     },
     {
@@ -1548,7 +1557,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L24",
       "id": "service_chatresult",
-      "community": 0,
+      "community": 2,
       "norm_label": "chatresult"
     },
     {
@@ -1566,7 +1575,7 @@
       "source_file": "backend/app/service.py",
       "source_location": "L32",
       "id": "service_lightweightreranker_rerank",
-      "community": 4,
+      "community": 0,
       "norm_label": ".rerank()"
     },
     {
@@ -2526,7 +2535,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/content/LatestBlogs.js",
-      "source_location": "L149",
+      "source_location": "L197",
+      "weight": 1.0,
+      "_src": "src_components_content_latestblogs_js",
+      "_tgt": "latestblogs_networksvg",
+      "source": "src_components_content_latestblogs_js",
+      "target": "latestblogs_networksvg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/content/LatestBlogs.js",
+      "source_location": "L284",
       "weight": 1.0,
       "_src": "src_components_content_latestblogs_js",
       "_tgt": "latestblogs_latestblogs",
@@ -4484,8 +4505,8 @@
       "source_file": "backend/app/main.py",
       "source_location": "L7",
       "weight": 0.8,
-      "_src": "service_assistantservice",
-      "_tgt": "main_chatrequest",
+      "_src": "main_chatrequest",
+      "_tgt": "service_assistantservice",
       "confidence_score": 0.5,
       "source": "main_chatrequest",
       "target": "service_assistantservice"
@@ -4532,8 +4553,8 @@
       "source_file": "backend/app/main.py",
       "source_location": "L7",
       "weight": 0.8,
-      "_src": "service_assistantservice",
-      "_tgt": "main_citationresponse",
+      "_src": "main_citationresponse",
+      "_tgt": "service_assistantservice",
       "confidence_score": 0.5,
       "source": "main_citationresponse",
       "target": "service_assistantservice"
@@ -4556,8 +4577,8 @@
       "source_file": "backend/app/main.py",
       "source_location": "L7",
       "weight": 0.8,
-      "_src": "service_assistantservice",
-      "_tgt": "main_chatresponse",
+      "_src": "main_chatresponse",
+      "_tgt": "service_assistantservice",
       "confidence_score": 0.5,
       "source": "main_chatresponse",
       "target": "service_assistantservice"
@@ -4569,8 +4590,8 @@
       "source_file": "backend/app/main.py",
       "source_location": "L41",
       "weight": 1.0,
-      "_src": "service_assistantservice_ingest_all",
-      "_tgt": "main_ingest",
+      "_src": "main_ingest",
+      "_tgt": "service_assistantservice_ingest_all",
       "source": "main_ingest",
       "target": "service_assistantservice_ingest_all"
     },
@@ -4857,8 +4878,8 @@
       "source_file": "backend/tests/test_service.py",
       "source_location": "L32",
       "weight": 1.0,
-      "_src": "test_service_test_low_confidence_fallback",
-      "_tgt": "service_assistantservice_chat",
+      "_src": "service_assistantservice_chat",
+      "_tgt": "test_service_test_low_confidence_fallback",
       "source": "service_assistantservice_chat",
       "target": "test_service_test_low_confidence_fallback"
     },
@@ -4869,8 +4890,8 @@
       "source_file": "backend/tests/test_service.py",
       "source_location": "L60",
       "weight": 1.0,
-      "_src": "test_service_test_chat_returns_citations_when_confident",
-      "_tgt": "service_assistantservice_chat",
+      "_src": "service_assistantservice_chat",
+      "_tgt": "test_service_test_chat_returns_citations_when_confident",
       "source": "service_assistantservice_chat",
       "target": "test_service_test_chat_returns_citations_when_confident"
     },

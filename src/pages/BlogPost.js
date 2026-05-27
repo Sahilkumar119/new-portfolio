@@ -57,7 +57,7 @@ const useStyles = makeStyles(() => ({
         gap: "6px",
         fontSize: "0.8rem",
         fontWeight: 500,
-        color: "var(--text-secondary)",
+        color: "var(--text-primary)",
         cursor: "pointer",
         background: "none",
         border: "none",

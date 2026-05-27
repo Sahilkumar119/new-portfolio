@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => ({
         boxShadow: "var(--glass-shadow)",
         cursor: "pointer",
         transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-        color: "var(--text-secondary)",
+        color: "var(--text-primary)",
         outline: "none",
         "& svg": {
             width: "17px",

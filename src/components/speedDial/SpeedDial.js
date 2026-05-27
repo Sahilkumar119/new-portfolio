@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => ({
         },
     },
     icon: {
-        color: "var(--text-secondary)",
+        color: "var(--text-primary)",
         fontSize: "0.88rem",
     },
 }));

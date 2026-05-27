@@ -1,11 +1,11 @@
 # Graph Report - new-portfolio  (2026-05-27)
 
 ## Corpus Check
-- 68 files · ~179,168 words
+- 68 files · ~180,603 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 236 nodes · 259 edges · 26 communities detected
+- 237 nodes · 260 edges · 26 communities detected
 - Extraction: 75% EXTRACTED · 25% INFERRED · 0% AMBIGUOUS · INFERRED: 64 edges (avg confidence: 0.76)
 - Token cost: 0 input · 0 output
 
@@ -70,22 +70,22 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.14
-Nodes (16): BaseModel, get_settings(), Settings, chat(), ChatRequest, ChatResponse, CitationResponse, ingest() (+8 more)
+Nodes (14): BaseModel, get_settings(), Settings, chat(), ChatRequest, ChatResponse, CitationResponse, ingest() (+6 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (11): AIProjects(), Certifications(), Connect(), LatestBlogs(), displayCwd(), isDir(), LinuxTerminal(), lookup() (+3 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.35
-Nodes (13): _chunk_markdown(), _deterministic_id(), load_all_sources(), _load_blogs(), _load_json_collection(), _load_resume(), _load_terminal(), _parse_frontmatter() (+5 more)
+Cohesion: 0.29
+Nodes (15): _chunk_markdown(), _deterministic_id(), load_all_sources(), _load_blogs(), _load_json_collection(), _load_resume(), _load_terminal(), _parse_frontmatter() (+7 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.21
 Nodes (13): Adding Content Automated Workflow Guide, Automation is Here Blog Post, Claude Content Management Workflow, Portfolio Content Automation System, content Directory Raw Sources, Gemini Content Automation System, Software 3.0 Karpathy Blog Post, Andrej Karpathy Software 3.0 Talk Video (+5 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.32
+Cohesion: 0.36
 Nodes (9): bm25_sparse_rank(), dense_lexical_rank(), hybrid_rank(), reciprocal_rank_fusion(), tokenize(), _ids(), test_bm25_prefers_rare_term_match(), test_dense_lexical_rank_prefers_high_overlap() (+1 more)
 
 ### Community 5 - "Community 5"
@@ -217,11 +217,11 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Why does `DocumentRecord` connect `Community 2` to `Community 0`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `ContentChunk` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `AssistantService` (e.g. with `ChatRequest` and `CitationResponse`) actually correct?**
   _`AssistantService` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 8 inferred relationships involving `DocumentRecord` (e.g. with `Citation` and `ChatResult`) actually correct?**
   _`DocumentRecord` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 8 inferred relationships involving `ContentChunk` (e.g. with `Citation` and `ChatResult`) actually correct?**
   _`ContentChunk` has 8 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 2 inferred relationships involving `_load_blogs()` (e.g. with `DocumentRecord` and `ContentChunk`) actually correct?**
+  _`_load_blogs()` has 2 INFERRED edges - model-reasoned connections that need verification._

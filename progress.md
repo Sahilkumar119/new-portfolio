@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **Blog Layout & Button Contrast Improvements (2026-05-27)**: Redesigned the blog post list to match a split 2-column layout (horizontal on desktop, vertical on mobile) with animated vector network graphics (acting like dynamic GIFs), tag icons, outline pills, and featured badges. Improved readability and contrast of primary/secondary menu text, theme icons, and control buttons without changing the glassmorphism parameters.
 - **Portfolio SEO Optimization (2026-05-27)**: Designed a portfolio-specific SEO optimization plan based on white-hat SEO best practices, focusing on dynamic sitemap generation, structured JSON-LD schemas (Person and BlogPosting), and dynamic page metadata in React Helmet. Created the implementation plan for user review.
 - **End-to-End Codebase Audit (2026-04-28)**: Full graph-driven audit via graphify. Fixed broken `test_service.py` (missing `openrouter_api_key` param), migrated FastAPI startup from deprecated `@app.on_event("startup")` to lifespan context manager, replaced bare `except Exception` in OpenRouter API call with specific `httpx.TimeoutException`/`HTTPStatusError`/`RequestError` handlers. All 7 backend tests pass, frontend build clean.
 - **Production Wiring Fix**: Fixed `vercel.json` rewrites that were swallowing `/api` requests and added `render.yaml`, `Dockerfile`, and `Procfile` to seamlessly deploy the backend on Render.
@@ -59,3 +60,6 @@
 - [x] Structured JSON-LD schemas (`Person`, `WebSite`, `BlogPosting`) inside Helmet.
 - [x] Converted lazy page imports to static imports to fix Suspense SSR errors during crawl.
 - [x] Automated `react-snapshot` crawling inside production build.
+- [x] Redesigned blog listing card layout to support split 2-column styling, featured badges, tag icons, calendar/clock indicators, and high-contrast orange titles.
+- [x] Added dynamic inline animated CSS SVG network graphs as default animated covers (acting like GIFs) for blogs.
+- [x] Improved contrast of button texts (menus, theme toggle, CTAs, back buttons) while maintaining glassmorphism.

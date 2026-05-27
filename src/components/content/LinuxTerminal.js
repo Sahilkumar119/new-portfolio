@@ -157,7 +157,7 @@ const useStyles = makeStyles(() => ({
         flex: 1,
         textAlign: "center",
         fontSize: "0.8rem",
-        color: "rgba(255, 255, 255, 0.4)",
+        color: "rgba(255, 255, 255, 0.70)",
         fontWeight: 500,
         marginRight: "44px",
         whiteSpace: "nowrap",

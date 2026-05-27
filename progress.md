@@ -1,6 +1,7 @@
 # Progress
 
 ## Recent Changes
+- **Site-Wide Text Contrast Improvements (2026-05-27)**: Increased the opacity and contrast of `--text-primary`, `--text-secondary`, and `--text-tertiary` variables for both Light and Dark modes in `index.css`. Also improved the terminal window header text contrast. This ensures premium visual clarity across the entire site while preserving the glassmorphic backdrop filters.
 - **Added Micro-ROS and XRCE-DDS Blog Post (2026-05-27)**: Published a new blog post explaining why ROS2 is too heavy for microcontrollers (ESP32), how Micro XRCE-DDS Client-Agent architecture works, and how UDP/Serial transport translates to standard DDS. Fully synchronized assets and updated sitemap/pre-rendered SEO page.
 - **Blog Layout & Button Contrast Improvements (2026-05-27)**: Redesigned the blog post list to match a split 2-column layout (horizontal on desktop, vertical on mobile) with animated vector network graphics (acting like dynamic GIFs), tag icons, outline pills, and featured badges. Improved readability and contrast of primary/secondary menu text, theme icons, and control buttons without changing the glassmorphism parameters.
 - **Portfolio SEO Optimization (2026-05-27)**: Designed a portfolio-specific SEO optimization plan based on white-hat SEO best practices, focusing on dynamic sitemap generation, structured JSON-LD schemas (Person and BlogPosting), and dynamic page metadata in React Helmet. Created the implementation plan for user review.

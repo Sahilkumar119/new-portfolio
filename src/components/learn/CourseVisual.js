@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
     WebkitMaskPosition: "center",
     WebkitMaskSize: "contain",
   },
-}));
+}), { name: "CourseVisual" });
 
 export const CourseVisual = ({ course }) => {
   const classes = useStyles();

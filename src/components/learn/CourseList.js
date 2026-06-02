@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.6,
     alignSelf: "center",
   },
-}));
+}), { name: "CourseList" });
 
 export const CourseList = ({ courses, activeIndex, setActiveIndex }) => {
   const classes = useStyles();

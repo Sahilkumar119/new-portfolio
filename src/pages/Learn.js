@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
     transition: "opacity 300ms ease",
     [theme.breakpoints.down("md")]: { display: "none" },
   },
-}));
+}), { name: "Learn" });
 
 export const Learn = () => {
   const classes = useStyles();

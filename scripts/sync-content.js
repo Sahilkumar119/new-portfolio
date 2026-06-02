@@ -152,6 +152,30 @@ const generateSitemap = (blogs) => {
     xml += `  </url>\n`;
   }
 
+  // Static SQL course (served straight from public/, nested module layout)
+  xml += `  <url>\n`;
+  xml += `    <loc>${baseUrl}/learn/sql/</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>monthly</changefreq>\n`;
+  xml += `    <priority>0.8</priority>\n`;
+  xml += `  </url>\n`;
+  const sqlModules = [
+    '00-foundations',
+    '01-joins',
+    '02-aggregation',
+    '03-subqueries-cte',
+    '04-window-functions',
+    '05-indexing-query-reasoning',
+  ];
+  sqlModules.forEach((mod) => {
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/learn/sql/modules/${mod}/${mod}.html</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.6</priority>\n`;
+    xml += `  </url>\n`;
+  });
+
   // Blog pages
   blogs.forEach((blog) => {
     const blogUrl = `${baseUrl}/blog/${blog.slug}`;

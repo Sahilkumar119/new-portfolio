@@ -25,6 +25,18 @@ export const COURSES = [
     logo: "/images/learn/docker.svg",
   },
   {
+    slug: "sql",
+    name: "SQL",
+    accent: "#E48E00",
+    tint: "#fbf3e6",
+    text: "#2a1c05",
+    blurb:
+      "Query data like you mean it — joins, aggregation, subqueries and CTEs, window functions, and the indexing intuition behind fast queries. Six hands-on modules.",
+    status: "live",
+    href: "/learn/sql/",
+    logo: "/images/learn/sql.svg",
+  },
+  {
     slug: "kubernetes",
     name: "Kubernetes",
     accent: "#326CE5",

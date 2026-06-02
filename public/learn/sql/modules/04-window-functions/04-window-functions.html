@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 04 — Window Functions: Calculate Across Rows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAE6DD;
+    --bg-2:#E3DED3;
+    --card:#DED9CE;
+    --grey:#C8C5BC;
+    --sage:#8C9A86;
+    --sage-soft:#AEB8A6;
+    --taupe:#BBB1A1;
+    --ink:#1C1C1A;
+    --ink-soft:#45443E;
+    --ink-faint:#5C5A51;
+    --line:#CBC5B8;
+    --line-strong:#1C1C1A;
+    --accent:#5E6B57;
+    --code-bg:#1E1D1A;
+    --code-fg:#E7E3DA;
+    --warn:#9A6E3F;
+    --danger:#94584C;
+    --radius:5px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --display:"Space Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 0 rgba(28,28,26,.05);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.72;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-thickness:1px;text-decoration-color:var(--ink-faint);transition:all .18s var(--ease)}
+  a:hover{text-decoration-color:var(--ink)}
+  ::selection{background:rgba(140,154,134,.4)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:200;background:var(--sage)}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(234,230,221,.88);
+    backdrop-filter:blur(10px) saturate(120%);border-bottom:1px solid var(--line-strong)}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:baseline;gap:11px;font-family:var(--display);font-weight:700;
+    font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+  .brand .crumb{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.04em;
+    color:var(--ink-faint);text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);
+    text-transform:uppercase;border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px;white-space:nowrap}
+  .pill b{color:var(--accent);font-weight:600}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;
+    grid-template-columns:230px minmax(0,1fr);gap:54px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:70px;align-self:start;padding:38px 0;max-height:calc(100vh - 70px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);padding:0 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  aside nav{display:flex;flex-direction:column;gap:1px;margin-top:12px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius);
+    color:var(--ink-faint);font-size:13.5px;font-weight:500;line-height:1.3;text-decoration:none;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:15px;height:15px;flex:none;opacity:.6}
+  aside nav a:hover{color:var(--ink)}
+  aside nav a.active{color:var(--ink);background:var(--card);border-left-color:var(--sage)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:20px 10px 0;font-size:12px;color:var(--ink-faint);line-height:1.55}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:16px 0 4px;border-bottom:1px solid var(--line-strong)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line-strong);border-radius:999px;padding:6px 12px;font-size:12.5px}
+    aside nav a.active{background:var(--sage);color:#0f120e}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:42px 0 120px;min-width:0;max-width:740px}
+
+  /* hero */
+  .hero{padding:6px 0 34px;border-bottom:1px solid var(--line-strong);margin-bottom:8px}
+  .eyebrow{display:inline-flex;gap:9px;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+  h1{font-family:var(--display);font-size:clamp(34px,5.6vw,58px);line-height:1.02;
+    margin:22px 0 18px;letter-spacing:-.035em;font-weight:700}
+  h1 .u{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;
+    text-decoration-color:var(--ink)}
+  .lede{color:var(--ink-soft);font-size:18.5px;max-width:60ch;margin:0;line-height:1.6}
+  .lede em{color:var(--ink);font-style:normal;font-weight:600;text-decoration:underline;
+    text-decoration-color:var(--sage);text-decoration-thickness:2px;text-underline-offset:3px}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:28px;border:1px solid var(--line-strong);
+    border-radius:var(--radius);overflow:hidden}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.02em;color:var(--ink-soft);padding:11px 15px;border-right:1px solid var(--line);flex:1;
+    min-width:max-content;background:var(--bg-2)}
+  .chip:last-child{border-right:none}
+  .chip svg{width:15px;height:15px;color:var(--ink-faint)}
+  .chip b{color:var(--accent)}
+  @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* section heads — editorial */
+  section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
+  .sec-head .num{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);
+    width:34px;height:34px;display:grid;place-items:center;border:1.5px solid var(--line-strong);
+    border-radius:var(--radius);flex:none;margin-top:4px}
+  .sec-head .htext{flex:1}
+  .sec-head .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:5px}
+  h2{font-family:var(--display);font-size:30px;margin:0;letter-spacing:-.025em;font-weight:700;line-height:1.12}
+  h3{font-family:var(--display);font-size:19px;margin:32px 0 4px;color:var(--ink);font-weight:600;letter-spacing:-.01em}
+  p{margin:14px 0;max-width:66ch}
+  strong{color:var(--ink);font-weight:600}
+
+  /* callouts */
+  .note{position:relative;border:1px solid var(--line-strong);background:var(--card);
+    padding:16px 18px 16px 50px;border-radius:var(--radius);margin:22px 0}
+  .note .ic{position:absolute;left:17px;top:17px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:4px}
+  .note p{margin:0;font-size:15px}
+  .note.key{background:rgba(140,154,134,.18);border-color:var(--accent)}
+  .note.key .ic,.note.key .tag{color:var(--accent)}
+  .note.warn{background:rgba(154,110,63,.12);border-color:var(--warn)}
+  .note.warn .ic,.note.warn .tag{color:var(--warn)}
+  .note.danger{background:rgba(148,88,76,.12);border-color:var(--danger)}
+  .note.danger .ic,.note.danger .tag{color:var(--danger)}
+  .note.info{background:var(--bg-2)}
+  .note.info .ic,.note.info .tag{color:var(--ink-soft)}
+
+  /* code — dark block on light page */
+  .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
+    overflow:hidden}
+  .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
+    border-bottom:1px solid #34322d;background:#191815}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11px;color:#8a8576;letter-spacing:.02em}
+  .codeblock .bar .dotn{font-family:var(--mono);font-size:11px;color:#5a584f;display:flex;gap:5px}
+  .codeblock .bar .dotn i{width:9px;height:9px;border-radius:50%;background:#3a382f;display:inline-block}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    color:#9a958a;background:transparent;border:1px solid #3a382f;border-radius:5px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease);text-transform:uppercase;letter-spacing:.04em}
+  .copybtn:hover{border-color:var(--sage);color:var(--sage)}
+  .copybtn svg{width:12px;height:12px}
+  .copybtn.done{color:var(--sage);border-color:var(--sage)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.85;color:var(--code-fg);overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.85em;background:var(--grey);border:1px solid var(--line);
+    padding:1px 6px;border-radius:4px;color:var(--ink);white-space:nowrap}
+  .cmt{color:#7c7869}.cmd{color:#9DBE9A}.flag{color:#c4abd2}.str{color:#aacba0}.out{color:#6f6c61}.kw{color:#E0B777}.fn{color:#9bb6d4}.num{color:#d98c7e}
+
+  /* tables */
+  .tablewrap{margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:500}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:var(--accent)}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--bg-2)}
+  .resultset td{font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
+
+  /* cards */
+  .grid{display:grid;gap:0;margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--bg-2);padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    transition:background .2s var(--ease)}
+  .grid.two .card:nth-child(2n),.grid.three .card:nth-child(3n){border-right:none}
+  .card:hover{background:var(--card)}
+  .card .ico{width:34px;height:34px;border-radius:var(--radius);display:grid;place-items:center;margin-bottom:13px;
+    border:1px solid var(--line-strong)}
+  .card .ico svg{width:18px;height:18px;color:var(--ink)}
+  .card h4{margin:0 0 6px;font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--ink)}
+  .card p{margin:0;font-size:13.5px;color:var(--ink-soft);max-width:none}
+  .ico.sage{background:var(--sage)} .ico.grey{background:var(--grey)} .ico.taupe{background:var(--taupe)}
+
+  /* anatomy line */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code-bg);border:1px solid var(--line-strong);
+    border-radius:var(--radius);padding:26px 18px;margin:22px 0;text-align:center;line-height:2.7}
+  .anat .tok{padding:5px 10px;border-radius:4px;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(224,183,119,.18);color:#E0B777}
+  .t2{background:rgba(157,190,154,.18);color:#9DBE9A}
+  .t3{background:rgba(155,182,212,.18);color:#9bb6d4}
+  .t4{background:rgba(196,171,210,.18);color:#c4abd2}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:#8a8576;margin-top:8px;letter-spacing:.03em}
+
+  /* step stack */
+  .stack{display:flex;flex-direction:column;gap:0;max-width:540px;margin:20px 0;
+    border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;font-family:var(--mono);font-size:13.5px}
+  .layer{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:12px;background:var(--bg-2);transition:background .15s var(--ease)}
+  .layer:last-child{border-bottom:none}
+  .layer:hover{background:var(--card)}
+  .layer small{color:var(--ink-faint);font-size:11.5px;font-family:var(--sans)}
+  .layer .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;
+    border:1px solid var(--line-strong);color:var(--ink);font-size:11px;flex:none}
+
+  /* details / Q&A */
+  details{background:var(--bg-2);border:1px solid var(--line-strong);border-radius:var(--radius);margin:10px 0;
+    overflow:hidden;transition:background .2s var(--ease)}
+  details[open]{background:var(--card)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:12px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--ink);
+    border-radius:4px;padding:3px 8px;flex:none;font-weight:500}
+  summary .star{color:var(--warn);flex:none;display:inline-flex}
+  summary .star svg{width:14px;height:14px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--ink-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--ink-soft);font-size:14.5px;
+    border-top:1px solid var(--line);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--ink)}
+  details .ans code.inl{color:var(--accent)}
+
+  /* checklist */
+  .check{list-style:none;padding:0;margin:18px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .check li{padding:13px 16px 13px 50px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px;background:var(--bg-2)}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:17px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line-strong);margin-top:64px;padding-top:32px;color:var(--ink-soft);font-size:14.5px}
+  footer h3{margin:0 0 14px;font-family:var(--display)}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);text-decoration:none;
+    border:1px solid var(--line-strong);padding:8px 13px;border-radius:var(--radius);transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--ink-faint)}
+  .reflink:hover{background:var(--ink);color:var(--bg)}
+  .reflink:hover svg{color:var(--bg)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0}
+  .next a{flex:1;min-width:220px;border:1px solid var(--line-strong);border-radius:var(--radius);
+    padding:18px;display:flex;flex-direction:column;gap:4px;text-decoration:none;background:var(--bg-2);transition:all .2s var(--ease)}
+  .next a:hover{background:var(--card)}
+  .next small{color:var(--ink-faint);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .next b{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:8px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+  .endline{margin-top:26px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;
+    border-top:1px solid var(--line);padding-top:18px}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- inline icon sprite (Lucide-style, no emoji) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-null" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+</svg>
+
+<!-- top bar -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      SQL&nbsp;Course
+      <span class="crumb">L3 Track / Module 04</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Window Functions</span>
+    <span class="pill"><b>~2h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- sidebar TOC -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#recap"><svg class="ti"><use href="#i-target"/></svg>Recap &amp; the core idea</a>
+      <a href="#over"><svg class="ti"><use href="#i-layers"/></svg>The OVER() clause</a>
+      <a href="#vs-group"><svg class="ti"><use href="#i-table"/></svg>PARTITION BY vs GROUP BY</a>
+      <a href="#ranking"><svg class="ti"><use href="#i-sort"/></svg>Ranking functions</a>
+      <a href="#top-n"><svg class="ti"><use href="#i-filter"/></svg>Top-N-per-group</a>
+      <a href="#lag-lead"><svg class="ti"><use href="#i-arrow"/></svg>LAG &amp; LEAD</a>
+      <a href="#frames"><svg class="ti"><use href="#i-clock"/></svg>Running totals &amp; frames</a>
+      <a href="#first-last"><svg class="ti"><use href="#i-search"/></svg>FIRST/LAST_VALUE, NTILE</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">Type every query yourself in <code style="font-family:var(--mono);font-size:11px">psql</code> or any Postgres playground. Reading SQL is not knowing SQL.</p>
+  </aside>
+
+  <!-- content -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 04</span>
+      <h1>Window Functions<br>Calculate <span class="u">across rows</span></h1>
+      <p class="lede">An aggregate collapses many rows into one. A <em>window function</em> does the same math — sum, average, rank, running total — but keeps <em>every row intact</em>. Each row holds onto its own identity <em>and</em> gains a value computed over a "window" of related rows. This is the thing <em>GROUP BY</em> simply cannot do, and the single most common topic that separates an L3 SQL candidate from an L1 one.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · core technique</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>needs Modules 00–03</span>
+        <span class="chip"><svg><use href="#i-db"/></svg>PostgreSQL 16</span>
+      </div>
+    </div>
+
+    <!-- 0. RECAP & CORE IDEA -->
+    <section id="recap">
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>Recap &amp; the core idea</h2></div></div>
+      <p>By now you can filter (<code class="inl">WHERE</code>), aggregate (<code class="inl">GROUP BY</code> with <code class="inl">SUM</code>, <code class="inl">AVG</code>, <code class="inl">COUNT</code>), join multiple tables, and reach for subqueries and CTEs to compose logic. Every aggregate you have written so far shares one trait: it <strong>collapses</strong>. Ten employees in a department become a single row holding their average salary. The individual rows are gone.</p>
+
+      <p>That is exactly the limitation window functions remove. Suppose the question is: <em>"show every employee, their salary, and the average salary of their department, on the same row."</em> With <code class="inl">GROUP BY</code> you are stuck — grouping destroys the per-employee rows, so you would need a self-join or a correlated subquery to glue the average back on. A window function answers it directly.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The one-sentence definition</span>
+        <p>A <strong>window function</strong> performs a calculation across a set of rows that are related to the current row — its <em>window</em> — and returns a value <strong>for each row, without collapsing them</strong>. Same family of math as aggregates; opposite effect on row count. GROUP BY reduces rows; a window function annotates them.</p></div>
+
+      <p>The mechanism is a single new clause, <code class="inl">OVER(...)</code>, bolted onto a function call. When the database sees <code class="inl">OVER</code>, it switches that function from "collapse mode" into "window mode." Everything in this module is really just learning what you can put inside those parentheses.</p>
+    </section>
+
+    <!-- 1. OVER CLAUSE -->
+    <section id="over">
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — Anatomy</span><h2>The OVER() clause</h2></div></div>
+      <p>A window function is any aggregate-or-window function followed by <code class="inl">OVER (...)</code>. Three optional pieces live inside the parentheses, and each one shapes the window differently.</p>
+
+      <div class="anat">
+        <span class="tok t1">AVG(salary)</span> <span class="tok t2">OVER</span> (<span class="tok t3">PARTITION BY dept_id</span> <span class="tok t4">ORDER BY salary</span> <span class="tok">frame</span>)
+        <span class="lbl">the function &nbsp;·&nbsp; OVER keyword &nbsp;·&nbsp; split into groups &nbsp;·&nbsp; order within group &nbsp;·&nbsp; which rows count</span>
+      </div>
+
+      <p>Start with the simplest possible window: empty parentheses. <code class="inl">OVER ()</code> means "the window is the entire result set" — every row sees every other row.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">whole-table average attached to every row</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, dept_id, salary,
+       <span class="fn">AVG</span>(salary) <span class="kw">OVER</span> ()<span class="kw">::numeric</span>(<span class="num">10</span>,<span class="num">0</span>) <span class="kw">AS</span> company_avg
+<span class="kw">FROM</span> employees;
+
+<span class="cmt">-- every row keeps its identity AND gets the same company-wide average</span>
+<span class="out"> name  | dept_id | salary | company_avg
+-------+---------+--------+-------------
+ Alice |      10 | 185000 |      119167
+ Bob   |      10 | 120000 |      119167
+ Carol |      20 | 135000 |      119167
+ Dan   |      20 |  98000 |      119167
+ Eve   |      30 | 105000 |      119167
+ Frank |  (null) |  72000 |      119167</span></code></pre>
+      </div>
+
+      <p>Six rows in, six rows out. The average <code class="inl">(185000+120000+135000+98000+105000+72000)/6 = 119167</code> is computed once and stamped onto every row. No <code class="inl">GROUP BY</code> appeared anywhere, and we did not lose a single employee.</p>
+
+      <p>Now add <code class="inl">PARTITION BY dept_id</code>. This splits the rows into independent groups (partitions) and computes the average <em>separately within each one</em> — but, crucially, still emits one row per employee.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">per-department average, rows preserved</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, dept_id, salary,
+       <span class="fn">AVG</span>(salary) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id)<span class="kw">::numeric</span>(<span class="num">10</span>,<span class="num">0</span>) <span class="kw">AS</span> dept_avg
+<span class="kw">FROM</span> employees
+<span class="kw">ORDER BY</span> dept_id, salary <span class="kw">DESC</span>;
+
+<span class="out"> name  | dept_id | salary | dept_avg
+-------+---------+--------+----------
+ Alice |      10 | 185000 |   152500   &lt;- (185000+120000)/2
+ Bob   |      10 | 120000 |   152500
+ Carol |      20 | 135000 |   116500   &lt;- (135000+98000)/2
+ Dan   |      20 |  98000 |   116500
+ Eve   |      30 | 105000 |   105000   &lt;- only one row in dept 30
+ Frank |  (null) |  72000 |    72000   &lt;- NULL is its own partition</span></code></pre>
+      </div>
+
+      <p>Look at what you get: <code class="inl">salary</code> and <code class="inl">dept_avg</code> sitting side by side on every row. Alice can instantly be compared to her department's mean (185000 vs 152500) without losing the row. That side-by-side shape is the whole point, and it is impossible with a plain <code class="inl">GROUP BY</code>.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">NULL forms its own partition</span>
+        <p>Frank's <code class="inl">dept_id</code> is <code class="inl">NULL</code>, so he lands in a partition by himself — his <code class="inl">dept_avg</code> is just his own salary. <code class="inl">PARTITION BY</code> treats all NULLs as one group (the same way <code class="inl">GROUP BY</code> does), which here means a partition of one.</p></div>
+    </section>
+
+    <!-- 2. PARTITION BY vs GROUP BY -->
+    <section id="vs-group">
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — The contrast</span><h2>PARTITION BY vs GROUP BY</h2></div></div>
+      <p>Let us make it razor-sharp. Both clauses carve the data into the same groups using the same columns. The difference is what happens to the rows afterward.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico grey"><svg><use href="#i-layers"/></svg></div>
+          <h4>GROUP BY — collapses</h4>
+          <p>Takes each group and returns <b>one row</b> for it. The detail rows vanish. <code class="inl">SELECT dept_id, AVG(salary)</code> gives you 3 rows for 3 departments. You cannot also show an individual name.</p></div>
+        <div class="card"><div class="ico sage"><svg><use href="#i-table"/></svg></div>
+          <h4>PARTITION BY — preserves</h4>
+          <p>Computes the same per-group value but <b>keeps every original row</b>, stamping the result onto each. 6 employees in, 6 rows out, each carrying its department's average alongside its own salary.</p></div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Same partitions, different row count</span>
+        <p><code class="inl">GROUP BY dept_id</code> and <code class="inl">PARTITION BY dept_id</code> build the <strong>identical buckets</strong>. The only difference: <code class="inl">GROUP BY</code> emits one summary row per bucket and throws the detail away; the window keeps every detail row and attaches the summary. Reach for the window whenever you need both the row <em>and</em> a figure computed over its group at the same time.</p></div>
+
+      <p>A practical tell: if your question contains the word "each" pointing at individual records — "show <em>each</em> order with its running total," "rank <em>each</em> employee within their department" — you almost certainly want a window function, not <code class="inl">GROUP BY</code>.</p>
+    </section>
+
+    <!-- 3. RANKING -->
+    <section id="ranking">
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Ordering within a window</span><h2>Ranking: ROW_NUMBER, RANK, DENSE_RANK</h2></div></div>
+      <p>Once a window has an <code class="inl">ORDER BY</code> inside it, you can number the rows. Three functions do this, and they differ <em>only</em> in how they treat ties. Knowing the difference cold is worth the few minutes it takes.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico sage"><svg><use href="#i-sort"/></svg></div>
+          <h4>ROW_NUMBER()</h4>
+          <p>Always a <b>unique</b> sequential integer: 1, 2, 3, 4… Ties are broken arbitrarily (whatever order the engine picks). No two rows ever share a number.</p></div>
+        <div class="card"><div class="ico grey"><svg><use href="#i-sort"/></svg></div>
+          <h4>RANK()</h4>
+          <p>Ties get the <b>same</b> rank, then the next rank <b>skips</b>. Two rows tied at 1 → next is 3. Leaves gaps, like Olympic medals (two golds, no silver).</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-sort"/></svg></div>
+          <h4>DENSE_RANK()</h4>
+          <p>Ties get the same rank, but the next rank is <b>contiguous</b> — no gap. Two rows tied at 1 → next is 2. Dense, no holes in the sequence.</p></div>
+      </div>
+
+      <p>Here is the classic task: rank employees by salary <em>within each department</em>, highest first. The <code class="inl">PARTITION BY</code> restarts the numbering for every department; the <code class="inl">ORDER BY</code> decides who is rank 1.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">rank within department</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, dept_id, salary,
+       <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> rn,
+       <span class="fn">RANK</span>()       <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> rnk,
+       <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> drnk
+<span class="kw">FROM</span> employees
+<span class="kw">ORDER BY</span> dept_id, salary <span class="kw">DESC</span>;</code></pre>
+      </div>
+
+      <p>To <em>see</em> the tie behavior, imagine department 20 had a tie — say Carol and a second employee both earn 135000. This is the difference the three functions produce on that tie:</p>
+
+      <div class="tablewrap">
+        <table class="resultset">
+          <thead><tr><th>name</th><th>salary</th><th>row_number</th><th>rank</th><th>dense_rank</th></tr></thead>
+          <tbody>
+            <tr><td>Carol</td><td>135000</td><td>1</td><td>1</td><td>1</td></tr>
+            <tr><td>Mallory</td><td>135000</td><td>2</td><td>1</td><td>1</td></tr>
+            <tr><td>Dan</td><td>98000</td><td>3</td><td>3</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Read the bottom row carefully — that is the whole lesson. After a two-way tie: <code class="inl">ROW_NUMBER</code> just kept counting (3). <code class="inl">RANK</code> <strong>skipped</strong> 2 and jumped to 3 (the gap). <code class="inl">DENSE_RANK</code> stayed <strong>contiguous</strong> at 2 (no gap).</p>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">ROW_NUMBER ties are non-deterministic</span>
+        <p>Because <code class="inl">ROW_NUMBER</code> must produce unique numbers, when two rows tie on the <code class="inl">ORDER BY</code> key it breaks the tie <strong>arbitrarily</strong> — and that choice can change between runs. If you need a stable, reproducible ordering, add a tiebreaker column: <code class="inl">ORDER BY salary DESC, emp_id</code>. Never rely on the engine's accidental order.</p></div>
+    </section>
+
+    <!-- 4. TOP-N-PER-GROUP -->
+    <section id="top-n">
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The killer pattern</span><h2>Top-N-per-group</h2></div></div>
+      <p>"Find the highest-paid employee in each department."  the clean answer is the canonical window-function pattern: number the rows, then keep the ones you want. But there is a catch that trips people, and understanding it is the real lesson.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">highest paid per department — CTE pattern</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> name, dept_id, salary,
+         <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id
+                            <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> employees
+)
+<span class="kw">SELECT</span> name, dept_id, salary
+<span class="kw">FROM</span> ranked
+<span class="kw">WHERE</span> rn <span class="num">=</span> <span class="num">1</span>;          <span class="cmt">-- top 1; use rn &lt;= 2 for top 2, etc.</span>
+
+<span class="out"> name  | dept_id | salary
+-------+---------+--------
+ Alice |      10 | 185000
+ Carol |      20 | 135000
+ Eve   |      30 | 105000
+ Frank |  (null) |  72000</span></code></pre>
+      </div>
+
+      <p>The structure is always the same: compute <code class="inl">ROW_NUMBER</code> in an inner query (a CTE or subquery), then filter on that number in an <em>outer</em> query. Change <code class="inl">rn = 1</code> to <code class="inl">rn &lt;= 2</code> and you get the top two per department, and so on.</p>
+
+      <h3>Why you must wrap it</h3>
+      <p>The obvious-looking shortcut <strong>does not work</strong>, and here is the exact reason:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">this is a syntax error</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- ERROR: window functions are not allowed in WHERE</span>
+<span class="kw">SELECT</span> name, dept_id, salary
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id
+                       <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="num">=</span> <span class="num">1</span>;</code></pre>
+      </div>
+
+      <p>Recall the logical order of operations from Module 00: <code class="inl">FROM</code> → <code class="inl">WHERE</code> → <code class="inl">GROUP BY</code> → <code class="inl">HAVING</code> → <code class="inl">SELECT</code> → <code class="inl">ORDER BY</code>. Window functions are computed at the <strong>SELECT stage</strong> — step 5 — because they need the rows already filtered and grouped before they can rank them. But <code class="inl">WHERE</code> runs at step 2, <em>before</em> the window function exists. You cannot filter on a value that has not been calculated yet.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The wrap is a stage shift</span>
+        <p>Wrapping the query in a CTE or subquery forces the window function to finish in the <strong>inner</strong> query's SELECT stage. Its output (<code class="inl">rn</code>) becomes an ordinary column of an ordinary result set. The <strong>outer</strong> query's <code class="inl">WHERE</code> then filters that column like any other. You are not working around a quirk — you are respecting the execution order.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">ROW_NUMBER vs RANK for ties matters here</span>
+        <p>If two employees tie for the top salary in a department and you want <strong>both</strong>, use <code class="inl">RANK() ... WHERE rnk = 1</code> (ties share rank 1, so both survive). <code class="inl">ROW_NUMBER</code> would arbitrarily pick just one. Choosing the right ranking function is a deliberate decision, not a coin flip.</p></div>
+    </section>
+
+    <!-- 5. LAG / LEAD -->
+    <section id="lag-lead">
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — Reaching across rows</span><h2>LAG &amp; LEAD</h2></div></div>
+      <p>Sometimes a row needs to look at its neighbor. <code class="inl">LAG</code> fetches a value from a <strong>previous</strong> row; <code class="inl">LEAD</code> fetches from a <strong>following</strong> row — both relative to the window's <code class="inl">ORDER BY</code>. This makes period-over-period comparisons ("how did this order compare to the last one?") trivial.</p>
+
+      <p>Let us use <code class="inl">orders</code>, sorted by <code class="inl">order_date</code>. Each row should show the previous order's amount and the change from it.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">each order vs the previous order</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> order_id, order_date, amount,
+       <span class="fn">LAG</span>(amount) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> order_date) <span class="kw">AS</span> prev_amount,
+       amount <span class="num">-</span> <span class="fn">LAG</span>(amount) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> order_date) <span class="kw">AS</span> delta
+<span class="kw">FROM</span> orders
+<span class="kw">ORDER BY</span> order_date;
+
+<span class="out"> order_id | order_date | amount | prev_amount | delta
+----------+------------+--------+-------------+--------
+     1001 | 2024-01-05 |    500 |      (null) | (null)   &lt;- no prior row
+     1002 | 2024-01-09 |    800 |         500 |    300
+     1003 | 2024-01-15 |    300 |         800 |   -300
+     1004 | 2024-01-22 |    950 |         300 |    650</span></code></pre>
+      </div>
+
+      <p>The very first row has no predecessor, so <code class="inl">LAG</code> returns <code class="inl">NULL</code> — and any arithmetic with that NULL is also NULL (recall Module 00's three-valued logic). <code class="inl">LEAD(amount)</code> works identically but looks <em>forward</em>, which is handy for "what is the next order" style questions.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Offset and default arguments</span>
+        <p>Both take two optional extra arguments: <code class="inl">LAG(amount, 2, 0)</code> means "go back <strong>2</strong> rows, and if there is no such row, use <strong>0</strong> instead of NULL." The offset defaults to 1 and the fallback defaults to NULL. Supplying a default like <code class="inl">0</code> is a clean way to avoid NULL-propagation in the very first rows.</p></div>
+
+      <p>You can partition too. <code class="inl">LAG(amount) OVER (PARTITION BY emp_id ORDER BY order_date)</code> compares each order to that employee's <em>own</em> previous order — the <code class="inl">LAG</code> resets at every employee boundary, never bleeding across partitions.</p>
+    </section>
+
+    <!-- 6. RUNNING TOTALS & FRAMES -->
+    <section id="frames">
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — The frame clause</span><h2>Running totals &amp; frames</h2></div></div>
+      <p>An aggregate inside a window with an <code class="inl">ORDER BY</code> becomes a <strong>running</strong> aggregate. A running total of order amounts — the cumulative sum as time moves forward — is the textbook example.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">running total of order amounts</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> order_id, order_date, amount,
+       <span class="fn">SUM</span>(amount) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> order_date
+                          <span class="kw">ROWS BETWEEN</span> <span class="kw">UNBOUNDED PRECEDING</span>
+                                   <span class="kw">AND</span> <span class="kw">CURRENT ROW</span>) <span class="kw">AS</span> running_total
+<span class="kw">FROM</span> orders
+<span class="kw">ORDER BY</span> order_date;
+
+<span class="out"> order_id | order_date | amount | running_total
+----------+------------+--------+---------------
+     1001 | 2024-01-05 |    500 |           500
+     1002 | 2024-01-09 |    800 |          1300
+     1003 | 2024-01-15 |    300 |          1600
+     1004 | 2024-01-22 |    950 |          2550</span></code></pre>
+      </div>
+
+      <p>The new piece is the <strong>frame clause</strong>: <code class="inl">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code>. It defines <em>exactly which rows</em> in the ordered window contribute to each row's calculation. Here: "every row from the very start of the partition up to and including the current one." So row 3's total covers rows 1–3, giving 1600.</p>
+
+      <p>You can build other windows by changing the frame bounds:</p>
+
+      <div class="stack">
+        <div class="layer"><span><code class="inl">UNBOUNDED PRECEDING</code> → <code class="inl">CURRENT ROW</code></span><small>running total (start of partition to here)</small></div>
+        <div class="layer"><span><code class="inl">2 PRECEDING</code> → <code class="inl">CURRENT ROW</code></span><small>3-row moving window (this row + 2 before)</small></div>
+        <div class="layer"><span><code class="inl">1 PRECEDING</code> → <code class="inl">1 FOLLOWING</code></span><small>centered 3-row window (neighbour each side)</small></div>
+        <div class="layer"><span><code class="inl">CURRENT ROW</code> → <code class="inl">UNBOUNDED FOLLOWING</code></span><small>reverse running total (here to the end)</small></div>
+      </div>
+
+      <h3>ROWS vs RANGE — the surprise</h3>
+      <p>The frame can count in two units, and confusing them is a genuine trap. <code class="inl">ROWS</code> counts <strong>physical rows</strong> — "the 2 rows before this one," full stop. <code class="inl">RANGE</code> counts by <strong>value</strong> of the <code class="inl">ORDER BY</code> key — it includes <em>all peer rows that share the current row's ordering value</em>, treating them as a single logical block.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The default frame is RANGE, not ROWS</span>
+        <p>If you write <code class="inl">SUM(amount) OVER (ORDER BY order_date)</code> with <strong>no</strong> explicit frame, PostgreSQL silently applies <code class="inl">RANGE UNBOUNDED PRECEDING AND CURRENT ROW</code>. Usually identical to <code class="inl">ROWS</code> — until you have <strong>ties</strong> in the <code class="inl">ORDER BY</code> column. With <code class="inl">RANGE</code>, two orders on the <em>same date</em> are peers: each one's running total includes <em>both</em>, so they show the <strong>same</strong> cumulative value. People expecting a row-by-row total are baffled when the running total "jumps" by both amounts at once. When you mean physical rows, <strong>write <code class="inl">ROWS</code> explicitly.</strong></p></div>
+
+      <p>A moving average — say, the average of the last three orders — is just a <code class="inl">ROWS</code> frame around <code class="inl">AVG</code>: <code class="inl">AVG(amount) OVER (ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</code>. The frame is what turns a static aggregate into a sliding one.</p>
+    </section>
+
+    <!-- 7. FIRST/LAST_VALUE, NTILE -->
+    <section id="first-last">
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — More window tools</span><h2>FIRST_VALUE, LAST_VALUE, NTILE</h2></div></div>
+      <p>Beyond ranking and offsets, a few more functions reach into the window to pull out positional values or to slice rows into buckets.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico sage"><svg><use href="#i-search"/></svg></div>
+          <h4>FIRST_VALUE / LAST_VALUE</h4>
+          <p>Return the value from the <b>first</b> or <b>last</b> row of the (ordered) frame. E.g. the top earner's name attached to every row in the department. <code class="inl">NTH_VALUE(col, n)</code> grabs the n-th row.</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-layers"/></svg></div>
+          <h4>NTILE(n)</h4>
+          <p>Splits the ordered window into <b>n roughly-equal buckets</b> and labels each row 1…n. <code class="inl">NTILE(4)</code> gives quartiles, <code class="inl">NTILE(100)</code> percentiles. Great for "which salary band is this person in?"</p></div>
+      </div>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">top earner per dept + salary quartile</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, dept_id, salary,
+       <span class="fn">FIRST_VALUE</span>(name) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id
+                              <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> dept_top_earner,
+       <span class="fn">NTILE</span>(<span class="num">4</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> salary_quartile
+<span class="kw">FROM</span> employees;</code></pre>
+      </div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The LAST_VALUE default-frame trap</span>
+        <p>Naively, <code class="inl">LAST_VALUE(name) OVER (PARTITION BY dept_id ORDER BY salary DESC)</code> looks like it returns the lowest earner. It does <strong>not</strong>. The default frame is <code class="inl">RANGE ... CURRENT ROW</code>, so the frame ends at the current row — meaning <code class="inl">LAST_VALUE</code> just returns the current row's own value, which is useless. To get the true last row of the partition, give it a full frame: <code class="inl">LAST_VALUE(name) OVER (PARTITION BY dept_id ORDER BY salary DESC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)</code>. <code class="inl">FIRST_VALUE</code> is safe because the default frame already starts at the partition's first row.</p></div>
+
+      <p>For true statistical percentiles, PostgreSQL offers <code class="inl">PERCENT_RANK()</code> and <code class="inl">CUME_DIST()</code> as window functions, plus the ordered-set aggregates <code class="inl">PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary)</code> for an interpolated median. <code class="inl">NTILE</code> is the quick, good-enough bucketing tool for most reporting.</p>
+    </section>
+
+    <!-- 8. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Practice</span><h2>Hands-on — do this now</h2></div></div>
+      <p>Use the same three-table schema from Module 00, and add a handful of <code class="inl">orders</code> rows with varied <code class="inl">order_date</code> and <code class="inl">amount</code> values (include at least two orders on the same date — you will want that for the ROWS-vs-RANGE task). Write each query <em>before</em> peeking at any hint.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Show every employee with their <code class="inl">salary</code> and the <strong>company-wide average</strong> on the same row, using <code class="inl">AVG(...) OVER ()</code>. Confirm row count stays at 6.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Add a <code class="inl">dept_avg</code> column with <code class="inl">PARTITION BY dept_id</code>, and a third column <code class="inl">salary - dept_avg</code> showing how far each person is above or below their department mean.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Produce <code class="inl">ROW_NUMBER</code>, <code class="inl">RANK</code>, and <code class="inl">DENSE_RANK</code> for employees ordered by salary descending (whole company). Then introduce a salary tie and watch the three columns diverge.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Use the CTE + <code class="inl">ROW_NUMBER</code> pattern to return the <strong>highest-paid employee per department</strong>. Then change it to the top 2.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Try filtering on <code class="inl">ROW_NUMBER() ... = 1</code> directly in <code class="inl">WHERE</code>, watch it error, and explain to yourself why (which execution stage).</li>
+        <li><svg><use href="#i-checkbox"/></svg>On <code class="inl">orders</code> ordered by date, add <code class="inl">prev_amount</code> via <code class="inl">LAG</code> and <code class="inl">delta = amount - prev_amount</code>. Then use <code class="inl">LAG(amount, 1, 0)</code> so the first row shows 0 instead of NULL.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Build a <strong>running total</strong> of <code class="inl">amount</code> with an explicit <code class="inl">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> frame. Then remove the frame entirely and compare the two same-date rows — observe the RANGE default difference.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Compute a <strong>3-order moving average</strong> of <code class="inl">amount</code> with <code class="inl">ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code>. Then try <code class="inl">LAST_VALUE</code> and reproduce the default-frame trap before fixing it with a full frame.</li>
+      </ul>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict, then run</span>
+        <p>Before each query executes, say out loud what value you expect in the new column for the first two or three rows. Window functions are where intuition quietly drifts from reality — especially around frames and ties. When the output disagrees with your prediction, <em>that gap is the lesson</em>. Chase it before moving on.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-window.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Window Functions — PostgreSQL tutorial</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-window.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Window function reference</a>
+      </div>
+
+      <div class="next">
+        <a href="../03-subqueries-cte/03-subqueries-cte.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 03 — Subqueries &amp; CTEs</b></span></a>
+        <a href="../05-indexing-query-reasoning/05-indexing-query-reasoning.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 05 — Indexing &amp; Query Reasoning</b></span></a>
+      </div>
+      <p class="endline">SQL L3 Track · Module 04 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 05 — Indexing &amp; Query Reasoning.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

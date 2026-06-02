@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 03 — Subqueries &amp; CTEs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAE6DD;
+    --bg-2:#E3DED3;
+    --card:#DED9CE;
+    --grey:#C8C5BC;
+    --sage:#8C9A86;
+    --sage-soft:#AEB8A6;
+    --taupe:#BBB1A1;
+    --ink:#1C1C1A;
+    --ink-soft:#45443E;
+    --ink-faint:#5C5A51;
+    --line:#CBC5B8;
+    --line-strong:#1C1C1A;
+    --accent:#5E6B57;
+    --code-bg:#1E1D1A;
+    --code-fg:#E7E3DA;
+    --warn:#9A6E3F;
+    --danger:#94584C;
+    --radius:5px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --display:"Space Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 0 rgba(28,28,26,.05);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.72;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-thickness:1px;text-decoration-color:var(--ink-faint);transition:all .18s var(--ease)}
+  a:hover{text-decoration-color:var(--ink)}
+  ::selection{background:rgba(140,154,134,.4)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:200;background:var(--sage)}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(234,230,221,.88);
+    backdrop-filter:blur(10px) saturate(120%);border-bottom:1px solid var(--line-strong)}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:baseline;gap:11px;font-family:var(--display);font-weight:700;
+    font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+  .brand .crumb{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.04em;
+    color:var(--ink-faint);text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);
+    text-transform:uppercase;border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px;white-space:nowrap}
+  .pill b{color:var(--accent);font-weight:600}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;
+    grid-template-columns:230px minmax(0,1fr);gap:54px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:70px;align-self:start;padding:38px 0;max-height:calc(100vh - 70px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);padding:0 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  aside nav{display:flex;flex-direction:column;gap:1px;margin-top:12px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius);
+    color:var(--ink-faint);font-size:13.5px;font-weight:500;line-height:1.3;text-decoration:none;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:15px;height:15px;flex:none;opacity:.6}
+  aside nav a:hover{color:var(--ink)}
+  aside nav a.active{color:var(--ink);background:var(--card);border-left-color:var(--sage)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:20px 10px 0;font-size:12px;color:var(--ink-faint);line-height:1.55}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:16px 0 4px;border-bottom:1px solid var(--line-strong)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line-strong);border-radius:999px;padding:6px 12px;font-size:12.5px}
+    aside nav a.active{background:var(--sage);color:#0f120e}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:42px 0 120px;min-width:0;max-width:740px}
+
+  /* hero */
+  .hero{padding:6px 0 34px;border-bottom:1px solid var(--line-strong);margin-bottom:8px}
+  .eyebrow{display:inline-flex;gap:9px;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+  h1{font-family:var(--display);font-size:clamp(34px,5.6vw,58px);line-height:1.02;
+    margin:22px 0 18px;letter-spacing:-.035em;font-weight:700}
+  h1 .u{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;
+    text-decoration-color:var(--ink)}
+  .lede{color:var(--ink-soft);font-size:18.5px;max-width:60ch;margin:0;line-height:1.6}
+  .lede em{color:var(--ink);font-style:normal;font-weight:600;text-decoration:underline;
+    text-decoration-color:var(--sage);text-decoration-thickness:2px;text-underline-offset:3px}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:28px;border:1px solid var(--line-strong);
+    border-radius:var(--radius);overflow:hidden}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.02em;color:var(--ink-soft);padding:11px 15px;border-right:1px solid var(--line);flex:1;
+    min-width:max-content;background:var(--bg-2)}
+  .chip:last-child{border-right:none}
+  .chip svg{width:15px;height:15px;color:var(--ink-faint)}
+  .chip b{color:var(--accent)}
+  @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* section heads — editorial */
+  section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
+  .sec-head .num{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);
+    width:34px;height:34px;display:grid;place-items:center;border:1.5px solid var(--line-strong);
+    border-radius:var(--radius);flex:none;margin-top:4px}
+  .sec-head .htext{flex:1}
+  .sec-head .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:5px}
+  h2{font-family:var(--display);font-size:30px;margin:0;letter-spacing:-.025em;font-weight:700;line-height:1.12}
+  h3{font-family:var(--display);font-size:19px;margin:32px 0 4px;color:var(--ink);font-weight:600;letter-spacing:-.01em}
+  p{margin:14px 0;max-width:66ch}
+  strong{color:var(--ink);font-weight:600}
+
+  /* callouts */
+  .note{position:relative;border:1px solid var(--line-strong);background:var(--card);
+    padding:16px 18px 16px 50px;border-radius:var(--radius);margin:22px 0}
+  .note .ic{position:absolute;left:17px;top:17px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:4px}
+  .note p{margin:0;font-size:15px}
+  .note.key{background:rgba(140,154,134,.18);border-color:var(--accent)}
+  .note.key .ic,.note.key .tag{color:var(--accent)}
+  .note.warn{background:rgba(154,110,63,.12);border-color:var(--warn)}
+  .note.warn .ic,.note.warn .tag{color:var(--warn)}
+  .note.danger{background:rgba(148,88,76,.12);border-color:var(--danger)}
+  .note.danger .ic,.note.danger .tag{color:var(--danger)}
+  .note.info{background:var(--bg-2)}
+  .note.info .ic,.note.info .tag{color:var(--ink-soft)}
+
+  /* code — dark block on light page */
+  .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
+    overflow:hidden}
+  .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
+    border-bottom:1px solid #34322d;background:#191815}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11px;color:#8a8576;letter-spacing:.02em}
+  .codeblock .bar .dotn{font-family:var(--mono);font-size:11px;color:#5a584f;display:flex;gap:5px}
+  .codeblock .bar .dotn i{width:9px;height:9px;border-radius:50%;background:#3a382f;display:inline-block}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    color:#9a958a;background:transparent;border:1px solid #3a382f;border-radius:5px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease);text-transform:uppercase;letter-spacing:.04em}
+  .copybtn:hover{border-color:var(--sage);color:var(--sage)}
+  .copybtn svg{width:12px;height:12px}
+  .copybtn.done{color:var(--sage);border-color:var(--sage)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.85;color:var(--code-fg);overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.85em;background:var(--grey);border:1px solid var(--line);
+    padding:1px 6px;border-radius:4px;color:var(--ink);white-space:nowrap}
+  .cmt{color:#7c7869}.cmd{color:#9DBE9A}.flag{color:#c4abd2}.str{color:#aacba0}.out{color:#6f6c61}.kw{color:#E0B777}.fn{color:#9bb6d4}.num{color:#d98c7e}
+
+  /* tables */
+  .tablewrap{margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:500}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:var(--accent)}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--bg-2)}
+  .resultset td{font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
+
+  /* cards */
+  .grid{display:grid;gap:0;margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--bg-2);padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    transition:background .2s var(--ease)}
+  .grid.two .card:nth-child(2n),.grid.three .card:nth-child(3n){border-right:none}
+  .card:hover{background:var(--card)}
+  .card .ico{width:34px;height:34px;border-radius:var(--radius);display:grid;place-items:center;margin-bottom:13px;
+    border:1px solid var(--line-strong)}
+  .card .ico svg{width:18px;height:18px;color:var(--ink)}
+  .card h4{margin:0 0 6px;font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--ink)}
+  .card p{margin:0;font-size:13.5px;color:var(--ink-soft);max-width:none}
+  .ico.sage{background:var(--sage)} .ico.grey{background:var(--grey)} .ico.taupe{background:var(--taupe)}
+
+  /* anatomy line */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code-bg);border:1px solid var(--line-strong);
+    border-radius:var(--radius);padding:26px 18px;margin:22px 0;text-align:center;line-height:2.7}
+  .anat .tok{padding:5px 10px;border-radius:4px;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(224,183,119,.18);color:#E0B777}
+  .t2{background:rgba(157,190,154,.18);color:#9DBE9A}
+  .t3{background:rgba(155,182,212,.18);color:#9bb6d4}
+  .t4{background:rgba(196,171,210,.18);color:#c4abd2}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:#8a8576;margin-top:8px;letter-spacing:.03em}
+
+  /* step stack */
+  .stack{display:flex;flex-direction:column;gap:0;max-width:540px;margin:20px 0;
+    border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;font-family:var(--mono);font-size:13.5px}
+  .layer{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:12px;background:var(--bg-2);transition:background .15s var(--ease)}
+  .layer:last-child{border-bottom:none}
+  .layer:hover{background:var(--card)}
+  .layer small{color:var(--ink-faint);font-size:11.5px;font-family:var(--sans)}
+  .layer .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;
+    border:1px solid var(--line-strong);color:var(--ink);font-size:11px;flex:none}
+
+  /* details / Q&A */
+  details{background:var(--bg-2);border:1px solid var(--line-strong);border-radius:var(--radius);margin:10px 0;
+    overflow:hidden;transition:background .2s var(--ease)}
+  details[open]{background:var(--card)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:12px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--ink);
+    border-radius:4px;padding:3px 8px;flex:none;font-weight:500}
+  summary .star{color:var(--warn);flex:none;display:inline-flex}
+  summary .star svg{width:14px;height:14px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--ink-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--ink-soft);font-size:14.5px;
+    border-top:1px solid var(--line);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--ink)}
+  details .ans code.inl{color:var(--accent)}
+
+  /* checklist */
+  .check{list-style:none;padding:0;margin:18px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .check li{padding:13px 16px 13px 50px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px;background:var(--bg-2)}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:17px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line-strong);margin-top:64px;padding-top:32px;color:var(--ink-soft);font-size:14.5px}
+  footer h3{margin:0 0 14px;font-family:var(--display)}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);text-decoration:none;
+    border:1px solid var(--line-strong);padding:8px 13px;border-radius:var(--radius);transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--ink-faint)}
+  .reflink:hover{background:var(--ink);color:var(--bg)}
+  .reflink:hover svg{color:var(--bg)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0}
+  .next a{flex:1;min-width:220px;border:1px solid var(--line-strong);border-radius:var(--radius);
+    padding:18px;display:flex;flex-direction:column;gap:4px;text-decoration:none;background:var(--bg-2);transition:all .2s var(--ease)}
+  .next a:hover{background:var(--card)}
+  .next small{color:var(--ink-faint);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .next b{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:8px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+  .endline{margin-top:26px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;
+    border-top:1px solid var(--line);padding-top:18px}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- inline icon sprite (Lucide-style, no emoji) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-null" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+</svg>
+
+<!-- top bar -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      SQL&nbsp;Course
+      <span class="crumb">L3 Track / Module 03</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Subqueries &amp; CTEs</span>
+    <span class="pill"><b>~2h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- sidebar TOC -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#idea"><svg class="ti"><use href="#i-target"/></svg>The nesting idea</a>
+      <a href="#scalar"><svg class="ti"><use href="#i-search"/></svg>Scalar subqueries</a>
+      <a href="#in"><svg class="ti"><use href="#i-filter"/></svg>WHERE … IN / NOT IN</a>
+      <a href="#exists"><svg class="ti"><use href="#i-layers"/></svg>EXISTS &amp; correlation</a>
+      <a href="#nulltrap"><svg class="ti"><use href="#i-null"/></svg>The NOT IN + NULL trap</a>
+      <a href="#anyall"><svg class="ti"><use href="#i-sort"/></svg>ANY / ALL</a>
+      <a href="#derived"><svg class="ti"><use href="#i-table"/></svg>Subqueries in FROM</a>
+      <a href="#cte"><svg class="ti"><use href="#i-db"/></svg>CTEs with WITH</a>
+      <a href="#recursive"><svg class="ti"><use href="#i-key"/></svg>Recursive CTEs</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">A query returns a table, so a query can stand wherever a table or a value can. That single closure rule is the whole chapter — type every example in <code style="font-family:var(--mono);font-size:11px">psql</code>.</p>
+  </aside>
+
+  <!-- content -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 03</span>
+      <h1>Subqueries &amp; CTEs<br>queries inside <span class="u">queries</span></h1>
+      <p class="lede">Every SQL query returns a table. Which means a query can sit <em>inside</em> another query — as a single value, as a list to match against, as a whole derived table, or as a named, reusable building block. This module is about <em>composability</em>: turning one hard question into a few easy ones stacked together, all the way up to a recursive walk of an org chart.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · composition</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>needs Modules 00–02</span>
+        <span class="chip"><svg><use href="#i-db"/></svg>PostgreSQL 16</span>
+      </div>
+    </div>
+
+    <!-- 0. THE NESTING IDEA -->
+    <section id="idea">
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>A query's result is itself a table</h2></div></div>
+      <p>By now you can <code class="inl">SELECT</code> columns, <code class="inl">WHERE</code>-filter rows (Module 00), <code class="inl">JOIN</code> tables together (Module 01), and <code class="inl">GROUP BY</code> + aggregate (Module 02). One property has quietly held all of that together: <strong>every SQL query returns a table</strong>. Tables go in, a table comes out. That is called the <strong>closure property</strong>, and it is the entire reason subqueries exist.</p>
+      <p>If a query produces a table, and SQL operates on tables, then a query can stand anywhere a table is expected. A query that returns one row and one column behaves like a single value — so it can go where a value goes. A query that returns one column of many rows behaves like a list. A query that returns a full grid behaves like a table you can select from. A <strong>subquery</strong> (or <em>inner query</em>) is just a <code class="inl">SELECT</code> wrapped in parentheses and dropped into a spot in an outer query.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico grey"><svg><use href="#i-search"/></svg></div>
+          <h4>As a value</h4>
+          <p>Returns one row, one column. Usable anywhere a literal like <code class="inl">100000</code> would go — typically in <code class="inl">SELECT</code> or <code class="inl">WHERE</code>.</p></div>
+        <div class="card"><div class="ico sage"><svg><use href="#i-filter"/></svg></div>
+          <h4>As a list</h4>
+          <p>Returns one column, many rows. Feeds <code class="inl">IN (...)</code>, <code class="inl">ANY</code>, <code class="inl">ALL</code> — "is this value among those?"</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-table"/></svg></div>
+          <h4>As a table</h4>
+          <p>Returns a full grid. Lives in <code class="inl">FROM</code> as a <b>derived table</b>, or named up top as a <b>CTE</b>.</p></div>
+      </div>
+
+      <p>The win is <strong>composability</strong>. Instead of cramming a hard question into one tangled statement, you answer a simpler sub-question first, then build on its result. This module walks every place a subquery can live, the one trap that catches almost everyone (<code class="inl">NOT IN</code> with NULLs), and finishes with Common Table Expressions — the readable, named form that makes deep nesting unnecessary.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">One rule, many shapes</span>
+        <p>There is really only one idea here: <strong>a result is a table, so a query can go wherever a table or value can</strong>. Scalar subqueries, <code class="inl">IN</code>-lists, <code class="inl">EXISTS</code>, derived tables, and CTEs are all just <em>where</em> you plug that result in. Hold the one rule and the syntax stops feeling like five separate features.</p></div>
+    </section>
+
+    <!-- 1. SCALAR SUBQUERIES -->
+    <section id="scalar">
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — One value</span><h2>Scalar subqueries</h2></div></div>
+      <p>A <strong>scalar subquery</strong> returns exactly one row and one column — a single value. Because it <em>is</em> a value, you can use it anywhere a value is legal: in a <code class="inl">WHERE</code> comparison, in the <code class="inl">SELECT</code> list, even inside an expression. The classic use is comparing each row against an aggregate of the whole table, which a plain <code class="inl">WHERE</code> cannot do on its own.</p>
+      <p>The question "who earns above the company average?" has a chicken-and-egg shape: you need the average before you can compare. A scalar subquery computes that average first, then the outer query compares every row to it.</p>
+
+      <div class="anat">
+        <span class="tok t1">WHERE</span> <span class="tok t2">salary</span> <span class="tok">&gt;</span> <span class="tok t3">(SELECT AVG(salary) FROM employees)</span>
+        <span class="lbl">column &nbsp;·&nbsp; comparison &nbsp;·&nbsp; scalar subquery → one value</span>
+      </div>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">earning above the company average</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, salary
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> salary <span class="num">&gt;</span> (<span class="kw">SELECT</span> <span class="fn">AVG</span>(salary) <span class="kw">FROM</span> employees);
+
+<span class="cmt">-- the inner query first computes one number: AVG = 119166.67</span>
+<span class="cmt">-- then WHERE keeps rows whose salary beats it</span>
+<span class="out"> name  | salary
+-------+---------
+ Alice | 185000
+ Bob   | 120000
+ Carol | 135000</span></code></pre>
+      </div>
+
+      <p>You can also drop a scalar subquery straight into the <code class="inl">SELECT</code> list to attach a computed value to every row — here, each person's salary alongside the gap to the company average:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">scalar subquery in the SELECT list</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name,
+       salary,
+       salary <span class="num">-</span> (<span class="kw">SELECT</span> <span class="fn">AVG</span>(salary) <span class="kw">FROM</span> employees) <span class="kw">AS</span> gap_to_avg
+<span class="kw">FROM</span> employees;</code></pre>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">It must return one value</span>
+        <p>A scalar subquery <strong>must</strong> return at most one row and one column. If it returns more than one row, PostgreSQL raises <code class="inl">ERROR: more than one row returned by a subquery used as an expression</code>. If it returns zero rows, the result is <code class="inl">NULL</code> (which can be surprising in arithmetic). When in doubt, make sure the inner query is an aggregate or has a key-equality filter that guarantees one row.</p></div>
+    </section>
+
+    <!-- 2. IN / NOT IN -->
+    <section id="in">
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — A list</span><h2>Subqueries in WHERE with IN / NOT IN</h2></div></div>
+      <p>When the inner query returns <strong>one column but many rows</strong>, it behaves like a list, and <code class="inl">IN</code> asks "is this value among those?" In Module 00 you used <code class="inl">IN (10, 20)</code> with a hand-written list. Now the list comes from another query — so it stays correct as the data changes.</p>
+      <p>"Which employees work in a department located in NYC?" The departments in NYC live in the <code class="inl">departments</code> table; the people live in <code class="inl">employees</code>. A subquery pulls the matching <code class="inl">dept_id</code>s, and <code class="inl">IN</code> filters employees against them.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">IN with a subquery list</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, dept_id
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> dept_id <span class="kw">IN</span> (
+        <span class="kw">SELECT</span> dept_id <span class="kw">FROM</span> departments
+        <span class="kw">WHERE</span> location <span class="num">=</span> <span class="str">'NYC'</span>
+      );
+
+<span class="cmt">-- inner query → the set of NYC dept_ids, e.g. {10, 20}</span>
+<span class="cmt">-- outer query → employees whose dept_id is in that set</span></code></pre>
+      </div>
+
+      <p><code class="inl">NOT IN</code> is the negation: "this value is among <em>none</em> of those." Read literally it seems obvious — "employees not in any NYC department" — and for clean, NULL-free data it works. But <code class="inl">NOT IN</code> hides a trap so common it gets its own section next. For now, know that both forms exist and that the inner query must return a single column to feed them.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">IN vs a join</span>
+        <p>You could also answer this with a <code class="inl">JOIN</code> to <code class="inl">departments</code>. The difference: <code class="inl">IN</code> returns each employee <strong>once</strong> regardless of how many NYC rows match, while a join can multiply rows if the right side is not unique. When you only want to <em>test membership</em> and not pull columns from the other table, <code class="inl">IN</code> (or <code class="inl">EXISTS</code>) is the cleaner intent.</p></div>
+    </section>
+
+    <!-- 3. EXISTS / CORRELATED -->
+    <section id="exists">
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Per-row tests</span><h2>EXISTS, NOT EXISTS &amp; correlated subqueries</h2></div></div>
+      <p>So far the inner queries were <strong>self-contained</strong>: they could run on their own, once, and the outer query reused the result. A <strong>correlated subquery</strong> is different — it <em>references a column from the outer row</em>, so it cannot run standalone. Conceptually it re-runs once per outer row, with that row's values plugged in. It is the SQL equivalent of a nested loop.</p>
+      <p><code class="inl">EXISTS (subquery)</code> is true if the subquery returns <strong>at least one row</strong>, false otherwise. It does not care <em>what</em> the rows contain — only whether any exist. That makes it the natural tool for "does a related row exist?" questions, and it pairs perfectly with correlation.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">departments that HAVE at least one employee</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> d.dept_name
+<span class="kw">FROM</span> departments d
+<span class="kw">WHERE</span> <span class="kw">EXISTS</span> (
+        <span class="kw">SELECT</span> <span class="num">1</span>                       <span class="cmt">-- value is irrelevant; only existence matters</span>
+        <span class="kw">FROM</span> employees e
+        <span class="kw">WHERE</span> e.dept_id <span class="num">=</span> d.dept_id     <span class="cmt">-- &lt;- correlation: d.dept_id is the OUTER row</span>
+      );</code></pre>
+      </div>
+
+      <p>For each department row <code class="inl">d</code>, the inner query asks "is there any employee whose <code class="inl">dept_id</code> equals <em>this</em> department's id?" The reference to <code class="inl">d.dept_id</code> is what makes it correlated. <code class="inl">SELECT 1</code> is idiomatic: since <code class="inl">EXISTS</code> ignores the selected values, we select a cheap constant.</p>
+
+      <p>Flip it to <code class="inl">NOT EXISTS</code> for the opposite — "departments with <strong>no</strong> employees at all":</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">departments with NO employees</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> d.dept_name
+<span class="kw">FROM</span> departments d
+<span class="kw">WHERE</span> <span class="kw">NOT EXISTS</span> (
+        <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> employees e
+        <span class="kw">WHERE</span> e.dept_id <span class="num">=</span> d.dept_id
+      );</code></pre>
+      </div>
+
+      <h3>EXISTS vs IN — same answer, different feel</h3>
+      <p>Both can express membership tests, and a good planner often optimizes them similarly. The intuition:</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico sage"><svg><use href="#i-filter"/></svg></div>
+          <h4><code class="inl">IN (subquery)</code></h4>
+          <p>Best when the inner list is <b>small and independent</b>. Builds the list once, then checks membership. Reads naturally as "value in this set."</p></div>
+        <div class="card"><div class="ico grey"><svg><use href="#i-layers"/></svg></div>
+          <h4><code class="inl">EXISTS (correlated)</code></h4>
+          <p>Best for "does a related row exist?" It can <b>stop at the first match</b> per outer row, and crucially it is <b>NULL-safe</b> where <code class="inl">NOT IN</code> is not.</p></div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Execution model</span>
+        <p>A correlated subquery is a conceptual <strong>nested loop</strong>: for each outer row, run the inner query with that row's values. In practice the planner may rewrite it into a hash or merge join, so "re-runs N times" is the mental model, not always the literal execution. But understanding it as a per-row test is what lets you reason about <code class="inl">EXISTS</code> correctly.</p></div>
+    </section>
+
+    <!-- 4. NOT IN NULL TRAP -->
+    <section id="nulltrap">
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The big trap</span><h2>The NOT IN + NULL trap</h2></div></div>
+      <p>This is the most famous subquery gotcha, and it follows directly from the three-valued logic you met in Module 00. The rule: <strong>if the subquery feeding <code class="inl">NOT IN</code> returns even one <code class="inl">NULL</code>, the whole <code class="inl">NOT IN</code> returns no rows</strong> — silently, with no error. Your query looks right, runs fine, and gives the wrong answer.</p>
+      <p>Why? <code class="inl">x NOT IN (a, b, NULL)</code> is defined as <code class="inl">x &lt;&gt; a AND x &lt;&gt; b AND x &lt;&gt; NULL</code>. That last comparison, <code class="inl">x &lt;&gt; NULL</code>, is <strong>unknown</strong> — never true. And <code class="inl">true AND unknown</code> collapses to <strong>unknown</strong>, which <code class="inl">WHERE</code> treats as not-true. So every row fails the test, even rows that clearly should match.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the bug — employees NOT in any NYC dept</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- Suppose one departments row has a NULL dept_id (bad data, or an outer join upstream).</span>
+<span class="cmt">-- This returns ZERO rows even though NYC clearly excludes some people.</span>
+<span class="kw">SELECT</span> name
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> dept_id <span class="kw">NOT IN</span> (
+        <span class="kw">SELECT</span> dept_id <span class="kw">FROM</span> departments   <span class="cmt">-- if ANY dept_id here is NULL...</span>
+      );                                  <span class="cmt">-- ...the whole NOT IN becomes unknown → 0 rows</span></code></pre>
+      </div>
+
+      <p>There are two robust fixes. The preferred one is to use <strong><code class="inl">NOT EXISTS</code></strong>, which uses a per-row existence test and is immune to the NULL collapse. The alternative is to <strong>filter the NULLs out</strong> of the subquery explicitly.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">two correct fixes</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- FIX 1 (preferred): NOT EXISTS is NULL-safe</span>
+<span class="kw">SELECT</span> e.name
+<span class="kw">FROM</span> employees e
+<span class="kw">WHERE</span> <span class="kw">NOT EXISTS</span> (
+        <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> departments d
+        <span class="kw">WHERE</span> d.dept_id <span class="num">=</span> e.dept_id
+      );
+
+<span class="cmt">-- FIX 2: strip NULLs from the subquery before NOT IN sees them</span>
+<span class="kw">SELECT</span> name
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> dept_id <span class="kw">NOT IN</span> (
+        <span class="kw">SELECT</span> dept_id <span class="kw">FROM</span> departments
+        <span class="kw">WHERE</span> dept_id <span class="kw">IS NOT NULL</span>     <span class="cmt">-- guard against the trap</span>
+      );</code></pre>
+      </div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
+        <p>"Your <code class="inl">NOT IN (subquery)</code> returns nothing and you swear it should match rows — what happened?" The answer is almost always: <strong>the subquery contains a NULL</strong>. Because <code class="inl">x &lt;&gt; NULL</code> is unknown, the chained <code class="inl">AND</code> collapses to unknown for every row. Note <code class="inl">IN</code> with a NULL is <em>not</em> symmetric — it can still return matches; only <code class="inl">NOT IN</code> is poisoned. Default to <code class="inl">NOT EXISTS</code> and you sidestep the whole problem.</p></div>
+    </section>
+
+    <!-- 5. ANY / ALL -->
+    <section id="anyall">
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — Quantifiers</span><h2>ANY &amp; ALL</h2></div></div>
+      <p><code class="inl">ANY</code> and <code class="inl">ALL</code> let you combine a comparison operator (<code class="inl">&gt;</code>, <code class="inl">&lt;</code>, <code class="inl">=</code>, …) with a whole list from a subquery. They answer "compared to <em>some</em> of these?" versus "compared to <em>all</em> of these?"</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Form</th><th>True when…</th><th>Equivalent to</th></tr></thead>
+          <tbody>
+            <tr><td><code>x &gt; ANY (sub)</code></td><td><code>x</code> beats <b>at least one</b> value</td><td><code>x &gt; MIN(sub)</code></td></tr>
+            <tr><td><code>x &gt; ALL (sub)</code></td><td><code>x</code> beats <b>every</b> value</td><td><code>x &gt; MAX(sub)</code></td></tr>
+            <tr><td><code>x = ANY (sub)</code></td><td><code>x</code> equals at least one value</td><td><code>x IN (sub)</code></td></tr>
+            <tr><td><code>x &lt;&gt; ALL (sub)</code></td><td><code>x</code> differs from every value</td><td><code>x NOT IN (sub)</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>So <code class="inl">IN</code> is just sugar for <code class="inl">= ANY</code>, and <code class="inl">NOT IN</code> is <code class="inl">&lt;&gt; ALL</code> — which is exactly why <code class="inl">NOT IN</code> inherits the same NULL trap from the previous section. The genuinely useful ones are the inequalities: "earns more than everyone in department 20" is a clean <code class="inl">&gt; ALL</code>.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">paid more than every employee in dept 20</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, salary
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> salary <span class="num">&gt;</span> <span class="kw">ALL</span> (
+        <span class="kw">SELECT</span> salary <span class="kw">FROM</span> employees <span class="kw">WHERE</span> dept_id <span class="num">=</span> <span class="num">20</span>
+      );
+<span class="cmt">-- dept 20 salaries = {135000, 98000}; &gt; ALL means &gt; 135000 → Alice (185000)</span></code></pre>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">ALL and the empty set</span>
+        <p>A subtle edge: <code class="inl">&gt; ALL (empty subquery)</code> is <strong>true</strong> for every row (there is nothing to fail against), while <code class="inl">&gt; ANY (empty)</code> is <strong>false</strong>. And like <code class="inl">NOT IN</code>, <code class="inl">&gt; ALL</code> with a NULL in the list goes unknown. In practice most people reach for <code class="inl">MAX</code>/<code class="inl">MIN</code> instead because the intent is clearer — but recognizing <code class="inl">ANY</code>/<code class="inl">ALL</code> is fair game.</p></div>
+    </section>
+
+    <!-- 6. DERIVED TABLES -->
+    <section id="derived">
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — A whole table</span><h2>Subqueries in FROM — derived tables</h2></div></div>
+      <p>When a subquery returns a full grid of rows and columns, you can put it in the <code class="inl">FROM</code> clause and select from it as if it were a real table. This is a <strong>derived table</strong> (or <em>inline view</em>). It is how you filter or join against an aggregated result — something a plain <code class="inl">WHERE</code> cannot do, because aggregates do not exist until after grouping.</p>
+      <p>"Which departments have an average salary above 100,000?" First aggregate per department, then filter on that average. The aggregation is the inner table; the filter wraps around it.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">filter on a per-department average</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> t.dept_id, t.avg_sal
+<span class="kw">FROM</span> (
+        <span class="kw">SELECT</span> dept_id, <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_sal
+        <span class="kw">FROM</span> employees
+        <span class="kw">GROUP BY</span> dept_id
+     ) <span class="kw">AS</span> t                       <span class="cmt">-- the derived table MUST be aliased: t</span>
+<span class="kw">WHERE</span> t.avg_sal <span class="num">&gt;</span> <span class="num">100000</span>;</code></pre>
+      </div>
+
+      <p>The inner query produces a small table of <code class="inl">(dept_id, avg_sal)</code> rows; the outer query treats <code class="inl">t</code> like any table and filters it. You <em>could</em> write this with <code class="inl">HAVING</code> (Module 02), and for one level of aggregation that is cleaner. Derived tables earn their keep when you need to aggregate, then join or aggregate <em>again</em> on the result.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Must alias the derived table</span>
+        <p>PostgreSQL <strong>requires</strong> every subquery in <code class="inl">FROM</code> to have an alias — <code class="inl">) AS t</code>. Forget it and you get <code class="inl">ERROR: subquery in FROM must have an alias</code>. Even if you never reference the alias by name, the parser demands one. This is a constant tripwire; make aliasing the derived table a reflex.</p></div>
+    </section>
+
+    <!-- 7. CTEs -->
+    <section id="cte">
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Named &amp; readable</span><h2>CTEs with WITH</h2></div></div>
+      <p>Nesting subqueries works, but it reads <em>inside-out</em>: to understand the query you start at the deepest parentheses and unwind outward. A <strong>Common Table Expression (CTE)</strong> fixes that. With the <code class="inl">WITH</code> keyword you give a subquery a <strong>name</strong> up top, then refer to it by name below — so the query reads <strong>top-down</strong>, like defining a variable before using it.</p>
+      <p>Here is the exact section-6 query rewritten as a CTE. Same result, but the intent is named and the structure is flat:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the derived-table query, as a CTE</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">WITH</span> dept_avg <span class="kw">AS</span> (
+       <span class="kw">SELECT</span> dept_id, <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_sal
+       <span class="kw">FROM</span> employees
+       <span class="kw">GROUP BY</span> dept_id
+)
+<span class="kw">SELECT</span> dept_id, avg_sal
+<span class="kw">FROM</span> dept_avg                      <span class="cmt">-- reference the CTE by name, like a table</span>
+<span class="kw">WHERE</span> avg_sal <span class="num">&gt;</span> <span class="num">100000</span>;</code></pre>
+      </div>
+
+      <p>Read it as a sentence: "<em>with</em> a table called <code class="inl">dept_avg</code> defined as the per-department averages, select from it where the average exceeds 100,000." The logic that was buried in nested parentheses now has a label and lives at the top.</p>
+
+      <h3>When CTEs beat nested subqueries</h3>
+      <div class="grid three">
+        <div class="card"><div class="ico sage"><svg><use href="#i-book"/></svg></div>
+          <h4>Readability</h4>
+          <p>Named, top-down structure. Each step has a label that documents intent — no inside-out unwinding.</p></div>
+        <div class="card"><div class="ico grey"><svg><use href="#i-copy"/></svg></div>
+          <h4>Reuse</h4>
+          <p>Postgres lets you reference a CTE <b>multiple times</b> in the same query. A derived table you would have to repeat.</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-layers"/></svg></div>
+          <h4>No deep nesting</h4>
+          <p>Chain several CTEs with commas — <code class="inl">WITH a AS (…), b AS (… from a …)</code> — instead of stacking parentheses.</p></div>
+      </div>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">chaining CTEs — each builds on the last</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">WITH</span> dept_avg <span class="kw">AS</span> (
+       <span class="kw">SELECT</span> dept_id, <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_sal
+       <span class="kw">FROM</span> employees <span class="kw">GROUP BY</span> dept_id
+),
+high_paying <span class="kw">AS</span> (                  <span class="cmt">-- second CTE references the first</span>
+       <span class="kw">SELECT</span> dept_id <span class="kw">FROM</span> dept_avg <span class="kw">WHERE</span> avg_sal <span class="num">&gt;</span> <span class="num">100000</span>
+)
+<span class="kw">SELECT</span> e.name, e.salary
+<span class="kw">FROM</span> employees e
+<span class="kw">JOIN</span> high_paying h <span class="kw">ON</span> e.dept_id <span class="num">=</span> h.dept_id;</code></pre>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">CTE vs temp table</span>
+        <p>A CTE exists only for the duration of the single statement — it is not stored. A <strong>temporary table</strong> persists for the session and can be indexed and reused across statements. Reach for a temp table only when you genuinely need to materialize a result and hit it many times; for one query, a CTE is lighter and self-documenting. Modern Postgres does not always materialize CTEs, so they are not an optimization fence the way they once were.</p></div>
+    </section>
+
+    <!-- 8. RECURSIVE CTEs -->
+    <section id="recursive">
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — The showcase</span><h2>Recursive CTEs — walking the org chart</h2></div></div>
+      <p>Here is where subqueries do something nothing else can: traverse a <strong>hierarchy</strong>. Our <code class="inl">employees</code> table has a self-referencing <code class="inl">manager_id</code> — each person points at their boss. To produce the full management chain ("who reports up to whom, and how many levels deep?") you need to follow that chain an unknown number of steps. A <strong>recursive CTE</strong> does exactly that.</p>
+      <p>A <code class="inl">WITH RECURSIVE</code> CTE has three parts, joined by <code class="inl">UNION ALL</code>:</p>
+
+      <div class="stack">
+        <div class="layer"><span><span class="n">1</span> <code class="inl">Anchor</code></span><small>the starting rows — here, the top boss (manager_id IS NULL): Alice</small></div>
+        <div class="layer"><span><span class="n">2</span> <code class="inl">UNION ALL</code></span><small>stack each recursive batch onto the results so far</small></div>
+        <div class="layer"><span><span class="n">3</span> <code class="inl">Recursive</code></span><small>employees whose manager appeared in the PREVIOUS level</small></div>
+        <div class="layer"><span><span class="n" style="color:var(--accent)">✓</span> <code class="inl">Termination</code></span><small>stops automatically when the recursive part returns no new rows</small></div>
+      </div>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">org chart with depth, from the top down</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">WITH RECURSIVE</span> org <span class="kw">AS</span> (
+    <span class="cmt">-- ANCHOR: the top of the tree (no manager)</span>
+    <span class="kw">SELECT</span> emp_id, name, manager_id, <span class="num">1</span> <span class="kw">AS</span> depth
+    <span class="kw">FROM</span> employees
+    <span class="kw">WHERE</span> manager_id <span class="kw">IS NULL</span>
+
+    <span class="kw">UNION ALL</span>
+
+    <span class="cmt">-- RECURSIVE: people whose manager is already in 'org'</span>
+    <span class="kw">SELECT</span> e.emp_id, e.name, e.manager_id, o.depth <span class="num">+</span> <span class="num">1</span>
+    <span class="kw">FROM</span> employees e
+    <span class="kw">JOIN</span> org o <span class="kw">ON</span> e.manager_id <span class="num">=</span> o.emp_id   <span class="cmt">-- join back to the CTE itself</span>
+)
+<span class="kw">SELECT</span> depth, emp_id, name, manager_id
+<span class="kw">FROM</span> org
+<span class="kw">ORDER BY</span> depth, emp_id;
+
+<span class="out"> depth | emp_id | name  | manager_id
+-------+--------+-------+------------
+     1 |      1 | Alice |     (null)     -- anchor
+     2 |      2 | Bob   |          1     -- reports to Alice
+     2 |      3 | Carol |          1
+     2 |      6 | Frank |          1
+     3 |      4 | Dan   |          3     -- reports to Carol
+     3 |      5 | Eve   |          3</span></code></pre>
+      </div>
+
+      <p>Trace the machine. The <strong>anchor</strong> finds Alice (depth 1). The <strong>recursive</strong> member then joins <code class="inl">employees</code> to the rows just produced: who reports to Alice? Bob, Carol, Frank — depth 2. Next pass, who reports to <em>those</em>? Dan and Eve report to Carol — depth 3. The pass after that finds nobody new, so the recursion <strong>terminates</strong>. <code class="inl">UNION ALL</code> piles every batch into the final <code class="inl">org</code> table.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Why UNION ALL, and a safety net</span>
+        <p>It is <code class="inl">UNION ALL</code> (not <code class="inl">UNION</code>) because each level is genuinely new rows — deduplicating every pass would be wasteful and can hide legitimate results. Termination is automatic: when the recursive query yields zero new rows, it stops. <strong>But beware cycles</strong> — if the data had a manager loop (A manages B manages A), the recursion would never end. Guard real hierarchies with a depth cap (<code class="inl">WHERE o.depth &lt; 100</code>) or Postgres's <code class="inl">CYCLE</code> clause.</p></div>
+    </section>
+
+    <!-- 9. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">9</span><div class="htext"><span class="kicker">Section 09 — Practice</span><h2>Hands-on — do this now</h2></div></div>
+      <p>Use the same three-table schema from Module 00 (recreate it if needed) in any Postgres playground or local <code class="inl">psql</code>. Write each query <em>before</em> peeking at a hint, and predict the rows out loud first.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Scalar subquery: list every employee earning <strong>above the company average</strong>. Then add a <code class="inl">gap_to_avg</code> column showing how far above (or below) each sits.</li>
+        <li><svg><use href="#i-checkbox"/></svg><code class="inl">IN</code>: find all employees whose department is located in <code class="inl">'NYC'</code> using a subquery against <code class="inl">departments</code>. Then rewrite the same intent as a <code class="inl">JOIN</code> and confirm the row counts match.</li>
+        <li><svg><use href="#i-checkbox"/></svg><code class="inl">EXISTS</code>: list departments that <strong>have at least one</strong> employee. Then flip to <code class="inl">NOT EXISTS</code> for departments with <strong>none</strong>.</li>
+        <li><svg><use href="#i-checkbox"/></svg>The trap: insert a <code class="inl">departments</code> row with a <code class="inl">NULL dept_id</code>, then run a <code class="inl">NOT IN (SELECT dept_id FROM departments)</code> query. Watch it return zero rows, then fix it two ways (NOT EXISTS, and filtering NULLs).</li>
+        <li><svg><use href="#i-checkbox"/></svg><code class="inl">&gt; ALL</code>: find employees paid more than <strong>everyone</strong> in department 20. Confirm it matches <code class="inl">&gt; (SELECT MAX(salary) FROM employees WHERE dept_id = 20)</code>.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Derived table: select departments whose <strong>average salary exceeds 100,000</strong> using a subquery in <code class="inl">FROM</code>. Deliberately omit the alias once to see the error, then add it.</li>
+        <li><svg><use href="#i-checkbox"/></svg>CTE: rewrite the previous query with <code class="inl">WITH</code>. Then chain a second CTE that lists the <em>employees</em> in those high-paying departments.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Recursive CTE: build the org chart with a <code class="inl">depth</code> column from Alice down. Then modify the anchor to start at Carol (<code class="inl">emp_id = 3</code>) and produce only her subtree.</li>
+      </ul>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict, then run</span>
+        <p>For the recursive task especially, write out the levels on paper before running — anchor first, then each pass. When your hand-traced tree matches the query output, you <em>understand</em> recursion rather than just copying syntax. That gap between prediction and result is the lesson every time.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-with.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>WITH queries (CTEs) — PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-subquery.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Subquery expressions — PostgreSQL</a>
+      </div>
+
+      <div class="next">
+        <a href="../02-aggregation/02-aggregation.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 02 — Aggregation</b></span></a>
+        <a href="../04-window-functions/04-window-functions.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 04 — Window Functions</b></span></a>
+      </div>
+      <p class="endline">SQL L3 Track · Module 03 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 04 — Window Functions. Course home: <a href="../../index.html">all modules</a>.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

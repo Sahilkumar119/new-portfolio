@@ -62,3 +62,4 @@ learn-icon-check.png
 # Tool output / redundant source (served copy lives in public/learn)
 /graphify-out/
 /docker-course/
+/sql-course/

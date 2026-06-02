@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 02 — Aggregation: Grouping &amp; Summarizing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAE6DD;
+    --bg-2:#E3DED3;
+    --card:#DED9CE;
+    --grey:#C8C5BC;
+    --sage:#8C9A86;
+    --sage-soft:#AEB8A6;
+    --taupe:#BBB1A1;
+    --ink:#1C1C1A;
+    --ink-soft:#45443E;
+    --ink-faint:#5C5A51;
+    --line:#CBC5B8;
+    --line-strong:#1C1C1A;
+    --accent:#5E6B57;
+    --code-bg:#1E1D1A;
+    --code-fg:#E7E3DA;
+    --warn:#9A6E3F;
+    --danger:#94584C;
+    --radius:5px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --display:"Space Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 0 rgba(28,28,26,.05);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.72;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-thickness:1px;text-decoration-color:var(--ink-faint);transition:all .18s var(--ease)}
+  a:hover{text-decoration-color:var(--ink)}
+  ::selection{background:rgba(140,154,134,.4)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:200;background:var(--sage)}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(234,230,221,.88);
+    backdrop-filter:blur(10px) saturate(120%);border-bottom:1px solid var(--line-strong)}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:baseline;gap:11px;font-family:var(--display);font-weight:700;
+    font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+  .brand .crumb{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.04em;
+    color:var(--ink-faint);text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);
+    text-transform:uppercase;border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px;white-space:nowrap}
+  .pill b{color:var(--accent);font-weight:600}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;
+    grid-template-columns:230px minmax(0,1fr);gap:54px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:70px;align-self:start;padding:38px 0;max-height:calc(100vh - 70px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);padding:0 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  aside nav{display:flex;flex-direction:column;gap:1px;margin-top:12px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius);
+    color:var(--ink-faint);font-size:13.5px;font-weight:500;line-height:1.3;text-decoration:none;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:15px;height:15px;flex:none;opacity:.6}
+  aside nav a:hover{color:var(--ink)}
+  aside nav a.active{color:var(--ink);background:var(--card);border-left-color:var(--sage)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:20px 10px 0;font-size:12px;color:var(--ink-faint);line-height:1.55}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:16px 0 4px;border-bottom:1px solid var(--line-strong)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line-strong);border-radius:999px;padding:6px 12px;font-size:12.5px}
+    aside nav a.active{background:var(--sage);color:#0f120e}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:42px 0 120px;min-width:0;max-width:740px}
+
+  /* hero */
+  .hero{padding:6px 0 34px;border-bottom:1px solid var(--line-strong);margin-bottom:8px}
+  .eyebrow{display:inline-flex;gap:9px;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+  h1{font-family:var(--display);font-size:clamp(34px,5.6vw,58px);line-height:1.02;
+    margin:22px 0 18px;letter-spacing:-.035em;font-weight:700}
+  h1 .u{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;
+    text-decoration-color:var(--ink)}
+  .lede{color:var(--ink-soft);font-size:18.5px;max-width:60ch;margin:0;line-height:1.6}
+  .lede em{color:var(--ink);font-style:normal;font-weight:600;text-decoration:underline;
+    text-decoration-color:var(--sage);text-decoration-thickness:2px;text-underline-offset:3px}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:28px;border:1px solid var(--line-strong);
+    border-radius:var(--radius);overflow:hidden}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.02em;color:var(--ink-soft);padding:11px 15px;border-right:1px solid var(--line);flex:1;
+    min-width:max-content;background:var(--bg-2)}
+  .chip:last-child{border-right:none}
+  .chip svg{width:15px;height:15px;color:var(--ink-faint)}
+  .chip b{color:var(--accent)}
+  @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* section heads — editorial */
+  section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
+  .sec-head .num{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);
+    width:34px;height:34px;display:grid;place-items:center;border:1.5px solid var(--line-strong);
+    border-radius:var(--radius);flex:none;margin-top:4px}
+  .sec-head .htext{flex:1}
+  .sec-head .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:5px}
+  h2{font-family:var(--display);font-size:30px;margin:0;letter-spacing:-.025em;font-weight:700;line-height:1.12}
+  h3{font-family:var(--display);font-size:19px;margin:32px 0 4px;color:var(--ink);font-weight:600;letter-spacing:-.01em}
+  p{margin:14px 0;max-width:66ch}
+  strong{color:var(--ink);font-weight:600}
+
+  /* callouts */
+  .note{position:relative;border:1px solid var(--line-strong);background:var(--card);
+    padding:16px 18px 16px 50px;border-radius:var(--radius);margin:22px 0}
+  .note .ic{position:absolute;left:17px;top:17px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:4px}
+  .note p{margin:0;font-size:15px}
+  .note.key{background:rgba(140,154,134,.18);border-color:var(--accent)}
+  .note.key .ic,.note.key .tag{color:var(--accent)}
+  .note.warn{background:rgba(154,110,63,.12);border-color:var(--warn)}
+  .note.warn .ic,.note.warn .tag{color:var(--warn)}
+  .note.danger{background:rgba(148,88,76,.12);border-color:var(--danger)}
+  .note.danger .ic,.note.danger .tag{color:var(--danger)}
+  .note.info{background:var(--bg-2)}
+  .note.info .ic,.note.info .tag{color:var(--ink-soft)}
+
+  /* code — dark block on light page */
+  .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
+    overflow:hidden}
+  .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
+    border-bottom:1px solid #34322d;background:#191815}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11px;color:#8a8576;letter-spacing:.02em}
+  .codeblock .bar .dotn{font-family:var(--mono);font-size:11px;color:#5a584f;display:flex;gap:5px}
+  .codeblock .bar .dotn i{width:9px;height:9px;border-radius:50%;background:#3a382f;display:inline-block}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    color:#9a958a;background:transparent;border:1px solid #3a382f;border-radius:5px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease);text-transform:uppercase;letter-spacing:.04em}
+  .copybtn:hover{border-color:var(--sage);color:var(--sage)}
+  .copybtn svg{width:12px;height:12px}
+  .copybtn.done{color:var(--sage);border-color:var(--sage)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.85;color:var(--code-fg);overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.85em;background:var(--grey);border:1px solid var(--line);
+    padding:1px 6px;border-radius:4px;color:var(--ink);white-space:nowrap}
+  .cmt{color:#7c7869}.cmd{color:#9DBE9A}.flag{color:#c4abd2}.str{color:#aacba0}.out{color:#6f6c61}.kw{color:#E0B777}.fn{color:#9bb6d4}.num{color:#d98c7e}
+
+  /* tables */
+  .tablewrap{margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:500}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:var(--accent)}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--bg-2)}
+  .resultset td{font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
+
+  /* cards */
+  .grid{display:grid;gap:0;margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--bg-2);padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    transition:background .2s var(--ease)}
+  .grid.two .card:nth-child(2n),.grid.three .card:nth-child(3n){border-right:none}
+  .card:hover{background:var(--card)}
+  .card .ico{width:34px;height:34px;border-radius:var(--radius);display:grid;place-items:center;margin-bottom:13px;
+    border:1px solid var(--line-strong)}
+  .card .ico svg{width:18px;height:18px;color:var(--ink)}
+  .card h4{margin:0 0 6px;font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--ink)}
+  .card p{margin:0;font-size:13.5px;color:var(--ink-soft);max-width:none}
+  .ico.sage{background:var(--sage)} .ico.grey{background:var(--grey)} .ico.taupe{background:var(--taupe)}
+
+  /* anatomy line */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code-bg);border:1px solid var(--line-strong);
+    border-radius:var(--radius);padding:26px 18px;margin:22px 0;text-align:center;line-height:2.7}
+  .anat .tok{padding:5px 10px;border-radius:4px;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(224,183,119,.18);color:#E0B777}
+  .t2{background:rgba(157,190,154,.18);color:#9DBE9A}
+  .t3{background:rgba(155,182,212,.18);color:#9bb6d4}
+  .t4{background:rgba(196,171,210,.18);color:#c4abd2}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:#8a8576;margin-top:8px;letter-spacing:.03em}
+
+  /* step stack */
+  .stack{display:flex;flex-direction:column;gap:0;max-width:540px;margin:20px 0;
+    border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;font-family:var(--mono);font-size:13.5px}
+  .layer{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:12px;background:var(--bg-2);transition:background .15s var(--ease)}
+  .layer:last-child{border-bottom:none}
+  .layer:hover{background:var(--card)}
+  .layer small{color:var(--ink-faint);font-size:11.5px;font-family:var(--sans)}
+  .layer .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;
+    border:1px solid var(--line-strong);color:var(--ink);font-size:11px;flex:none}
+
+  /* details / Q&A */
+  details{background:var(--bg-2);border:1px solid var(--line-strong);border-radius:var(--radius);margin:10px 0;
+    overflow:hidden;transition:background .2s var(--ease)}
+  details[open]{background:var(--card)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:12px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--ink);
+    border-radius:4px;padding:3px 8px;flex:none;font-weight:500}
+  summary .star{color:var(--warn);flex:none;display:inline-flex}
+  summary .star svg{width:14px;height:14px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--ink-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--ink-soft);font-size:14.5px;
+    border-top:1px solid var(--line);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--ink)}
+  details .ans code.inl{color:var(--accent)}
+
+  /* checklist */
+  .check{list-style:none;padding:0;margin:18px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .check li{padding:13px 16px 13px 50px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px;background:var(--bg-2)}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:17px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line-strong);margin-top:64px;padding-top:32px;color:var(--ink-soft);font-size:14.5px}
+  footer h3{margin:0 0 14px;font-family:var(--display)}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);text-decoration:none;
+    border:1px solid var(--line-strong);padding:8px 13px;border-radius:var(--radius);transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--ink-faint)}
+  .reflink:hover{background:var(--ink);color:var(--bg)}
+  .reflink:hover svg{color:var(--bg)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0}
+  .next a{flex:1;min-width:220px;border:1px solid var(--line-strong);border-radius:var(--radius);
+    padding:18px;display:flex;flex-direction:column;gap:4px;text-decoration:none;background:var(--bg-2);transition:all .2s var(--ease)}
+  .next a:hover{background:var(--card)}
+  .next small{color:var(--ink-faint);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .next b{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:8px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+  .endline{margin-top:26px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;
+    border-top:1px solid var(--line);padding-top:18px}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- inline icon sprite (Lucide-style, no emoji) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-null" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+</svg>
+
+<!-- top bar -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      SQL&nbsp;Course
+      <span class="crumb">L3 Track / Module 02</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Aggregation</span>
+    <span class="pill"><b>~1.5h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- sidebar TOC -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#shift"><svg class="ti"><use href="#i-brain"/></svg>The shift in thinking</a>
+      <a href="#aggfns"><svg class="ti"><use href="#i-layers"/></svg>Aggregate functions</a>
+      <a href="#count"><svg class="ti"><use href="#i-target"/></svg>COUNT subtleties</a>
+      <a href="#groupby"><svg class="ti"><use href="#i-db"/></svg>GROUP BY mechanics</a>
+      <a href="#rule"><svg class="ti"><use href="#i-warn"/></svg>The cardinal rule</a>
+      <a href="#nulls"><svg class="ti"><use href="#i-null"/></svg>NULL in aggregation</a>
+      <a href="#having"><svg class="ti"><use href="#i-filter"/></svg>HAVING vs WHERE</a>
+      <a href="#join"><svg class="ti"><use href="#i-key"/></svg>Grouping with JOINs</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">Type every query yourself in <code style="font-family:var(--mono);font-size:11px">psql</code> or any Postgres playground. Reading SQL is not knowing SQL.</p>
+  </aside>
+
+  <!-- content -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 02</span>
+      <h1>Aggregation —<br><span class="u">Grouping</span> &amp; Summarizing</h1>
+      <p class="lede">So far every query has worked <em>one row at a time</em>. Aggregation is the moment SQL learns to <em>summarize</em>: take many rows and collapse them into a single answer per group — a count, a total, an average. Master <em>GROUP BY</em> and <em>HAVING</em> and you can answer almost any "per category" business question without ever leaving the database.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · aggregation</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>needs Module 00 &amp; 01</span>
+        <span class="chip"><svg><use href="#i-db"/></svg>PostgreSQL 16</span>
+      </div>
+    </div>
+
+    <!-- 0. THE SHIFT -->
+    <section id="shift">
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>The shift in thinking</h2></div></div>
+      <p>In Module 00 you filtered, sorted, and reshaped <strong>individual rows</strong>. In Module 01 you stitched tables together with joins — but the result was still a list of rows, one per matched pair. Every query you have written returns roughly "give me <em>these</em> rows." Aggregation breaks that pattern entirely.</p>
+      <p>An aggregate query asks a fundamentally different question: <strong>"summarize many rows into one number."</strong> How many employees are there? What is the total of all orders? What is the average salary <em>per department</em>? You are no longer looking at rows — you are looking at <strong>summaries of sets of rows</strong>. That single mental flip is what this whole module teaches.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Row-at-a-time vs set summary</span>
+        <p>A normal <code class="inl">SELECT</code> maps each input row to one output row. An <strong>aggregate</strong> does the opposite: it <em>folds</em> a whole pile of rows down into a single value. <code class="inl">GROUP BY</code> then lets you do that fold <em>once per group</em> instead of once for the entire table. Hold onto the word "fold" — it is the most accurate picture of what is happening.</p></div>
+
+      <p>We use the same three tables as every module: <code class="inl">departments</code>, <code class="inl">employees</code>, and <code class="inl">orders</code>. As a reminder, the six employees are Alice (dept 10, 185000), Bob (dept 10, 120000), Carol (dept 20, 135000), Dan (dept 20, 98000), Eve (dept 30, 105000), and Frank (dept <code class="inl">NULL</code>, 72000). That deliberate <code class="inl">NULL</code> on Frank is going to teach us several lessons before we are done.</p>
+    </section>
+
+    <!-- 1. AGGREGATE FUNCTIONS -->
+    <section id="aggfns">
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — The five workhorses</span><h2>Aggregate functions over the whole table</h2></div></div>
+      <p>Before grouping enters the picture, see what an aggregate does on its own. The five you will reach for constantly are <code class="inl">COUNT</code>, <code class="inl">SUM</code>, <code class="inl">AVG</code>, <code class="inl">MIN</code>, and <code class="inl">MAX</code>. Each takes a column (or <code class="inl">*</code>) and reduces every row in the table down to <strong>one value</strong>.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">aggregates over all employees</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> <span class="fn">COUNT</span>(<span class="num">*</span>)      <span class="kw">AS</span> headcount,   <span class="cmt">-- how many rows</span>
+       <span class="fn">SUM</span>(salary)    <span class="kw">AS</span> payroll,     <span class="cmt">-- total of the column</span>
+       <span class="fn">AVG</span>(salary)    <span class="kw">AS</span> avg_salary,  <span class="cmt">-- arithmetic mean</span>
+       <span class="fn">MIN</span>(salary)    <span class="kw">AS</span> lowest,      <span class="cmt">-- smallest value</span>
+       <span class="fn">MAX</span>(salary)    <span class="kw">AS</span> highest      <span class="cmt">-- largest value</span>
+<span class="kw">FROM</span> employees;
+
+<span class="cmt">-- result: exactly ONE row, no matter how many input rows</span>
+<span class="out"> headcount | payroll | avg_salary | lowest | highest
+-----------+---------+------------+--------+---------
+         6 |  715000 |  119166.67 |  72000 |  185000</span></code></pre>
+      </div>
+
+      <p>Notice what happened: six input rows became <strong>one output row</strong>. That is the defining trait of an aggregate query with no <code class="inl">GROUP BY</code> — the entire table is treated as a single group, and you get a single summary row back. You can mix several aggregates in one <code class="inl">SELECT</code>; they all fold the same set of rows independently.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico sage"><svg><use href="#i-target"/></svg></div>
+          <h4>COUNT / SUM</h4>
+          <p>Counting rows and totalling a numeric column. The two you will use most in reporting queries.</p></div>
+        <div class="card"><div class="ico grey"><svg><use href="#i-layers"/></svg></div>
+          <h4>AVG</h4>
+          <p>The mean. Watch out: it divides by the count of <b>non-NULL</b> values, not the row count — section 5.</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-sort"/></svg></div>
+          <h4>MIN / MAX</h4>
+          <p>Smallest and largest. Work on numbers, dates, and text (alphabetical) alike.</p></div>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">One row in, one number out</span>
+        <p>An aggregate <em>collapses</em>. The instant you put one in your <code class="inl">SELECT</code>, you have told the database "I want a summary, not a row listing." This is why you cannot casually mix a bare column with an aggregate — there would be six names but only one count, and nothing to line them up against. That tension is exactly what <code class="inl">GROUP BY</code> resolves.</p></div>
+    </section>
+
+    <!-- 2. COUNT SUBTLETIES -->
+    <section id="count">
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — The classic trap</span><h2>COUNT(*) vs COUNT(col) vs COUNT(DISTINCT)</h2></div></div>
+      <p>This trips up people who think they know <code class="inl">COUNT</code> cold. There are three distinct behaviours, and the difference is entirely about <strong>how each one treats NULL and duplicates</strong>.</p>
+
+      <div class="stack">
+        <div class="layer"><span><code class="inl">COUNT(*)</code></span><small>counts every row — NULLs included</small></div>
+        <div class="layer"><span><code class="inl">COUNT(col)</code></span><small>counts rows where col IS NOT NULL</small></div>
+        <div class="layer"><span><code class="inl">COUNT(DISTINCT col)</code></span><small>counts distinct non-NULL values of col</small></div>
+      </div>
+
+      <p>Our <code class="inl">employees</code> table is the perfect demonstration because Frank's <code class="inl">dept_id</code> is <code class="inl">NULL</code>, and several employees share a department. Watch the three counts diverge:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">three ways to count</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> <span class="fn">COUNT</span>(<span class="num">*</span>)                  <span class="kw">AS</span> all_rows,
+       <span class="fn">COUNT</span>(dept_id)            <span class="kw">AS</span> with_dept,
+       <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> dept_id)   <span class="kw">AS</span> distinct_depts
+<span class="kw">FROM</span> employees;</code></pre>
+      </div>
+
+      <div class="tablewrap">
+        <table class="resultset">
+          <thead><tr><th>all_rows</th><th>with_dept</th><th>distinct_depts</th></tr></thead>
+          <tbody>
+            <tr><td>6</td><td>5</td><td>3</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Read the result carefully. <code class="inl">all_rows = 6</code> counts every employee, Frank included. <code class="inl">with_dept = 5</code> drops Frank, because his <code class="inl">dept_id</code> is <code class="inl">NULL</code> and <code class="inl">COUNT(col)</code> only counts non-NULL values. <code class="inl">distinct_depts = 3</code> collapses the five remaining department values (10, 10, 20, 20, 30) down to the three unique ones — and still ignores Frank's NULL. Three different numbers from the same six rows.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
+        <p><b>"What is the difference between <code class="inl">COUNT(*)</code> and <code class="inl">COUNT(column)</code>?"</b> <code class="inl">COUNT(*)</code> counts rows; <code class="inl">COUNT(column)</code> counts rows where that column is <b>not NULL</b>. If the column has no NULLs the two are equal — which is exactly why the bug hides until a NULL shows up. <code class="inl">COUNT(DISTINCT column)</code> adds de-duplication on top, still skipping NULL. Knowing all three is L3-level table stakes.</p></div>
+
+      <p>A practical consequence: if someone asks "how many employees have a department assigned?" the answer is <code class="inl">COUNT(dept_id)</code>, not <code class="inl">COUNT(*)</code>. If they ask "how many <em>different</em> departments do we staff?" it is <code class="inl">COUNT(DISTINCT dept_id)</code>. Picking the wrong one gives a confidently-wrong number.</p>
+    </section>
+
+    <!-- 3. GROUP BY MECHANICS -->
+    <section id="groupby">
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — The core mechanic</span><h2>GROUP BY — one summary per group</h2></div></div>
+      <p>So far every aggregate folded the <em>whole</em> table into one number. <code class="inl">GROUP BY</code> changes that: it splits the rows into <strong>buckets</strong> by some key, then runs the aggregate <strong>once inside each bucket</strong>. One output row per distinct group value.</p>
+
+      <div class="anat">
+        <span class="tok t1">SELECT</span> <span class="tok t3">dept_id</span><span class="tok">,</span> <span class="tok t2">AVG(salary)</span> <span class="tok t1">FROM</span> <span class="tok t4">employees</span> <span class="tok t1">GROUP BY</span> <span class="tok t3">dept_id</span><span class="tok">;</span>
+        <span class="lbl">the grouping key &nbsp;·&nbsp; aggregate computed per group &nbsp;·&nbsp; source &nbsp;·&nbsp; how to bucket rows</span>
+      </div>
+
+      <p>The grouping key (<code class="inl">dept_id</code>) appears in two places: in <code class="inl">GROUP BY</code> to define the buckets, and in <code class="inl">SELECT</code> so the output tells you <em>which</em> group each summary belongs to. Picture the fold happening physically:</p>
+
+      <div class="stack">
+        <div class="layer"><span><span class="n">10</span> Alice 185000, Bob 120000</span><small>2 rows &rarr; AVG = 152500</small></div>
+        <div class="layer"><span><span class="n">20</span> Carol 135000, Dan 98000</span><small>2 rows &rarr; AVG = 116500</small></div>
+        <div class="layer"><span><span class="n">30</span> Eve 105000</span><small>1 row &rarr; AVG = 105000</small></div>
+        <div class="layer"><span><span class="n" style="color:var(--warn)">∅</span> Frank 72000 (dept NULL)</span><small>1 row &rarr; AVG = 72000</small></div>
+      </div>
+
+      <p>Six input rows became <strong>four group rows</strong> — three real departments plus Frank's <code class="inl">NULL</code> bucket (more on that in section 5). Here is the query and its result:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">average salary per department</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> dept_id,
+       <span class="fn">COUNT</span>(<span class="num">*</span>)   <span class="kw">AS</span> headcount,
+       <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_salary
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept_id
+<span class="kw">ORDER BY</span> dept_id;
+
+<span class="out"> dept_id | headcount | avg_salary
+---------+-----------+------------
+      10 |         2 |  152500.00
+      20 |         2 |  116500.00
+      30 |         1 |  105000.00
+  (null) |         1 |   72000.00</span></code></pre>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Where GROUP BY runs</span>
+        <p>Recall the logical order from Module 00: <code class="inl">FROM</code> &rarr; <code class="inl">WHERE</code> &rarr; <code class="inl">GROUP BY</code> &rarr; <code class="inl">HAVING</code> &rarr; <code class="inl">SELECT</code> &rarr; <code class="inl">ORDER BY</code>. <code class="inl">GROUP BY</code> is step 3, <em>after</em> <code class="inl">WHERE</code> has already filtered rows. So the rows that get grouped are only the ones that survived <code class="inl">WHERE</code>. This ordering explains everything in the next three sections.</p></div>
+    </section>
+
+    <!-- 4. THE CARDINAL RULE -->
+    <section id="rule">
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The rule you must internalize</span><h2>Every SELECT column: grouped or aggregated</h2></div></div>
+      <p>Here is the single rule that governs every aggregate query, and the one beginners break constantly:</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The cardinal rule</span>
+        <p>Once a query has a <code class="inl">GROUP BY</code>, <strong>every column in the <code class="inl">SELECT</code> list must either appear in the <code class="inl">GROUP BY</code> clause or be wrapped in an aggregate function.</strong> No exceptions for ordinary columns.</p></div>
+
+      <p>Why? Think about what a group row <em>is</em>. After grouping by <code class="inl">dept_id</code>, the bucket for department 10 holds two people: Alice and Bob. The output is <strong>one</strong> row for that bucket. If you ask for a bare <code class="inl">name</code>, the database faces an impossible choice — <em>which</em> name goes in that single row, Alice or Bob? There is no sensible answer, so it refuses.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the error and the fix</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- ERROR: "name" is neither grouped nor aggregated</span>
+<span class="kw">SELECT</span> dept_id, name, <span class="fn">AVG</span>(salary)
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept_id;
+<span class="out">-- ERROR:  column "employees.name" must appear in the GROUP BY
+--         clause or be used in an aggregate function</span>
+
+<span class="cmt">-- FIX A: aggregate it — e.g. list names per group</span>
+<span class="kw">SELECT</span> dept_id, <span class="fn">STRING_AGG</span>(name, <span class="str">', '</span>), <span class="fn">AVG</span>(salary)
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept_id;
+
+<span class="cmt">-- FIX B: add it to GROUP BY — but this changes the buckets!</span>
+<span class="kw">SELECT</span> dept_id, name, <span class="fn">AVG</span>(salary)
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept_id, name;   <span class="cmt">-- now one group PER person</span></code></pre>
+      </div>
+
+      <p>Notice that the two fixes mean very different things. <strong>Fix A</strong> keeps one row per department and folds all the names together with <code class="inl">STRING_AGG</code>. <strong>Fix B</strong> adds <code class="inl">name</code> to the grouping key, which makes each <code class="inl">(dept_id, name)</code> pair its own bucket — and since every person is unique, you are basically back to one row per employee. Choose based on the question you are actually answering.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The functional-dependency exception</span>
+        <p>PostgreSQL relaxes the rule in one safe case: if you <code class="inl">GROUP BY</code> a table's <strong>primary key</strong>, you may select any other column from that table without aggregating it. Grouping <code class="inl">employees</code> by <code class="inl">emp_id</code> (its PK) means each group is exactly one row, so <code class="inl">name</code> and <code class="inl">salary</code> are unambiguous — they are <em>functionally dependent</em> on the key. This is per the SQL standard and most other databases reject it, so do not lean on it in portable code.</p></div>
+    </section>
+
+    <!-- 5. NULL IN AGGREGATION -->
+    <section id="nulls">
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — NULL strikes again</span><h2>How NULL behaves in groups &amp; aggregates</h2></div></div>
+      <p>Module 00 warned you that <code class="inl">NULL</code> bends the rules. Aggregation adds two more behaviours you must know cold, because they quietly change your numbers.</p>
+
+      <h3>1. NULL forms its own group</h3>
+      <p>When you <code class="inl">GROUP BY dept_id</code>, all the rows with a <code class="inl">NULL</code> department do <strong>not</strong> vanish and do <strong>not</strong> merge into some other bucket — they collect into a single <code class="inl">NULL</code> group of their own. That is why Frank produced his own <code class="inl">(null)</code> row in section 3. In grouping, all NULLs are treated as "the same unknown" and bucketed together, even though <code class="inl">NULL = NULL</code> is never true in a <code class="inl">WHERE</code>. Grouping is the one place SQL treats NULLs as equal.</p>
+
+      <h3>2. Aggregates skip NULLs</h3>
+      <p>This is the bigger trap. Every aggregate except <code class="inl">COUNT(*)</code> <strong>ignores NULL inputs entirely</strong>. The critical consequence is for <code class="inl">AVG</code>: it computes <code class="inl">SUM(col) / COUNT(col)</code> — that is, the total divided by the count of <em>non-NULL</em> values, <strong>not</strong> divided by the total number of rows.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">AVG ignores NULLs — the denominator surprise</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- Imagine Frank's salary were NULL instead of 72000.</span>
+<span class="cmt">-- SUM = 643000 over the 5 known salaries.</span>
+
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(salary)              <span class="kw">AS</span> avg_skips_null,   <span class="cmt">-- 643000 / 5  = 128600</span>
+       <span class="fn">SUM</span>(salary) <span class="num">/</span> <span class="fn">COUNT</span>(<span class="num">*</span>) <span class="kw">AS</span> avg_over_rows     <span class="cmt">-- 643000 / 6  = 107166</span>
+<span class="kw">FROM</span> employees;
+
+<span class="cmt">-- AVG divides by COUNT(salary)=5, NOT COUNT(*)=6.</span>
+<span class="cmt">-- If you WANT NULLs to count as zero, do it explicitly:</span>
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="fn">COALESCE</span>(salary, <span class="num">0</span>)) <span class="kw">FROM</span> employees;  <span class="cmt">-- 643000 / 6</span></code></pre>
+      </div>
+
+      <p>So the answer to "what is the average salary?" depends on an unstated assumption: do people with an unknown salary belong in the average or not? <code class="inl">AVG</code> says no by default. If your business definition says a missing salary should count as zero, you must say so explicitly with <code class="inl">COALESCE</code>. Getting this wrong silently skews every average in a report.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
+        <p>"Does <code class="inl">AVG(salary)</code> count rows where salary is NULL?" <b>No.</b> NULLs are excluded from both the sum and the count, so the divisor is the number of non-NULL salaries. This is also why <code class="inl">AVG(col)</code> can differ from <code class="inl">SUM(col) / COUNT(*)</code>. Only <code class="inl">COUNT(*)</code> counts NULL rows; every value aggregate ignores them.</p></div>
+    </section>
+
+    <!-- 6. HAVING vs WHERE -->
+    <section id="having">
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — Filtering groups</span><h2>HAVING vs WHERE — before or after</h2></div></div>
+      <p>Both <code class="inl">WHERE</code> and <code class="inl">HAVING</code> filter — but they act at different stages,. The distinction is exactly one word: <strong>before</strong> or <strong>after</strong> grouping.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico grey"><svg><use href="#i-filter"/></svg></div>
+          <h4>WHERE — filters rows</h4>
+          <p>Runs <b>before</b> <code class="inl">GROUP BY</code> (step 2). Decides which individual rows even enter the groups. Cannot see aggregates — they don't exist yet.</p></div>
+        <div class="card"><div class="ico sage"><svg><use href="#i-layers"/></svg></div>
+          <h4>HAVING — filters groups</h4>
+          <p>Runs <b>after</b> <code class="inl">GROUP BY</code> (step 4). Decides which finished group rows to keep. This is where aggregate conditions live.</p></div>
+      </div>
+
+      <p>Suppose you want "departments whose average salary exceeds 100,000." The condition is on an <em>aggregate</em> (<code class="inl">AVG(salary)</code>), which only exists after grouping — so it must go in <code class="inl">HAVING</code>:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">filter groups with HAVING</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> dept_id, <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_salary
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> dept_id
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(salary) <span class="num">&gt;</span> <span class="num">100000</span>   <span class="cmt">-- keep groups, not rows</span>
+<span class="kw">ORDER BY</span> avg_salary <span class="kw">DESC</span>;
+
+<span class="out"> dept_id | avg_salary
+---------+------------
+      10 |  152500.00
+      20 |  116500.00
+      30 |  105000.00</span>   <span class="out">-- dept NULL (72000) is excluded</span></code></pre>
+      </div>
+
+      <p>Now try putting that aggregate in <code class="inl">WHERE</code> and watch it fail — because at the moment <code class="inl">WHERE</code> runs, no grouping has happened, so <code class="inl">AVG(salary)</code> is meaningless:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">why aggregates cannot go in WHERE</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- ERROR: aggregates are not allowed in WHERE</span>
+<span class="kw">SELECT</span> dept_id, <span class="fn">AVG</span>(salary)
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> <span class="fn">AVG</span>(salary) <span class="num">&gt;</span> <span class="num">100000</span>   <span class="cmt">-- runs at step 2, before grouping!</span>
+<span class="kw">GROUP BY</span> dept_id;
+<span class="out">-- ERROR:  aggregate functions are not allowed in WHERE</span></code></pre>
+      </div>
+
+      <p>The two clauses are not interchangeable, and they are not redundant either — you often use <strong>both in one query</strong>, and the order matters for both correctness and speed. <code class="inl">WHERE</code> trims rows first (so fewer rows get grouped), then <code class="inl">HAVING</code> trims the resulting groups:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">WHERE then HAVING — both, in order</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- among employees hired after 2019, find departments</span>
+<span class="cmt">-- with more than one such employee</span>
+<span class="kw">SELECT</span> dept_id, <span class="fn">COUNT</span>(<span class="num">*</span>) <span class="kw">AS</span> recent_hires
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> hire_date <span class="num">&gt;</span> <span class="str">'2019-12-31'</span>   <span class="cmt">-- row filter, BEFORE grouping</span>
+<span class="kw">GROUP BY</span> dept_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(<span class="num">*</span>) <span class="num">&gt;</span> <span class="num">1</span>;            <span class="cmt">-- group filter, AFTER grouping</span></code></pre>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The rule of thumb</span>
+        <p>If your condition is about a <strong>single row's column</strong> (a salary, a date, a status), it belongs in <code class="inl">WHERE</code>. If your condition is about a <strong>computed group summary</strong> (a count, a sum, an average of the group), it belongs in <code class="inl">HAVING</code>. Putting a plain row filter in <code class="inl">HAVING</code> usually still works but is slower — it grouped rows it could have discarded earlier. Filter early.</p></div>
+    </section>
+
+    <!-- 7. GROUP BY + JOIN -->
+    <section id="join">
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Putting it together</span><h2>Multiple keys, JOINs &amp; subtotals</h2></div></div>
+      <p>Real reports combine Module 01's joins with this module's grouping. The pattern is everywhere: join the fact table to a lookup table, then group by the human-readable name instead of the cryptic id. Let's report headcount and average salary per <em>department name</em>:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">JOIN then GROUP BY the readable name</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> d.dept_name,
+       <span class="fn">COUNT</span>(e.emp_id)  <span class="kw">AS</span> headcount,
+       <span class="fn">ROUND</span>(<span class="fn">AVG</span>(e.salary), <span class="num">0</span>) <span class="kw">AS</span> avg_salary
+<span class="kw">FROM</span> employees e
+<span class="kw">JOIN</span> departments d <span class="kw">ON</span> d.dept_id <span class="num">=</span> e.dept_id
+<span class="kw">GROUP BY</span> d.dept_name      <span class="cmt">-- group by the joined column</span>
+<span class="kw">ORDER BY</span> avg_salary <span class="kw">DESC</span>;</code></pre>
+      </div>
+
+      <p>Because this is an inner <code class="inl">JOIN</code>, Frank (whose <code class="inl">dept_id</code> is <code class="inl">NULL</code>) drops out before grouping — there is no department row to match him. If you wanted to keep him in a "no department" bucket, you would use a <code class="inl">LEFT JOIN</code> and group by <code class="inl">COALESCE(d.dept_name, 'Unassigned')</code>. The choice of join type directly controls which groups exist.</p>
+
+      <h3>Grouping by multiple columns</h3>
+      <p>You can group by more than one key. Each <strong>distinct combination</strong> becomes a bucket. For example, count orders per employee per status — a two-dimensional summary:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">two grouping keys = one row per combination</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> emp_id, status,
+       <span class="fn">COUNT</span>(<span class="num">*</span>)     <span class="kw">AS</span> n_orders,
+       <span class="fn">SUM</span>(amount) <span class="kw">AS</span> total
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> emp_id, status   <span class="cmt">-- one row per (emp_id, status) pair</span>
+<span class="kw">ORDER BY</span> emp_id, status;</code></pre>
+      </div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Fan-out — the join + aggregate trap</span>
+        <p>The nastiest aggregation bug is <b>double counting from a join</b>. If you join <code class="inl">employees</code> to <code class="inl">orders</code> (one employee, many orders) and then <code class="inl">SUM(e.salary)</code>, each employee's salary is repeated once per order and summed many times — a wildly inflated total. This is called <b>fan-out</b>. The fix: aggregate the "many" side <em>first</em> (often in a subquery or CTE — Module 03) before joining, or be sure every aggregate operates on the correct grain. Always ask: "what is one row in this joined result?"</p></div>
+
+      <h3>Subtotals with ROLLUP — a brief look</h3>
+      <p>Sometimes you want per-group totals <em>and</em> a grand total in one result. <code class="inl">GROUPING SETS</code>, <code class="inl">ROLLUP</code>, and <code class="inl">CUBE</code> generate multiple grouping levels at once. You will not need them daily, but recognize the shape:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">ROLLUP adds a grand-total row</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> dept_id, <span class="fn">SUM</span>(salary) <span class="kw">AS</span> payroll
+<span class="kw">FROM</span> employees
+<span class="kw">GROUP BY</span> <span class="fn">ROLLUP</span>(dept_id);   <span class="cmt">-- per-dept rows + one extra (null) grand-total row</span></code></pre>
+      </div>
+
+      <p>The extra row with a <code class="inl">NULL</code> <code class="inl">dept_id</code> here is the grand total across all departments — Postgres signals "this is the total, not a real group" with a NULL in the grouped column. That is all you need to recognize it; the deeper machinery can wait.</p>
+    </section>
+
+    <!-- 8. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Practice</span><h2>Hands-on — do this now</h2></div></div>
+      <p>Use the same schema and six employees from Module 00, and add a few <code class="inl">orders</code> rows so the grouping has variety. Write each query <em>before</em> peeking — predict the number of output rows first, then run and check.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Get the total payroll, average salary, and headcount of the whole company in one query. Confirm it returns exactly one row.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">COUNT(*)</code>, <code class="inl">COUNT(dept_id)</code>, and <code class="inl">COUNT(DISTINCT dept_id)</code> together. Explain out loud why all three numbers differ.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Average salary per <code class="inl">dept_id</code>. Predict how many group rows you get (don't forget Frank's NULL bucket), then verify.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Try <code class="inl">SELECT dept_id, name, AVG(salary) ... GROUP BY dept_id</code>, watch it error, then fix it two ways: with <code class="inl">STRING_AGG(name, ', ')</code> and by adding <code class="inl">name</code> to <code class="inl">GROUP BY</code>.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Temporarily set one salary to <code class="inl">NULL</code>, then compare <code class="inl">AVG(salary)</code> against <code class="inl">SUM(salary) / COUNT(*)</code>. Prove the denominators differ.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find departments with average salary above 100,000 using <code class="inl">HAVING</code>. Then try the same condition in <code class="inl">WHERE</code> and read the error.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Among employees hired after 2019, find departments with more than one such employee — one <code class="inl">WHERE</code> and one <code class="inl">HAVING</code> in the same query.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Join <code class="inl">employees</code> to <code class="inl">departments</code> and report headcount + average salary per <code class="inl">dept_name</code>. Then switch to a <code class="inl">LEFT JOIN</code> with <code class="inl">COALESCE</code> so Frank appears in an "Unassigned" bucket.</li>
+      </ul>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict the row count first</span>
+        <p>For every aggregate query, say out loud <em>how many rows</em> the result will have before you run it. With <code class="inl">GROUP BY</code>, that number is "how many distinct group keys exist" — including any NULL bucket. When your prediction is wrong, that gap is the lesson. Chase it down before moving on.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-aggregate.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Aggregate functions — PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUP" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>GROUP BY &amp; HAVING — PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-agg.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Aggregate tutorial</a>
+      </div>
+
+      <div class="next">
+        <a href="../01-joins/01-joins.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01 — Joins</b></span></a>
+        <a href="../03-subqueries-cte/03-subqueries-cte.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03 — Subqueries &amp; CTEs</b></span></a>
+      </div>
+      <div class="next">
+        <a href="../../index.html"><small>↑ Course home</small><span class="nx"><svg><use href="#i-book"/></svg><b>SQL Course — all modules</b></span></a>
+      </div>
+      <p class="endline">SQL L3 Track · Module 02 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 03 — Subqueries &amp; CTEs.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

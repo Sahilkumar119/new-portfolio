@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 00 — Relational Foundations &amp; SELECT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAE6DD;
+    --bg-2:#E3DED3;
+    --card:#DED9CE;
+    --grey:#C8C5BC;
+    --sage:#8C9A86;
+    --sage-soft:#AEB8A6;
+    --taupe:#BBB1A1;
+    --ink:#1C1C1A;
+    --ink-soft:#45443E;
+    --ink-faint:#5C5A51;
+    --line:#CBC5B8;
+    --line-strong:#1C1C1A;
+    --accent:#5E6B57;
+    --code-bg:#1E1D1A;
+    --code-fg:#E7E3DA;
+    --warn:#9A6E3F;
+    --danger:#94584C;
+    --radius:5px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --display:"Space Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 0 rgba(28,28,26,.05);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.72;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-thickness:1px;text-decoration-color:var(--ink-faint);transition:all .18s var(--ease)}
+  a:hover{text-decoration-color:var(--ink)}
+  ::selection{background:rgba(140,154,134,.4)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:200;background:var(--sage)}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(234,230,221,.88);
+    backdrop-filter:blur(10px) saturate(120%);border-bottom:1px solid var(--line-strong)}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:baseline;gap:11px;font-family:var(--display);font-weight:700;
+    font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+  .brand .crumb{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.04em;
+    color:var(--ink-faint);text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);
+    text-transform:uppercase;border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px;white-space:nowrap}
+  .pill b{color:var(--accent);font-weight:600}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;
+    grid-template-columns:230px minmax(0,1fr);gap:54px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:70px;align-self:start;padding:38px 0;max-height:calc(100vh - 70px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);padding:0 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  aside nav{display:flex;flex-direction:column;gap:1px;margin-top:12px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius);
+    color:var(--ink-faint);font-size:13.5px;font-weight:500;line-height:1.3;text-decoration:none;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:15px;height:15px;flex:none;opacity:.6}
+  aside nav a:hover{color:var(--ink)}
+  aside nav a.active{color:var(--ink);background:var(--card);border-left-color:var(--sage)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:20px 10px 0;font-size:12px;color:var(--ink-faint);line-height:1.55}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:16px 0 4px;border-bottom:1px solid var(--line-strong)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line-strong);border-radius:999px;padding:6px 12px;font-size:12.5px}
+    aside nav a.active{background:var(--sage);color:#0f120e}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:42px 0 120px;min-width:0;max-width:740px}
+
+  /* hero */
+  .hero{padding:6px 0 34px;border-bottom:1px solid var(--line-strong);margin-bottom:8px}
+  .eyebrow{display:inline-flex;gap:9px;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+  h1{font-family:var(--display);font-size:clamp(34px,5.6vw,58px);line-height:1.02;
+    margin:22px 0 18px;letter-spacing:-.035em;font-weight:700}
+  h1 .u{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;
+    text-decoration-color:var(--ink)}
+  .lede{color:var(--ink-soft);font-size:18.5px;max-width:60ch;margin:0;line-height:1.6}
+  .lede em{color:var(--ink);font-style:normal;font-weight:600;text-decoration:underline;
+    text-decoration-color:var(--sage);text-decoration-thickness:2px;text-underline-offset:3px}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:28px;border:1px solid var(--line-strong);
+    border-radius:var(--radius);overflow:hidden}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.02em;color:var(--ink-soft);padding:11px 15px;border-right:1px solid var(--line);flex:1;
+    min-width:max-content;background:var(--bg-2)}
+  .chip:last-child{border-right:none}
+  .chip svg{width:15px;height:15px;color:var(--ink-faint)}
+  .chip b{color:var(--accent)}
+  @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* section heads — editorial */
+  section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
+  .sec-head .num{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);
+    width:34px;height:34px;display:grid;place-items:center;border:1.5px solid var(--line-strong);
+    border-radius:var(--radius);flex:none;margin-top:4px}
+  .sec-head .htext{flex:1}
+  .sec-head .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:5px}
+  h2{font-family:var(--display);font-size:30px;margin:0;letter-spacing:-.025em;font-weight:700;line-height:1.12}
+  h3{font-family:var(--display);font-size:19px;margin:32px 0 4px;color:var(--ink);font-weight:600;letter-spacing:-.01em}
+  p{margin:14px 0;max-width:66ch}
+  strong{color:var(--ink);font-weight:600}
+
+  /* callouts */
+  .note{position:relative;border:1px solid var(--line-strong);background:var(--card);
+    padding:16px 18px 16px 50px;border-radius:var(--radius);margin:22px 0}
+  .note .ic{position:absolute;left:17px;top:17px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:4px}
+  .note p{margin:0;font-size:15px}
+  .note.key{background:rgba(140,154,134,.18);border-color:var(--accent)}
+  .note.key .ic,.note.key .tag{color:var(--accent)}
+  .note.warn{background:rgba(154,110,63,.12);border-color:var(--warn)}
+  .note.warn .ic,.note.warn .tag{color:var(--warn)}
+  .note.danger{background:rgba(148,88,76,.12);border-color:var(--danger)}
+  .note.danger .ic,.note.danger .tag{color:var(--danger)}
+  .note.info{background:var(--bg-2)}
+  .note.info .ic,.note.info .tag{color:var(--ink-soft)}
+
+  /* code — dark block on light page */
+  .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
+    overflow:hidden}
+  .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
+    border-bottom:1px solid #34322d;background:#191815}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11px;color:#8a8576;letter-spacing:.02em}
+  .codeblock .bar .dotn{font-family:var(--mono);font-size:11px;color:#5a584f;display:flex;gap:5px}
+  .codeblock .bar .dotn i{width:9px;height:9px;border-radius:50%;background:#3a382f;display:inline-block}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    color:#9a958a;background:transparent;border:1px solid #3a382f;border-radius:5px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease);text-transform:uppercase;letter-spacing:.04em}
+  .copybtn:hover{border-color:var(--sage);color:var(--sage)}
+  .copybtn svg{width:12px;height:12px}
+  .copybtn.done{color:var(--sage);border-color:var(--sage)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.85;color:var(--code-fg);overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.85em;background:var(--grey);border:1px solid var(--line);
+    padding:1px 6px;border-radius:4px;color:var(--ink);white-space:nowrap}
+  .cmt{color:#7c7869}.cmd{color:#9DBE9A}.flag{color:#c4abd2}.str{color:#aacba0}.out{color:#6f6c61}.kw{color:#E0B777}.fn{color:#9bb6d4}.num{color:#d98c7e}
+
+  /* tables */
+  .tablewrap{margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:500}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:var(--accent)}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--bg-2)}
+  .resultset td{font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
+
+  /* cards */
+  .grid{display:grid;gap:0;margin:22px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--bg-2);padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    transition:background .2s var(--ease)}
+  .grid.two .card:nth-child(2n),.grid.three .card:nth-child(3n){border-right:none}
+  .card:hover{background:var(--card)}
+  .card .ico{width:34px;height:34px;border-radius:var(--radius);display:grid;place-items:center;margin-bottom:13px;
+    border:1px solid var(--line-strong)}
+  .card .ico svg{width:18px;height:18px;color:var(--ink)}
+  .card h4{margin:0 0 6px;font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--ink)}
+  .card p{margin:0;font-size:13.5px;color:var(--ink-soft);max-width:none}
+  .ico.sage{background:var(--sage)} .ico.grey{background:var(--grey)} .ico.taupe{background:var(--taupe)}
+
+  /* anatomy line */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code-bg);border:1px solid var(--line-strong);
+    border-radius:var(--radius);padding:26px 18px;margin:22px 0;text-align:center;line-height:2.7}
+  .anat .tok{padding:5px 10px;border-radius:4px;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(224,183,119,.18);color:#E0B777}
+  .t2{background:rgba(157,190,154,.18);color:#9DBE9A}
+  .t3{background:rgba(155,182,212,.18);color:#9bb6d4}
+  .t4{background:rgba(196,171,210,.18);color:#c4abd2}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:#8a8576;margin-top:8px;letter-spacing:.03em}
+
+  /* step stack */
+  .stack{display:flex;flex-direction:column;gap:0;max-width:540px;margin:20px 0;
+    border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;font-family:var(--mono);font-size:13.5px}
+  .layer{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:12px;background:var(--bg-2);transition:background .15s var(--ease)}
+  .layer:last-child{border-bottom:none}
+  .layer:hover{background:var(--card)}
+  .layer small{color:var(--ink-faint);font-size:11.5px;font-family:var(--sans)}
+  .layer .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;
+    border:1px solid var(--line-strong);color:var(--ink);font-size:11px;flex:none}
+
+  /* details / Q&A */
+  details{background:var(--bg-2);border:1px solid var(--line-strong);border-radius:var(--radius);margin:10px 0;
+    overflow:hidden;transition:background .2s var(--ease)}
+  details[open]{background:var(--card)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:12px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--ink);
+    border-radius:4px;padding:3px 8px;flex:none;font-weight:500}
+  summary .star{color:var(--warn);flex:none;display:inline-flex}
+  summary .star svg{width:14px;height:14px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--ink-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--ink-soft);font-size:14.5px;
+    border-top:1px solid var(--line);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--ink)}
+  details .ans code.inl{color:var(--accent)}
+
+  /* checklist */
+  .check{list-style:none;padding:0;margin:18px 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .check li{padding:13px 16px 13px 50px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px;background:var(--bg-2)}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:17px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line-strong);margin-top:64px;padding-top:32px;color:var(--ink-soft);font-size:14.5px}
+  footer h3{margin:0 0 14px;font-family:var(--display)}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);text-decoration:none;
+    border:1px solid var(--line-strong);padding:8px 13px;border-radius:var(--radius);transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--ink-faint)}
+  .reflink:hover{background:var(--ink);color:var(--bg)}
+  .reflink:hover svg{color:var(--bg)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0}
+  .next a{flex:1;min-width:220px;border:1px solid var(--line-strong);border-radius:var(--radius);
+    padding:18px;display:flex;flex-direction:column;gap:4px;text-decoration:none;background:var(--bg-2);transition:all .2s var(--ease)}
+  .next a:hover{background:var(--card)}
+  .next small{color:var(--ink-faint);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .next b{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:8px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+  .endline{margin-top:26px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;
+    border-top:1px solid var(--line);padding-top:18px}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- inline icon sprite (Lucide-style, no emoji) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-null" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+</svg>
+
+<!-- top bar -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      SQL&nbsp;Course
+      <span class="crumb">L3 Track / Module 00</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Foundations</span>
+    <span class="pill"><b>~1.5h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- sidebar TOC -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#why"><svg class="ti"><use href="#i-target"/></svg>Why SQL, why now</a>
+      <a href="#relational"><svg class="ti"><use href="#i-db"/></svg>The relational model</a>
+      <a href="#schema"><svg class="ti"><use href="#i-table"/></svg>Our practice schema</a>
+      <a href="#select"><svg class="ti"><use href="#i-search"/></svg>SELECT &amp; FROM</a>
+      <a href="#where"><svg class="ti"><use href="#i-filter"/></svg>Filtering with WHERE</a>
+      <a href="#null"><svg class="ti"><use href="#i-null"/></svg>NULL &amp; three-valued logic</a>
+      <a href="#order"><svg class="ti"><use href="#i-sort"/></svg>ORDER BY, LIMIT, DISTINCT</a>
+      <a href="#order-of-ops"><svg class="ti"><use href="#i-layers"/></svg>Logical query order</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">Type every query yourself in <code style="font-family:var(--mono);font-size:11px">psql</code> or any Postgres playground. Reading SQL is not knowing SQL.</p>
+  </aside>
+
+  <!-- content -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 00</span>
+      <h1>Relational Foundations<br>&amp; the <span class="u">SELECT</span> statement</h1>
+      <p class="lede">Before joins, window functions, or indexes mean anything, you need the bedrock: <em>what a relational table actually is</em>, and how a single <em>SELECT</em> walks through your data. This module builds the mental model everything else stands on — and the one query shape you will write ten thousand times.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · foundations</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>no prerequisites</span>
+        <span class="chip"><svg><use href="#i-db"/></svg>PostgreSQL 16</span>
+      </div>
+    </div>
+
+    <!-- 0. WHY -->
+    <section id="why">
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>Why SQL, why now</h2></div></div>
+      <p>SQL is the one skill on every data, backend, and ML job description that almost nobody can skip. It matters because it reveals how you <strong>reason about data</strong> — not just whether you can memorize syntax. A clean SQL answer shows you can think in sets, handle edge cases like missing values, and translate a vague business question into precise logic.</p>
+      <p>The roadmap target for this track is <strong>L3 — proficient</strong>: you can write joins, group-and-aggregate, window functions, reason about indexes, and explain <em>why</em> a query is slow. We get there in six modules. This first one is deceptively important: most SQL bugs people hit later trace back to a shaky grasp of these basics — especially <code class="inl">NULL</code> and the order operations actually run in.</p>
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Mental model first</span>
+        <p>SQL is <strong>declarative</strong>. You describe <em>what</em> result you want; the database decides <em>how</em> to get it. This is the opposite of Python, where you spell out every step. Your job is to state the shape of the answer precisely — the query planner handles the rest. Internalizing this flips how you read and write every statement.</p></div>
+    </section>
+
+    <!-- 1. RELATIONAL MODEL -->
+    <section id="relational">
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — Concepts</span><h2>The relational model</h2></div></div>
+      <p>A relational database stores data in <strong>tables</strong> (formally, <em>relations</em>). A table is a set of <strong>rows</strong> (records), each with the same set of <strong>columns</strong> (fields). That is the whole idea — but a few properties make it powerful and worth saying out loud, because reviewers probe them.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico grey"><svg><use href="#i-table"/></svg></div>
+          <h4>Rows are a set</h4>
+          <p>Tables are <b>unordered</b> by default. There is no "first row" unless you ask for one with <code class="inl">ORDER BY</code>. Never assume insertion order.</p></div>
+        <div class="card"><div class="ico sage"><svg><use href="#i-key"/></svg></div>
+          <h4>Primary key</h4>
+          <p>A column (or set) that <b>uniquely identifies</b> each row. Never NULL, never duplicated. <code class="inl">emp_id</code> is our employees' primary key.</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-arrow"/></svg></div>
+          <h4>Foreign key</h4>
+          <p>A column that <b>points at</b> another table's primary key. <code class="inl">employees.dept_id</code> references <code class="inl">departments.dept_id</code> — this is how tables relate.</p></div>
+      </div>
+
+      <p>Each column has a <strong>data type</strong> — <code class="inl">INTEGER</code>, <code class="inl">TEXT</code>, <code class="inl">NUMERIC</code>, <code class="inl">DATE</code>, <code class="inl">BOOLEAN</code> — that constrains what it can hold. Types matter: comparing a number to text, or sorting dates stored as text, is a classic source of wrong answers. The relational model's discipline (typed columns, keys, constraints) is exactly what lets the database guarantee your data stays sane.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Relation vs table</span>
+        <p>In theory, a <strong>relation</strong> is a true mathematical set — no duplicate rows, no order. In practice, a SQL <strong>table</strong> can hold duplicate rows unless a key or constraint forbids it. The gap between the pure theory and SQL's pragmatic reality (duplicates, NULLs, ordering) is where most of the interesting edge cases live.</p></div>
+    </section>
+
+    <!-- 2. SCHEMA -->
+    <section id="schema">
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — Setup</span><h2>Our practice schema</h2></div></div>
+      <p>Every module in this course uses the <strong>same three tables</strong>. Learn them once here and you can focus on the SQL technique, not on re-reading a new schema each time. It is a tiny company: people work in departments, some manage others, and they place orders.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">schema.sql — run this once to follow along</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> departments (
+  dept_id     <span class="cmd">INTEGER</span> <span class="kw">PRIMARY KEY</span>,
+  dept_name   <span class="cmd">TEXT</span> <span class="kw">NOT NULL</span>,
+  location    <span class="cmd">TEXT</span>
+);
+
+<span class="kw">CREATE TABLE</span> employees (
+  emp_id      <span class="cmd">INTEGER</span> <span class="kw">PRIMARY KEY</span>,
+  name        <span class="cmd">TEXT</span> <span class="kw">NOT NULL</span>,
+  dept_id     <span class="cmd">INTEGER</span> <span class="kw">REFERENCES</span> departments(dept_id),  <span class="cmt">-- foreign key</span>
+  manager_id  <span class="cmd">INTEGER</span> <span class="kw">REFERENCES</span> employees(emp_id),    <span class="cmt">-- self-reference!</span>
+  salary      <span class="cmd">NUMERIC</span>(10,2),
+  hire_date   <span class="cmd">DATE</span>
+);
+
+<span class="kw">CREATE TABLE</span> orders (
+  order_id    <span class="cmd">INTEGER</span> <span class="kw">PRIMARY KEY</span>,
+  emp_id      <span class="cmd">INTEGER</span> <span class="kw">REFERENCES</span> employees(emp_id),
+  customer    <span class="cmd">TEXT</span>,
+  amount      <span class="cmd">NUMERIC</span>(10,2),
+  order_date  <span class="cmd">DATE</span>,
+  status      <span class="cmd">TEXT</span>  <span class="cmt">-- 'paid', 'pending', 'cancelled'</span>
+);</code></pre>
+      </div>
+
+      <p>A few rows of <code class="inl">employees</code> so the queries below have something to bite on. Notice row 1 (Alice) has a <code class="inl">NULL</code> manager — she is the boss — and Frank has a <code class="inl">NULL</code> department. Those NULLs are deliberate; they will teach us something important in section 5.</p>
+
+      <div class="tablewrap">
+        <table class="resultset">
+          <thead><tr><th>emp_id</th><th>name</th><th>dept_id</th><th>manager_id</th><th>salary</th><th>hire_date</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Alice</td><td>10</td><td>NULL</td><td>185000</td><td>2018-03-01</td></tr>
+            <tr><td>2</td><td>Bob</td><td>10</td><td>1</td><td>120000</td><td>2019-07-15</td></tr>
+            <tr><td>3</td><td>Carol</td><td>20</td><td>1</td><td>135000</td><td>2020-01-20</td></tr>
+            <tr><td>4</td><td>Dan</td><td>20</td><td>3</td><td>98000</td><td>2021-09-05</td></tr>
+            <tr><td>5</td><td>Eve</td><td>30</td><td>3</td><td>105000</td><td>2022-02-11</td></tr>
+            <tr><td>6</td><td>Frank</td><td>NULL</td><td>1</td><td>72000</td><td>2023-06-30</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. SELECT & FROM -->
+    <section id="select">
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Core syntax</span><h2>SELECT &amp; FROM — asking for columns</h2></div></div>
+      <p>The smallest useful query has two parts: <strong>which columns</strong> you want (<code class="inl">SELECT</code>) and <strong>which table</strong> they come from (<code class="inl">FROM</code>). Everything else is a refinement on top of this.</p>
+
+      <div class="anat">
+        <span class="tok t1">SELECT</span> <span class="tok t2">name, salary</span> <span class="tok t1">FROM</span> <span class="tok t3">employees</span><span class="tok">;</span>
+        <span class="lbl">keyword &nbsp;·&nbsp; columns you want &nbsp;·&nbsp; keyword &nbsp;·&nbsp; source table</span>
+      </div>
+
+      <p>Read it as a sentence: "select the name and salary columns, from the employees table." The result is a new table — every SQL query returns a table, even if it is one row and one column. That closure property (tables in, tables out) is what lets you nest queries later.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">pick specific columns</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees;
+
+<span class="cmt">-- result</span>
+<span class="out"> name  | salary
+-------+---------
+ Alice | 185000
+ Bob   | 120000
+ ...   | ...</span></code></pre>
+      </div>
+
+      <h3>SELECT * — and why to avoid it in real code</h3>
+      <p>The star <code class="inl">*</code> means "every column." It is fine for quick exploration, but in production queries and code it is a smell: it returns columns you may not need (wasting I/O), it breaks silently when the table schema changes, and it hides intent from the next person reading the query. <strong>Name the columns you actually want.</strong></p>
+
+      <h3>Expressions and aliases</h3>
+      <p>A <code class="inl">SELECT</code> list is not limited to bare columns — you can compute. And <code class="inl">AS</code> renames a column in the output, which is essential once expressions produce ugly auto-generated names.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">compute + alias</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name,
+       salary,
+       salary <span class="num">*</span> <span class="num">0.10</span> <span class="kw">AS</span> bonus,        <span class="cmt">-- computed column, named</span>
+       salary <span class="num">/</span> <span class="num">12</span> <span class="kw">AS</span> monthly_pay
+<span class="kw">FROM</span> employees;</code></pre>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Gotcha — integer division</span>
+        <p>In PostgreSQL, <code class="inl">salary / 12</code> where both sides are integers gives an <strong>integer</strong> result (truncated, no decimals). To get a fractional answer, make one side a decimal: <code class="inl">salary / 12.0</code> or cast it: <code class="inl">salary::numeric / 12</code>. This bites people constantly when computing averages or rates by hand.</p></div>
+    </section>
+
+    <!-- 4. WHERE -->
+    <section id="where">
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — Filtering</span><h2>Filtering rows with WHERE</h2></div></div>
+      <p><code class="inl">WHERE</code> keeps only the rows where a condition is <strong>true</strong>. Conceptually the database walks every row, tests your condition, and discards the ones that fail. This is your primary tool for narrowing a table down to the rows that matter.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">basic filters</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> salary <span class="num">&gt;</span> <span class="num">100000</span>;                 <span class="cmt">-- comparison</span>
+
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> dept_id <span class="num">=</span> <span class="num">10</span> <span class="kw">AND</span> salary <span class="num">&gt;</span> <span class="num">100000</span>;   <span class="cmt">-- combine with AND</span>
+
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> dept_id <span class="num">=</span> <span class="num">20</span> <span class="kw">OR</span> dept_id <span class="num">=</span> <span class="num">30</span>;       <span class="cmt">-- OR</span></code></pre>
+      </div>
+
+      <p>A handful of operators cover most filtering. Know these cold.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>=  &lt;&gt;  &lt;  &gt;  &lt;=  &gt;=</code></td><td>Comparisons (<code>&lt;&gt;</code> is "not equal")</td><td><code>salary &gt;= 100000</code></td></tr>
+            <tr><td><code>BETWEEN a AND b</code></td><td>Range, inclusive on both ends</td><td><code>salary BETWEEN 90000 AND 120000</code></td></tr>
+            <tr><td><code>IN (...)</code></td><td>Matches any value in a list</td><td><code>dept_id IN (10, 20)</code></td></tr>
+            <tr><td><code>LIKE</code></td><td>Pattern: <code>%</code> = any chars, <code>_</code> = one char</td><td><code>name LIKE 'A%'</code> (starts with A)</td></tr>
+            <tr><td><code>AND  OR  NOT</code></td><td>Combine / negate conditions</td><td><code>NOT (dept_id = 10)</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">AND before OR</span>
+        <p><code class="inl">AND</code> binds tighter than <code class="inl">OR</code>, just like <code class="inl">×</code> before <code class="inl">+</code> in arithmetic. So <code class="inl">a OR b AND c</code> means <code class="inl">a OR (b AND c)</code>. When in doubt, <strong>add parentheses</strong> — they cost nothing and make intent unambiguous. Ambiguous boolean logic is a top source of silently-wrong queries.</p></div>
+    </section>
+
+    <!-- 5. NULL -->
+    <section id="null">
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — The big one</span><h2>NULL &amp; three-valued logic</h2></div></div>
+      <p>This is the single most important section in the module, because <code class="inl">NULL</code> is where confident beginners write wrong queries that <em>look</em> right. <code class="inl">NULL</code> does not mean zero, and it does not mean empty string. It means <strong>"unknown / no value"</strong> — and that changes the rules of logic.</p>
+
+      <p>Because NULL is "unknown," any comparison <em>with</em> it produces not <code class="inl">true</code> or <code class="inl">false</code> but a third value: <strong>unknown</strong>. SQL uses <strong>three-valued logic</strong>: true, false, unknown. And <code class="inl">WHERE</code> only keeps rows where the condition is <em>true</em> — so "unknown" rows are dropped.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the NULL trap</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- WRONG: this never matches Frank, even though his dept_id IS null</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees <span class="kw">WHERE</span> dept_id <span class="num">=</span> <span class="kw">NULL</span>;   <span class="cmt">-- returns 0 rows!</span>
+
+<span class="cmt">-- RIGHT: use IS NULL / IS NOT NULL</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees <span class="kw">WHERE</span> dept_id <span class="kw">IS NULL</span>;      <span class="cmt">-- Frank</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees <span class="kw">WHERE</span> dept_id <span class="kw">IS NOT NULL</span>;</code></pre>
+      </div>
+
+      <p>Why does <code class="inl">dept_id = NULL</code> return nothing? Because "is this unknown value equal to this unknown value?" is itself unknown — never true. <strong>You must use <code class="inl">IS NULL</code> and <code class="inl">IS NOT NULL</code></strong> to test for missing values. There is no other correct way.</p>
+
+      <h3>NULL ripples everywhere</h3>
+      <div class="stack">
+        <div class="layer"><span><span class="n" style="color:var(--danger)">!</span> <code class="inl">5 + NULL</code></span><small>→ NULL (arithmetic with unknown is unknown)</small></div>
+        <div class="layer"><span><span class="n" style="color:var(--danger)">!</span> <code class="inl">'hi' || NULL</code></span><small>→ NULL (string concat too)</small></div>
+        <div class="layer"><span><span class="n" style="color:var(--warn)">~</span> <code class="inl">NOT (unknown)</code></span><small>→ still unknown</small></div>
+        <div class="layer"><span><span class="n" style="color:var(--accent)">✓</span> <code class="inl">COALESCE(dept_id, 0)</code></span><small>→ replaces NULL with a fallback value</small></div>
+      </div>
+
+      <p><code class="inl">COALESCE(x, fallback)</code> returns the first non-NULL argument — your main tool for handling missing values gracefully. Want to treat a missing salary as zero in a calculation? <code class="inl">COALESCE(salary, 0)</code>. This one function prevents a huge class of NULL-propagation bugs.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
+        <p>"Why does <code class="inl">WHERE salary &lt;&gt; 100000</code> exclude employees whose salary is NULL?" Because <code class="inl">NULL &lt;&gt; 100000</code> evaluates to <strong>unknown</strong>, not true — so those rows are filtered out. If you want them included, you must say <code class="inl">WHERE salary &lt;&gt; 100000 OR salary IS NULL</code>. Getting this right separates L3 from L1.</p></div>
+    </section>
+
+    <!-- 6. ORDER BY / LIMIT / DISTINCT -->
+    <section id="order">
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — Shaping output</span><h2>ORDER BY, LIMIT &amp; DISTINCT</h2></div></div>
+      <p>Remember: rows have no inherent order. <code class="inl">ORDER BY</code> is the <strong>only</strong> way to guarantee the sequence of your result. <code class="inl">LIMIT</code> caps how many rows come back, and <code class="inl">DISTINCT</code> removes duplicates.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">sort, cap, dedupe</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- highest paid first; ASC is default, DESC reverses</span>
+<span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees
+<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>;
+
+<span class="cmt">-- top 3 earners — sort THEN limit</span>
+<span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees
+<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">3</span>;
+
+<span class="cmt">-- the distinct set of departments people belong to</span>
+<span class="kw">SELECT DISTINCT</span> dept_id <span class="kw">FROM</span> employees;
+
+<span class="cmt">-- sort by two keys: dept first, then salary within each dept</span>
+<span class="kw">SELECT</span> name, dept_id, salary <span class="kw">FROM</span> employees
+<span class="kw">ORDER BY</span> dept_id <span class="kw">ASC</span>, salary <span class="kw">DESC</span>;</code></pre>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Where does NULL sort?</span>
+        <p>In PostgreSQL, <code class="inl">NULL</code> sorts <strong>last</strong> in <code class="inl">ASC</code> and <strong>first</strong> in <code class="inl">DESC</code> by default. Override with <code class="inl">ORDER BY salary DESC NULLS LAST</code>. Different databases pick different defaults — another reason to be explicit when NULLs matter.</p></div>
+
+      <p><code class="inl">LIMIT</code> without <code class="inl">ORDER BY</code> gives you <em>some</em> rows but no guarantee <em>which</em> ones — the database returns whatever is convenient. "Give me the top 5 by revenue" always means <code class="inl">ORDER BY revenue DESC LIMIT 5</code>. The sort is what makes "top" meaningful.</p>
+    </section>
+
+    <!-- 7. LOGICAL ORDER -->
+    <section id="order-of-ops">
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Execution model</span><h2>The logical order of a query</h2></div></div>
+      <p>You <em>write</em> a query starting with <code class="inl">SELECT</code>, but the database <em>executes</em> the clauses in a different order. Understanding this order explains a dozen "why doesn't this work?" errors — like why you cannot use a column alias from <code class="inl">SELECT</code> inside <code class="inl">WHERE</code>.</p>
+
+      <div class="stack">
+        <div class="layer"><span><span class="n">1</span> <code class="inl">FROM</code></span><small>pick the source table(s)</small></div>
+        <div class="layer"><span><span class="n">2</span> <code class="inl">WHERE</code></span><small>filter individual rows</small></div>
+        <div class="layer"><span><span class="n">3</span> <code class="inl">GROUP BY</code></span><small>collapse rows into groups (Module 02)</small></div>
+        <div class="layer"><span><span class="n">4</span> <code class="inl">HAVING</code></span><small>filter the groups</small></div>
+        <div class="layer"><span><span class="n">5</span> <code class="inl">SELECT</code></span><small>compute output columns &amp; aliases</small></div>
+        <div class="layer"><span><span class="n">6</span> <code class="inl">ORDER BY</code></span><small>sort the result</small></div>
+        <div class="layer"><span><span class="n">7</span> <code class="inl">LIMIT</code></span><small>cap the row count</small></div>
+      </div>
+
+      <p>Notice <code class="inl">SELECT</code> runs at step 5 — <em>after</em> <code class="inl">WHERE</code>. That is why this fails:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">alias scope error</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- ERROR: "bonus" does not exist yet when WHERE runs</span>
+<span class="kw">SELECT</span> name, salary <span class="num">*</span> <span class="num">0.1</span> <span class="kw">AS</span> bonus
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> bonus <span class="num">&gt;</span> <span class="num">15000</span>;
+
+<span class="cmt">-- FIX: repeat the expression, since WHERE runs before SELECT</span>
+<span class="kw">SELECT</span> name, salary <span class="num">*</span> <span class="num">0.1</span> <span class="kw">AS</span> bonus
+<span class="kw">FROM</span> employees
+<span class="kw">WHERE</span> salary <span class="num">*</span> <span class="num">0.1</span> <span class="num">&gt;</span> <span class="num">15000</span>;     <span class="cmt">-- ORDER BY *can* use the alias, though</span></code></pre>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Why ORDER BY can use aliases</span>
+        <p><code class="inl">ORDER BY</code> runs at step 6, <em>after</em> <code class="inl">SELECT</code> has computed the aliases — so <code class="inl">ORDER BY bonus</code> works fine. <code class="inl">WHERE</code> runs before, so it cannot. Memorize the seven-step ladder and these rules stop being arbitrary; they become obvious.</p></div>
+    </section>
+
+    <!-- 8. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Practice</span><h2>Hands-on — do this now</h2></div></div>
+      <p>Spin up the schema (any free Postgres playground works — <a href="https://www.db-fiddle.com/" target="_blank" rel="noopener">db-fiddle</a>, <a href="https://onecompiler.com/postgresql" target="_blank" rel="noopener">OneCompiler</a>, or local <code class="inl">psql</code>). Create the three tables, insert the six employee rows above, then write each query <em>before</em> looking at any hint.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Select just <code class="inl">name</code> and <code class="inl">hire_date</code> for every employee. Then change it to <code class="inl">SELECT *</code> and notice the difference in output width.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find all employees earning more than 100,000, sorted highest first. Predict the order on paper, then confirm.</li>
+        <li><svg><use href="#i-checkbox"/></svg>List employees whose name starts with a vowel using <code class="inl">LIKE</code> (hint: <code class="inl">name LIKE 'A%' OR name LIKE 'E%' ...</code>).</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find the employee(s) with no manager. Then find the one with no department. Use the correct NULL test — prove that <code class="inl">= NULL</code> returns zero rows.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Add a computed column <code class="inl">annual_bonus</code> = 10% of salary, aliased. Then try to filter on the alias in <code class="inl">WHERE</code>, watch it fail, and fix it.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Get the distinct list of <code class="inl">status</code> values that appear in <code class="inl">orders</code>. Then the top 3 orders by <code class="inl">amount</code>.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Use <code class="inl">COALESCE</code> to show every employee's <code class="inl">dept_id</code>, but display <code class="inl">0</code> for Frank instead of NULL.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Sort employees by salary descending with <code class="inl">NULLS LAST</code>, after temporarily setting one salary to NULL. Watch where that row lands.</li>
+      </ul>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict, then run</span>
+        <p>Before each query executes, say out loud what rows you expect and in what order. Then run it. When reality disagrees with your prediction, <em>that gap is the lesson</em> — chase it down before moving on. This active-prediction habit is exactly what separates people who "know SQL" from people who can only recognize it.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-select.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>SELECT — PostgreSQL tutorial</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-comparison.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Comparison operators &amp; NULL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-order.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Sorting rows (ORDER BY)</a>
+        <a class="reflink" href="https://use-the-index-luke.com/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Use The Index, Luke</a>
+      </div>
+
+      <div class="next">
+        <a href="../../index.html"><small>← Course home</small><span class="nx"><svg><use href="#i-back"/></svg><b>SQL Course — all modules</b></span></a>
+        <a href="../01-joins/01-joins.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 01 — Joins</b></span></a>
+      </div>
+      <p class="endline">SQL L3 Track · Module 00 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 01 — Joins.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

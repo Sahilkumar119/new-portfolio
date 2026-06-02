@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Course — L3 Track</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAE6DD;--bg-2:#E3DED3;--card:#DED9CE;--grey:#C8C5BC;--sage:#8C9A86;--taupe:#BBB1A1;
+    --ink:#1C1C1A;--ink-soft:#45443E;--ink-faint:#5C5A51;--line:#CBC5B8;--line-strong:#1C1C1A;
+    --accent:#5E6B57;--radius:5px;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    --display:"Space Grotesk",system-ui,sans-serif;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.72;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:rgba(140,154,134,.4)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(234,230,221,.88);backdrop-filter:blur(10px) saturate(120%);border-bottom:1px solid var(--line-strong)}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:baseline;gap:12px}
+  .brand{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-.02em}
+  .brand .crumb{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase;border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+  /* hero */
+  .hero{padding:64px 0 44px;border-bottom:1px solid var(--line-strong)}
+  .eyebrow{display:inline-flex;gap:9px;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+  h1{font-family:var(--display);font-size:clamp(40px,8vw,86px);line-height:.98;margin:24px 0 22px;letter-spacing:-.04em;font-weight:700;max-width:14ch}
+  h1 .u{text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:8px}
+  .lede{color:var(--ink-soft);font-size:19px;max-width:58ch;line-height:1.6;margin:0}
+  .lede em{color:var(--ink);font-weight:600;font-style:normal;text-decoration:underline;text-decoration-color:var(--sage);text-decoration-thickness:2px;text-underline-offset:3px}
+  .herometa{display:flex;flex-wrap:wrap;gap:0;margin-top:34px;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;max-width:760px}
+  .herometa .m{flex:1;min-width:max-content;padding:14px 18px;border-right:1px solid var(--line);background:var(--bg-2)}
+  .herometa .m:last-child{border-right:none}
+  .herometa .m b{font-family:var(--display);font-size:22px;display:block;color:var(--ink)}
+  .herometa .m span{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  @media(max-width:620px){.herometa{flex-direction:column}.herometa .m{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* section label */
+  .seclabel{display:flex;align-items:baseline;gap:14px;margin:60px 0 22px}
+  .seclabel .n{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+  .seclabel h2{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0}
+  .seclabel .rule{flex:1;height:1px;background:var(--line)}
+
+  /* module grid */
+  .modules{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  @media(max-width:760px){.modules{grid-template-columns:1fr}}
+  .mod{padding:28px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2);display:flex;flex-direction:column;gap:12px;min-height:200px;transition:background .2s var(--ease);position:relative}
+  .modules .mod:nth-child(2n){border-right:none}
+  .mod:hover{background:var(--card)}
+  .mod .big{font-family:var(--display);font-size:54px;font-weight:700;line-height:1;letter-spacing:-.04em;color:var(--ink)}
+  .mod .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+  .mod h3{font-family:var(--display);font-size:21px;font-weight:600;letter-spacing:-.02em;margin:0}
+  .mod p{margin:0;font-size:14px;color:var(--ink-soft);flex:1}
+  .mod .go{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-top:auto}
+  .mod .go svg{width:15px;height:15px;transition:transform .2s var(--ease)}
+  .mod:hover .go svg{transform:translateX(4px)}
+  .mod.sage{background:var(--sage)}.mod.sage:hover{background:#849077}
+  .mod.sage .tag,.mod.sage p{color:#22281d}.mod.sage .big,.mod.sage h3,.mod.sage .go{color:#10140c}
+
+  /* schema strip */
+  .schema{margin:22px 0 0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+  .schema .row{display:grid;grid-template-columns:160px 1fr;border-bottom:1px solid var(--line)}
+  .schema .row:last-child{border-bottom:none}
+  .schema .row .t{padding:14px 18px;font-family:var(--mono);font-weight:600;font-size:13.5px;background:var(--ink);color:var(--bg);display:flex;align-items:center}
+  .schema .row .c{padding:14px 18px;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);background:var(--bg-2);line-height:1.7}
+  @media(max-width:620px){.schema .row{grid-template-columns:1fr}}
+
+  footer{border-top:1px solid var(--line-strong);margin-top:72px;padding:32px 0 80px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:.02em}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="inner">
+    <span class="brand">SQL&nbsp;Course</span>
+    <span class="crumb">L3 Track / Index</span>
+    <span class="spacer"></span>
+    <span class="pill">PostgreSQL</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow"><span class="dot"></span>Data &amp; ML career track · 6 modules</span>
+    <h1>Learn <span class="u">SQL</span> properly</h1>
+    <p class="lede">A focused path from <em>what a table is</em> to <em>why a query is slow</em>. Built for someone who wants to say, with a straight face, that they are <em>proficient</em> in SQL — joins, aggregation, window functions, and the index reasoning that separates a scripter from an engineer.</p>
+    <div class="herometa">
+      <div class="m"><b>6</b><span>Modules</span></div>
+      <div class="m"><b>L3</b><span>Target level</span></div>
+      <div class="m"><b>~11h</b><span>Total focused</span></div>
+      <div class="m"><b>1</b><span>Shared schema</span></div>
+    </div>
+  </section>
+
+  <div class="seclabel"><span class="n">01</span><h2>The path</h2><span class="rule"></span></div>
+
+  <div class="modules">
+    <a class="mod" href="modules/00-foundations/00-foundations.html">
+      <div class="big">00</div>
+      <span class="tag">Foundations · ~1.5h</span>
+      <h3>Relational Foundations &amp; SELECT</h3>
+      <p>Tables, keys, types. SELECT / WHERE / ORDER BY, the NULL trap, and the logical order every query runs in.</p>
+      <span class="go">Start here <svg><use href="#i-arrow"/></svg></span>
+    </a>
+    <a class="mod" href="modules/01-joins/01-joins.html">
+      <div class="big">01</div>
+      <span class="tag">Combining tables · ~2h</span>
+      <h3>Joins</h3>
+      <p>INNER, LEFT, RIGHT, FULL, CROSS, and self-joins. Anti-joins, NULLs, and the WHERE-vs-ON outer-join trap.</p>
+      <span class="go">Open module <svg><use href="#i-arrow"/></svg></span>
+    </a>
+    <a class="mod" href="modules/02-aggregation/02-aggregation.html">
+      <div class="big">02</div>
+      <span class="tag">Summarizing · ~1.5h</span>
+      <h3>Aggregation</h3>
+      <p>COUNT / SUM / AVG, GROUP BY mechanics, HAVING vs WHERE, and how NULLs behave inside aggregates.</p>
+      <span class="go">Open module <svg><use href="#i-arrow"/></svg></span>
+    </a>
+    <a class="mod" href="modules/03-subqueries-cte/03-subqueries-cte.html">
+      <div class="big">03</div>
+      <span class="tag">Composition · ~2h</span>
+      <h3>Subqueries &amp; CTEs</h3>
+      <p>Scalar &amp; correlated subqueries, EXISTS, the NOT IN + NULL trap, CTEs, and recursive org-chart queries.</p>
+      <span class="go">Open module <svg><use href="#i-arrow"/></svg></span>
+    </a>
+    <a class="mod sage" href="modules/04-window-functions/04-window-functions.html">
+      <div class="big">04</div>
+      <span class="tag">Across rows · ~2h</span>
+      <h3>Window Functions</h3>
+      <p>OVER / PARTITION BY, ranking, top-N-per-group, LAG/LEAD, running totals, and the ROWS-vs-RANGE frame.</p>
+      <span class="go">Open module <svg><use href="#i-arrow"/></svg></span>
+    </a>
+    <a class="mod" href="modules/05-indexing-query-reasoning/05-indexing-query-reasoning.html">
+      <div class="big">05</div>
+      <span class="tag">Performance · ~2h</span>
+      <h3>Indexing &amp; Query Reasoning</h3>
+      <p>B-tree indexes, EXPLAIN ANALYZE, sargability, composite indexes, and a workflow for debugging slow queries.</p>
+      <span class="go">Open module <svg><use href="#i-arrow"/></svg></span>
+    </a>
+  </div>
+
+  <div class="seclabel"><span class="n">02</span><h2>The schema you'll use throughout</h2><span class="rule"></span></div>
+  <p style="color:var(--ink-soft);max-width:66ch">Every module runs on the same tiny company database, so you focus on technique, not on re-reading a new schema each time. People work in departments, some manage others, and they place orders.</p>
+
+  <div class="schema">
+    <div class="row"><div class="t">departments</div><div class="c">dept_id (PK) · dept_name · location</div></div>
+    <div class="row"><div class="t">employees</div><div class="c">emp_id (PK) · name · dept_id (FK→departments) · manager_id (FK→employees, self-ref) · salary · hire_date</div></div>
+    <div class="row"><div class="t">orders</div><div class="c">order_id (PK) · emp_id (FK→employees) · customer · amount · order_date · status</div></div>
+  </div>
+
+  <footer>SQL L3 Track · PostgreSQL 16 · built for visual, eye-easy reading · work top to bottom, ticking each module's hands-on checklist before moving on.</footer>
+
+</div>
+</body>
+</html>

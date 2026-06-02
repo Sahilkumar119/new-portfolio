@@ -36,7 +36,7 @@
   "scripts": {
     "sync": "node scripts/sync-content.js",
     "start": "npm run sync && react-scripts start",
-    "build": "npm run sync && react-scripts build && react-snapshot",
+    "build": "npm run sync && react-scripts build && react-snapshot && node scripts/restore-static.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

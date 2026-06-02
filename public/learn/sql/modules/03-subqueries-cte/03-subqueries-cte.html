@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 03 — Subqueries &amp; CTEs</title>
+<title>Module 03, Subqueries &amp; CTEs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
   .chip b{color:var(--accent)}
   @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
 
-  /* section heads — editorial */
+  /* section heads, editorial */
   section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
   section:first-of-type{border-top:none}
   .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
@@ -137,7 +137,7 @@
   .note.info{background:var(--bg-2)}
   .note.info .ic,.note.info .tag{color:var(--ink-soft)}
 
-  /* code — dark block on light page */
+  /* code, dark block on light page */
   .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
     overflow:hidden}
   .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
@@ -318,7 +318,7 @@
       <a href="#recursive"><svg class="ti"><use href="#i-key"/></svg>Recursive CTEs</a>
       <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
     </nav>
-    <p class="scrollmsg">A query returns a table, so a query can stand wherever a table or a value can. That single closure rule is the whole chapter — type every example in <code style="font-family:var(--mono);font-size:11px">psql</code>.</p>
+    <p class="scrollmsg">A query returns a table, so a query can stand wherever a table or a value can. That single closure rule is the whole chapter. Type every example in <code style="font-family:var(--mono);font-size:11px">psql</code>.</p>
   </aside>
 
   <!-- content -->
@@ -327,7 +327,7 @@
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 03</span>
       <h1>Subqueries &amp; CTEs<br>queries inside <span class="u">queries</span></h1>
-      <p class="lede">Every SQL query returns a table. Which means a query can sit <em>inside</em> another query — as a single value, as a list to match against, as a whole derived table, or as a named, reusable building block. This module is about <em>composability</em>: turning one hard question into a few easy ones stacked together, all the way up to a recursive walk of an org chart.</p>
+      <p class="lede">Every SQL query returns a table. Which means a query can sit <em>inside</em> another query (as a single value, as a list to match against, as a whole derived table, or as a named, reusable building block). Maya just started as an analyst here, and her first week is one long lesson in <em>composability</em>: turning one hard question into a few easy ones stacked together, all the way up to a recursive walk of the org chart.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · composition</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>needs Modules 00–02</span>
@@ -337,23 +337,24 @@
 
     <!-- 0. THE NESTING IDEA -->
     <section id="idea">
-      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>A query's result is itself a table</h2></div></div>
-      <p>By now you can <code class="inl">SELECT</code> columns, <code class="inl">WHERE</code>-filter rows (Module 00), <code class="inl">JOIN</code> tables together (Module 01), and <code class="inl">GROUP BY</code> + aggregate (Module 02). One property has quietly held all of that together: <strong>every SQL query returns a table</strong>. Tables go in, a table comes out. That is called the <strong>closure property</strong>, and it is the entire reason subqueries exist.</p>
-      <p>If a query produces a table, and SQL operates on tables, then a query can stand anywhere a table is expected. A query that returns one row and one column behaves like a single value — so it can go where a value goes. A query that returns one column of many rows behaves like a list. A query that returns a full grid behaves like a table you can select from. A <strong>subquery</strong> (or <em>inner query</em>) is just a <code class="inl">SELECT</code> wrapped in parentheses and dropped into a spot in an outer query.</p>
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 · Orientation</span><h2>A query's result is itself a table</h2></div></div>
+      <p>By now you can <code class="inl">SELECT</code> columns, <code class="inl">WHERE</code>-filter rows (Module 00), <code class="inl">JOIN</code> tables together (Module 01), and <code class="inl">GROUP BY</code> + aggregate (Module 02). One property has quietly held all of that together: <strong>every SQL query returns a table</strong>. Tables go in, a table comes out. That is called the <strong>closure property</strong>, and it is the entire reason subqueries exist. It is also the idea Maya keeps reaching for as the questions her manager sends get harder.</p>
+      <p>If a query produces a table, and SQL operates on tables, then a query can stand anywhere a table is expected. A query that returns one row and one column behaves like a single value, so it can go where a value goes. A query that returns one column of many rows behaves like a list. A query that returns a full grid behaves like a table you can select from. A <strong>subquery</strong> (or <em>inner query</em>) is just a <code class="inl">SELECT</code> wrapped in parentheses and dropped into a spot in an outer query.</p>
+      <p>The schema Maya works with is small: a <code class="inl">departments</code> table, an <code class="inl">employees</code> table that points back at it, and an <code class="inl">orders</code> table. Tiny, but every pattern in this module shows up the moment a real request lands on her desk.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico grey"><svg><use href="#i-search"/></svg></div>
           <h4>As a value</h4>
-          <p>Returns one row, one column. Usable anywhere a literal like <code class="inl">100000</code> would go — typically in <code class="inl">SELECT</code> or <code class="inl">WHERE</code>.</p></div>
+          <p>Returns one row, one column. Usable anywhere a literal like <code class="inl">100000</code> would go, typically in <code class="inl">SELECT</code> or <code class="inl">WHERE</code>.</p></div>
         <div class="card"><div class="ico sage"><svg><use href="#i-filter"/></svg></div>
           <h4>As a list</h4>
-          <p>Returns one column, many rows. Feeds <code class="inl">IN (...)</code>, <code class="inl">ANY</code>, <code class="inl">ALL</code> — "is this value among those?"</p></div>
+          <p>Returns one column, many rows. Feeds <code class="inl">IN (...)</code>, <code class="inl">ANY</code>, <code class="inl">ALL</code>. Asks "is this value among those?"</p></div>
         <div class="card"><div class="ico taupe"><svg><use href="#i-table"/></svg></div>
           <h4>As a table</h4>
           <p>Returns a full grid. Lives in <code class="inl">FROM</code> as a <b>derived table</b>, or named up top as a <b>CTE</b>.</p></div>
       </div>
 
-      <p>The win is <strong>composability</strong>. Instead of cramming a hard question into one tangled statement, you answer a simpler sub-question first, then build on its result. This module walks every place a subquery can live, the one trap that catches almost everyone (<code class="inl">NOT IN</code> with NULLs), and finishes with Common Table Expressions — the readable, named form that makes deep nesting unnecessary.</p>
+      <p>The win is <strong>composability</strong>. Instead of cramming a hard question into one tangled statement, you answer a simpler sub-question first, then build on its result. This module walks every place a subquery can live, the one trap that catches almost everyone (<code class="inl">NOT IN</code> with NULLs), and finishes with Common Table Expressions, the readable, named form that makes deep nesting unnecessary.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">One rule, many shapes</span>
         <p>There is really only one idea here: <strong>a result is a table, so a query can go wherever a table or value can</strong>. Scalar subqueries, <code class="inl">IN</code>-lists, <code class="inl">EXISTS</code>, derived tables, and CTEs are all just <em>where</em> you plug that result in. Hold the one rule and the syntax stops feeling like five separate features.</p></div>
@@ -361,9 +362,9 @@
 
     <!-- 1. SCALAR SUBQUERIES -->
     <section id="scalar">
-      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — One value</span><h2>Scalar subqueries</h2></div></div>
-      <p>A <strong>scalar subquery</strong> returns exactly one row and one column — a single value. Because it <em>is</em> a value, you can use it anywhere a value is legal: in a <code class="inl">WHERE</code> comparison, in the <code class="inl">SELECT</code> list, even inside an expression. The classic use is comparing each row against an aggregate of the whole table, which a plain <code class="inl">WHERE</code> cannot do on its own.</p>
-      <p>The question "who earns above the company average?" has a chicken-and-egg shape: you need the average before you can compare. A scalar subquery computes that average first, then the outer query compares every row to it.</p>
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 · One value</span><h2>Scalar subqueries</h2></div></div>
+      <p>A <strong>scalar subquery</strong> returns exactly one row and one column, a single value. Because it <em>is</em> a value, you can use it anywhere a value is legal: in a <code class="inl">WHERE</code> comparison, in the <code class="inl">SELECT</code> list, even inside an expression. The classic use is comparing each row against an aggregate of the whole table, which a plain <code class="inl">WHERE</code> cannot do on its own.</p>
+      <p>Maya's first ticket: "who earns above the company average?" It has a chicken-and-egg shape. You need the average before you can compare. A scalar subquery computes that average first, then the outer query compares every row to it.</p>
 
       <div class="anat">
         <span class="tok t1">WHERE</span> <span class="tok t2">salary</span> <span class="tok">&gt;</span> <span class="tok t3">(SELECT AVG(salary) FROM employees)</span>
@@ -385,7 +386,7 @@
  Carol | 135000</span></code></pre>
       </div>
 
-      <p>You can also drop a scalar subquery straight into the <code class="inl">SELECT</code> list to attach a computed value to every row — here, each person's salary alongside the gap to the company average:</p>
+      <p>You can also drop a scalar subquery straight into the <code class="inl">SELECT</code> list to attach a computed value to every row. Here, each person's salary alongside the gap to the company average:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">scalar subquery in the SELECT list</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -401,9 +402,9 @@
 
     <!-- 2. IN / NOT IN -->
     <section id="in">
-      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — A list</span><h2>Subqueries in WHERE with IN / NOT IN</h2></div></div>
-      <p>When the inner query returns <strong>one column but many rows</strong>, it behaves like a list, and <code class="inl">IN</code> asks "is this value among those?" In Module 00 you used <code class="inl">IN (10, 20)</code> with a hand-written list. Now the list comes from another query — so it stays correct as the data changes.</p>
-      <p>"Which employees work in a department located in NYC?" The departments in NYC live in the <code class="inl">departments</code> table; the people live in <code class="inl">employees</code>. A subquery pulls the matching <code class="inl">dept_id</code>s, and <code class="inl">IN</code> filters employees against them.</p>
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 · A list</span><h2>Subqueries in WHERE with IN / NOT IN</h2></div></div>
+      <p>When the inner query returns <strong>one column but many rows</strong>, it behaves like a list, and <code class="inl">IN</code> asks "is this value among those?" In Module 00 you used <code class="inl">IN (10, 20)</code> with a hand-written list. Now the list comes from another query, so it stays correct as the data changes.</p>
+      <p>Next on Maya's list: "which employees work in a department located in NYC?" The departments in NYC live in the <code class="inl">departments</code> table; the people live in <code class="inl">employees</code>. A subquery pulls the matching <code class="inl">dept_id</code>s, and <code class="inl">IN</code> filters employees against them.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">IN with a subquery list</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -418,7 +419,7 @@
 <span class="cmt">-- outer query → employees whose dept_id is in that set</span></code></pre>
       </div>
 
-      <p><code class="inl">NOT IN</code> is the negation: "this value is among <em>none</em> of those." Read literally it seems obvious — "employees not in any NYC department" — and for clean, NULL-free data it works. But <code class="inl">NOT IN</code> hides a trap so common it gets its own section next. For now, know that both forms exist and that the inner query must return a single column to feed them.</p>
+      <p><code class="inl">NOT IN</code> is the negation: "this value is among <em>none</em> of those." Read literally it seems obvious (think "employees not in any NYC department"), and for clean, NULL-free data it works. But <code class="inl">NOT IN</code> hides a trap so common it gets its own section next. For now, know that both forms exist and that the inner query must return a single column to feed them.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">IN vs a join</span>
         <p>You could also answer this with a <code class="inl">JOIN</code> to <code class="inl">departments</code>. The difference: <code class="inl">IN</code> returns each employee <strong>once</strong> regardless of how many NYC rows match, while a join can multiply rows if the right side is not unique. When you only want to <em>test membership</em> and not pull columns from the other table, <code class="inl">IN</code> (or <code class="inl">EXISTS</code>) is the cleaner intent.</p></div>
@@ -426,9 +427,9 @@
 
     <!-- 3. EXISTS / CORRELATED -->
     <section id="exists">
-      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Per-row tests</span><h2>EXISTS, NOT EXISTS &amp; correlated subqueries</h2></div></div>
-      <p>So far the inner queries were <strong>self-contained</strong>: they could run on their own, once, and the outer query reused the result. A <strong>correlated subquery</strong> is different — it <em>references a column from the outer row</em>, so it cannot run standalone. Conceptually it re-runs once per outer row, with that row's values plugged in. It is the SQL equivalent of a nested loop.</p>
-      <p><code class="inl">EXISTS (subquery)</code> is true if the subquery returns <strong>at least one row</strong>, false otherwise. It does not care <em>what</em> the rows contain — only whether any exist. That makes it the natural tool for "does a related row exist?" questions, and it pairs perfectly with correlation.</p>
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 · Per-row tests</span><h2>EXISTS, NOT EXISTS &amp; correlated subqueries</h2></div></div>
+      <p>So far the inner queries were <strong>self-contained</strong>: they could run on their own, once, and the outer query reused the result. A <strong>correlated subquery</strong> is different. It <em>references a column from the outer row</em>, so it cannot run standalone. Conceptually it re-runs once per outer row, with that row's values plugged in. It is the SQL equivalent of a nested loop.</p>
+      <p><code class="inl">EXISTS (subquery)</code> is true if the subquery returns <strong>at least one row</strong>, false otherwise. It does not care <em>what</em> the rows contain, only whether any exist. That makes it the natural tool for "does a related row exist?" questions, and it pairs perfectly with correlation. Maya hits it when her manager asks which departments are actually staffed.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">departments that HAVE at least one employee</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -443,7 +444,7 @@
 
       <p>For each department row <code class="inl">d</code>, the inner query asks "is there any employee whose <code class="inl">dept_id</code> equals <em>this</em> department's id?" The reference to <code class="inl">d.dept_id</code> is what makes it correlated. <code class="inl">SELECT 1</code> is idiomatic: since <code class="inl">EXISTS</code> ignores the selected values, we select a cheap constant.</p>
 
-      <p>Flip it to <code class="inl">NOT EXISTS</code> for the opposite — "departments with <strong>no</strong> employees at all":</p>
+      <p>Flip it to <code class="inl">NOT EXISTS</code> for the opposite, "departments with <strong>no</strong> employees at all":</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">departments with NO employees</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -455,7 +456,7 @@
       );</code></pre>
       </div>
 
-      <h3>EXISTS vs IN — same answer, different feel</h3>
+      <h3>EXISTS vs IN: same answer, different feel</h3>
       <p>Both can express membership tests, and a good planner often optimizes them similarly. The intuition:</p>
 
       <div class="grid two">
@@ -473,12 +474,12 @@
 
     <!-- 4. NOT IN NULL TRAP -->
     <section id="nulltrap">
-      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The big trap</span><h2>The NOT IN + NULL trap</h2></div></div>
-      <p>This is the most famous subquery gotcha, and it follows directly from the three-valued logic you met in Module 00. The rule: <strong>if the subquery feeding <code class="inl">NOT IN</code> returns even one <code class="inl">NULL</code>, the whole <code class="inl">NOT IN</code> returns no rows</strong> — silently, with no error. Your query looks right, runs fine, and gives the wrong answer.</p>
-      <p>Why? <code class="inl">x NOT IN (a, b, NULL)</code> is defined as <code class="inl">x &lt;&gt; a AND x &lt;&gt; b AND x &lt;&gt; NULL</code>. That last comparison, <code class="inl">x &lt;&gt; NULL</code>, is <strong>unknown</strong> — never true. And <code class="inl">true AND unknown</code> collapses to <strong>unknown</strong>, which <code class="inl">WHERE</code> treats as not-true. So every row fails the test, even rows that clearly should match.</p>
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 · The big trap</span><h2>The NOT IN + NULL trap</h2></div></div>
+      <p>This is the most famous subquery gotcha, and it bites Maya hard. Her "employees not in any NYC department" query runs clean and returns nothing, even though she knows it should match people. It follows directly from the three-valued logic you met in Module 00. The rule: <strong>if the subquery feeding <code class="inl">NOT IN</code> returns even one <code class="inl">NULL</code>, the whole <code class="inl">NOT IN</code> returns no rows</strong>, silently, with no error. The query looks right, runs fine, and gives the wrong answer.</p>
+      <p>Why? <code class="inl">x NOT IN (a, b, NULL)</code> is defined as <code class="inl">x &lt;&gt; a AND x &lt;&gt; b AND x &lt;&gt; NULL</code>. That last comparison, <code class="inl">x &lt;&gt; NULL</code>, is <strong>unknown</strong>, never true. And <code class="inl">true AND unknown</code> collapses to <strong>unknown</strong>, which <code class="inl">WHERE</code> treats as not-true. So every row fails the test, even rows that clearly should match.</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the bug — employees NOT in any NYC dept</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the bug, employees NOT in any NYC dept</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="cmt">-- Suppose one departments row has a NULL dept_id (bad data, or an outer join upstream).</span>
 <span class="cmt">-- This returns ZERO rows even though NYC clearly excludes some people.</span>
 <span class="kw">SELECT</span> name
@@ -510,12 +511,12 @@
       </div>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
-        <p>"Your <code class="inl">NOT IN (subquery)</code> returns nothing and you swear it should match rows — what happened?" The answer is almost always: <strong>the subquery contains a NULL</strong>. Because <code class="inl">x &lt;&gt; NULL</code> is unknown, the chained <code class="inl">AND</code> collapses to unknown for every row. Note <code class="inl">IN</code> with a NULL is <em>not</em> symmetric — it can still return matches; only <code class="inl">NOT IN</code> is poisoned. Default to <code class="inl">NOT EXISTS</code> and you sidestep the whole problem.</p></div>
+        <p>"Your <code class="inl">NOT IN (subquery)</code> returns nothing and you swear it should match rows. What happened?" The answer is almost always: <strong>the subquery contains a NULL</strong>. Because <code class="inl">x &lt;&gt; NULL</code> is unknown, the chained <code class="inl">AND</code> collapses to unknown for every row. Note <code class="inl">IN</code> with a NULL is <em>not</em> symmetric. It can still return matches; only <code class="inl">NOT IN</code> is poisoned. Default to <code class="inl">NOT EXISTS</code> and you sidestep the whole problem.</p></div>
     </section>
 
     <!-- 5. ANY / ALL -->
     <section id="anyall">
-      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — Quantifiers</span><h2>ANY &amp; ALL</h2></div></div>
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 · Quantifiers</span><h2>ANY &amp; ALL</h2></div></div>
       <p><code class="inl">ANY</code> and <code class="inl">ALL</code> let you combine a comparison operator (<code class="inl">&gt;</code>, <code class="inl">&lt;</code>, <code class="inl">=</code>, …) with a whole list from a subquery. They answer "compared to <em>some</em> of these?" versus "compared to <em>all</em> of these?"</p>
 
       <div class="tablewrap">
@@ -530,7 +531,7 @@
         </table>
       </div>
 
-      <p>So <code class="inl">IN</code> is just sugar for <code class="inl">= ANY</code>, and <code class="inl">NOT IN</code> is <code class="inl">&lt;&gt; ALL</code> — which is exactly why <code class="inl">NOT IN</code> inherits the same NULL trap from the previous section. The genuinely useful ones are the inequalities: "earns more than everyone in department 20" is a clean <code class="inl">&gt; ALL</code>.</p>
+      <p>So <code class="inl">IN</code> is just sugar for <code class="inl">= ANY</code>, and <code class="inl">NOT IN</code> is <code class="inl">&lt;&gt; ALL</code>, which is exactly why <code class="inl">NOT IN</code> inherits the same NULL trap from the previous section. The genuinely useful ones are the inequalities: "earns more than everyone in department 20" is a clean <code class="inl">&gt; ALL</code>.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">paid more than every employee in dept 20</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -543,14 +544,14 @@
       </div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">ALL and the empty set</span>
-        <p>A subtle edge: <code class="inl">&gt; ALL (empty subquery)</code> is <strong>true</strong> for every row (there is nothing to fail against), while <code class="inl">&gt; ANY (empty)</code> is <strong>false</strong>. And like <code class="inl">NOT IN</code>, <code class="inl">&gt; ALL</code> with a NULL in the list goes unknown. In practice most people reach for <code class="inl">MAX</code>/<code class="inl">MIN</code> instead because the intent is clearer — but recognizing <code class="inl">ANY</code>/<code class="inl">ALL</code> is fair game.</p></div>
+        <p>A subtle edge: <code class="inl">&gt; ALL (empty subquery)</code> is <strong>true</strong> for every row (there is nothing to fail against), while <code class="inl">&gt; ANY (empty)</code> is <strong>false</strong>. And like <code class="inl">NOT IN</code>, <code class="inl">&gt; ALL</code> with a NULL in the list goes unknown. In practice most people reach for <code class="inl">MAX</code>/<code class="inl">MIN</code> instead because the intent is clearer, but recognizing <code class="inl">ANY</code>/<code class="inl">ALL</code> is fair game.</p></div>
     </section>
 
     <!-- 6. DERIVED TABLES -->
     <section id="derived">
-      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — A whole table</span><h2>Subqueries in FROM — derived tables</h2></div></div>
-      <p>When a subquery returns a full grid of rows and columns, you can put it in the <code class="inl">FROM</code> clause and select from it as if it were a real table. This is a <strong>derived table</strong> (or <em>inline view</em>). It is how you filter or join against an aggregated result — something a plain <code class="inl">WHERE</code> cannot do, because aggregates do not exist until after grouping.</p>
-      <p>"Which departments have an average salary above 100,000?" First aggregate per department, then filter on that average. The aggregation is the inner table; the filter wraps around it.</p>
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 · A whole table</span><h2>Subqueries in FROM: derived tables</h2></div></div>
+      <p>When a subquery returns a full grid of rows and columns, you can put it in the <code class="inl">FROM</code> clause and select from it as if it were a real table. This is a <strong>derived table</strong> (or <em>inline view</em>). It is how you filter or join against an aggregated result, something a plain <code class="inl">WHERE</code> cannot do, because aggregates do not exist until after grouping.</p>
+      <p>Maya's manager wants the budget picture: "which departments have an average salary above 100,000?" First aggregate per department, then filter on that average. The aggregation is the inner table; the filter wraps around it.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">filter on a per-department average</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -566,13 +567,13 @@
       <p>The inner query produces a small table of <code class="inl">(dept_id, avg_sal)</code> rows; the outer query treats <code class="inl">t</code> like any table and filters it. You <em>could</em> write this with <code class="inl">HAVING</code> (Module 02), and for one level of aggregation that is cleaner. Derived tables earn their keep when you need to aggregate, then join or aggregate <em>again</em> on the result.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Must alias the derived table</span>
-        <p>PostgreSQL <strong>requires</strong> every subquery in <code class="inl">FROM</code> to have an alias — <code class="inl">) AS t</code>. Forget it and you get <code class="inl">ERROR: subquery in FROM must have an alias</code>. Even if you never reference the alias by name, the parser demands one. This is a constant tripwire; make aliasing the derived table a reflex.</p></div>
+        <p>PostgreSQL <strong>requires</strong> every subquery in <code class="inl">FROM</code> to have an alias, the <code class="inl">) AS t</code> part. Forget it and you get <code class="inl">ERROR: subquery in FROM must have an alias</code>. Even if you never reference the alias by name, the parser demands one. This is a constant tripwire; make aliasing the derived table a reflex.</p></div>
     </section>
 
     <!-- 7. CTEs -->
     <section id="cte">
-      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Named &amp; readable</span><h2>CTEs with WITH</h2></div></div>
-      <p>Nesting subqueries works, but it reads <em>inside-out</em>: to understand the query you start at the deepest parentheses and unwind outward. A <strong>Common Table Expression (CTE)</strong> fixes that. With the <code class="inl">WITH</code> keyword you give a subquery a <strong>name</strong> up top, then refer to it by name below — so the query reads <strong>top-down</strong>, like defining a variable before using it.</p>
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 · Named &amp; readable</span><h2>CTEs with WITH</h2></div></div>
+      <p>By Friday Maya's derived-table query works, but a teammate reviewing it has to read it <em>inside-out</em>: start at the deepest parentheses and unwind outward. A <strong>Common Table Expression (CTE)</strong> fixes that. With the <code class="inl">WITH</code> keyword you give a subquery a <strong>name</strong> up top, then refer to it by name below, so the query reads <strong>top-down</strong>, like defining a variable before using it.</p>
       <p>Here is the exact section-6 query rewritten as a CTE. Same result, but the intent is named and the structure is flat:</p>
 
       <div class="codeblock">
@@ -593,17 +594,17 @@
       <div class="grid three">
         <div class="card"><div class="ico sage"><svg><use href="#i-book"/></svg></div>
           <h4>Readability</h4>
-          <p>Named, top-down structure. Each step has a label that documents intent — no inside-out unwinding.</p></div>
+          <p>Named, top-down structure. Each step has a label that documents intent, with no inside-out unwinding.</p></div>
         <div class="card"><div class="ico grey"><svg><use href="#i-copy"/></svg></div>
           <h4>Reuse</h4>
           <p>Postgres lets you reference a CTE <b>multiple times</b> in the same query. A derived table you would have to repeat.</p></div>
         <div class="card"><div class="ico taupe"><svg><use href="#i-layers"/></svg></div>
           <h4>No deep nesting</h4>
-          <p>Chain several CTEs with commas — <code class="inl">WITH a AS (…), b AS (… from a …)</code> — instead of stacking parentheses.</p></div>
+          <p>Chain several CTEs with commas, as in <code class="inl">WITH a AS (…), b AS (… from a …)</code>, instead of stacking parentheses.</p></div>
       </div>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">chaining CTEs — each builds on the last</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">chaining CTEs, each builds on the last</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="kw">WITH</span> dept_avg <span class="kw">AS</span> (
        <span class="kw">SELECT</span> dept_id, <span class="fn">AVG</span>(salary) <span class="kw">AS</span> avg_sal
        <span class="kw">FROM</span> employees <span class="kw">GROUP BY</span> dept_id
@@ -617,17 +618,17 @@ high_paying <span class="kw">AS</span> (                  <span class="cmt">-- s
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">CTE vs temp table</span>
-        <p>A CTE exists only for the duration of the single statement — it is not stored. A <strong>temporary table</strong> persists for the session and can be indexed and reused across statements. Reach for a temp table only when you genuinely need to materialize a result and hit it many times; for one query, a CTE is lighter and self-documenting. Modern Postgres does not always materialize CTEs, so they are not an optimization fence the way they once were.</p></div>
+        <p>A CTE exists only for the duration of the single statement; it is not stored. A <strong>temporary table</strong> persists for the session and can be indexed and reused across statements. Reach for a temp table only when you genuinely need to materialize a result and hit it many times; for one query, a CTE is lighter and self-documenting. Modern Postgres does not always materialize CTEs, so they are not an optimization fence the way they once were.</p></div>
     </section>
 
     <!-- 8. RECURSIVE CTEs -->
     <section id="recursive">
-      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — The showcase</span><h2>Recursive CTEs — walking the org chart</h2></div></div>
-      <p>Here is where subqueries do something nothing else can: traverse a <strong>hierarchy</strong>. Our <code class="inl">employees</code> table has a self-referencing <code class="inl">manager_id</code> — each person points at their boss. To produce the full management chain ("who reports up to whom, and how many levels deep?") you need to follow that chain an unknown number of steps. A <strong>recursive CTE</strong> does exactly that.</p>
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 · The showcase</span><h2>Recursive CTEs: walking the org chart</h2></div></div>
+      <p>Maya's last task of the week is the one that scared her: build the org chart. Here is where subqueries do something nothing else can, traverse a <strong>hierarchy</strong>. The <code class="inl">employees</code> table has a self-referencing <code class="inl">manager_id</code>, so each person points at their boss. To produce the full management chain ("who reports up to whom, and how many levels deep?") you follow that chain an unknown number of steps. A <strong>recursive CTE</strong> does exactly that.</p>
       <p>A <code class="inl">WITH RECURSIVE</code> CTE has three parts, joined by <code class="inl">UNION ALL</code>:</p>
 
       <div class="stack">
-        <div class="layer"><span><span class="n">1</span> <code class="inl">Anchor</code></span><small>the starting rows — here, the top boss (manager_id IS NULL): Alice</small></div>
+        <div class="layer"><span><span class="n">1</span> <code class="inl">Anchor</code></span><small>the starting rows: here, the top boss (manager_id IS NULL), Alice</small></div>
         <div class="layer"><span><span class="n">2</span> <code class="inl">UNION ALL</code></span><small>stack each recursive batch onto the results so far</small></div>
         <div class="layer"><span><span class="n">3</span> <code class="inl">Recursive</code></span><small>employees whose manager appeared in the PREVIOUS level</small></div>
         <div class="layer"><span><span class="n" style="color:var(--accent)">✓</span> <code class="inl">Termination</code></span><small>stops automatically when the recursive part returns no new rows</small></div>
@@ -662,15 +663,15 @@ high_paying <span class="kw">AS</span> (                  <span class="cmt">-- s
      3 |      5 | Eve   |          3</span></code></pre>
       </div>
 
-      <p>Trace the machine. The <strong>anchor</strong> finds Alice (depth 1). The <strong>recursive</strong> member then joins <code class="inl">employees</code> to the rows just produced: who reports to Alice? Bob, Carol, Frank — depth 2. Next pass, who reports to <em>those</em>? Dan and Eve report to Carol — depth 3. The pass after that finds nobody new, so the recursion <strong>terminates</strong>. <code class="inl">UNION ALL</code> piles every batch into the final <code class="inl">org</code> table.</p>
+      <p>Maya traces the machine by hand. The <strong>anchor</strong> finds Alice (depth 1). The <strong>recursive</strong> member then joins <code class="inl">employees</code> to the rows just produced: who reports to Alice? Bob, Carol, Frank, all depth 2. Next pass, who reports to <em>those</em>? Dan and Eve report to Carol, so depth 3. The pass after that finds nobody new, so the recursion <strong>terminates</strong>. <code class="inl">UNION ALL</code> piles every batch into the final <code class="inl">org</code> table. The chart she dreaded falls out in eight lines.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Why UNION ALL, and a safety net</span>
-        <p>It is <code class="inl">UNION ALL</code> (not <code class="inl">UNION</code>) because each level is genuinely new rows — deduplicating every pass would be wasteful and can hide legitimate results. Termination is automatic: when the recursive query yields zero new rows, it stops. <strong>But beware cycles</strong> — if the data had a manager loop (A manages B manages A), the recursion would never end. Guard real hierarchies with a depth cap (<code class="inl">WHERE o.depth &lt; 100</code>) or Postgres's <code class="inl">CYCLE</code> clause.</p></div>
+        <p>It is <code class="inl">UNION ALL</code> (not <code class="inl">UNION</code>) because each level is genuinely new rows. Deduplicating every pass would be wasteful and can hide legitimate results. Termination is automatic: when the recursive query yields zero new rows, it stops. <strong>But beware cycles.</strong> If the data had a manager loop (A manages B manages A), the recursion would never end. Guard real hierarchies with a depth cap (<code class="inl">WHERE o.depth &lt; 100</code>) or Postgres's <code class="inl">CYCLE</code> clause.</p></div>
     </section>
 
     <!-- 9. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">9</span><div class="htext"><span class="kicker">Section 09 — Practice</span><h2>Hands-on — do this now</h2></div></div>
+      <div class="sec-head"><span class="num">9</span><div class="htext"><span class="kicker">Section 09 · Practice</span><h2>Hands-on: do this now</h2></div></div>
       <p>Use the same three-table schema from Module 00 (recreate it if needed) in any Postgres playground or local <code class="inl">psql</code>. Write each query <em>before</em> peeking at a hint, and predict the rows out loud first.</p>
 
       <ul class="check">
@@ -685,21 +686,21 @@ high_paying <span class="kw">AS</span> (                  <span class="cmt">-- s
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict, then run</span>
-        <p>For the recursive task especially, write out the levels on paper before running — anchor first, then each pass. When your hand-traced tree matches the query output, you <em>understand</em> recursion rather than just copying syntax. That gap between prediction and result is the lesson every time.</p></div>
+        <p>For the recursive task especially, write out the levels on paper before running: anchor first, then each pass, the way Maya did. When your hand-traced tree matches the query output, you <em>understand</em> recursion rather than just copying syntax. That gap between prediction and result is the lesson every time.</p></div>
     </section>
 
     <footer>
       <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
       <div class="refs">
-        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-with.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>WITH queries (CTEs) — PostgreSQL</a>
-        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-subquery.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Subquery expressions — PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-with.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>WITH queries (CTEs), PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-subquery.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Subquery expressions, PostgreSQL</a>
       </div>
 
       <div class="next">
-        <a href="../02-aggregation/02-aggregation.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 02 — Aggregation</b></span></a>
-        <a href="../04-window-functions/04-window-functions.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 04 — Window Functions</b></span></a>
+        <a href="../02-aggregation/02-aggregation.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 02 · Aggregation</b></span></a>
+        <a href="../04-window-functions/04-window-functions.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 04 · Window Functions</b></span></a>
       </div>
-      <p class="endline">SQL L3 Track · Module 03 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 04 — Window Functions. Course home: <a href="../../index.html">all modules</a>.</p>
+      <p class="endline">SQL L3 Track · Module 03 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 04, Window Functions. Course home: <a href="../../index.html">all modules</a>.</p>
     </footer>
 
   </main>

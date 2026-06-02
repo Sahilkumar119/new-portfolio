@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 03 — Volumes &amp; Storage: Persisting Data in Docker</title>
+<title>Module 03: Volumes &amp; Storage: Persisting Data in Docker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -331,8 +331,8 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 3</span>
-      <h1>Module 03 — <span class="grad">Volumes &amp; Storage</span><br>Persisting Data in Docker</h1>
-      <p class="lede">Modules 01 and 02 taught you to <em>run</em> and <em>build</em> containers. But every database row, every uploaded file, every log line written inside a container <em>disappears when you remove it</em> — unless you understand storage. This module fixes that.</p>
+      <h1>Module 03: <span class="grad">Volumes &amp; Storage</span><br>Persisting Data in Docker</h1>
+      <p class="lede">Sam just shipped their first containerized app and felt great about it. Then a redeploy wiped every signup overnight. Modules 01 and 02 taught Sam to <em>run</em> and <em>build</em> containers, but every database row, every uploaded file, every log line written inside a container <em>disappears when you remove it</em>, unless you understand storage. This module fixes that.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · hands-on heavy</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 01 &amp; 02</span>
@@ -344,12 +344,12 @@
     <!-- 0. RECAP -->
     <section id="recap">
       <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
-      <p>In Module 01 you learned that a running container gets a thin, writable layer on top of the read-only image layers. In Module 02 you learned how to bake things into the image at build time with a Dockerfile. There is, however, a category of data that you simply <strong>cannot bake into an image</strong>: runtime state. A database writing rows, an app saving uploads, a service writing logs — all of this happens while the container is running, long after build time.</p>
+      <p>In Module 01 you learned that a running container gets a thin, writable layer on top of the read-only image layers. In Module 02 you learned how to bake things into the image at build time with a Dockerfile. There is, however, a category of data that you simply <strong>cannot bake into an image</strong>: runtime state. A database writing rows, an app saving uploads, a service writing logs. All of this happens while the container is running, long after build time. This is exactly the gap Sam fell into.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico violet"><svg><use href="#i-layers"/></svg></div>
           <h4>Writable layer</h4>
-          <p>Every container gets one at startup. Writes go here by default. It is <b style="color:var(--fg)">tied to the container lifecycle</b> — it disappears on <code class="inl">docker rm</code>.</p></div>
+          <p>Every container gets one at startup. Writes go here by default. It is <b style="color:var(--fg)">tied to the container lifecycle</b> and disappears on <code class="inl">docker rm</code>.</p></div>
         <div class="card"><div class="ico blue"><svg><use href="#i-db"/></svg></div>
           <h4>Persistent data</h4>
           <p>Database files, user uploads, config state. This data needs to <b style="color:var(--fg)">outlive any single container</b>. Volumes and bind mounts give it a home outside the writable layer.</p></div>
@@ -359,32 +359,32 @@
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why this module matters</span>
-        <p>"How would you run a database in Docker without losing data?" is the core question this module answers. Every real production Docker setup uses volumes — you cannot skip this and claim to know Docker.</p></div>
+        <p>"How would you run a database in Docker without losing data?" is the core question this module answers. Every real production Docker setup uses volumes. You cannot skip this and claim to know Docker.</p></div>
     </section>
 
     <!-- 1. THE PROBLEM -->
     <section id="problem">
-      <div class="sec-head"><span class="num">1</span><h2>The problem — why container filesystems are disposable</h2></div>
+      <div class="sec-head"><span class="num">1</span><h2>The problem: why container filesystems are disposable</h2></div>
 
-      <p>When Docker starts a container, it stacks the read-only image layers and then adds a fresh, empty writable layer on top. The container writes everything new into that writable layer — new files, modified configs, database rows. The image layers underneath are never touched.</p>
+      <p>When Docker starts a container, it stacks the read-only image layers and then adds a fresh, empty writable layer on top. The container writes everything new into that writable layer: new files, modified configs, database rows. The image layers underneath are never touched. This is where Sam's signups were going.</p>
 
       <p>Here is what the storage stack looks like at runtime:</p>
 
       <div class="stack">
-        <div class="layer rw"><span>Writable container layer</span><small>created fresh at docker run — destroyed at docker rm</small></div>
+        <div class="layer rw"><span>Writable container layer</span><small>created fresh at docker run, destroyed at docker rm</small></div>
         <div class="layer ro"><span>COPY . .  (your app code)</span><small>read-only image layer</small></div>
         <div class="layer ro"><span>RUN pip install ...</span><small>read-only image layer</small></div>
         <div class="layer ro"><span>FROM python:3.12-slim</span><small>read-only base image layer</small></div>
       </div>
 
-      <p>When you run <code class="inl">docker rm</code>, Docker removes the container and <strong>destroys its writable layer</strong>. Everything the running process wrote in there is gone. The image is unaffected — you can create a new container from it, which gets a fresh empty writable layer.</p>
+      <p>When you run <code class="inl">docker rm</code>, Docker removes the container and <strong>destroys its writable layer</strong>. Everything the running process wrote in there is gone. The image is unaffected. You can create a new container from it, which gets a fresh empty writable layer.</p>
 
       <h3>The database scenario</h3>
       <p>Imagine you spin up a Postgres container without any storage configuration. You create a database, add tables, insert rows. Then you run <code class="inl">docker rm</code>. Every single row you ever inserted is gone. When you run a new Postgres container from the same image, it starts completely empty.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — the data-loss scenario (no volume)</span><span class="spacer"></span>
+          <span class="title">terminal: the data-loss scenario (no volume)</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># start postgres without any volume</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> db postgres:16
@@ -398,14 +398,14 @@
 <span class="cmt"># start a fresh container from the same image</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> db postgres:16
 
-<span class="cmt"># all your data is gone — fresh empty database</span>
+<span class="cmt"># all your data is gone: fresh empty database</span>
 <span class="out"># (this is the problem modules solve)</span></code></pre>
       </div>
 
-      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">This is not a bug — it is by design</span>
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">This is not a bug, it is by design</span>
         <p>Containers are meant to be <b>ephemeral and replaceable</b>. The writable layer is intentionally thrown away so you can safely delete and recreate containers. The problem only arises when you put <b>stateful data</b> in a place designed for stateless operation. The solution is to move that data <b>outside the container</b> using a mount.</p></div>
 
-      <p>There is also a secondary problem: writing through the Union Filesystem (the overlay driver that manages those stacked layers) is <strong>slower</strong> than writing to native host storage. For I/O-heavy workloads like databases, you want data written directly to host disk, not through the overlay. Volumes solve this too — they bypass the Union Filesystem entirely.</p>
+      <p>There is also a secondary problem: writing through the Union Filesystem (the overlay driver that manages those stacked layers) is <strong>slower</strong> than writing to native host storage. For I/O-heavy workloads like databases, you want data written directly to host disk, not through the overlay. Volumes solve this too. They bypass the Union Filesystem entirely.</p>
     </section>
 
     <!-- 2. THREE MOUNT TYPES -->
@@ -431,7 +431,7 @@
           </tr>
           <tr>
             <td><b>tmpfs</b></td>
-            <td>In host RAM only — never touches disk</td>
+            <td>In host RAM only, never touches disk</td>
             <td>Docker (in-memory)</td>
             <td>Sensitive ephemeral data (secrets, scratch space) that must never be written to disk.</td>
           </tr>
@@ -447,7 +447,7 @@
           <p>You pick the exact host path. The container sees that directory directly. Ideal for dev workflows where you edit files on the host and want the container to pick up changes instantly.</p></div>
         <div class="card"><div class="ico violet"><svg><use href="#i-memory"/></svg></div>
           <h4>tmpfs mounts</h4>
-          <p>Stored in memory only. Automatically wiped when the container stops. Use for credentials or intermediate scratch data that must never land on disk — not even swap.</p></div>
+          <p>Stored in memory only. Automatically wiped when the container stops. Use for credentials or intermediate scratch data that must never land on disk, not even swap.</p></div>
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The decision heuristic</span>
@@ -462,7 +462,7 @@
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">docker volume — the full lifecycle</span><span class="spacer"></span>
+          <span class="title">docker volume: the full lifecycle</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># create a named volume</span>
 <span class="cmd">docker</span> volume create pgdata
@@ -511,7 +511,7 @@ local     pgdata</span>
   postgres:16</code></pre>
       </div>
 
-      <p>With the <code class="inl">--mount</code> syntax, if you mistype the volume name or the path, Docker returns an error immediately. With <code class="inl">-v</code>, if Docker cannot find an existing volume named <code class="inl">pgdata</code>, it silently creates a new one — which can produce confusing "where did my data go?" situations in dev.</p>
+      <p>With the <code class="inl">--mount</code> syntax, if you mistype the volume name or the path, Docker returns an error immediately. With <code class="inl">-v</code>, if Docker cannot find an existing volume named <code class="inl">pgdata</code>, it silently creates a new one. That can produce confusing "where did my data go?" situations in dev, the same trap that bit Sam.</p>
 
       <div class="anat">
         <span class="tok t1">docker run</span>&nbsp;
@@ -529,14 +529,14 @@ local     pgdata</span>
     <section id="bindmounts">
       <div class="sec-head"><span class="num">4</span><h2>Bind mounts in practice</h2></div>
 
-      <p>A bind mount takes a directory or file from your host machine and maps it directly into a path inside the container. The container and the host see the exact same filesystem location — writes from either side are immediately visible to the other. This is what makes bind mounts the natural choice for development workflows.</p>
+      <p>A bind mount takes a directory or file from your host machine and maps it directly into a path inside the container. The container and the host see the exact same filesystem location, so writes from either side are immediately visible to the other. This is what makes bind mounts the natural choice for development workflows.</p>
 
       <h3>The live-reload dev pattern</h3>
-      <p>Without bind mounts, every code change during development means rebuilding the image, which is slow. With a bind mount, you mount your source code directory into the container and any edit you save in your editor is immediately visible inside the running container — no rebuild needed.</p>
+      <p>Without bind mounts, every code change during development means rebuilding the image, which is slow. With a bind mount, you mount your source code directory into the container and any edit you save in your editor is immediately visible inside the running container, no rebuild needed.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">dev workflow — bind-mount source code</span><span class="spacer"></span>
+          <span class="title">dev workflow: bind-mount source code</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># mount the current directory into /app inside the container</span>
 <span class="cmt"># $(pwd) expands to the absolute path of your current folder</span>
@@ -571,18 +571,18 @@ local     pgdata</span>
       </div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Bind mounts are host-path dependent</span>
-        <p>Bind mounts reference absolute paths on your specific host machine. That means a <code class="inl">docker run</code> command with a bind mount is not portable — it works on your machine but will break on another machine where that path doesn't exist, or when the paths differ. Named volumes are portable; bind mounts are not. This is why you use bind mounts only for dev, not for production deployments.</p></div>
+        <p>Bind mounts reference absolute paths on your specific host machine. That means a <code class="inl">docker run</code> command with a bind mount is not portable. It works on your machine but will break on another machine where that path doesn't exist, or when the paths differ. Named volumes are portable; bind mounts are not. This is why you use bind mounts only for dev, not for production deployments.</p></div>
     </section>
 
     <!-- 5. VOLUMES IN PRACTICE -->
     <section id="volumes">
-      <div class="sec-head"><span class="num">5</span><h2>Volumes in practice — the Postgres example</h2></div>
+      <div class="sec-head"><span class="num">5</span><h2>Volumes in practice: the Postgres example</h2></div>
 
-      <p>The canonical, motivating example for named volumes is a database. Postgres stores all its data files in <code class="inl">/var/lib/postgresql/data</code> inside the container. If you mount a named volume there, the data files live in Docker-managed storage on the host — surviving container removal and recreation.</p>
+      <p>The canonical, motivating example for named volumes is a database. Postgres stores all its data files in <code class="inl">/var/lib/postgresql/data</code> inside the container. If you mount a named volume there, the data files live in Docker-managed storage on the host, surviving container removal and recreation. This is the fix Sam needed.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">postgres with a named volume — data survives docker rm</span><span class="spacer"></span>
+          <span class="title">postgres with a named volume: data survives docker rm</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># step 1: run postgres, mounting the named volume pgdata</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> \
@@ -616,13 +616,13 @@ postgres=# \q</span>
 (1 row)</span></code></pre>
       </div>
 
-      <p>This is the key insight: the volume <code class="inl">pgdata</code> is a completely separate object from the container. You can <code class="inl">docker rm</code> the container as many times as you like — the volume (and the data in it) is untouched until you explicitly run <code class="inl">docker volume rm pgdata</code>.</p>
+      <p>This is the key insight: the volume <code class="inl">pgdata</code> is a completely separate object from the container. You can <code class="inl">docker rm</code> the container as many times as you like. The volume (and the data in it) is untouched until you explicitly run <code class="inl">docker volume rm pgdata</code>. Sam reran the demo three times just to believe the rows stayed.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Container lifecycle vs volume lifecycle</span>
-        <p>These are <b>independent</b>. Containers are ephemeral: create, run, stop, remove, recreate. Volumes are persistent: they outlive any individual container, can be attached to a new container, and must be explicitly deleted. Never confuse "removing a container" with "deleting its data" — the data lives in the volume.</p></div>
+        <p>These are <b>independent</b>. Containers are ephemeral: create, run, stop, remove, recreate. Volumes are persistent: they outlive any individual container, can be attached to a new container, and must be explicitly deleted. Never confuse "removing a container" with "deleting its data". The data lives in the volume.</p></div>
 
       <h3>Sharing a volume between containers</h3>
-      <p>Multiple containers can mount the same named volume at the same time. This is how you share files between a web server and a sidecar container, for instance. Be aware that concurrent writes without application-level coordination can lead to corruption — most databases handle their own locking, but arbitrary shared volumes need careful thought.</p>
+      <p>Multiple containers can mount the same named volume at the same time. This is how you share files between a web server and a sidecar container, for instance. Be aware that concurrent writes without application-level coordination can lead to corruption. Most databases handle their own locking, but arbitrary shared volumes need careful thought.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
@@ -664,14 +664,14 @@ postgres=# \q</span>
 <span class="cmd">docker</span> run <span class="flag">-u</span> <span class="str">$(id -u):$(id -g)</span> <span class="flag">-v</span> <span class="str">$(pwd):/app</span> myapp</code></pre>
       </div>
 
-      <h3>Anonymous volumes — the silent surprise</h3>
-      <p>Some images declare a <code class="inl">VOLUME</code> instruction in their Dockerfile (Postgres does this, for example). When you run such an image without specifying a mount, Docker automatically creates an <strong>anonymous volume</strong> — a named volume with a long random UUID as its name. This ensures the data directory is on a proper volume rather than the writable layer, which is thoughtful.</p>
+      <h3>Anonymous volumes: the silent surprise</h3>
+      <p>Some images declare a <code class="inl">VOLUME</code> instruction in their Dockerfile (Postgres does this, for example). When you run such an image without specifying a mount, Docker automatically creates an <strong>anonymous volume</strong>, a named volume with a long random UUID as its name. This ensures the data directory is on a proper volume rather than the writable layer, which is thoughtful.</p>
 
-      <p>The surprise comes when you run <code class="inl">docker volume ls</code> and see a list of cryptic UUIDs that you didn't create. These are anonymous volumes. They are easy to orphan — when you <code class="inl">docker rm</code> the container, the anonymous volume stays behind unless you run <code class="inl">docker rm -v</code> (which deletes associated anonymous volumes together with the container). Named volumes are never deleted by <code class="inl">docker rm -v</code> — only anonymous ones.</p>
+      <p>The surprise comes when you run <code class="inl">docker volume ls</code> and see a list of cryptic UUIDs that you didn't create. These are anonymous volumes. They are easy to orphan. When you <code class="inl">docker rm</code> the container, the anonymous volume stays behind unless you run <code class="inl">docker rm -v</code> (which deletes associated anonymous volumes together with the container). Named volumes are never deleted by <code class="inl">docker rm -v</code>, only anonymous ones.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">anonymous volumes — listing and cleaning up</span><span class="spacer"></span>
+          <span class="title">anonymous volumes: listing and cleaning up</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># run postgres without specifying a volume</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> db postgres:16
@@ -689,11 +689,11 @@ local     a1b2c3d4e5f6...  (anonymous)</span>
       </div>
 
       <h3>Volume mount over a populated image directory</h3>
-      <p>This is one of the most confusing behaviours, and it applies differently to volumes vs bind mounts. When you mount a <strong>named volume</strong> over a directory that already has files in the image at that path, Docker copies the image's existing files into the volume on the <em>first</em> use (if the volume is empty). This is why Postgres works at all — the image's pre-initialized data directory gets seeded into the volume the first time. On subsequent runs with the same volume, Docker uses whatever is in the volume (your actual data), not the image directory.</p>
+      <p>This is one of the most confusing behaviours, and it applies differently to volumes vs bind mounts. When you mount a <strong>named volume</strong> over a directory that already has files in the image at that path, Docker copies the image's existing files into the volume on the <em>first</em> use (if the volume is empty). This is why Postgres works at all: the image's pre-initialized data directory gets seeded into the volume the first time. On subsequent runs with the same volume, Docker uses whatever is in the volume (your actual data), not the image directory.</p>
 
-      <p>With a <strong>bind mount</strong>, this seeding does NOT happen. A bind mount over a populated image directory hides the image's files entirely, showing you only the host directory's contents. If that host directory is empty, the container sees an empty directory — even if the image had files there. This is a common source of confusion when bind-mounting over <code class="inl">/app</code> in an image that had files copied there at build time.</p>
+      <p>With a <strong>bind mount</strong>, this seeding does NOT happen. A bind mount over a populated image directory hides the image's files entirely, showing you only the host directory's contents. If that host directory is empty, the container sees an empty directory, even if the image had files there. This is a common source of confusion when bind-mounting over <code class="inl">/app</code> in an image that had files copied there at build time.</p>
 
-      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Volume vs bind mount — the mount-over behaviour</span>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Volume vs bind mount: the mount-over behaviour</span>
         <p><b>Named volume over populated dir:</b> on first use (empty volume), Docker seeds the volume from the image directory. Your data persists there. <br><b>Bind mount over populated dir:</b> image directory is completely hidden. You see only the host path. Empty host dir = empty container dir. No seeding ever happens.</p></div>
     </section>
 
@@ -701,7 +701,7 @@ local     a1b2c3d4e5f6...  (anonymous)</span>
     <section id="backup">
       <div class="sec-head"><span class="num">7</span><h2>Backup &amp; inspecting volume data</h2></div>
 
-      <p>Because named volumes live under <code class="inl">/var/lib/docker/volumes/</code> — a path owned by root and managed by Docker — you cannot just <code class="inl">cp</code> from there directly in normal usage. The standard pattern is to use a throwaway container that mounts the volume and runs a <code class="inl">tar</code> backup.</p>
+      <p>Because named volumes live under <code class="inl">/var/lib/docker/volumes/</code> (a path owned by root and managed by Docker), you cannot just <code class="inl">cp</code> from there directly in normal usage. The standard pattern is to use a throwaway container that mounts the volume and runs a <code class="inl">tar</code> backup.</p>
 
       <h3>Backing up a volume</h3>
       <div class="codeblock">
@@ -763,12 +763,12 @@ local     a1b2c3d4e5f6...  (anonymous)</span>
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The throwaway container pattern</span>
-        <p>The pattern of running a minimal image (like <code class="inl">alpine</code>) with <code class="inl">--rm</code> to perform a one-off operation on a volume is fundamental to Docker workflows. The same approach is used to migrate data, seed databases, convert file formats, or inspect volume contents without modifying them. Remember it — it comes up frequently.</p></div>
+        <p>The pattern of running a minimal image (like <code class="inl">alpine</code>) with <code class="inl">--rm</code> to perform a one-off operation on a volume is fundamental to Docker workflows. The same approach is used to migrate data, seed databases, convert file formats, or inspect volume contents without modifying them. Remember it, because it comes up frequently.</p></div>
     </section>
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><h2>Hands-on — do this now</h2></div>
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: do this now</h2></div>
       <p>Reading about data persistence means nothing until you watch a <code class="inl">docker rm</code> not destroy your data with your own eyes. This checklist is your minimum before moving on.</p>
 
       <ul class="check">
@@ -776,20 +776,20 @@ local     a1b2c3d4e5f6...  (anonymous)</span>
         <li><svg><use href="#i-checkbox"/></svg>Run a Postgres container with <code class="inl">-v mydata:/var/lib/postgresql/data</code>. Connect with <code class="inl">docker exec</code> and <code class="inl">psql</code>. Create a table. Insert a row. Exit.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker rm -f</code> on that container. Confirm it is gone with <code class="inl">docker ps -a</code>. Confirm the volume is still there with <code class="inl">docker volume ls</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>Create a new container from the same image, attaching the same volume. Connect to Postgres and run <code class="inl">SELECT * FROM your_table;</code>. Verify your row is still there. This is the moment that makes volumes click.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Make a folder on your host with a simple text file in it. Bind-mount it into an <code class="inl">alpine</code> container. Edit the file on your host and immediately <code class="inl">cat</code> it inside the container — confirm the change appears live.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Make a folder on your host with a simple text file in it. Bind-mount it into an <code class="inl">alpine</code> container. Edit the file on your host and immediately <code class="inl">cat</code> it inside the container, then confirm the change appears live.</li>
         <li><svg><use href="#i-checkbox"/></svg>Add <code class="inl">:ro</code> to that bind mount. Try to write to the file from inside the container. You should see <code class="inl">Read-only file system</code>. This is the safety guard for config files.</li>
         <li><svg><use href="#i-checkbox"/></svg>Use the throwaway-container pattern to back up your <code class="inl">mydata</code> volume to a <code class="inl">.tar.gz</code> file on your host. Confirm the tar file exists and has a non-zero size.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker volume prune</code> after removing all containers that use <code class="inl">mydata</code>. Understand which volumes it removes and which it leaves. Try to remove a volume that a running container is still using — note the error message.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker volume prune</code> after removing all containers that use <code class="inl">mydata</code>. Understand which volumes it removes and which it leaves. Try to remove a volume that a running container is still using, and note the error message.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Sketch before you type</span>
-        <p>Before running each command, write on paper what you expect to happen. "I expect the row to still be there because the volume persists independently." Then run it and see if you were right. This active prediction habit is what converts reading into actual understanding — and it is what real understanding looks like.</p></div>
+        <p>Before running each command, write on paper what you expect to happen. "I expect the row to still be there because the volume persists independently." Then run it and see if you were right. This active prediction habit is what converts reading into actual understanding, and it is what real understanding looks like. It is also how Sam went from losing data to trusting the deploy.</p></div>
     </section>
 
     <footer>
       <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
       <div class="refs">
-        <a class="reflink" href="https://docs.docker.com/engine/storage/volumes/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Volumes — Docker docs</a>
+        <a class="reflink" href="https://docs.docker.com/engine/storage/volumes/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Volumes: Docker docs</a>
         <a class="reflink" href="https://docs.docker.com/engine/storage/bind-mounts/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Bind mounts</a>
         <a class="reflink" href="https://docs.docker.com/engine/storage/tmpfs/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>tmpfs mounts</a>
         <a class="reflink" href="https://docs.docker.com/reference/cli/docker/volume/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>docker volume CLI reference</a>
@@ -797,8 +797,8 @@ local     a1b2c3d4e5f6...  (anonymous)</span>
       </div>
 
       <div class="next">
-        <a href="module-02.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 02 — Dockerfiles</b></span></a>
-        <a href="module-04.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 04 — Networking</b></span></a>
+        <a href="module-02.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 02: Dockerfiles</b></span></a>
+        <a href="module-04.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 04: Networking</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 03 · built for visual learning.
       Once you can explain volumes, bind mounts, and tmpfs in your own words and the hands-on checklist is all ticked, move on to Module 04.</p>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 00 — Relational Foundations &amp; SELECT</title>
+<title>Module 00: Relational Foundations &amp; SELECT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
   .chip b{color:var(--accent)}
   @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
 
-  /* section heads — editorial */
+  /* section heads - editorial */
   section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
   section:first-of-type{border-top:none}
   .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
@@ -137,7 +137,7 @@
   .note.info{background:var(--bg-2)}
   .note.info .ic,.note.info .tag{color:var(--ink-soft)}
 
-  /* code — dark block on light page */
+  /* code - dark block on light page */
   .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
     overflow:hidden}
   .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
@@ -326,7 +326,7 @@
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 00</span>
       <h1>Relational Foundations<br>&amp; the <span class="u">SELECT</span> statement</h1>
-      <p class="lede">Before joins, window functions, or indexes mean anything, you need the bedrock: <em>what a relational table actually is</em>, and how a single <em>SELECT</em> walks through your data. This module builds the mental model everything else stands on — and the one query shape you will write ten thousand times.</p>
+      <p class="lede">Before joins, window functions, or indexes mean anything, you need the bedrock: <em>what a relational table actually is</em>, and how a single <em>SELECT</em> walks through your data. This module builds the mental model everything else stands on, plus the one query shape you will write ten thousand times.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · foundations</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>no prerequisites</span>
@@ -336,17 +336,17 @@
 
     <!-- 0. WHY -->
     <section id="why">
-      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>Why SQL, why now</h2></div></div>
-      <p>SQL is the one skill on every data, backend, and ML job description that almost nobody can skip. It matters because it reveals how you <strong>reason about data</strong> — not just whether you can memorize syntax. A clean SQL answer shows you can think in sets, handle edge cases like missing values, and translate a vague business question into precise logic.</p>
-      <p>The roadmap target for this track is <strong>L3 — proficient</strong>: you can write joins, group-and-aggregate, window functions, reason about indexes, and explain <em>why</em> a query is slow. We get there in six modules. This first one is deceptively important: most SQL bugs people hit later trace back to a shaky grasp of these basics — especially <code class="inl">NULL</code> and the order operations actually run in.</p>
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00: Orientation</span><h2>Why SQL, why now</h2></div></div>
+      <p>Meet Maya. She just started as an analyst at a small company, and on day one her manager drops a question on her desk: "Who are our highest-paid people, and which departments are they in?" The answer lives in a database, and the only way to ask is SQL. That is the pattern in almost every role that touches data, from analytics to backend to operations: sooner or later the real answer sits in a table, and SQL is how you get it out. It also reveals how you <strong>reason about data</strong>, not just whether you can memorize syntax. A clean SQL answer shows you can think in sets, handle edge cases like missing values, and turn a vague business question into precise logic.</p>
+      <p>The roadmap target for this track is <strong>L3, proficient</strong>: you can write joins, group-and-aggregate, window functions, reason about indexes, and explain <em>why</em> a query is slow. We get there in six modules. This first one is deceptively important. Most SQL bugs people hit later trace back to a shaky grasp of these basics, especially <code class="inl">NULL</code> and the order operations actually run in. Maya will hit a few of those bugs herself as we go.</p>
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Mental model first</span>
-        <p>SQL is <strong>declarative</strong>. You describe <em>what</em> result you want; the database decides <em>how</em> to get it. This is the opposite of Python, where you spell out every step. Your job is to state the shape of the answer precisely — the query planner handles the rest. Internalizing this flips how you read and write every statement.</p></div>
+        <p>SQL is <strong>declarative</strong>. You describe <em>what</em> result you want; the database decides <em>how</em> to get it. This is the opposite of Python, where you spell out every step. Your job is to state the shape of the answer precisely, and the query planner handles the rest. Internalizing this flips how you read and write every statement.</p></div>
     </section>
 
     <!-- 1. RELATIONAL MODEL -->
     <section id="relational">
-      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — Concepts</span><h2>The relational model</h2></div></div>
-      <p>A relational database stores data in <strong>tables</strong> (formally, <em>relations</em>). A table is a set of <strong>rows</strong> (records), each with the same set of <strong>columns</strong> (fields). That is the whole idea — but a few properties make it powerful and worth saying out loud, because reviewers probe them.</p>
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01: Concepts</span><h2>The relational model</h2></div></div>
+      <p>Before Maya can query anything, she needs to know what she is querying. A relational database stores data in <strong>tables</strong> (formally, <em>relations</em>). A table is a set of <strong>rows</strong> (records), each with the same set of <strong>columns</strong> (fields). That is the whole idea. A few properties make it powerful, though, and they are worth saying out loud because reviewers probe them.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico grey"><svg><use href="#i-table"/></svg></div>
@@ -357,22 +357,22 @@
           <p>A column (or set) that <b>uniquely identifies</b> each row. Never NULL, never duplicated. <code class="inl">emp_id</code> is our employees' primary key.</p></div>
         <div class="card"><div class="ico taupe"><svg><use href="#i-arrow"/></svg></div>
           <h4>Foreign key</h4>
-          <p>A column that <b>points at</b> another table's primary key. <code class="inl">employees.dept_id</code> references <code class="inl">departments.dept_id</code> — this is how tables relate.</p></div>
+          <p>A column that <b>points at</b> another table's primary key. <code class="inl">employees.dept_id</code> references <code class="inl">departments.dept_id</code>. This is how tables relate.</p></div>
       </div>
 
-      <p>Each column has a <strong>data type</strong> — <code class="inl">INTEGER</code>, <code class="inl">TEXT</code>, <code class="inl">NUMERIC</code>, <code class="inl">DATE</code>, <code class="inl">BOOLEAN</code> — that constrains what it can hold. Types matter: comparing a number to text, or sorting dates stored as text, is a classic source of wrong answers. The relational model's discipline (typed columns, keys, constraints) is exactly what lets the database guarantee your data stays sane.</p>
+      <p>Each column has a <strong>data type</strong> (<code class="inl">INTEGER</code>, <code class="inl">TEXT</code>, <code class="inl">NUMERIC</code>, <code class="inl">DATE</code>, <code class="inl">BOOLEAN</code>) that constrains what it can hold. Types matter: comparing a number to text, or sorting dates stored as text, is a classic source of wrong answers. The relational model's discipline of typed columns, keys, and constraints is what lets the database guarantee your data stays sane.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Relation vs table</span>
-        <p>In theory, a <strong>relation</strong> is a true mathematical set — no duplicate rows, no order. In practice, a SQL <strong>table</strong> can hold duplicate rows unless a key or constraint forbids it. The gap between the pure theory and SQL's pragmatic reality (duplicates, NULLs, ordering) is where most of the interesting edge cases live.</p></div>
+        <p>In theory, a <strong>relation</strong> is a true mathematical set, with no duplicate rows and no order. In practice, a SQL <strong>table</strong> can hold duplicate rows unless a key or constraint forbids it. The gap between the pure theory and SQL's pragmatic reality (duplicates, NULLs, ordering) is where most of the interesting edge cases live.</p></div>
     </section>
 
     <!-- 2. SCHEMA -->
     <section id="schema">
-      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — Setup</span><h2>Our practice schema</h2></div></div>
-      <p>Every module in this course uses the <strong>same three tables</strong>. Learn them once here and you can focus on the SQL technique, not on re-reading a new schema each time. It is a tiny company: people work in departments, some manage others, and they place orders.</p>
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02: Setup</span><h2>Our practice schema</h2></div></div>
+      <p>Every module in this course uses the <strong>same three tables</strong>, and they happen to model Maya's company. Learn them once here and you can focus on the SQL technique, not on re-reading a new schema each time. It is a tiny outfit: people work in departments, some manage others, and they place orders.</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">schema.sql — run this once to follow along</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">schema.sql · run this once to follow along</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="kw">CREATE TABLE</span> departments (
   dept_id     <span class="cmd">INTEGER</span> <span class="kw">PRIMARY KEY</span>,
   dept_name   <span class="cmd">TEXT</span> <span class="kw">NOT NULL</span>,
@@ -398,7 +398,7 @@
 );</code></pre>
       </div>
 
-      <p>A few rows of <code class="inl">employees</code> so the queries below have something to bite on. Notice row 1 (Alice) has a <code class="inl">NULL</code> manager — she is the boss — and Frank has a <code class="inl">NULL</code> department. Those NULLs are deliberate; they will teach us something important in section 5.</p>
+      <p>Here are a few rows of <code class="inl">employees</code> so the queries below have something to bite on. Maya notices two oddities right away. Row 1 (Alice) has a <code class="inl">NULL</code> manager, because Alice is the boss, and Frank has a <code class="inl">NULL</code> department. Those NULLs are deliberate; they will teach her something important in section 5.</p>
 
       <div class="tablewrap">
         <table class="resultset">
@@ -417,15 +417,15 @@
 
     <!-- 3. SELECT & FROM -->
     <section id="select">
-      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Core syntax</span><h2>SELECT &amp; FROM — asking for columns</h2></div></div>
-      <p>The smallest useful query has two parts: <strong>which columns</strong> you want (<code class="inl">SELECT</code>) and <strong>which table</strong> they come from (<code class="inl">FROM</code>). Everything else is a refinement on top of this.</p>
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03: Core syntax</span><h2>SELECT &amp; FROM: asking for columns</h2></div></div>
+      <p>Back to Maya's first task: the list of names and salaries. The smallest useful query has two parts: <strong>which columns</strong> you want (<code class="inl">SELECT</code>) and <strong>which table</strong> they come from (<code class="inl">FROM</code>). Everything else is a refinement on top of this.</p>
 
       <div class="anat">
         <span class="tok t1">SELECT</span> <span class="tok t2">name, salary</span> <span class="tok t1">FROM</span> <span class="tok t3">employees</span><span class="tok">;</span>
         <span class="lbl">keyword &nbsp;·&nbsp; columns you want &nbsp;·&nbsp; keyword &nbsp;·&nbsp; source table</span>
       </div>
 
-      <p>Read it as a sentence: "select the name and salary columns, from the employees table." The result is a new table — every SQL query returns a table, even if it is one row and one column. That closure property (tables in, tables out) is what lets you nest queries later.</p>
+      <p>Maya reads it as a sentence: "select the name and salary columns, from the employees table." The result is itself a new table. Every SQL query returns a table, even if it is one row and one column. That closure property (tables in, tables out) is what lets you nest queries later.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">pick specific columns</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -439,11 +439,11 @@
  ...   | ...</span></code></pre>
       </div>
 
-      <h3>SELECT * — and why to avoid it in real code</h3>
+      <h3>SELECT *, and why to avoid it in real code</h3>
       <p>The star <code class="inl">*</code> means "every column." It is fine for quick exploration, but in production queries and code it is a smell: it returns columns you may not need (wasting I/O), it breaks silently when the table schema changes, and it hides intent from the next person reading the query. <strong>Name the columns you actually want.</strong></p>
 
       <h3>Expressions and aliases</h3>
-      <p>A <code class="inl">SELECT</code> list is not limited to bare columns — you can compute. And <code class="inl">AS</code> renames a column in the output, which is essential once expressions produce ugly auto-generated names.</p>
+      <p>Next, Maya's manager wants each person's bonus shown alongside their salary. A <code class="inl">SELECT</code> list is not limited to bare columns; you can compute. And <code class="inl">AS</code> renames a column in the output, which is essential once expressions produce ugly auto-generated names.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">compute + alias</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -454,14 +454,14 @@
 <span class="kw">FROM</span> employees;</code></pre>
       </div>
 
-      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Gotcha — integer division</span>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Gotcha: integer division</span>
         <p>In PostgreSQL, <code class="inl">salary / 12</code> where both sides are integers gives an <strong>integer</strong> result (truncated, no decimals). To get a fractional answer, make one side a decimal: <code class="inl">salary / 12.0</code> or cast it: <code class="inl">salary::numeric / 12</code>. This bites people constantly when computing averages or rates by hand.</p></div>
     </section>
 
     <!-- 4. WHERE -->
     <section id="where">
-      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — Filtering</span><h2>Filtering rows with WHERE</h2></div></div>
-      <p><code class="inl">WHERE</code> keeps only the rows where a condition is <strong>true</strong>. Conceptually the database walks every row, tests your condition, and discards the ones that fail. This is your primary tool for narrowing a table down to the rows that matter.</p>
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04: Filtering</span><h2>Filtering rows with WHERE</h2></div></div>
+      <p>Now the question gets sharper: "only the people earning over 100,000." Maya does not want the whole table, just a slice of it. <code class="inl">WHERE</code> keeps only the rows where a condition is <strong>true</strong>. Conceptually the database walks every row, tests your condition, and discards the ones that fail. This is your primary tool for narrowing a table down to the rows that matter.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">basic filters</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -491,15 +491,15 @@
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">AND before OR</span>
-        <p><code class="inl">AND</code> binds tighter than <code class="inl">OR</code>, just like <code class="inl">×</code> before <code class="inl">+</code> in arithmetic. So <code class="inl">a OR b AND c</code> means <code class="inl">a OR (b AND c)</code>. When in doubt, <strong>add parentheses</strong> — they cost nothing and make intent unambiguous. Ambiguous boolean logic is a top source of silently-wrong queries.</p></div>
+        <p><code class="inl">AND</code> binds tighter than <code class="inl">OR</code>, just like <code class="inl">×</code> before <code class="inl">+</code> in arithmetic. So <code class="inl">a OR b AND c</code> means <code class="inl">a OR (b AND c)</code>. When in doubt, <strong>add parentheses</strong>. They cost nothing and make intent unambiguous. Ambiguous boolean logic is a top source of silently-wrong queries.</p></div>
     </section>
 
     <!-- 5. NULL -->
     <section id="null">
-      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — The big one</span><h2>NULL &amp; three-valued logic</h2></div></div>
-      <p>This is the single most important section in the module, because <code class="inl">NULL</code> is where confident beginners write wrong queries that <em>look</em> right. <code class="inl">NULL</code> does not mean zero, and it does not mean empty string. It means <strong>"unknown / no value"</strong> — and that changes the rules of logic.</p>
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05: The big one</span><h2>NULL &amp; three-valued logic</h2></div></div>
+      <p>This is the moment Maya hits her first real bug. She tries to list everyone with no department by writing <code class="inl">WHERE dept_id = NULL</code>, and gets back zero rows, even though Frank clearly has no department. This is the single most important section in the module, because <code class="inl">NULL</code> is where confident beginners write wrong queries that <em>look</em> right. <code class="inl">NULL</code> does not mean zero, and it does not mean empty string. It means <strong>"unknown / no value,"</strong> and that changes the rules of logic.</p>
 
-      <p>Because NULL is "unknown," any comparison <em>with</em> it produces not <code class="inl">true</code> or <code class="inl">false</code> but a third value: <strong>unknown</strong>. SQL uses <strong>three-valued logic</strong>: true, false, unknown. And <code class="inl">WHERE</code> only keeps rows where the condition is <em>true</em> — so "unknown" rows are dropped.</p>
+      <p>Because NULL is "unknown," any comparison <em>with</em> it produces not <code class="inl">true</code> or <code class="inl">false</code> but a third value: <strong>unknown</strong>. SQL uses <strong>three-valued logic</strong>: true, false, unknown. And <code class="inl">WHERE</code> only keeps rows where the condition is <em>true</em>, so "unknown" rows like Frank's are dropped.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the NULL trap</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -511,7 +511,7 @@
 <span class="kw">SELECT</span> name <span class="kw">FROM</span> employees <span class="kw">WHERE</span> dept_id <span class="kw">IS NOT NULL</span>;</code></pre>
       </div>
 
-      <p>Why does <code class="inl">dept_id = NULL</code> return nothing? Because "is this unknown value equal to this unknown value?" is itself unknown — never true. <strong>You must use <code class="inl">IS NULL</code> and <code class="inl">IS NOT NULL</code></strong> to test for missing values. There is no other correct way.</p>
+      <p>So why did Maya's <code class="inl">dept_id = NULL</code> return nothing? Because "is this unknown value equal to this unknown value?" is itself unknown, never true. <strong>You must use <code class="inl">IS NULL</code> and <code class="inl">IS NOT NULL</code></strong> to test for missing values. There is no other correct way, and once Maya switches to <code class="inl">IS NULL</code>, Frank shows up.</p>
 
       <h3>NULL ripples everywhere</h3>
       <div class="stack">
@@ -521,16 +521,16 @@
         <div class="layer"><span><span class="n" style="color:var(--accent)">✓</span> <code class="inl">COALESCE(dept_id, 0)</code></span><small>→ replaces NULL with a fallback value</small></div>
       </div>
 
-      <p><code class="inl">COALESCE(x, fallback)</code> returns the first non-NULL argument — your main tool for handling missing values gracefully. Want to treat a missing salary as zero in a calculation? <code class="inl">COALESCE(salary, 0)</code>. This one function prevents a huge class of NULL-propagation bugs.</p>
+      <p><code class="inl">COALESCE(x, fallback)</code> returns the first non-NULL argument, which is Maya's main tool for handling missing values gracefully. Want to treat a missing salary as zero in a calculation? <code class="inl">COALESCE(salary, 0)</code>. This one function prevents a huge class of NULL-propagation bugs.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
-        <p>"Why does <code class="inl">WHERE salary &lt;&gt; 100000</code> exclude employees whose salary is NULL?" Because <code class="inl">NULL &lt;&gt; 100000</code> evaluates to <strong>unknown</strong>, not true — so those rows are filtered out. If you want them included, you must say <code class="inl">WHERE salary &lt;&gt; 100000 OR salary IS NULL</code>. Getting this right separates L3 from L1.</p></div>
+        <p>"Why does <code class="inl">WHERE salary &lt;&gt; 100000</code> exclude employees whose salary is NULL?" Because <code class="inl">NULL &lt;&gt; 100000</code> evaluates to <strong>unknown</strong>, not true, so those rows are filtered out. If you want them included, you must say <code class="inl">WHERE salary &lt;&gt; 100000 OR salary IS NULL</code>. Getting this right separates L3 from L1.</p></div>
     </section>
 
     <!-- 6. ORDER BY / LIMIT / DISTINCT -->
     <section id="order">
-      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — Shaping output</span><h2>ORDER BY, LIMIT &amp; DISTINCT</h2></div></div>
-      <p>Remember: rows have no inherent order. <code class="inl">ORDER BY</code> is the <strong>only</strong> way to guarantee the sequence of your result. <code class="inl">LIMIT</code> caps how many rows come back, and <code class="inl">DISTINCT</code> removes duplicates.</p>
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06: Shaping output</span><h2>ORDER BY, LIMIT &amp; DISTINCT</h2></div></div>
+      <p>Maya's manager comes back: "Actually, just the top three earners, highest first." Remember that rows have no inherent order. <code class="inl">ORDER BY</code> is the <strong>only</strong> way to guarantee the sequence of your result. <code class="inl">LIMIT</code> caps how many rows come back, and <code class="inl">DISTINCT</code> removes duplicates.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">sort, cap, dedupe</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -538,7 +538,7 @@
 <span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees
 <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>;
 
-<span class="cmt">-- top 3 earners — sort THEN limit</span>
+<span class="cmt">-- top 3 earners: sort THEN limit</span>
 <span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees
 <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>
 <span class="kw">LIMIT</span> <span class="num">3</span>;
@@ -552,15 +552,15 @@
       </div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Where does NULL sort?</span>
-        <p>In PostgreSQL, <code class="inl">NULL</code> sorts <strong>last</strong> in <code class="inl">ASC</code> and <strong>first</strong> in <code class="inl">DESC</code> by default. Override with <code class="inl">ORDER BY salary DESC NULLS LAST</code>. Different databases pick different defaults — another reason to be explicit when NULLs matter.</p></div>
+        <p>In PostgreSQL, <code class="inl">NULL</code> sorts <strong>last</strong> in <code class="inl">ASC</code> and <strong>first</strong> in <code class="inl">DESC</code> by default. Override with <code class="inl">ORDER BY salary DESC NULLS LAST</code>. Different databases pick different defaults, which is another reason to be explicit when NULLs matter.</p></div>
 
-      <p><code class="inl">LIMIT</code> without <code class="inl">ORDER BY</code> gives you <em>some</em> rows but no guarantee <em>which</em> ones — the database returns whatever is convenient. "Give me the top 5 by revenue" always means <code class="inl">ORDER BY revenue DESC LIMIT 5</code>. The sort is what makes "top" meaningful.</p>
+      <p>One trap Maya avoids: <code class="inl">LIMIT</code> without <code class="inl">ORDER BY</code> gives you <em>some</em> rows but no guarantee <em>which</em> ones, since the database returns whatever is convenient. "Give me the top 5 by revenue" always means <code class="inl">ORDER BY revenue DESC LIMIT 5</code>. The sort is what makes "top" meaningful.</p>
     </section>
 
     <!-- 7. LOGICAL ORDER -->
     <section id="order-of-ops">
-      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Execution model</span><h2>The logical order of a query</h2></div></div>
-      <p>You <em>write</em> a query starting with <code class="inl">SELECT</code>, but the database <em>executes</em> the clauses in a different order. Understanding this order explains a dozen "why doesn't this work?" errors — like why you cannot use a column alias from <code class="inl">SELECT</code> inside <code class="inl">WHERE</code>.</p>
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07: Execution model</span><h2>The logical order of a query</h2></div></div>
+      <p>Maya tries to reuse her <code class="inl">bonus</code> alias inside <code class="inl">WHERE</code> and gets an error she does not understand. The reason: you <em>write</em> a query starting with <code class="inl">SELECT</code>, but the database <em>executes</em> the clauses in a different order. Understanding this order explains a dozen "why doesn't this work?" errors, including why you cannot use a column alias from <code class="inl">SELECT</code> inside <code class="inl">WHERE</code>.</p>
 
       <div class="stack">
         <div class="layer"><span><span class="n">1</span> <code class="inl">FROM</code></span><small>pick the source table(s)</small></div>
@@ -572,7 +572,7 @@
         <div class="layer"><span><span class="n">7</span> <code class="inl">LIMIT</code></span><small>cap the row count</small></div>
       </div>
 
-      <p>Notice <code class="inl">SELECT</code> runs at step 5 — <em>after</em> <code class="inl">WHERE</code>. That is why this fails:</p>
+      <p>Notice <code class="inl">SELECT</code> runs at step 5, <em>after</em> <code class="inl">WHERE</code>. That is why Maya's query fails:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">alias scope error</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -588,19 +588,19 @@
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Why ORDER BY can use aliases</span>
-        <p><code class="inl">ORDER BY</code> runs at step 6, <em>after</em> <code class="inl">SELECT</code> has computed the aliases — so <code class="inl">ORDER BY bonus</code> works fine. <code class="inl">WHERE</code> runs before, so it cannot. Memorize the seven-step ladder and these rules stop being arbitrary; they become obvious.</p></div>
+        <p><code class="inl">ORDER BY</code> runs at step 6, <em>after</em> <code class="inl">SELECT</code> has computed the aliases, so <code class="inl">ORDER BY bonus</code> works fine. <code class="inl">WHERE</code> runs before, so it cannot. Memorize the seven-step ladder and these rules stop being arbitrary; they become obvious.</p></div>
     </section>
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Practice</span><h2>Hands-on — do this now</h2></div></div>
-      <p>Spin up the schema (any free Postgres playground works — <a href="https://www.db-fiddle.com/" target="_blank" rel="noopener">db-fiddle</a>, <a href="https://onecompiler.com/postgresql" target="_blank" rel="noopener">OneCompiler</a>, or local <code class="inl">psql</code>). Create the three tables, insert the six employee rows above, then write each query <em>before</em> looking at any hint.</p>
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08: Practice</span><h2>Hands-on: do this now</h2></div></div>
+      <p>Maya learned by typing, and so will you. Spin up the schema (any free Postgres playground works: <a href="https://www.db-fiddle.com/" target="_blank" rel="noopener">db-fiddle</a>, <a href="https://onecompiler.com/postgresql" target="_blank" rel="noopener">OneCompiler</a>, or local <code class="inl">psql</code>). Create the three tables, insert the six employee rows above, then write each query <em>before</em> looking at any hint.</p>
 
       <ul class="check">
         <li><svg><use href="#i-checkbox"/></svg>Select just <code class="inl">name</code> and <code class="inl">hire_date</code> for every employee. Then change it to <code class="inl">SELECT *</code> and notice the difference in output width.</li>
         <li><svg><use href="#i-checkbox"/></svg>Find all employees earning more than 100,000, sorted highest first. Predict the order on paper, then confirm.</li>
         <li><svg><use href="#i-checkbox"/></svg>List employees whose name starts with a vowel using <code class="inl">LIKE</code> (hint: <code class="inl">name LIKE 'A%' OR name LIKE 'E%' ...</code>).</li>
-        <li><svg><use href="#i-checkbox"/></svg>Find the employee(s) with no manager. Then find the one with no department. Use the correct NULL test — prove that <code class="inl">= NULL</code> returns zero rows.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find the employee(s) with no manager. Then find the one with no department. Use the correct NULL test, and prove that <code class="inl">= NULL</code> returns zero rows the way it did for Maya.</li>
         <li><svg><use href="#i-checkbox"/></svg>Add a computed column <code class="inl">annual_bonus</code> = 10% of salary, aliased. Then try to filter on the alias in <code class="inl">WHERE</code>, watch it fail, and fix it.</li>
         <li><svg><use href="#i-checkbox"/></svg>Get the distinct list of <code class="inl">status</code> values that appear in <code class="inl">orders</code>. Then the top 3 orders by <code class="inl">amount</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>Use <code class="inl">COALESCE</code> to show every employee's <code class="inl">dept_id</code>, but display <code class="inl">0</code> for Frank instead of NULL.</li>
@@ -608,23 +608,23 @@
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict, then run</span>
-        <p>Before each query executes, say out loud what rows you expect and in what order. Then run it. When reality disagrees with your prediction, <em>that gap is the lesson</em> — chase it down before moving on. This active-prediction habit is exactly what separates people who "know SQL" from people who can only recognize it.</p></div>
+        <p>Before each query executes, say out loud what rows you expect and in what order. Then run it. When reality disagrees with your prediction, <em>that gap is the lesson</em>, so chase it down before moving on. This active-prediction habit is exactly what separates people who "know SQL" from people who can only recognize it.</p></div>
     </section>
 
     <footer>
       <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
       <div class="refs">
-        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-select.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>SELECT — PostgreSQL tutorial</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-select.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>SELECT · PostgreSQL tutorial</a>
         <a class="reflink" href="https://www.postgresql.org/docs/current/functions-comparison.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Comparison operators &amp; NULL</a>
         <a class="reflink" href="https://www.postgresql.org/docs/current/queries-order.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Sorting rows (ORDER BY)</a>
         <a class="reflink" href="https://use-the-index-luke.com/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Use The Index, Luke</a>
       </div>
 
       <div class="next">
-        <a href="../../index.html"><small>← Course home</small><span class="nx"><svg><use href="#i-back"/></svg><b>SQL Course — all modules</b></span></a>
-        <a href="../01-joins/01-joins.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 01 — Joins</b></span></a>
+        <a href="../../index.html"><small>← Course home</small><span class="nx"><svg><use href="#i-back"/></svg><b>SQL Course · all modules</b></span></a>
+        <a href="../01-joins/01-joins.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 01 · Joins</b></span></a>
       </div>
-      <p class="endline">SQL L3 Track · Module 00 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 01 — Joins.</p>
+      <p class="endline">SQL L3 Track · Module 00 · built for visual, eye-easy reading. Work through the hands-on checklist, then follow Maya into Module 01, Joins.</p>
     </footer>
 
   </main>

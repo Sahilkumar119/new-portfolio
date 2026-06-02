@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 00 — Foundations: What a Container Actually Is</title>
+<title>Module 00 · Foundations: What a Container Actually Is</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -325,10 +325,11 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 0</span>
-      <h1>Module 00 — <span class="grad">Foundations</span><br>What a Container Actually Is</h1>
-      <p class="lede">If you only memorise commands, you'll fall down on the <em>why</em> — the very thing that separates
-      juniors from professionals. This module builds the mental model first: what problem containers solve, what
-      actually makes one isolated, and how Docker's pieces fit together. No fluff.</p>
+      <h1>Module 00 · <span class="grad">Foundations</span><br>What a Container Actually Is</h1>
+      <p class="lede">Meet Sam, a developer about to ship their first containerized app. If Sam only memorises commands,
+      Sam will fall down on the <em>why</em>, the very thing that separates juniors from professionals. This module
+      builds the mental model first: what problem containers solve, what actually makes one isolated, and how Docker's
+      pieces fit together. No fluff.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1h</b> · conceptual</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>mental model first</span>
@@ -340,21 +341,22 @@
     <!-- 1. THE PROBLEM -->
     <section id="problem">
       <div class="sec-head"><span class="num">1</span><h2>The problem containers solve</h2></div>
-      <p>"It works on my machine." Classic. An app needs a specific Python version, certain system libraries,
-      env vars, a particular Linux distro. Move it to another machine and any mismatch breaks it.</p>
+      <p>Sam's app runs perfectly on Sam's laptop. Then a teammate pulls it and it dies on import. "It works on my
+      machine." Classic. The app needs a specific Python version, certain system libraries, env vars, a particular
+      Linux distro. Move it to another machine and any mismatch breaks it.</p>
       <p>Two historical fixes came before containers:</p>
       <div class="grid two">
         <div class="card"><div class="ico amber"><svg><use href="#i-server"/></svg></div>
           <h4>Install directly on the server</h4>
-          <p>Fragile and unrepeatable. Apps conflict — App A needs OpenSSL 1.1, App B needs 3.0, and they share one host.</p></div>
+          <p>Fragile and unrepeatable. Apps conflict (App A needs OpenSSL 1.1, App B needs 3.0, and they share one host).</p></div>
         <div class="card"><div class="ico blue"><svg><use href="#i-cpu"/></svg></div>
           <h4>Virtual Machines</h4>
           <p>Each app gets a full guest OS. Strong isolation, but heavy: gigabytes of RAM/disk per VM, slow to boot.</p></div>
       </div>
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The container idea</span>
-        <p><b>Containers</b> are the third fix: package the app <em>and</em> its dependencies into one portable artifact
-        (an <b>image</b>), and run it as an isolated process on a shared kernel. Lightweight like a process,
-        portable like a VM.</p></div>
+        <p><b>Containers</b> are the third fix, and the one that ends Sam's "works on my machine" headache: package the
+        app <em>and</em> its dependencies into one portable artifact (an <b>image</b>), and run it as an isolated process
+        on a shared kernel. Lightweight like a process, portable like a VM.</p></div>
     </section>
 
     <!-- 2. CONTAINERS vs VMs -->
@@ -386,7 +388,7 @@
           <tr><td><b>Size</b></td><td>GBs</td><td>MBs</td></tr>
           <tr><td><b>Startup</b></td><td>Seconds–minutes</td><td>Milliseconds–seconds</td></tr>
           <tr><td><b>Overhead</b></td><td>High (full OS per VM)</td><td>Low (just the app + deps)</td></tr>
-          <tr><td><b>Isolation strength</b></td><td>Stronger (hardware-virtualized)</td><td>Weaker (kernel-level) — relevant to security</td></tr>
+          <tr><td><b>Isolation strength</b></td><td>Stronger (hardware-virtualized)</td><td>Weaker (kernel-level), relevant to security</td></tr>
           <tr><td><b>Use case</b></td><td>Run different OSes, strong tenant isolation</td><td>Package/ship/scale apps, microservices</td></tr>
         </tbody>
       </table></div>
@@ -404,8 +406,9 @@
     <!-- 3. WHAT MAKES IT ISOLATED -->
     <section id="isolation">
       <div class="sec-head"><span class="num">3</span><h2>What actually makes a container isolated</h2></div>
-      <p>A container is <b>not</b> a special object. It's a normal Linux process that the kernel has been told to
-      <em>restrict and isolate</em> using three kernel features. This is the heart of the foundations.</p>
+      <p>Sam pictured a container as some magic box. It isn't. A container is <b>not</b> a special object. It's a normal
+      Linux process that the kernel has been told to <em>restrict and isolate</em> using three kernel features. This is
+      the heart of the foundations.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico violet"><svg><use href="#i-eye"/></svg></div>
@@ -416,7 +419,7 @@
           <h4>Union/overlay FS</h4><p>How image layers become a single writable root via copy-on-write.</p></div>
       </div>
 
-      <h3>a) Namespaces — "what the process can SEE"</h3>
+      <h3>a) Namespaces: "what the process can SEE"</h3>
       <p>Namespaces partition kernel resources so a process sees its own isolated view. The key ones:</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Namespace</th><th>Isolates</th></tr></thead>
@@ -426,20 +429,20 @@
           <tr><td><b style="color:var(--violet)">MNT</b></td><td>Its own filesystem mount points (its own root <code>/</code>).</td></tr>
           <tr><td><b style="color:var(--violet)">UTS</b></td><td>Its own hostname.</td></tr>
           <tr><td><b style="color:var(--violet)">IPC</b></td><td>Its own inter-process communication (shared memory, semaphores).</td></tr>
-          <tr><td><b style="color:var(--violet)">USER</b></td><td>Maps user IDs; lets a process be "root" inside the container but unprivileged on the host (the basis of rootless/hardening — Module 07).</td></tr>
+          <tr><td><b style="color:var(--violet)">USER</b></td><td>Maps user IDs; lets a process be "root" inside the container but unprivileged on the host (the basis of rootless/hardening, Module 07).</td></tr>
         </tbody>
       </table></div>
       <div class="note info"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Mnemonic</span>
         <p><b>MNT, UTS, IPC, NET, PID, USER</b> → "Make Unix Isolation Now, Please User."</p></div>
 
-      <h3>b) cgroups (control groups) — "what the process can USE"</h3>
+      <h3>b) cgroups (control groups): "what the process can USE"</h3>
       <p>cgroups <em>limit and account</em> resource usage: CPU, memory, disk I/O, network bandwidth, number of
-      processes (PIDs). This is how <code class="inl">docker run --memory=256m</code> works — and it maps directly to
+      processes (PIDs). This is how <code class="inl">docker run --memory=256m</code> works, and it maps directly to
       Kubernetes <code class="inl">resources.requests/limits</code> later.</p>
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The one-liner that answers a common question</span>
         <p><b>Namespaces isolate (visibility); cgroups limit (consumption).</b></p></div>
 
-      <h3>c) Union/overlay filesystem — "how the image becomes a writable root"</h3>
+      <h3>c) Union/overlay filesystem: "how the image becomes a writable root"</h3>
       <p>An image is a stack of read-only layers. When you start a container, the engine adds a thin
       <b>writable layer</b> on top (copy-on-write). Your storage driver <code class="inl">overlayfs</code> merges them
       into a single view. Delete the container and the writable layer is gone; the underlying image layers are
@@ -460,7 +463,7 @@
 
     <!-- 4. IMAGE vs CONTAINER -->
     <section id="img-ctr">
-      <div class="sec-head"><span class="num">4</span><h2>Image vs container — do not confuse these</h2></div>
+      <div class="sec-head"><span class="num">4</span><h2>Image vs container: do not confuse these</h2></div>
       <div class="grid two">
         <div class="card"><div class="ico violet"><svg><use href="#i-image"/></svg></div>
           <h4>Image = blueprint</h4>
@@ -471,14 +474,14 @@
       </div>
       <div class="note info"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Analogy</span>
         <p><b>Image is the class, container is the object.</b> Or: image is the recipe, container is the cooked dish.
-        You can run many containers from one image.</p></div>
+        Sam can run many containers from one image, which is exactly what happens when the app scales out.</p></div>
     </section>
 
     <!-- 5. ARCHITECTURE -->
     <section id="arch">
       <div class="sec-head"><span class="num">5</span><h2>Docker's architecture: client / daemon / registry</h2></div>
-      <p>Docker is not one program. Knowing the split — and being able to narrate it — is what signals you
-      understand the stack.</p>
+      <p>When Sam types <code class="inl">docker run</code>, several pieces move at once. Docker is not one program.
+      Knowing the split (and being able to narrate it) is what signals you understand the stack.</p>
 
       <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">the request path</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code>  docker CLI  ──REST API──►  dockerd (daemon)  ──pull/push──►  Registry (e.g. Docker Hub)
   (client)                   │  builds images
@@ -493,7 +496,7 @@
           <tr><td><b style="color:var(--accent)">Docker daemon</b> <code>dockerd</code></td><td>The long-running server. Builds images, runs/manages containers, networks, volumes. Client and daemon can be on different machines.</td></tr>
           <tr><td><b style="color:var(--cyan)">containerd</b></td><td>High-level container runtime the daemon delegates to (image transfer, container lifecycle). Also what Kubernetes uses directly.</td></tr>
           <tr><td><b style="color:var(--violet)">runc</b></td><td>The low-level runtime that talks to the kernel to create the namespaces/cgroups and spawn the process. OCI-compliant.</td></tr>
-          <tr><td><b style="color:var(--amber)">Registry</b></td><td>Stores and distributes images (Docker Hub, GHCR, ECR, a private registry — Module 06).</td></tr>
+          <tr><td><b style="color:var(--amber)">Registry</b></td><td>Stores and distributes images (Docker Hub, GHCR, ECR, a private registry, covered in Module 06).</td></tr>
         </tbody>
       </table></div>
 
@@ -502,7 +505,7 @@
         create namespaces/cgroups → start process. Being able to narrate that signals you understand the whole stack,
         not just the CLI.</p></div>
 
-      <h3>OCI — the standards</h3>
+      <h3>OCI: the standards</h3>
       <p><b>OCI (Open Container Initiative)</b> defines open specs for the <b>image format</b> and the <b>runtime</b>.
       This is why images are portable across Docker, Podman, Kubernetes, and more. "Docker image" is colloquial;
       the precise term is "OCI image." Knowing this signals maturity.</p>
@@ -511,7 +514,8 @@
     <!-- 6. WHERE THIS IS HEADING -->
     <section id="thread">
       <div class="sec-head"><span class="num">6</span><h2>Where this is heading</h2></div>
-      <p>Every concept here reappears later. Keep asking "how does this reappear in Kubernetes?" — that's the senior mindset.</p>
+      <p>Every concept here reappears later. As Sam moves toward Kubernetes, keep asking "how does this reappear there?"
+      That habit is the senior mindset.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Foundation concept</th><th>Where it reappears</th></tr></thead>
         <tbody>
@@ -525,9 +529,9 @@
 
     <!-- 7. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">7</span><h2>Hands-on — prove isolation yourself</h2></div>
-      <p>Don't take any of this on faith. The point of this exercise is to <em>see</em> namespaces and cgroups with
-      your own eyes. Run each line and predict what it will show before you hit enter.</p>
+      <div class="sec-head"><span class="num">7</span><h2>Hands-on: prove isolation yourself</h2></div>
+      <p>Sam doesn't take any of this on faith, and neither should you. The point of this exercise is to <em>see</em>
+      namespaces and cgroups with your own eyes. Run each line and predict what it will show before you hit enter.</p>
 
       <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: prove a container is just an isolated process</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Start a long-lived container in the background</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> demo nginx:1.27
@@ -537,7 +541,7 @@
 <span class="out">PID  CMD</span>
 <span class="out">  1  nginx: master process ...   &lt;- PID 1 inside the container</span>
 
-<span class="cmt"># 3. Same process, seen from the HOST — a normal process with a big PID</span>
+<span class="cmt"># 3. Same process, seen from the HOST, a normal process with a big PID</span>
 ps <span class="flag">-ef</span> | grep nginx          <span class="cmt"># it's just a host process, not PID 1 here</span>
 
 <span class="cmt"># 4. UTS namespace: the container has its own hostname</span>
@@ -575,7 +579,7 @@ ps <span class="flag">-ef</span> | grep nginx          <span class="cmt"># it's 
 
       <div class="next">
         <a href="index.html"><small>← Back</small><span class="nx"><svg><use href="#i-back"/></svg><b>Back to course index</b></span></a>
-        <a href="module-01.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 01 — Images &amp; Containers</b></span></a>
+        <a href="module-01.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 01 · Images &amp; Containers</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 00 · built for visual learning.
       Once you can answer the VM-vs-container, namespaces-vs-cgroups, and "what does docker run do?" questions without peeking, move on to Module 01.</p>

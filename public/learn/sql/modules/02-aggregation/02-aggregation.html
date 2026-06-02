@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 02 — Aggregation: Grouping &amp; Summarizing</title>
+<title>Module 02, Aggregation: Grouping &amp; Summarizing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
   .chip b{color:var(--accent)}
   @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
 
-  /* section heads — editorial */
+  /* section heads, editorial */
   section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
   section:first-of-type{border-top:none}
   .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
@@ -137,7 +137,7 @@
   .note.info{background:var(--bg-2)}
   .note.info .ic,.note.info .tag{color:var(--ink-soft)}
 
-  /* code — dark block on light page */
+  /* code, dark block on light page */
   .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
     overflow:hidden}
   .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
@@ -325,8 +325,8 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 02</span>
-      <h1>Aggregation —<br><span class="u">Grouping</span> &amp; Summarizing</h1>
-      <p class="lede">So far every query has worked <em>one row at a time</em>. Aggregation is the moment SQL learns to <em>summarize</em>: take many rows and collapse them into a single answer per group — a count, a total, an average. Master <em>GROUP BY</em> and <em>HAVING</em> and you can answer almost any "per category" business question without ever leaving the database.</p>
+      <h1>Aggregation:<br><span class="u">Grouping</span> &amp; Summarizing</h1>
+      <p class="lede">So far every query has worked <em>one row at a time</em>. Aggregation is the moment SQL learns to <em>summarize</em>: take many rows and collapse them into a single answer per group (a count, a total, an average). Master <em>GROUP BY</em> and <em>HAVING</em> and you can answer almost any "per category" business question without ever leaving the database. Maya, freshly hired as an analyst here, is about to discover that her first week of "just pull me the numbers" requests all live in this one idea.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · aggregation</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>needs Module 00 &amp; 01</span>
@@ -336,20 +336,20 @@
 
     <!-- 0. THE SHIFT -->
     <section id="shift">
-      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>The shift in thinking</h2></div></div>
-      <p>In Module 00 you filtered, sorted, and reshaped <strong>individual rows</strong>. In Module 01 you stitched tables together with joins — but the result was still a list of rows, one per matched pair. Every query you have written returns roughly "give me <em>these</em> rows." Aggregation breaks that pattern entirely.</p>
-      <p>An aggregate query asks a fundamentally different question: <strong>"summarize many rows into one number."</strong> How many employees are there? What is the total of all orders? What is the average salary <em>per department</em>? You are no longer looking at rows — you are looking at <strong>summaries of sets of rows</strong>. That single mental flip is what this whole module teaches.</p>
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 · Orientation</span><h2>The shift in thinking</h2></div></div>
+      <p>In Module 00 you filtered, sorted, and reshaped <strong>individual rows</strong>. In Module 01 you stitched tables together with joins, but the result was still a list of rows, one per matched pair. Every query you have written returns roughly "give me <em>these</em> rows." Aggregation breaks that pattern entirely.</p>
+      <p>On Maya's second morning her manager drops by with three questions: how many employees are there, what is the total of all orders, and what is the average salary <em>per department</em>? An aggregate query asks a fundamentally different thing than the row listings she already knows: <strong>"summarize many rows into one number."</strong> She is no longer looking at rows, she is looking at <strong>summaries of sets of rows</strong>. That single mental flip is what this whole module teaches.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Row-at-a-time vs set summary</span>
-        <p>A normal <code class="inl">SELECT</code> maps each input row to one output row. An <strong>aggregate</strong> does the opposite: it <em>folds</em> a whole pile of rows down into a single value. <code class="inl">GROUP BY</code> then lets you do that fold <em>once per group</em> instead of once for the entire table. Hold onto the word "fold" — it is the most accurate picture of what is happening.</p></div>
+        <p>A normal <code class="inl">SELECT</code> maps each input row to one output row. An <strong>aggregate</strong> does the opposite: it <em>folds</em> a whole pile of rows down into a single value. <code class="inl">GROUP BY</code> then lets you do that fold <em>once per group</em> instead of once for the entire table. Hold onto the word "fold," it is the most accurate picture of what is happening.</p></div>
 
       <p>We use the same three tables as every module: <code class="inl">departments</code>, <code class="inl">employees</code>, and <code class="inl">orders</code>. As a reminder, the six employees are Alice (dept 10, 185000), Bob (dept 10, 120000), Carol (dept 20, 135000), Dan (dept 20, 98000), Eve (dept 30, 105000), and Frank (dept <code class="inl">NULL</code>, 72000). That deliberate <code class="inl">NULL</code> on Frank is going to teach us several lessons before we are done.</p>
     </section>
 
     <!-- 1. AGGREGATE FUNCTIONS -->
     <section id="aggfns">
-      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — The five workhorses</span><h2>Aggregate functions over the whole table</h2></div></div>
-      <p>Before grouping enters the picture, see what an aggregate does on its own. The five you will reach for constantly are <code class="inl">COUNT</code>, <code class="inl">SUM</code>, <code class="inl">AVG</code>, <code class="inl">MIN</code>, and <code class="inl">MAX</code>. Each takes a column (or <code class="inl">*</code>) and reduces every row in the table down to <strong>one value</strong>.</p>
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 · The five workhorses</span><h2>Aggregate functions over the whole table</h2></div></div>
+      <p>Before grouping enters the picture, see what an aggregate does on its own. Maya starts with the easiest of her manager's questions, the whole-company totals. The five functions she will reach for constantly are <code class="inl">COUNT</code>, <code class="inl">SUM</code>, <code class="inl">AVG</code>, <code class="inl">MIN</code>, and <code class="inl">MAX</code>. Each takes a column (or <code class="inl">*</code>) and reduces every row in the table down to <strong>one value</strong>.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">aggregates over all employees</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -366,7 +366,7 @@
          6 |  715000 |  119166.67 |  72000 |  185000</span></code></pre>
       </div>
 
-      <p>Notice what happened: six input rows became <strong>one output row</strong>. That is the defining trait of an aggregate query with no <code class="inl">GROUP BY</code> — the entire table is treated as a single group, and you get a single summary row back. You can mix several aggregates in one <code class="inl">SELECT</code>; they all fold the same set of rows independently.</p>
+      <p>Notice what happened: six input rows became <strong>one output row</strong>. That is the defining trait of an aggregate query with no <code class="inl">GROUP BY</code>. The entire table is treated as a single group, and you get a single summary row back. You can mix several aggregates in one <code class="inl">SELECT</code>; they all fold the same set of rows independently. Maya has answered question one with a single line.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico sage"><svg><use href="#i-target"/></svg></div>
@@ -374,23 +374,23 @@
           <p>Counting rows and totalling a numeric column. The two you will use most in reporting queries.</p></div>
         <div class="card"><div class="ico grey"><svg><use href="#i-layers"/></svg></div>
           <h4>AVG</h4>
-          <p>The mean. Watch out: it divides by the count of <b>non-NULL</b> values, not the row count — section 5.</p></div>
+          <p>The mean. Watch out: it divides by the count of <b>non-NULL</b> values, not the row count (section 5).</p></div>
         <div class="card"><div class="ico taupe"><svg><use href="#i-sort"/></svg></div>
           <h4>MIN / MAX</h4>
           <p>Smallest and largest. Work on numbers, dates, and text (alphabetical) alike.</p></div>
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">One row in, one number out</span>
-        <p>An aggregate <em>collapses</em>. The instant you put one in your <code class="inl">SELECT</code>, you have told the database "I want a summary, not a row listing." This is why you cannot casually mix a bare column with an aggregate — there would be six names but only one count, and nothing to line them up against. That tension is exactly what <code class="inl">GROUP BY</code> resolves.</p></div>
+        <p>An aggregate <em>collapses</em>. The instant you put one in your <code class="inl">SELECT</code>, you have told the database "I want a summary, not a row listing." This is why you cannot casually mix a bare column with an aggregate. There would be six names but only one count, and nothing to line them up against. That tension is exactly what <code class="inl">GROUP BY</code> resolves.</p></div>
     </section>
 
     <!-- 2. COUNT SUBTLETIES -->
     <section id="count">
-      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — The classic trap</span><h2>COUNT(*) vs COUNT(col) vs COUNT(DISTINCT)</h2></div></div>
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 · The classic trap</span><h2>COUNT(*) vs COUNT(col) vs COUNT(DISTINCT)</h2></div></div>
       <p>This trips up people who think they know <code class="inl">COUNT</code> cold. There are three distinct behaviours, and the difference is entirely about <strong>how each one treats NULL and duplicates</strong>.</p>
 
       <div class="stack">
-        <div class="layer"><span><code class="inl">COUNT(*)</code></span><small>counts every row — NULLs included</small></div>
+        <div class="layer"><span><code class="inl">COUNT(*)</code></span><small>counts every row, NULLs included</small></div>
         <div class="layer"><span><code class="inl">COUNT(col)</code></span><small>counts rows where col IS NOT NULL</small></div>
         <div class="layer"><span><code class="inl">COUNT(DISTINCT col)</code></span><small>counts distinct non-NULL values of col</small></div>
       </div>
@@ -414,25 +414,25 @@
         </table>
       </div>
 
-      <p>Read the result carefully. <code class="inl">all_rows = 6</code> counts every employee, Frank included. <code class="inl">with_dept = 5</code> drops Frank, because his <code class="inl">dept_id</code> is <code class="inl">NULL</code> and <code class="inl">COUNT(col)</code> only counts non-NULL values. <code class="inl">distinct_depts = 3</code> collapses the five remaining department values (10, 10, 20, 20, 30) down to the three unique ones — and still ignores Frank's NULL. Three different numbers from the same six rows.</p>
+      <p>Read the result carefully. <code class="inl">all_rows = 6</code> counts every employee, Frank included. <code class="inl">with_dept = 5</code> drops Frank, because his <code class="inl">dept_id</code> is <code class="inl">NULL</code> and <code class="inl">COUNT(col)</code> only counts non-NULL values. <code class="inl">distinct_depts = 3</code> collapses the five remaining department values (10, 10, 20, 20, 30) down to the three unique ones, and still ignores Frank's NULL. Three different numbers from the same six rows. Maya files that away; it is going to matter the moment someone phrases a question imprecisely.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
-        <p><b>"What is the difference between <code class="inl">COUNT(*)</code> and <code class="inl">COUNT(column)</code>?"</b> <code class="inl">COUNT(*)</code> counts rows; <code class="inl">COUNT(column)</code> counts rows where that column is <b>not NULL</b>. If the column has no NULLs the two are equal — which is exactly why the bug hides until a NULL shows up. <code class="inl">COUNT(DISTINCT column)</code> adds de-duplication on top, still skipping NULL. Knowing all three is L3-level table stakes.</p></div>
+        <p><b>"What is the difference between <code class="inl">COUNT(*)</code> and <code class="inl">COUNT(column)</code>?"</b> <code class="inl">COUNT(*)</code> counts rows; <code class="inl">COUNT(column)</code> counts rows where that column is <b>not NULL</b>. If the column has no NULLs the two are equal, which is exactly why the bug hides until a NULL shows up. <code class="inl">COUNT(DISTINCT column)</code> adds de-duplication on top, still skipping NULL. Knowing all three is L3-level table stakes.</p></div>
 
       <p>A practical consequence: if someone asks "how many employees have a department assigned?" the answer is <code class="inl">COUNT(dept_id)</code>, not <code class="inl">COUNT(*)</code>. If they ask "how many <em>different</em> departments do we staff?" it is <code class="inl">COUNT(DISTINCT dept_id)</code>. Picking the wrong one gives a confidently-wrong number.</p>
     </section>
 
     <!-- 3. GROUP BY MECHANICS -->
     <section id="groupby">
-      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — The core mechanic</span><h2>GROUP BY — one summary per group</h2></div></div>
-      <p>So far every aggregate folded the <em>whole</em> table into one number. <code class="inl">GROUP BY</code> changes that: it splits the rows into <strong>buckets</strong> by some key, then runs the aggregate <strong>once inside each bucket</strong>. One output row per distinct group value.</p>
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 · The core mechanic</span><h2>GROUP BY, one summary per group</h2></div></div>
+      <p>Question three on Maya's list, average salary <em>per department</em>, is where the whole-table trick runs out. So far every aggregate folded the <em>whole</em> table into one number. <code class="inl">GROUP BY</code> changes that: it splits the rows into <strong>buckets</strong> by some key, then runs the aggregate <strong>once inside each bucket</strong>. One output row per distinct group value.</p>
 
       <div class="anat">
         <span class="tok t1">SELECT</span> <span class="tok t3">dept_id</span><span class="tok">,</span> <span class="tok t2">AVG(salary)</span> <span class="tok t1">FROM</span> <span class="tok t4">employees</span> <span class="tok t1">GROUP BY</span> <span class="tok t3">dept_id</span><span class="tok">;</span>
         <span class="lbl">the grouping key &nbsp;·&nbsp; aggregate computed per group &nbsp;·&nbsp; source &nbsp;·&nbsp; how to bucket rows</span>
       </div>
 
-      <p>The grouping key (<code class="inl">dept_id</code>) appears in two places: in <code class="inl">GROUP BY</code> to define the buckets, and in <code class="inl">SELECT</code> so the output tells you <em>which</em> group each summary belongs to. Picture the fold happening physically:</p>
+      <p>The grouping key (<code class="inl">dept_id</code>) appears in two places: in <code class="inl">GROUP BY</code> to define the buckets, and in <code class="inl">SELECT</code> so the output tells you <em>which</em> group each summary belongs to. Picture the fold happening physically, the way Maya sketched it on a sticky note:</p>
 
       <div class="stack">
         <div class="layer"><span><span class="n">10</span> Alice 185000, Bob 120000</span><small>2 rows &rarr; AVG = 152500</small></div>
@@ -441,7 +441,7 @@
         <div class="layer"><span><span class="n" style="color:var(--warn)">∅</span> Frank 72000 (dept NULL)</span><small>1 row &rarr; AVG = 72000</small></div>
       </div>
 
-      <p>Six input rows became <strong>four group rows</strong> — three real departments plus Frank's <code class="inl">NULL</code> bucket (more on that in section 5). Here is the query and its result:</p>
+      <p>Six input rows became <strong>four group rows</strong>: three real departments plus Frank's <code class="inl">NULL</code> bucket (more on that in section 5). Here is the query and its result:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">average salary per department</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -466,13 +466,13 @@
 
     <!-- 4. THE CARDINAL RULE -->
     <section id="rule">
-      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The rule you must internalize</span><h2>Every SELECT column: grouped or aggregated</h2></div></div>
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 · The rule you must internalize</span><h2>Every SELECT column: grouped or aggregated</h2></div></div>
       <p>Here is the single rule that governs every aggregate query, and the one beginners break constantly:</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The cardinal rule</span>
         <p>Once a query has a <code class="inl">GROUP BY</code>, <strong>every column in the <code class="inl">SELECT</code> list must either appear in the <code class="inl">GROUP BY</code> clause or be wrapped in an aggregate function.</strong> No exceptions for ordinary columns.</p></div>
 
-      <p>Why? Think about what a group row <em>is</em>. After grouping by <code class="inl">dept_id</code>, the bucket for department 10 holds two people: Alice and Bob. The output is <strong>one</strong> row for that bucket. If you ask for a bare <code class="inl">name</code>, the database faces an impossible choice — <em>which</em> name goes in that single row, Alice or Bob? There is no sensible answer, so it refuses.</p>
+      <p>Maya hits this rule within the hour, when she tries to add employee names to her per-department report. Why does it fail? Think about what a group row <em>is</em>. After grouping by <code class="inl">dept_id</code>, the bucket for department 10 holds two people: Alice and Bob. The output is <strong>one</strong> row for that bucket. If she asks for a bare <code class="inl">name</code>, the database faces an impossible choice. <em>Which</em> name goes in that single row, Alice or Bob? There is no sensible answer, so it refuses.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the error and the fix</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -483,36 +483,36 @@
 <span class="out">-- ERROR:  column "employees.name" must appear in the GROUP BY
 --         clause or be used in an aggregate function</span>
 
-<span class="cmt">-- FIX A: aggregate it — e.g. list names per group</span>
+<span class="cmt">-- FIX A: aggregate it, e.g. list names per group</span>
 <span class="kw">SELECT</span> dept_id, <span class="fn">STRING_AGG</span>(name, <span class="str">', '</span>), <span class="fn">AVG</span>(salary)
 <span class="kw">FROM</span> employees
 <span class="kw">GROUP BY</span> dept_id;
 
-<span class="cmt">-- FIX B: add it to GROUP BY — but this changes the buckets!</span>
+<span class="cmt">-- FIX B: add it to GROUP BY, but this changes the buckets!</span>
 <span class="kw">SELECT</span> dept_id, name, <span class="fn">AVG</span>(salary)
 <span class="kw">FROM</span> employees
 <span class="kw">GROUP BY</span> dept_id, name;   <span class="cmt">-- now one group PER person</span></code></pre>
       </div>
 
-      <p>Notice that the two fixes mean very different things. <strong>Fix A</strong> keeps one row per department and folds all the names together with <code class="inl">STRING_AGG</code>. <strong>Fix B</strong> adds <code class="inl">name</code> to the grouping key, which makes each <code class="inl">(dept_id, name)</code> pair its own bucket — and since every person is unique, you are basically back to one row per employee. Choose based on the question you are actually answering.</p>
+      <p>Notice that the two fixes mean very different things. <strong>Fix A</strong> keeps one row per department and folds all the names together with <code class="inl">STRING_AGG</code>. <strong>Fix B</strong> adds <code class="inl">name</code> to the grouping key, which makes each <code class="inl">(dept_id, name)</code> pair its own bucket, and since every person is unique, you are basically back to one row per employee. Maya wants the per-department summary, so Fix A is what her manager actually asked for. Choose based on the question you are actually answering.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The functional-dependency exception</span>
-        <p>PostgreSQL relaxes the rule in one safe case: if you <code class="inl">GROUP BY</code> a table's <strong>primary key</strong>, you may select any other column from that table without aggregating it. Grouping <code class="inl">employees</code> by <code class="inl">emp_id</code> (its PK) means each group is exactly one row, so <code class="inl">name</code> and <code class="inl">salary</code> are unambiguous — they are <em>functionally dependent</em> on the key. This is per the SQL standard and most other databases reject it, so do not lean on it in portable code.</p></div>
+        <p>PostgreSQL relaxes the rule in one safe case: if you <code class="inl">GROUP BY</code> a table's <strong>primary key</strong>, you may select any other column from that table without aggregating it. Grouping <code class="inl">employees</code> by <code class="inl">emp_id</code> (its PK) means each group is exactly one row, so <code class="inl">name</code> and <code class="inl">salary</code> are unambiguous; they are <em>functionally dependent</em> on the key. This is per the SQL standard and most other databases reject it, so do not lean on it in portable code.</p></div>
     </section>
 
     <!-- 5. NULL IN AGGREGATION -->
     <section id="nulls">
-      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — NULL strikes again</span><h2>How NULL behaves in groups &amp; aggregates</h2></div></div>
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 · NULL strikes again</span><h2>How NULL behaves in groups &amp; aggregates</h2></div></div>
       <p>Module 00 warned you that <code class="inl">NULL</code> bends the rules. Aggregation adds two more behaviours you must know cold, because they quietly change your numbers.</p>
 
       <h3>1. NULL forms its own group</h3>
-      <p>When you <code class="inl">GROUP BY dept_id</code>, all the rows with a <code class="inl">NULL</code> department do <strong>not</strong> vanish and do <strong>not</strong> merge into some other bucket — they collect into a single <code class="inl">NULL</code> group of their own. That is why Frank produced his own <code class="inl">(null)</code> row in section 3. In grouping, all NULLs are treated as "the same unknown" and bucketed together, even though <code class="inl">NULL = NULL</code> is never true in a <code class="inl">WHERE</code>. Grouping is the one place SQL treats NULLs as equal.</p>
+      <p>When you <code class="inl">GROUP BY dept_id</code>, all the rows with a <code class="inl">NULL</code> department do <strong>not</strong> vanish and do <strong>not</strong> merge into some other bucket. They collect into a single <code class="inl">NULL</code> group of their own. That is why Frank produced his own <code class="inl">(null)</code> row in section 3. In grouping, all NULLs are treated as "the same unknown" and bucketed together, even though <code class="inl">NULL = NULL</code> is never true in a <code class="inl">WHERE</code>. Grouping is the one place SQL treats NULLs as equal.</p>
 
       <h3>2. Aggregates skip NULLs</h3>
-      <p>This is the bigger trap. Every aggregate except <code class="inl">COUNT(*)</code> <strong>ignores NULL inputs entirely</strong>. The critical consequence is for <code class="inl">AVG</code>: it computes <code class="inl">SUM(col) / COUNT(col)</code> — that is, the total divided by the count of <em>non-NULL</em> values, <strong>not</strong> divided by the total number of rows.</p>
+      <p>This is the bigger trap, and the one that nearly sends Maya's report out wrong. Every aggregate except <code class="inl">COUNT(*)</code> <strong>ignores NULL inputs entirely</strong>. The critical consequence is for <code class="inl">AVG</code>: it computes <code class="inl">SUM(col) / COUNT(col)</code>, that is, the total divided by the count of <em>non-NULL</em> values, <strong>not</strong> divided by the total number of rows.</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">AVG ignores NULLs — the denominator surprise</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">AVG ignores NULLs (the denominator surprise)</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="cmt">-- Imagine Frank's salary were NULL instead of 72000.</span>
 <span class="cmt">-- SUM = 643000 over the 5 known salaries.</span>
 
@@ -525,7 +525,7 @@
 <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="fn">COALESCE</span>(salary, <span class="num">0</span>)) <span class="kw">FROM</span> employees;  <span class="cmt">-- 643000 / 6</span></code></pre>
       </div>
 
-      <p>So the answer to "what is the average salary?" depends on an unstated assumption: do people with an unknown salary belong in the average or not? <code class="inl">AVG</code> says no by default. If your business definition says a missing salary should count as zero, you must say so explicitly with <code class="inl">COALESCE</code>. Getting this wrong silently skews every average in a report.</p>
+      <p>So the answer to "what is the average salary?" depends on an unstated assumption: do people with an unknown salary belong in the average or not? <code class="inl">AVG</code> says no by default. If your business definition says a missing salary should count as zero, you must say so explicitly with <code class="inl">COALESCE</code>. Getting this wrong silently skews every average in a report, which is exactly the kind of quiet error Maya would rather catch before her manager forwards it upstairs.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common gotcha</span>
         <p>"Does <code class="inl">AVG(salary)</code> count rows where salary is NULL?" <b>No.</b> NULLs are excluded from both the sum and the count, so the divisor is the number of non-NULL salaries. This is also why <code class="inl">AVG(col)</code> can differ from <code class="inl">SUM(col) / COUNT(*)</code>. Only <code class="inl">COUNT(*)</code> counts NULL rows; every value aggregate ignores them.</p></div>
@@ -533,19 +533,19 @@
 
     <!-- 6. HAVING vs WHERE -->
     <section id="having">
-      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — Filtering groups</span><h2>HAVING vs WHERE — before or after</h2></div></div>
-      <p>Both <code class="inl">WHERE</code> and <code class="inl">HAVING</code> filter — but they act at different stages,. The distinction is exactly one word: <strong>before</strong> or <strong>after</strong> grouping.</p>
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 · Filtering groups</span><h2>HAVING vs WHERE, before or after</h2></div></div>
+      <p>Maya's next request raises the stakes: "only the departments whose average salary clears 100,000." Both <code class="inl">WHERE</code> and <code class="inl">HAVING</code> filter, but they act at different stages. The distinction is exactly one word: <strong>before</strong> or <strong>after</strong> grouping.</p>
 
       <div class="grid two">
         <div class="card"><div class="ico grey"><svg><use href="#i-filter"/></svg></div>
-          <h4>WHERE — filters rows</h4>
-          <p>Runs <b>before</b> <code class="inl">GROUP BY</code> (step 2). Decides which individual rows even enter the groups. Cannot see aggregates — they don't exist yet.</p></div>
+          <h4>WHERE filters rows</h4>
+          <p>Runs <b>before</b> <code class="inl">GROUP BY</code> (step 2). Decides which individual rows even enter the groups. Cannot see aggregates; they don't exist yet.</p></div>
         <div class="card"><div class="ico sage"><svg><use href="#i-layers"/></svg></div>
-          <h4>HAVING — filters groups</h4>
+          <h4>HAVING filters groups</h4>
           <p>Runs <b>after</b> <code class="inl">GROUP BY</code> (step 4). Decides which finished group rows to keep. This is where aggregate conditions live.</p></div>
       </div>
 
-      <p>Suppose you want "departments whose average salary exceeds 100,000." The condition is on an <em>aggregate</em> (<code class="inl">AVG(salary)</code>), which only exists after grouping — so it must go in <code class="inl">HAVING</code>:</p>
+      <p>Suppose you want "departments whose average salary exceeds 100,000." The condition is on an <em>aggregate</em> (<code class="inl">AVG(salary)</code>), which only exists after grouping, so it must go in <code class="inl">HAVING</code>:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">filter groups with HAVING</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -562,7 +562,7 @@
       30 |  105000.00</span>   <span class="out">-- dept NULL (72000) is excluded</span></code></pre>
       </div>
 
-      <p>Now try putting that aggregate in <code class="inl">WHERE</code> and watch it fail — because at the moment <code class="inl">WHERE</code> runs, no grouping has happened, so <code class="inl">AVG(salary)</code> is meaningless:</p>
+      <p>Maya's first instinct is to drop the condition into <code class="inl">WHERE</code>, and it fails. At the moment <code class="inl">WHERE</code> runs, no grouping has happened, so <code class="inl">AVG(salary)</code> is meaningless:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">why aggregates cannot go in WHERE</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -574,10 +574,10 @@
 <span class="out">-- ERROR:  aggregate functions are not allowed in WHERE</span></code></pre>
       </div>
 
-      <p>The two clauses are not interchangeable, and they are not redundant either — you often use <strong>both in one query</strong>, and the order matters for both correctness and speed. <code class="inl">WHERE</code> trims rows first (so fewer rows get grouped), then <code class="inl">HAVING</code> trims the resulting groups:</p>
+      <p>The two clauses are not interchangeable, and they are not redundant either. You often use <strong>both in one query</strong>, and the order matters for both correctness and speed. <code class="inl">WHERE</code> trims rows first (so fewer rows get grouped), then <code class="inl">HAVING</code> trims the resulting groups:</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">WHERE then HAVING — both, in order</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">WHERE then HAVING, both, in order</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="cmt">-- among employees hired after 2019, find departments</span>
 <span class="cmt">-- with more than one such employee</span>
 <span class="kw">SELECT</span> dept_id, <span class="fn">COUNT</span>(<span class="num">*</span>) <span class="kw">AS</span> recent_hires
@@ -588,13 +588,13 @@
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The rule of thumb</span>
-        <p>If your condition is about a <strong>single row's column</strong> (a salary, a date, a status), it belongs in <code class="inl">WHERE</code>. If your condition is about a <strong>computed group summary</strong> (a count, a sum, an average of the group), it belongs in <code class="inl">HAVING</code>. Putting a plain row filter in <code class="inl">HAVING</code> usually still works but is slower — it grouped rows it could have discarded earlier. Filter early.</p></div>
+        <p>If your condition is about a <strong>single row's column</strong> (a salary, a date, a status), it belongs in <code class="inl">WHERE</code>. If your condition is about a <strong>computed group summary</strong> (a count, a sum, an average of the group), it belongs in <code class="inl">HAVING</code>. Putting a plain row filter in <code class="inl">HAVING</code> usually still works but is slower, because it grouped rows it could have discarded earlier. Filter early.</p></div>
     </section>
 
     <!-- 7. GROUP BY + JOIN -->
     <section id="join">
-      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Putting it together</span><h2>Multiple keys, JOINs &amp; subtotals</h2></div></div>
-      <p>Real reports combine Module 01's joins with this module's grouping. The pattern is everywhere: join the fact table to a lookup table, then group by the human-readable name instead of the cryptic id. Let's report headcount and average salary per <em>department name</em>:</p>
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 · Putting it together</span><h2>Multiple keys, JOINs &amp; subtotals</h2></div></div>
+      <p>By Friday Maya's manager wants the report readable by people who do not memorize department ids. Real reports combine Module 01's joins with this module's grouping. The pattern is everywhere: join the fact table to a lookup table, then group by the human-readable name instead of the cryptic id. Let's report headcount and average salary per <em>department name</em>:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">JOIN then GROUP BY the readable name</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -607,10 +607,10 @@
 <span class="kw">ORDER BY</span> avg_salary <span class="kw">DESC</span>;</code></pre>
       </div>
 
-      <p>Because this is an inner <code class="inl">JOIN</code>, Frank (whose <code class="inl">dept_id</code> is <code class="inl">NULL</code>) drops out before grouping — there is no department row to match him. If you wanted to keep him in a "no department" bucket, you would use a <code class="inl">LEFT JOIN</code> and group by <code class="inl">COALESCE(d.dept_name, 'Unassigned')</code>. The choice of join type directly controls which groups exist.</p>
+      <p>Because this is an inner <code class="inl">JOIN</code>, Frank (whose <code class="inl">dept_id</code> is <code class="inl">NULL</code>) drops out before grouping; there is no department row to match him. Maya notices the headcount is short by one and remembers Frank. If she wants to keep him in a "no department" bucket, she uses a <code class="inl">LEFT JOIN</code> and groups by <code class="inl">COALESCE(d.dept_name, 'Unassigned')</code>. The choice of join type directly controls which groups exist.</p>
 
       <h3>Grouping by multiple columns</h3>
-      <p>You can group by more than one key. Each <strong>distinct combination</strong> becomes a bucket. For example, count orders per employee per status — a two-dimensional summary:</p>
+      <p>You can group by more than one key. Each <strong>distinct combination</strong> becomes a bucket. For example, count orders per employee per status, a two-dimensional summary:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">two grouping keys = one row per combination</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -622,11 +622,11 @@
 <span class="kw">ORDER BY</span> emp_id, status;</code></pre>
       </div>
 
-      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Fan-out — the join + aggregate trap</span>
-        <p>The nastiest aggregation bug is <b>double counting from a join</b>. If you join <code class="inl">employees</code> to <code class="inl">orders</code> (one employee, many orders) and then <code class="inl">SUM(e.salary)</code>, each employee's salary is repeated once per order and summed many times — a wildly inflated total. This is called <b>fan-out</b>. The fix: aggregate the "many" side <em>first</em> (often in a subquery or CTE — Module 03) before joining, or be sure every aggregate operates on the correct grain. Always ask: "what is one row in this joined result?"</p></div>
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Fan-out, the join + aggregate trap</span>
+        <p>The nastiest aggregation bug is <b>double counting from a join</b>. If you join <code class="inl">employees</code> to <code class="inl">orders</code> (one employee, many orders) and then <code class="inl">SUM(e.salary)</code>, each employee's salary is repeated once per order and summed many times, a wildly inflated total. This is called <b>fan-out</b>, and it is the one that would have quietly embarrassed Maya in a meeting. The fix: aggregate the "many" side <em>first</em> (often in a subquery or CTE, covered in Module 03) before joining, or be sure every aggregate operates on the correct grain. Always ask: "what is one row in this joined result?"</p></div>
 
-      <h3>Subtotals with ROLLUP — a brief look</h3>
-      <p>Sometimes you want per-group totals <em>and</em> a grand total in one result. <code class="inl">GROUPING SETS</code>, <code class="inl">ROLLUP</code>, and <code class="inl">CUBE</code> generate multiple grouping levels at once. You will not need them daily, but recognize the shape:</p>
+      <h3>Subtotals with ROLLUP, a brief look</h3>
+      <p>Sometimes you want per-group totals <em>and</em> a grand total in one result, which is precisely what Maya's manager scribbles at the bottom of the request: "and the company total, please." <code class="inl">GROUPING SETS</code>, <code class="inl">ROLLUP</code>, and <code class="inl">CUBE</code> generate multiple grouping levels at once. You will not need them daily, but recognize the shape:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">ROLLUP adds a grand-total row</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -635,13 +635,13 @@
 <span class="kw">GROUP BY</span> <span class="fn">ROLLUP</span>(dept_id);   <span class="cmt">-- per-dept rows + one extra (null) grand-total row</span></code></pre>
       </div>
 
-      <p>The extra row with a <code class="inl">NULL</code> <code class="inl">dept_id</code> here is the grand total across all departments — Postgres signals "this is the total, not a real group" with a NULL in the grouped column. That is all you need to recognize it; the deeper machinery can wait.</p>
+      <p>The extra row with a <code class="inl">NULL</code> <code class="inl">dept_id</code> here is the grand total across all departments. Postgres signals "this is the total, not a real group" with a NULL in the grouped column. That single line answers Maya's whole first week of questions at once. That is all you need to recognize it; the deeper machinery can wait.</p>
     </section>
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Practice</span><h2>Hands-on — do this now</h2></div></div>
-      <p>Use the same schema and six employees from Module 00, and add a few <code class="inl">orders</code> rows so the grouping has variety. Write each query <em>before</em> peeking — predict the number of output rows first, then run and check.</p>
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 · Practice</span><h2>Hands-on, do this now</h2></div></div>
+      <p>Step into Maya's chair. Use the same schema and six employees from Module 00, and add a few <code class="inl">orders</code> rows so the grouping has variety. Write each query <em>before</em> peeking; predict the number of output rows first, then run and check.</p>
 
       <ul class="check">
         <li><svg><use href="#i-checkbox"/></svg>Get the total payroll, average salary, and headcount of the whole company in one query. Confirm it returns exactly one row.</li>
@@ -650,30 +650,30 @@
         <li><svg><use href="#i-checkbox"/></svg>Try <code class="inl">SELECT dept_id, name, AVG(salary) ... GROUP BY dept_id</code>, watch it error, then fix it two ways: with <code class="inl">STRING_AGG(name, ', ')</code> and by adding <code class="inl">name</code> to <code class="inl">GROUP BY</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>Temporarily set one salary to <code class="inl">NULL</code>, then compare <code class="inl">AVG(salary)</code> against <code class="inl">SUM(salary) / COUNT(*)</code>. Prove the denominators differ.</li>
         <li><svg><use href="#i-checkbox"/></svg>Find departments with average salary above 100,000 using <code class="inl">HAVING</code>. Then try the same condition in <code class="inl">WHERE</code> and read the error.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Among employees hired after 2019, find departments with more than one such employee — one <code class="inl">WHERE</code> and one <code class="inl">HAVING</code> in the same query.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Among employees hired after 2019, find departments with more than one such employee, using one <code class="inl">WHERE</code> and one <code class="inl">HAVING</code> in the same query.</li>
         <li><svg><use href="#i-checkbox"/></svg>Join <code class="inl">employees</code> to <code class="inl">departments</code> and report headcount + average salary per <code class="inl">dept_name</code>. Then switch to a <code class="inl">LEFT JOIN</code> with <code class="inl">COALESCE</code> so Frank appears in an "Unassigned" bucket.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict the row count first</span>
-        <p>For every aggregate query, say out loud <em>how many rows</em> the result will have before you run it. With <code class="inl">GROUP BY</code>, that number is "how many distinct group keys exist" — including any NULL bucket. When your prediction is wrong, that gap is the lesson. Chase it down before moving on.</p></div>
+        <p>For every aggregate query, say out loud <em>how many rows</em> the result will have before you run it. With <code class="inl">GROUP BY</code>, that number is "how many distinct group keys exist," including any NULL bucket. When your prediction is wrong, that gap is the lesson. Chase it down before moving on.</p></div>
     </section>
 
     <footer>
       <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
       <div class="refs">
-        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-aggregate.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Aggregate functions — PostgreSQL</a>
-        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUP" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>GROUP BY &amp; HAVING — PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/functions-aggregate.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Aggregate functions · PostgreSQL</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUP" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>GROUP BY &amp; HAVING · PostgreSQL</a>
         <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-agg.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Aggregate tutorial</a>
       </div>
 
       <div class="next">
-        <a href="../01-joins/01-joins.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01 — Joins</b></span></a>
-        <a href="../03-subqueries-cte/03-subqueries-cte.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03 — Subqueries &amp; CTEs</b></span></a>
+        <a href="../01-joins/01-joins.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01 · Joins</b></span></a>
+        <a href="../03-subqueries-cte/03-subqueries-cte.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03 · Subqueries &amp; CTEs</b></span></a>
       </div>
       <div class="next">
-        <a href="../../index.html"><small>↑ Course home</small><span class="nx"><svg><use href="#i-book"/></svg><b>SQL Course — all modules</b></span></a>
+        <a href="../../index.html"><small>↑ Course home</small><span class="nx"><svg><use href="#i-book"/></svg><b>SQL Course · all modules</b></span></a>
       </div>
-      <p class="endline">SQL L3 Track · Module 02 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 03 — Subqueries &amp; CTEs.</p>
+      <p class="endline">SQL L3 Track · Module 02 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 03, Subqueries &amp; CTEs.</p>
     </footer>
 
   </main>

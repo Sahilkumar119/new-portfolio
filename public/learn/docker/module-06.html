@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 06 — Registries: Distributing Images</title>
+<title>Module 06: Registries: Distributing Images</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -333,10 +333,11 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 6</span>
-      <h1>Module 06 — <span class="grad">Registries</span><br>Distributing Images</h1>
-      <p class="lede">You can build images (Module 02) and run full multi-container apps (Module 05). The missing piece is
+      <h1>Module 06: <span class="grad">Registries</span><br>Distributing Images</h1>
+      <p class="lede">Meet Sam. Sam just built their first containerized app and it runs perfectly on their laptop, which is
+      exactly the problem. You can build images (Module 02) and run full multi-container apps (Module 05). The missing piece is
       <em>how images get from your machine to CI, to production, to a teammate's laptop</em>. That answer is a
-      <em>registry</em> — and this module covers everything from pushing your first image to pinning by digest for
+      <em>registry</em>, and this module covers everything from Sam's first push to pinning by digest for
       reproducible, secure deploys.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · hands-on</span>
@@ -352,12 +353,12 @@
       <p>Go back to Module 00 for a moment. The very first diagram showed three actors: the <strong>Docker client</strong>
       (your CLI), the <strong>Docker daemon</strong> (the engine running on your machine), and a
       <strong>registry</strong> (the remote store). Every time you ran <code class="inl">docker pull nginx</code> back in
-      Module 01, the daemon silently reached out to Docker Hub — that's a registry — and downloaded layers. You've been
+      Module 01, the daemon silently reached out to Docker Hub (that's a registry) and downloaded layers. Sam, like you, has been
       using registries from day one without thinking about them.</p>
 
       <p>By Module 02 you learned to <em>build</em> images: layers, Dockerfiles, the cache. By Module 05 you could
-      orchestrate full multi-container applications with Compose. But every image you built stayed local on your machine.
-      The second you need to:</p>
+      orchestrate full multi-container applications with Compose. But every image stayed local on the machine that built it.
+      Sam hit the wall the moment a teammate asked to run the app too. The second you need to:</p>
 
       <ul>
         <li>deploy that image to a cloud server or Kubernetes cluster,</li>
@@ -373,7 +374,7 @@
           <p>You can produce an image from a Dockerfile. Layers are local, cached, composable.</p></div>
         <div class="card"><div class="ico violet"><svg><use href="#i-layers"/></svg></div>
           <h4>Run (Modules 01–05)</h4>
-          <p>You can run containers, volumes, networks, full Compose stacks — all on your machine.</p></div>
+          <p>You can run containers, volumes, networks, full Compose stacks, all on your machine.</p></div>
         <div class="card"><div class="ico green"><svg><use href="#i-upload"/></svg></div>
           <h4>Share (this module)</h4>
           <p>Push to a registry so CI, production, and teammates can pull the exact same image.</p></div>
@@ -388,7 +389,7 @@
       the daemon downloads only the layers it doesn't already have locally.</p>
 
       <p>That last sentence is important: <strong>layers are content-addressed</strong>. If two images share a base
-      layer — say, both start from <code class="inl">python:3.12-slim</code> — that layer is stored once in the registry
+      layer, say both start from <code class="inl">python:3.12-slim</code>, that layer is stored once in the registry
       and once on every machine that has pulled either image. A push doesn't re-upload layers that are already there. Docker
       checks each layer's digest against the registry before uploading; only genuinely new or changed layers travel over
       the wire.</p>
@@ -397,7 +398,7 @@
         <p>Remember the layer diagram from Module 02? Every <code class="inl">RUN</code> and <code class="inl">COPY</code>
         instruction produced a layer with a <code class="inl">sha256</code> digest. The registry uses those exact same
         digests to decide what to store and what to skip on push. <b>Write a Dockerfile with cache-friendly layer order
-        and your CI pushes get faster too</b> — only the changed bottom layers upload each time.</p></div>
+        and your CI pushes get faster too</b>. Only the changed bottom layers upload each time.</p></div>
 
       <p>Docker Hub is the default public registry. When you type <code class="inl">docker pull nginx</code> without
       specifying a host, the daemon talks to <code class="inl">registry-1.docker.io</code>. The registry protocol itself
@@ -429,7 +430,7 @@
             <td><b>GHCR</b><br><code>ghcr.io</code></td>
             <td>Projects hosted on GitHub; seamless GitHub Actions integration</td>
             <td>GitHub PAT or <code>GITHUB_TOKEN</code></td>
-            <td>Free for public repos. Private images tied to org/repo permissions. Best choice if your CI is GitHub Actions — no separate secrets for auth.</td>
+            <td>Free for public repos. Private images tied to org/repo permissions. Best choice if your CI is GitHub Actions, with no separate secrets for auth.</td>
           </tr>
           <tr>
             <td><b>AWS ECR</b><br><code>&lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com</code></td>
@@ -453,13 +454,13 @@
             <td><b>Self-hosted</b><br><code>registry:2</code> / Harbor</td>
             <td>Air-gapped environments, on-prem, full control over retention</td>
             <td>Basic auth or LDAP (Harbor)</td>
-            <td><code>registry:2</code> is the official minimal CNCF distribution — one container, no UI. Harbor adds RBAC, scanning, replication, a UI. Both speak OCI.</td>
+            <td><code>registry:2</code> is the official minimal CNCF distribution: one container, no UI. Harbor adds RBAC, scanning, replication, a UI. Both speak OCI.</td>
           </tr>
         </tbody>
       </table></div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">How to choose</span>
-        <p>Start on Docker Hub or GHCR while learning. When you join a company using AWS, use ECR — it integrates
+        <p>Start on Docker Hub or GHCR while learning, as Sam does here. When you join a company using AWS, use ECR. It integrates
         with IAM and eliminates the need to manage separate credentials. On GCP, use Artifact Registry. Self-hosting with
         Harbor makes sense when your organisation has compliance requirements that forbid data leaving its own
         infrastructure, or when you need fine-grained RBAC and image lifecycle policies in one place.</p></div>
@@ -481,12 +482,12 @@
         <tbody>
           <tr><td><b>Registry host</b></td><td>The hostname (and optional port) of the registry server. <code>ghcr.io</code>, <code>docker.io</code>, <code>123456789.dkr.ecr.us-east-1.amazonaws.com</code></td><td>Defaults to <code>docker.io</code> (Docker Hub)</td></tr>
           <tr><td><b>Namespace</b></td><td>Your Docker Hub username, GitHub username, or organisation name. On ECR it's the AWS account + region prefix.</td><td>On Docker Hub defaults to <code>library</code> (official images like <code>nginx</code>)</td></tr>
-          <tr><td><b>Repository</b></td><td>The name of the image — typically the app name: <code>app</code>, <code>api</code>, <code>worker</code></td><td>Required — there is no default</td></tr>
-          <tr><td><b>Tag</b></td><td>A human-readable pointer to a specific image manifest. Mutable — the registry can move it to a different manifest at any time.</td><td>Defaults to <code>:latest</code></td></tr>
+          <tr><td><b>Repository</b></td><td>The name of the image, typically the app name: <code>app</code>, <code>api</code>, <code>worker</code></td><td>Required; there is no default</td></tr>
+          <tr><td><b>Tag</b></td><td>A human-readable pointer to a specific image manifest. Mutable, so the registry can move it to a different manifest at any time.</td><td>Defaults to <code>:latest</code></td></tr>
         </tbody>
       </table></div>
 
-      <h3>The :latest trap — a callback to Module 01</h3>
+      <h3>The :latest trap: a callback to Module 01</h3>
       <p>In Module 01 you were told never to rely on <code class="inl">:latest</code> for anything important.
       Here is the full reason: <code class="inl">:latest</code> is just a <strong>mutable tag</strong>. It points to
       whatever manifest was pushed most recently. Push a new version and <code class="inl">:latest</code> now means
@@ -496,7 +497,7 @@
       <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Never pin :latest in production</span>
         <p>A Kubernetes deployment using <code class="inl">image: myapp:latest</code> will silently run a different version
         than the one you tested the moment anyone pushes a new build. In the best case this causes confusing behaviour; in
-        the worst case it silently ships a regression to production. Pin a specific version tag — or better, a digest
+        the worst case it silently ships a regression to production. Pin a specific version tag, or better, a digest
         (Section 5).</p></div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Official images have a short name</span>
@@ -508,14 +509,14 @@
     <!-- 4. LOGIN TAG PUSH PULL -->
     <section id="push-pull">
       <div class="sec-head"><span class="num">4</span><h2>Login, tag, push, pull</h2></div>
-      <p>Four commands cover the entire publish flow. Here they all are together, in order, for a real GHCR example. Read
-      the whole block first, then we break down each step.</p>
+      <p>Here is the moment Sam has been building toward. Four commands cover the entire publish flow. They are all together,
+      in order, for a real GHCR example. Read the whole block first, then we break down each step.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — full publish flow (GHCR)</span><span class="spacer"></span>
+          <span class="title">terminal: full publish flow (GHCR)</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># 1. Authenticate — use a Personal Access Token, not your password</span>
+        <pre><code><span class="cmt"># 1. Authenticate: use a Personal Access Token, not your password</span>
 <span class="cmd">echo</span> <span class="str">"&lt;YOUR_GITHUB_PAT&gt;"</span> | <span class="cmd">docker</span> login ghcr.io <span class="flag">-u</span> &lt;github-username&gt; <span class="flag">--password-stdin</span>
 
 <span class="cmt"># 2. Build your image locally (you already know this from Module 02)</span>
@@ -524,7 +525,7 @@
 <span class="cmt"># 3. Tag it with the full registry reference</span>
 <span class="cmd">docker</span> tag myapp:1.0 ghcr.io/&lt;github-username&gt;/myapp:1.0
 
-<span class="cmt"># 4. Push — only layers the registry doesn't already have are uploaded</span>
+<span class="cmt"># 4. Push: only layers the registry doesn't already have are uploaded</span>
 <span class="cmd">docker</span> push ghcr.io/&lt;github-username&gt;/myapp:1.0
 
 <span class="cmt"># --- on another machine / in CI / in production ---</span>
@@ -540,7 +541,7 @@
 
       <p><strong>docker login</strong> writes an auth token to <code class="inl">~/.docker/config.json</code>. The daemon
       attaches this token to every push/pull request to that registry host. Always pipe the token via
-      <code class="inl">--password-stdin</code> rather than passing it as a CLI argument — otherwise it appears in your
+      <code class="inl">--password-stdin</code> rather than passing it as a CLI argument. Otherwise it appears in your
       shell history and in <code class="inl">ps</code> output on shared machines. Use a <strong>Personal Access Token
       (PAT)</strong> or a CI-managed secret, never your account password.</p>
 
@@ -549,7 +550,7 @@
       alias.</p>
 
       <p><strong>docker push</strong> contacts the registry, walks each layer's digest, and asks "do you already have
-      this?" Only missing layers are uploaded. You will see output like:</p>
+      this?" Only missing layers are uploaded. Sam watches the output scroll by and sees something like:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
@@ -562,30 +563,30 @@ e9c3d8b71a11: Layer already exists  ← shared with another image
       </div>
 
       <p><strong>docker pull</strong> is the reverse: the daemon downloads the manifest, checks which layers it already has
-      locally, and fetches only the missing ones. This is why pulling a second image that shares a base is fast —
+      locally, and fetches only the missing ones. This is why pulling a second image that shares a base is fast:
       the base layers are already there.</p>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Private images require login on every machine</span>
         <p>If your image is private, every machine that needs to pull it must be authenticated. On a developer laptop that
         means <code class="inl">docker login</code>. In Kubernetes that means an <code class="inl">imagePullSecret</code>
         (a Secret containing registry credentials that you attach to a Pod spec). This is a forward reference to
-        Kubernetes — keep it in mind.</p></div>
+        Kubernetes, so keep it in mind.</p></div>
     </section>
 
     <!-- 5. TAGS VS DIGESTS -->
     <section id="digests">
-      <div class="sec-head"><span class="num">5</span><h2>Tags vs digests — the reproducibility difference</h2></div>
+      <div class="sec-head"><span class="num">5</span><h2>Tags vs digests: the reproducibility difference</h2></div>
       <p>This is a concept worth mastering. Tags and digests both refer to an image, but they have fundamentally
       different guarantees.</p>
 
       <div class="grid two">
         <div class="card"><div class="ico amber"><svg><use href="#i-tag"/></svg></div>
-          <h4>Tags — mutable pointers</h4>
+          <h4>Tags: mutable pointers</h4>
           <p>A tag is a string label that a registry associates with a manifest. Anyone with push access can move it to a
-          different manifest at any time. <code>:1.0</code>, <code>:latest</code>, <code>:stable</code> — all mutable.</p></div>
+          different manifest at any time. <code>:1.0</code>, <code>:latest</code>, <code>:stable</code>, all mutable.</p></div>
         <div class="card"><div class="ico green"><svg><use href="#i-hash"/></svg></div>
-          <h4>Digests — immutable content addresses</h4>
-          <p>A digest is the <code>sha256</code> hash of the manifest JSON. It can never change — the content <em>is</em>
+          <h4>Digests: immutable content addresses</h4>
+          <p>A digest is the <code>sha256</code> hash of the manifest JSON. It can never change, because the content <em>is</em>
           the address. Pull the same digest on any machine, anywhere, at any time: you get the identical image.</p></div>
       </div>
 
@@ -595,7 +596,7 @@ e9c3d8b71a11: Layer already exists  ← shared with another image
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">terminal</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># pull by digest — immune to tag mutation</span>
+        <pre><code><span class="cmt"># pull by digest: immune to tag mutation</span>
 <span class="cmd">docker</span> pull ghcr.io/user/myapp@<span class="str">sha256:c8f2a91b3d4e7f6082c1a9b5d8e3f2a7b4c6d9e1f3a5b7c9d2e4f6a8b0c1d3e5</span>
 
 <span class="cmt"># inspect an image's digest locally</span>
@@ -606,7 +607,7 @@ e9c3d8b71a11: Layer already exists  ← shared with another image
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The clean answer</span>
-        <p>Tags are mutable — they can be moved to a different image at any time. <b>Digests are immutable</b> — they are
+        <p>Tags are mutable; they can be moved to a different image at any time. <b>Digests are immutable</b>, since they are
         the <code class="inl">sha256</code> hash of the manifest itself, so they uniquely and permanently identify one
         exact image. For reproducible, secure production deployments, <b>pin the digest</b>. Your CI pipeline should
         record the digest from the push output and use it in the deployment manifest, not the tag.</p></div>
@@ -617,10 +618,10 @@ e9c3d8b71a11: Layer already exists  ← shared with another image
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">k8s deployment snippet (forward reference)</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># tag alone — mutable, not recommended for prod</span>
+        <pre><code><span class="cmt"># tag alone: mutable, not recommended for prod</span>
 image: ghcr.io/user/myapp:<span class="str">1.2.0</span>
 
-<span class="cmt"># tag + digest — best of both: human-readable AND immutable</span>
+<span class="cmt"># tag + digest: best of both, human-readable AND immutable</span>
 image: ghcr.io/user/myapp:<span class="str">1.2.0</span>@<span class="str">sha256:c8f2a91b3d4e7f...</span></code></pre>
       </div>
     </section>
@@ -662,7 +663,7 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
 <span class="cmd">docker</span> tag <span class="str">$REGISTRY:$SHA</span> <span class="str">$REGISTRY:$VERSION</span>
 <span class="cmd">docker</span> tag <span class="str">$REGISTRY:$SHA</span> <span class="str">$REGISTRY:latest</span>
 
-<span class="cmt"># push all three — same layers, three manifest pointers</span>
+<span class="cmt"># push all three: same layers, three manifest pointers</span>
 <span class="cmd">docker</span> push <span class="str">$REGISTRY:$SHA</span>
 <span class="cmd">docker</span> push <span class="str">$REGISTRY:$VERSION</span>
 <span class="cmd">docker</span> push <span class="str">$REGISTRY:latest</span></code></pre>
@@ -677,7 +678,7 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
 
     <!-- 7. SCANNING & SIGNING -->
     <section id="scanning">
-      <div class="sec-head"><span class="num">7</span><h2>Scanning &amp; signing — intro to supply-chain safety</h2></div>
+      <div class="sec-head"><span class="num">7</span><h2>Scanning &amp; signing: intro to supply-chain safety</h2></div>
       <p>Pushing an image to a registry makes it available to anyone (or any system) that pulls it. Before you do that in
       a production context, you want to know two things: <em>does this image contain known vulnerabilities?</em> and
       <em>can the recipient trust that this image came from you and hasn't been tampered with?</em> That's vulnerability
@@ -690,9 +691,9 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — docker scout (built-in since Docker Desktop 4.17)</span><span class="spacer"></span>
+          <span class="title">terminal: docker scout (built-in since Docker Desktop 4.17)</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># quick overview — shows CVE count by severity</span>
+        <pre><code><span class="cmt"># quick overview: shows CVE count by severity</span>
 <span class="cmd">docker</span> scout quickview ghcr.io/user/myapp:1.0
 
 <span class="cmt"># full CVE list</span>
@@ -707,7 +708,7 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — trivy</span><span class="spacer"></span>
+          <span class="title">terminal: trivy</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># scan a local image</span>
 <span class="cmd">trivy</span> image myapp:1.0
@@ -717,29 +718,29 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
       </div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Scan before push, not after</span>
-        <p>Scan your image as part of the CI build — <em>before</em> it reaches the registry. Catching a critical CVE
+        <p>Scan your image as part of the CI build, <em>before</em> it reaches the registry. Catching a critical CVE
         after the image is in production is a fire drill. Catching it in CI is a five-second fix. Most teams gate the push
         step: <code class="inl">trivy image --exit-code 1 --severity CRITICAL myapp:$SHA &amp;&amp; docker push ...</code>.</p></div>
 
       <h3>Image signing and provenance (intro)</h3>
       <p>Signing answers: <em>"is this image actually what it claims to be, and did it come from the pipeline I trust?"</em>
       The CNCF tool <strong>cosign</strong> (part of the Sigstore project) attaches a cryptographic signature to an image's
-      digest in the registry. A deploy pipeline can verify the signature before running a container — if the signature is
+      digest in the registry. A deploy pipeline can verify the signature before running a container. If the signature is
       missing or invalid, the deploy is rejected.</p>
 
       <p>Docker also ships an older, built-in mechanism called <strong>Docker Content Trust (DCT)</strong>, backed by The Update
       Framework / Notary. Setting <code class="inl">DOCKER_CONTENT_TRUST=1</code> makes the client sign tags on push and refuse to
-      pull any unsigned tag. It predates Sigstore and is largely superseded by <strong>cosign</strong> in modern pipelines —
-      cosign is keyless, registry-agnostic, and signs the immutable digest rather than the mutable tag — but you will still see
+      pull any unsigned tag. It predates Sigstore and is largely superseded by <strong>cosign</strong> in modern pipelines
+      (cosign is keyless, registry-agnostic, and signs the immutable digest rather than the mutable tag), but you will still see
       DCT referenced in legacy setups.</p>
 
-      <p><strong>Attestations</strong> go further: they attach machine-readable provenance metadata — which git commit, which
-      CI run, which Dockerfile — to the image in the registry. GitHub Actions can generate these automatically with
+      <p><strong>Attestations</strong> go further: they attach machine-readable provenance metadata (which git commit, which
+      CI run, which Dockerfile) to the image in the registry. GitHub Actions can generate these automatically with
       <code class="inl">actions/attest-build-provenance</code>.</p>
 
-      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">This is intro-level — Module 07 goes deeper</span>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">This is intro-level, Module 07 goes deeper</span>
         <p>Supply-chain security (cosign, Sigstore, SBOM generation, policy enforcement with OPA/Kyverno) is covered in
-        depth in Module 07 — Security &amp; Hardening. For now, the key takeaways are: <b>always scan before pushing</b>,
+        depth in Module 07, Security &amp; Hardening. For now, the key takeaways are: <b>always scan before pushing</b>,
         and know that signing/attestations exist as the next level of trust beyond scanning.</p></div>
     </section>
 
@@ -749,7 +750,7 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
 
       <h3>Pushing from GitHub Actions</h3>
       <p>GitHub Actions has a built-in <code class="inl">GITHUB_TOKEN</code> that is scoped to the repository and has
-      write access to GHCR for that repo. You don't need to create a separate secret — just log in with it:</p>
+      write access to GHCR for that repo. You don't need to create a separate secret; just log in with it. Sam's next step is wiring this into CI so the push happens on every commit:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
@@ -779,18 +780,18 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
       <h3>Pulling in production with imagePullSecrets</h3>
       <p>When Kubernetes pulls a private image, it needs credentials. You create a Kubernetes Secret of type
       <code class="inl">kubernetes.io/dockerconfigjson</code> containing the registry auth, then reference it in your Pod
-      spec under <code class="inl">imagePullSecrets</code>. This is a forward reference to the Kubernetes phase — just know
+      spec under <code class="inl">imagePullSecrets</code>. This is a forward reference to the Kubernetes phase, so just know
       that the registry credential problem you solved locally with <code class="inl">docker login</code> has a direct
       equivalent in every orchestrator.</p>
 
       <h3>Self-hosting with registry:2</h3>
       <p>Running your own registry is genuinely one command. The official <code class="inl">registry:2</code> image is the
-      CNCF Distribution reference implementation — no UI, no RBAC, just the OCI-compliant HTTP API. Useful for
+      CNCF Distribution reference implementation: no UI, no RBAC, just the OCI-compliant HTTP API. Useful for
       air-gapped labs or local testing:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — local registry</span><span class="spacer"></span>
+          <span class="title">terminal: local registry</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># start a local registry on port 5000, persist data in a volume</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">-p</span> 5000:5000 <span class="flag">--name</span> registry <span class="flag">-v</span> registry-data:/var/lib/registry registry:2
@@ -812,25 +813,26 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
 
     <!-- 9. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">9</span><h2>Hands-on — do this now</h2></div>
-      <p>The only way to understand push/pull is to do it yourself and watch only the changed layers travel. This checklist
-      should take 30–45 minutes.</p>
+      <div class="sec-head"><span class="num">9</span><h2>Hands-on: do this now</h2></div>
+      <p>Walk Sam's path yourself. The only way to understand push/pull is to do it and watch only the changed layers travel.
+      This checklist should take 30 to 45 minutes.</p>
 
       <ul class="check">
-        <li><svg><use href="#i-checkbox"/></svg>Create a free Docker Hub account at hub.docker.com — or enable GHCR on any GitHub repo (it's free for public repos).</li>
+        <li><svg><use href="#i-checkbox"/></svg>Create a free Docker Hub account at hub.docker.com, or enable GHCR on any GitHub repo (it's free for public repos).</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker login docker.io</code> (or <code class="inl">docker login ghcr.io</code>) and verify you get "Login Succeeded".</li>
         <li><svg><use href="#i-checkbox"/></svg>Take any local image you built in Modules 02–05. Tag it: <code class="inl">docker tag myapp:1.0 &lt;yournamespace&gt;/myapp:1.0</code>.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Push it: <code class="inl">docker push &lt;yournamespace&gt;/myapp:1.0</code>. Watch the output — note which layers say "Pushed" vs "Layer already exists".</li>
+        <li><svg><use href="#i-checkbox"/></svg>Push it: <code class="inl">docker push &lt;yournamespace&gt;/myapp:1.0</code>. Watch the output and note which layers say "Pushed" vs "Layer already exists".</li>
         <li><svg><use href="#i-checkbox"/></svg>Delete the local image: <code class="inl">docker rmi &lt;yournamespace&gt;/myapp:1.0</code>. Then pull it back: <code class="inl">docker pull &lt;yournamespace&gt;/myapp:1.0</code>. Confirm it runs.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Make a trivial one-line change to the app (e.g., edit a string), rebuild, retag as <code class="inl">:1.1</code>, and push again. Observe that only the changed layers upload — the base layers say "Layer already exists".</li>
+        <li><svg><use href="#i-checkbox"/></svg>Make a trivial one-line change to the app (e.g., edit a string), rebuild, retag as <code class="inl">:1.1</code>, and push again. Observe that only the changed layers upload; the base layers say "Layer already exists".</li>
         <li><svg><use href="#i-checkbox"/></svg>Find the digest: run <code class="inl">docker inspect --format '{{index .RepoDigests 0}}' &lt;image&gt;</code>. Copy the <code class="inl">sha256:...</code> and pull by that digest directly.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker scout quickview &lt;yourimage&gt;</code> (or <code class="inl">trivy image &lt;yourimage&gt;</code> if Trivy is installed). Read the CVE summary. Note that even a minimal image may have findings.</li>
         <li><svg><use href="#i-checkbox"/></svg>Optional: start a local <code class="inl">registry:2</code> container, push and pull to <code class="inl">localhost:5000</code> to see that the same commands work against a self-hosted registry.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">What to observe, not just do</span>
-        <p>The most important moment in this hands-on is watching the <em>second push</em> — where only one or two layers
-        upload instead of all of them. That is the content-addressed deduplication that makes registries fast and storage
+        <p>The most important moment in this hands-on is watching the <em>second push</em>, where only one or two layers
+        upload instead of all of them. This is the moment Sam's app stops being trapped on one laptop. That is the
+        content-addressed deduplication that makes registries fast and storage
         efficient. The registry didn't need you to tell it what changed; it figured it out from the layer digests. <b>If
         you understand why that works, you understand how registries work.</b></p></div>
     </section>
@@ -847,8 +849,8 @@ REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
       </div>
 
       <div class="next">
-        <a href="module-05.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 05 — Docker Compose</b></span></a>
-        <a href="module-07.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 07 — Security &amp; Hardening</b></span></a>
+        <a href="module-05.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 05: Docker Compose</b></span></a>
+        <a href="module-07.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 07: Security &amp; Hardening</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 06 · built for visual learning.
       Once the hands-on checklist is all ticked, move on to Module 07.</p>

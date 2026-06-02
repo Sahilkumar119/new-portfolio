@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 02 — Dockerfiles: Build, Layers &amp; the Cache</title>
+<title>Module 02: Dockerfiles: Build, Layers &amp; the Cache</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -325,8 +325,9 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 2</span>
-      <h1>Module 02 — <span class="grad">Dockerfiles</span><br>Build, Layers &amp; the Cache</h1>
-      <p class="lede">Until now you <em>ran</em> images other people built. This module is where you <em>build your own</em> —
+      <h1>Module 02: <span class="grad">Dockerfiles</span><br>Build, Layers &amp; the Cache</h1>
+      <p class="lede">Sam has been shipping their first containerized app, and so far Sam only <em>ran</em> images other people built.
+      This module is where you <em>build your own</em>,
       and, more importantly, build them so they're <em>small, fast to rebuild, and safe</em>. The build cache is the
       single concept that separates a 12-minute rebuild from a 4-second one. Get it into your bones here.</p>
       <div class="meta">
@@ -341,22 +342,23 @@
     <section id="recap">
       <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
       <p>Module 01 ended on a cliff: <em>"data you write inside a container is not in the image, and a package you
-      install with <code class="inl">docker exec</code> vanishes on <code class="inl">docker rm</code>."</em> The fix to
+      install with <code class="inl">docker exec</code> vanishes on <code class="inl">docker rm</code>."</em> Sam hit this
+      wall hard. Every time their app's container restarted, the dependencies Sam had hand-installed were gone. The fix to
       that, the only proper one, is to bake what you need <strong>into the image at build time</strong>. That is what a
-      Dockerfile does.</p>
+      Dockerfile does, and it's exactly the tool Sam needs to ship for real.</p>
       <div class="grid three">
         <div class="card"><div class="ico violet"><svg><use href="#i-layers"/></svg></div>
           <h4>Image = layers</h4>
           <p>A stack of read-only layers. Every Dockerfile instruction that changes the filesystem adds <b style="color:var(--fg)">one layer</b>.</p></div>
         <div class="card"><div class="ico blue"><svg><use href="#i-file"/></svg></div>
           <h4>Dockerfile = recipe</h4>
-          <p>A plain text file of instructions. Run through <b style="color:var(--fg)">docker build</b> it produces an image — repeatably.</p></div>
+          <p>A plain text file of instructions. Run through <b style="color:var(--fg)">docker build</b> it produces an image, repeatably.</p></div>
         <div class="card"><div class="ico green"><svg><use href="#i-bolt"/></svg></div>
           <h4>Cache = speed</h4>
           <p>Unchanged layers are reused from the last build. <b style="color:var(--fg)">Order your instructions</b> and rebuilds go from minutes to seconds.</p></div>
       </div>
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why this module matters</span>
-        <p>"Write a Dockerfile for this app," "why is your image 1.2 GB," and "your CI rebuild takes 10 minutes — fix it"
+        <p>"Write a Dockerfile for this app," "why is your image 1.2 GB," and "your CI rebuild takes 10 minutes, fix it"
         are three of the most common practical screens you will hit. All three are answered by understanding layers and
         the cache. This is the module that makes you <em>useful</em>, not just conversant.</p></div>
     </section>
@@ -368,7 +370,7 @@
       to assemble an image, top to bottom. <code class="inl">docker build</code> reads it, runs each instruction in order,
       and snapshots the filesystem after each one into a <strong>layer</strong>. The final stack of layers is your image.</p>
 
-      <p>Here is the smallest useful, real-world example — a Python web app. Read it once; we dissect every line below.</p>
+      <p>Here is the smallest useful, real-world example, the Python web app Sam is shipping. Read it once; we dissect every line below.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
@@ -380,7 +382,7 @@
 <span class="cmt"># 2. Set the working directory inside the image</span>
 <span class="kw">WORKDIR</span> /app
 
-<span class="cmt"># 3. Copy ONLY the dependency manifest first (cache trick — section 4)</span>
+<span class="cmt"># 3. Copy ONLY the dependency manifest first (cache trick: section 4)</span>
 <span class="kw">COPY</span> requirements.txt .
 
 <span class="cmt"># 4. Install dependencies</span>
@@ -410,14 +412,14 @@
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The one-line mental model</span>
         <p>A Dockerfile is a <b>declarative, ordered recipe</b>. <code class="inl">docker build</code> executes it
-        instruction by instruction, caching each step. The output is an immutable image — the same Dockerfile + same
+        instruction by instruction, caching each step. The output is an immutable image. The same Dockerfile + same
         context produces the same image, anywhere. This is the death of "works on my machine."</p></div>
     </section>
 
     <!-- 2. INSTRUCTIONS -->
     <section id="instr">
       <div class="sec-head"><span class="num">2</span><h2>The instructions you must know cold</h2></div>
-      <p>There are ~18 Dockerfile instructions. You use about 10 daily. Know these by heart — you'll use the
+      <p>There are ~18 Dockerfile instructions. You use about 10 daily. Know these by heart, because you'll use the
       distinctions constantly (especially the ones marked).</p>
 
       <div class="tablewrap"><table>
@@ -430,7 +432,7 @@
           <tr><td><code>RUN</code></td><td>Executes a command at <b>build time</b> (install packages, compile). Each RUN = a layer.</td><td>yes</td></tr>
           <tr><td><code>ENV</code></td><td>Sets an environment variable, persisted into the image and into running containers.</td><td>metadata</td></tr>
           <tr><td><code>ARG</code></td><td>Build-time variable (<code>--build-arg</code>). <b>Not</b> available at run time. Gone once built.</td><td>metadata</td></tr>
-          <tr><td><code>EXPOSE</code></td><td>Documents which port the app listens on. Does <b>not</b> publish it — that's <code>-p</code> at run.</td><td>metadata</td></tr>
+          <tr><td><code>EXPOSE</code></td><td>Documents which port the app listens on. Does <b>not</b> publish it (that's <code>-p</code> at run).</td><td>metadata</td></tr>
           <tr><td><code>USER</code></td><td>Sets the user for following instructions and the running container. Drop root (section 7).</td><td>metadata</td></tr>
           <tr><td><code>CMD</code></td><td>Default command/args when a container starts. Overridable on the CLI. One effective CMD.</td><td>metadata</td></tr>
           <tr><td><code>ENTRYPOINT</code></td><td>The fixed executable a container always runs. CMD becomes its default args.</td><td>metadata</td></tr>
@@ -438,11 +440,11 @@
         </tbody>
       </table></div>
 
-      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">"New layer?" — why it matters</span>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">"New layer?" and why it matters</span>
         <p>Only instructions that change the <b>filesystem</b> (<code class="inl">RUN</code>, <code class="inl">COPY</code>,
         <code class="inl">ADD</code>) create a real, sized layer. The rest write image <b>metadata</b> (config the engine
         reads). Modern Docker/BuildKit squashes metadata efficiently, so don't lose sleep over an extra
-        <code class="inl">ENV</code> — but every <code class="inl">RUN</code> and <code class="inl">COPY</code> is real
+        <code class="inl">ENV</code>, but every <code class="inl">RUN</code> and <code class="inl">COPY</code> is real
         weight and a real cache boundary.</p></div>
 
       <h3>ADD vs COPY (common gotcha)</h3>
@@ -455,8 +457,9 @@
 
     <!-- 3. CMD vs ENTRYPOINT -->
     <section id="cmdentry">
-      <div class="sec-head"><span class="num">3</span><h2>CMD vs ENTRYPOINT — the classic trap</h2></div>
-      <p>This pair confuses everyone at first and is asked constantly. The clean way to hold it:</p>
+      <div class="sec-head"><span class="num">3</span><h2>CMD vs ENTRYPOINT, the classic trap</h2></div>
+      <p>This pair confuses everyone at first and is asked constantly. Sam tripped here too: their app ignored
+      <code class="inl">docker stop</code> until they understood the split. The clean way to hold it:</p>
 
       <div class="grid two">
         <div class="card"><div class="ico cyan"><svg><use href="#i-terminal"/></svg></div>
@@ -464,7 +467,7 @@
           <p>The fixed executable. Think "this container <b>is</b> a curl" / "this container <b>is</b> nginx." Hard to override (needs <code class="inl">--entrypoint</code>).</p></div>
         <div class="card"><div class="ico amber"><svg><use href="#i-cli"/></svg></div>
           <h4>CMD = <em>default arguments</em></h4>
-          <p>The default args passed to that executable (or the whole default command if there's no ENTRYPOINT). Easily overridden — just type args after the image name.</p></div>
+          <p>The default args passed to that executable (or the whole default command if there's no ENTRYPOINT). Easily overridden; just type args after the image name.</p></div>
       </div>
 
       <p>They combine. With both set, the container runs <code class="inl">ENTRYPOINT + CMD</code>. Anything you type
@@ -482,9 +485,9 @@
       </div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Exec form vs shell form</span>
-        <p>Always prefer the <b>exec form</b> — a JSON array: <code class="inl">CMD ["python", "app.py"]</code>. The
+        <p>Always prefer the <b>exec form</b>, a JSON array: <code class="inl">CMD ["python", "app.py"]</code>. The
         <b>shell form</b> <code class="inl">CMD python app.py</code> wraps your command in <code class="inl">/bin/sh -c</code>,
-        which means your process is <b>not</b> PID 1 — it becomes a child of the shell, and Unix signals
+        which means your process is <b>not</b> PID 1. It becomes a child of the shell, and Unix signals
         (<code class="inl">SIGTERM</code> from <code class="inl">docker stop</code>) don't reach it. Result: containers that
         ignore <code class="inl">stop</code> and get SIGKILL'd. Exec form makes your app PID 1 and signals work. This ties
         directly back to Module 01's "container lives as long as PID 1."</p></div>
@@ -497,8 +500,10 @@
 
     <!-- 4. CACHE -->
     <section id="cache">
-      <div class="sec-head"><span class="num">4</span><h2>Layers &amp; the build cache — the core skill</h2></div>
-      <p>This is the most valuable thing in the module. <code class="inl">docker build</code> caches each instruction's
+      <div class="sec-head"><span class="num">4</span><h2>Layers &amp; the build cache, the core skill</h2></div>
+      <p>This is the most valuable thing in the module, and the part that finally made Sam's builds bearable. Sam's
+      rebuild was crawling at 12 minutes per code change, killing their shipping momentum. The cache is the fix.
+      <code class="inl">docker build</code> caches each instruction's
       result. On the next build it walks down the Dockerfile and, for each instruction, asks: <em>"has this instruction
       <b>or any instruction above it</b> changed?"</em></p>
 
@@ -507,7 +512,7 @@
         <li><strong>Changed</strong> → rebuild this layer <em>and every layer below it</em>. The cache is invalidated downward.</li>
       </ul>
 
-      <p>That second rule — <strong>a cache miss cascades to everything underneath</strong> — is the whole game. It means
+      <p>That second rule, <strong>a cache miss cascades to everything underneath</strong>, is the whole game. It means
       <b>instruction order decides rebuild speed</b>. Put the things that rarely change near the top, the things that
       change constantly (your source code) near the bottom.</p>
 
@@ -515,7 +520,7 @@
       <div class="grid two">
         <div class="codeblock" style="margin:0">
           <div class="bar"><span class="lights"><i class="r"></i></span>
-            <span class="title">❌ slow — rebuilds deps every time</span></div>
+            <span class="title">❌ slow: rebuilds deps every time</span></div>
           <pre><code><span class="kw">FROM</span> python:3.12-slim
 <span class="kw">WORKDIR</span> /app
 <span class="kw">COPY</span> . .
@@ -524,7 +529,7 @@
         </div>
         <div class="codeblock" style="margin:0">
           <div class="bar"><span class="lights"><i class="g"></i></span>
-            <span class="title">✅ fast — deps cached</span></div>
+            <span class="title">✅ fast: deps cached</span></div>
           <pre><code><span class="kw">FROM</span> python:3.12-slim
 <span class="kw">WORKDIR</span> /app
 <span class="kw">COPY</span> requirements.txt .
@@ -534,7 +539,7 @@
         </div>
       </div>
       <p class="sub">In the left version, editing <em>one line of source</em> changes the <code class="inl">COPY . .</code>
-      layer, which sits <b>above</b> the pip install — so dependencies reinstall on every build (minutes). In the right
+      layer, which sits <b>above</b> the pip install, so dependencies reinstall on every build (minutes). In the right
       version, <code class="inl">requirements.txt</code> rarely changes, so its layer and the pip install stay cached; only
       the final <code class="inl">COPY . .</code> reruns (seconds).</p>
 
@@ -542,15 +547,15 @@
       <div class="stack">
         <div class="layer hit"><span>FROM python:3.12-slim</span><small>✓ CACHED</small></div>
         <div class="layer hit"><span>WORKDIR /app</span><small>✓ CACHED</small></div>
-        <div class="layer hit"><span>COPY requirements.txt .</span><small>✓ CACHED — file unchanged</small></div>
-        <div class="layer hit"><span>RUN pip install ...</span><small>✓ CACHED — the expensive one, saved</small></div>
-        <div class="layer miss"><span>COPY . .</span><small>✗ MISS — source changed</small></div>
+        <div class="layer hit"><span>COPY requirements.txt .</span><small>✓ CACHED, file unchanged</small></div>
+        <div class="layer hit"><span>RUN pip install ...</span><small>✓ CACHED, the expensive one, saved</small></div>
+        <div class="layer miss"><span>COPY . .</span><small>✗ MISS, source changed</small></div>
         <div class="layer miss"><span>CMD [...]</span><small>✗ rebuilt (below the miss)</small></div>
       </div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Cache busting you'll hit for real</span>
-        <p>1) <code class="inl">apt-get update</code> in its own <code class="inl">RUN</code> caches a stale package list —
-        always chain it: <code class="inl">RUN apt-get update &amp;&amp; apt-get install -y curl</code>. 2) A changing
+        <p>1) <code class="inl">apt-get update</code> in its own <code class="inl">RUN</code> caches a stale package list,
+        so always chain it: <code class="inl">RUN apt-get update &amp;&amp; apt-get install -y curl</code>. 2) A changing
         <code class="inl">ARG</code> or a <code class="inl">COPY</code> of a file whose timestamp/content changed busts
         everything below. 3) Force a clean build with <code class="inl">docker build --no-cache</code> when you suspect a
         stale layer.</p></div>
@@ -561,7 +566,7 @@
       <div class="sec-head"><span class="num">5</span><h2>Build context &amp; .dockerignore</h2></div>
       <p>The <code class="inl">.</code> at the end of <code class="inl">docker build -t myapp .</code> is the
       <strong>build context</strong>: the directory the daemon receives to build from. <code class="inl">COPY</code> can
-      only see files inside it. Crucially, the <b>entire context is sent to the daemon first</b> — so if your folder has a
+      only see files inside it. Crucially, the <b>entire context is sent to the daemon first</b>, so if your folder has a
       500 MB <code class="inl">node_modules</code>, a <code class="inl">.git</code> history, and your virtualenv, all of it
       ships before the build even starts. Slow builds, fat images, leaked secrets.</p>
 
@@ -582,17 +587,17 @@ Dockerfile
 README.md</code></pre>
       </div>
 
-      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Security — the rule</span>
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Security: the rule</span>
         <p>Never <code class="inl">COPY . .</code> without a <code class="inl">.dockerignore</code>. A stray
         <code class="inl">.env</code>, <code class="inl">.git</code> with old secrets in history, or cloud credentials file
-        gets baked into an image layer — and image layers are <b>readable by anyone who pulls the image</b>. Deleting the
+        gets baked into an image layer, and image layers are <b>readable by anyone who pulls the image</b>. Deleting the
         file in a later layer does <b>not</b> remove it; it still exists in the earlier layer. Keep secrets out of the
         context entirely.</p></div>
     </section>
 
     <!-- 6. MULTI-STAGE -->
     <section id="multistage">
-      <div class="sec-head"><span class="num">6</span><h2>Multi-stage builds — the size killer</h2></div>
+      <div class="sec-head"><span class="num">6</span><h2>Multi-stage builds, the size killer</h2></div>
       <p>Building an app often needs heavy tooling (compilers, build deps, dev packages) that the <b>final running image
       does not need</b>. Shipping all of it makes a 1 GB image where 80 MB would do. Multi-stage builds solve this: use
       multiple <code class="inl">FROM</code> stages, do the heavy work in an early "builder" stage, then copy <b>only the
@@ -600,7 +605,7 @@ README.md</code></pre>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">Dockerfile — multi-stage (Go example)</span><span class="spacer"></span>
+          <span class="title">Dockerfile: multi-stage (Go example)</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># ── stage 1: build (heavy toolchain) ──</span>
 <span class="kw">FROM</span> golang:1.22 <span class="kw">AS</span> builder
@@ -627,7 +632,7 @@ README.md</code></pre>
 
     <!-- 7. SLIM & SAFE -->
     <section id="slim">
-      <div class="sec-head"><span class="num">7</span><h2>Small &amp; safe images — the best-practice checklist</h2></div>
+      <div class="sec-head"><span class="num">7</span><h2>Small &amp; safe images, the best-practice checklist</h2></div>
       <p>The habits that separate a professional Dockerfile from a tutorial one. Each is a habit worth building.</p>
 
       <div class="tablewrap"><table>
@@ -635,8 +640,8 @@ README.md</code></pre>
         <tbody>
           <tr><td>Pick a <b>slim/alpine/distroless</b> base</td><td><code>python:3.12-slim</code> not <code>python:3.12</code>. Hundreds of MB and dozens of CVEs avoided.</td></tr>
           <tr><td><b>Pin</b> the tag (or digest)</td><td><code>:3.12-slim</code> not <code>:latest</code>. Reproducible, no surprise breakage (ties to Module 01).</td></tr>
-          <tr><td><b>Chain</b> RUN commands</td><td><code>apt-get update &amp;&amp; install ... &amp;&amp; rm -rf /var/lib/apt/lists/*</code> in one RUN — fewer layers, no stale cache, cleanup in same layer.</td></tr>
-          <tr><td>Clean up <b>in the same layer</b></td><td>Deleting a cache in a later layer doesn't shrink the image — the bytes live in the earlier layer. Delete where you created.</td></tr>
+          <tr><td><b>Chain</b> RUN commands</td><td><code>apt-get update &amp;&amp; install ... &amp;&amp; rm -rf /var/lib/apt/lists/*</code> in one RUN: fewer layers, no stale cache, cleanup in same layer.</td></tr>
+          <tr><td>Clean up <b>in the same layer</b></td><td>Deleting a cache in a later layer doesn't shrink the image; the bytes live in the earlier layer. Delete where you created.</td></tr>
           <tr><td>Run as a <b>non-root USER</b></td><td>Default container user is root. A breakout then = host root-ish. Add a user and <code>USER appuser</code>. (Hardening depth = Module 07.)</td></tr>
           <tr><td>Use a <b>.dockerignore</b></td><td>Smaller context, faster builds, no leaked secrets (section 5).</td></tr>
           <tr><td><b>Multi-stage</b> for compiled/bundled apps</td><td>Ship the artifact, not the toolchain (section 6).</td></tr>
@@ -660,22 +665,23 @@ README.md</code></pre>
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><h2>Hands-on — do this now</h2></div>
-      <p>Reading this module teaches you nothing until you watch the cache hit and miss yourself. Spend 30 minutes here.</p>
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on, do this now</h2></div>
+      <p>Reading this module teaches you nothing until you watch the cache hit and miss yourself. This is the exact loop
+      that turned Sam's 12-minute rebuild into seconds. Spend 30 minutes here.</p>
 
       <ul class="check">
         <li><svg><use href="#i-checkbox"/></svg>Make a folder with a trivial app (a <code class="inl">requirements.txt</code> with one package + a 3-line <code class="inl">app.py</code>). Write the "slow" Dockerfile from section 4.</li>
         <li><svg><use href="#i-checkbox"/></svg>Build it twice in a row. Watch the second build: every line says <code class="inl">CACHED</code>. Time it.</li>
         <li><svg><use href="#i-checkbox"/></svg>Change <b>one line in app.py</b> and rebuild. Notice <code class="inl">pip install</code> reruns even though deps didn't change. That's the bug.</li>
         <li><svg><use href="#i-checkbox"/></svg>Switch to the "fast" Dockerfile (copy requirements first). Rebuild, edit app.py, rebuild again. Now pip install stays <code class="inl">CACHED</code>. Feel the difference.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker history myapp:1.0</code> and <code class="inl">docker images</code> — see each layer's size and the total image size.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker history myapp:1.0</code> and <code class="inl">docker images</code> to see each layer's size and the total image size.</li>
         <li><svg><use href="#i-checkbox"/></svg>Add a <code class="inl">.dockerignore</code>, then add a fake <code class="inl">.env</code> to the folder. Confirm with <code class="inl">docker build</code> output that the context shrank.</li>
         <li><svg><use href="#i-checkbox"/></svg>Convert any compiled-language toy (or a Node app) to a <b>multi-stage</b> build. Compare image sizes before/after with <code class="inl">docker images</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>Break the cache on purpose: <code class="inl">docker build --no-cache</code> and watch every layer rebuild.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Pseudo-code, not copy-paste</span>
-        <p>Write the app.py yourself — even three lines. The point of this course is that <b>you</b> can produce these
+        <p>Write the app.py yourself, even three lines. The point of this course is that <b>you</b> can produce these
         files from memory on the job, not that you pasted them. If you get stuck, sketch the steps in
         plain English first, then translate each step to a Dockerfile instruction.</p></div>
     </section>
@@ -684,19 +690,20 @@ README.md</code></pre>
     <section id="roadmap">
       <div class="sec-head"><span class="num">10</span><h2>How much further to "I know Docker well"?</h2></div>
       <p>You asked the right question. Here is the honest map. You are <strong>3 of ~8 Docker modules in</strong>. The
-      good news: you can start a real project sooner than you can claim full mastery — those are two different milestones.</p>
+      good news: you can start a real project sooner than you can claim full mastery. Those are two different milestones.
+      Sam is shipping already, hardening comes later.</p>
 
       <div class="tablewrap"><table>
         <thead><tr><th>Module</th><th>Topic</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>00</td><td>Foundations — what a container is (namespaces, cgroups)</td><td><b style="color:var(--accent)">done ✓</b></td></tr>
-          <tr><td>01</td><td>Images &amp; containers — lifecycle, core CLI</td><td><b style="color:var(--accent)">done ✓</b></td></tr>
-          <tr><td>02</td><td>Dockerfiles — build, layers, cache, multi-stage</td><td><b style="color:var(--accent)">this one ✓</b></td></tr>
-          <tr><td>03</td><td><b>Volumes &amp; storage</b> — persisting data, bind mounts vs volumes</td><td><b style="color:var(--amber)">next</b></td></tr>
-          <tr><td>04</td><td><b>Networking</b> — bridge, ports, container-to-container DNS</td><td>upcoming</td></tr>
-          <tr><td>05</td><td><b>Docker Compose</b> — multi-container apps from one YAML file</td><td>upcoming</td></tr>
-          <tr><td>06</td><td><b>Registries</b> — push/pull, tagging, Docker Hub / GHCR</td><td>upcoming</td></tr>
-          <tr><td>07</td><td><b>Security &amp; hardening</b> — non-root, capabilities, scanning, secrets</td><td>upcoming</td></tr>
+          <tr><td>00</td><td>Foundations: what a container is (namespaces, cgroups)</td><td><b style="color:var(--accent)">done ✓</b></td></tr>
+          <tr><td>01</td><td>Images &amp; containers: lifecycle, core CLI</td><td><b style="color:var(--accent)">done ✓</b></td></tr>
+          <tr><td>02</td><td>Dockerfiles: build, layers, cache, multi-stage</td><td><b style="color:var(--accent)">this one ✓</b></td></tr>
+          <tr><td>03</td><td><b>Volumes &amp; storage</b>: persisting data, bind mounts vs volumes</td><td><b style="color:var(--amber)">next</b></td></tr>
+          <tr><td>04</td><td><b>Networking</b>: bridge, ports, container-to-container DNS</td><td>upcoming</td></tr>
+          <tr><td>05</td><td><b>Docker Compose</b>: multi-container apps from one YAML file</td><td>upcoming</td></tr>
+          <tr><td>06</td><td><b>Registries</b>: push/pull, tagging, Docker Hub / GHCR</td><td>upcoming</td></tr>
+          <tr><td>07</td><td><b>Security &amp; hardening</b>: non-root, capabilities, scanning, secrets</td><td>upcoming</td></tr>
         </tbody>
       </table></div>
 
@@ -706,7 +713,7 @@ README.md</code></pre>
           <p>Build + Volumes + Networking + Compose = enough to containerize a real multi-service app (API + DB + cache) end to end. That's <b>2 modules away</b>. A great portfolio piece, and where most learning sticks.</p></div>
         <div class="card"><div class="ico green"><svg><use href="#i-shield"/></svg></div>
           <h4>Say "I know Docker well" after Module 07</h4>
-          <p>Once security/hardening is in, you cover everything the "Docker" toolkit demands on the job. That's <b>4 modules away</b>. After that comes orchestration (Kubernetes) — a separate phase, not "Docker" anymore.</p></div>
+          <p>Once security/hardening is in, you cover everything the "Docker" toolkit demands on the job. That's <b>4 modules away</b>. After that comes orchestration (Kubernetes), a separate phase, not "Docker" anymore.</p></div>
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Brutally honest take</span>
@@ -728,8 +735,8 @@ README.md</code></pre>
       </div>
 
       <div class="next">
-        <a href="module-01.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01 — Images &amp; Containers</b></span></a>
-        <a href="module-03.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03 — Volumes &amp; Storage</b></span></a>
+        <a href="module-01.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01: Images &amp; Containers</b></span></a>
+        <a href="module-03.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03: Volumes &amp; Storage</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 02 · built for visual learning.
       Once the hands-on checklist is all ticked and you can write these Dockerfiles from memory, move on to Module 03.</p>

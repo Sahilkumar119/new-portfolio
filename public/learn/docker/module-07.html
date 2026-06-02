@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 07 — Security &amp; Hardening</title>
+<title>Module 07 · Security &amp; Hardening</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -332,8 +332,8 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 7</span>
-      <h1>Module 07 — <span class="grad">Security &amp; Hardening</span></h1>
-      <p class="lede">You have built images, run containers, managed volumes, networks, Compose stacks, and pushed to registries. Now we make all of that <em>production-worthy</em> — because a container that works is not the same as a container that is <em>safe to run in the world</em>.</p>
+      <h1>Module 07 · <span class="grad">Security &amp; Hardening</span></h1>
+      <p class="lede">Sam has built images, run containers, managed volumes, networks, Compose stacks, and pushed their first app to a registry. The demo works. Now comes the part that keeps Sam up at night: making all of that <em>production-worthy</em>. A container that works is not the same as a container that is <em>safe to run in the world</em>, and shipping the first one is where most developers learn that the hard way.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · hands-on heavy</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>builds on all prior modules</span>
@@ -345,8 +345,8 @@
     <!-- 0. RECAP -->
     <section id="recap">
       <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
-      <p>Module 00 stated a truth that everything else in this course traces back to: containers <strong>share the host kernel</strong>. They are not separate operating systems. The isolation comes from Linux namespaces (PID, NET, MNT, UTS, IPC, USER) and cgroups — both of which are features of the <em>same</em> kernel your host is already running. That single fact defines the entire security picture for Docker.</p>
-      <p>Module 02 touched the surface: drop root with <code class="inl">USER appuser</code>, keep secrets out of the context with <code class="inl">.dockerignore</code>. Those two steps were not just best-practice flavour — they were the beginning of a full hardening story. This module finishes that story.</p>
+      <p>Module 00 stated a truth that everything else in this course traces back to: containers <strong>share the host kernel</strong>. They are not separate operating systems. The isolation comes from Linux namespaces (PID, NET, MNT, UTS, IPC, USER) and cgroups, both of which are features of the <em>same</em> kernel your host is already running. That single fact defines the entire security picture for Docker.</p>
+      <p>Module 02 touched the surface: drop root with <code class="inl">USER appuser</code>, keep secrets out of the context with <code class="inl">.dockerignore</code>. Those two steps were not just best-practice flavour. They were the beginning of a full hardening story, and this module finishes it. Sam already did the easy parts without quite understanding why; here we make the why explicit and add everything else.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico red"><svg><use href="#i-warn"/></svg></div>
@@ -361,13 +361,13 @@
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Scope of this module</span>
-        <p>This module covers hardening for containers you build and run yourself. For multi-tenant untrusted workloads (running other people's arbitrary code) a VM boundary or a kernel-level sandboxed runtime like gVisor or Kata Containers is the correct tool — Docker's namespace isolation alone is not considered a hard security boundary for that threat model.</p></div>
+        <p>This module covers hardening for containers you build and run yourself. For multi-tenant untrusted workloads (running other people's arbitrary code) a VM boundary or a kernel-level sandboxed runtime like gVisor or Kata Containers is the correct tool. Docker's namespace isolation alone is not considered a hard security boundary for that threat model.</p></div>
     </section>
 
     <!-- 1. THREAT MODEL -->
     <section id="threat">
-      <div class="sec-head"><span class="num">1</span><h2>The threat model — what you are actually defending against</h2></div>
-      <p>Before layering controls, you need to understand what failure looks like. There are four categories of concern with Docker containers:</p>
+      <div class="sec-head"><span class="num">1</span><h2>The threat model (what you are actually defending against)</h2></div>
+      <p>Before layering controls, Sam needs to understand what failure looks like. Otherwise hardening is just cargo-culting flags off a blog post. There are four categories of concern with Docker containers:</p>
 
       <div class="tablewrap"><table>
         <thead><tr><th>Threat</th><th>What it means</th><th>Primary control</th></tr></thead>
@@ -380,19 +380,19 @@
       </table></div>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The central insight</span>
-        <p>Container isolation is <b>weaker than a VM</b> because a VM has a hypervisor between guest and host — there is no shared kernel. In a container, a kernel exploit crosses the container boundary immediately. This is not a theoretical concern: real container escapes (runc CVE-2019-5736, for example) have exploited this exact path. Defence-in-depth reduces the blast radius when something goes wrong.</p></div>
+        <p>Container isolation is <b>weaker than a VM</b> because a VM has a hypervisor between guest and host, so there is no shared kernel. In a container, a kernel exploit crosses the container boundary immediately. This is not a theoretical concern: real container escapes (runc CVE-2019-5736, for example) have exploited this exact path. Defence-in-depth reduces the blast radius when something goes wrong.</p></div>
     </section>
 
     <!-- 2. NON-ROOT -->
     <section id="nonroot">
-      <div class="sec-head"><span class="num">2</span><h2>Run as non-root — the #1 finding</h2></div>
-      <p>By default, the process inside a Docker container runs as <strong>root (UID 0)</strong>. That root is not fully the same as host root — namespaces constrain it — but the gap is much narrower than you want it to be. If the container process escapes, it arrives on the host as root. Root can read <code class="inl">/etc/shadow</code>, write to <code class="inl">/etc/cron.d</code>, and install a kernel module. Every security audit flags this first.</p>
+      <div class="sec-head"><span class="num">2</span><h2>Run as non-root (the #1 finding)</h2></div>
+      <p>By default, the process inside a Docker container runs as <strong>root (UID 0)</strong>. That root is not fully the same as host root (namespaces constrain it) but the gap is much narrower than you want it to be. If the container process escapes, it arrives on the host as root. Root can read <code class="inl">/etc/shadow</code>, write to <code class="inl">/etc/cron.d</code>, and install a kernel module. Every security audit flags this first. When Sam ran the first scan, this was line one of the report.</p>
 
-      <p>The fix is a three-line addition to your Dockerfile, which Module 02 introduced. Here is the full pattern with the reasoning visible:</p>
+      <p>The fix is a three-line addition to the Dockerfile, which Module 02 introduced. Here is the full pattern with the reasoning visible:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">Dockerfile — non-root user pattern</span><span class="spacer"></span>
+          <span class="title">Dockerfile : non-root user pattern</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="kw">FROM</span> python:3.12-slim
 
@@ -418,7 +418,7 @@
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — override user at runtime</span><span class="spacer"></span>
+          <span class="title">terminal : override user at runtime</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmd">docker</span> run <span class="flag">--user</span> 1001:1001 myimage</code></pre>
       </div>
@@ -429,13 +429,13 @@
 
     <!-- 3. CAPABILITIES -->
     <section id="caps">
-      <div class="sec-head"><span class="num">3</span><h2>Drop Linux capabilities — fine-grained root powers</h2></div>
-      <p>Linux does not treat root as a binary on/off switch. Root's power is split into roughly 40 distinct <strong>capabilities</strong> — each one grants a specific kernel-level privilege. Examples: <code class="inl">CAP_NET_BIND_SERVICE</code> (bind ports below 1024), <code class="inl">CAP_SYS_ADMIN</code> (mount filesystems, change namespaces — essentially a root backdoor), <code class="inl">CAP_NET_RAW</code> (craft raw packets, useful for attacks).</p>
-      <p>By default, Docker grants containers a subset of capabilities — not all of them, but more than most apps need. The hardening principle: <strong>drop everything, add back only what your app actually requires</strong>.</p>
+      <div class="sec-head"><span class="num">3</span><h2>Drop Linux capabilities (fine-grained root powers)</h2></div>
+      <p>Linux does not treat root as a binary on/off switch. Root's power is split into roughly 40 distinct <strong>capabilities</strong>, and each one grants a specific kernel-level privilege. Examples: <code class="inl">CAP_NET_BIND_SERVICE</code> (bind ports below 1024), <code class="inl">CAP_SYS_ADMIN</code> (mount filesystems, change namespaces, essentially a root backdoor), <code class="inl">CAP_NET_RAW</code> (craft raw packets, useful for attacks).</p>
+      <p>By default, Docker grants containers a subset of capabilities: not all of them, but more than most apps need. The hardening principle is simple. Drop everything, then add back only what your app actually requires. Sam's app is a plain web service, so the honest answer to "what does it need" turns out to be almost nothing.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — drop all capabilities, add back only what is needed</span><span class="spacer"></span>
+          <span class="title">terminal : drop all capabilities, add back only what is needed</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># most web apps need nothing beyond basic networking</span>
 <span class="cmd">docker</span> run <span class="flag">--cap-drop=ALL</span> myimage
@@ -448,7 +448,7 @@
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — check capabilities of a running container</span><span class="spacer"></span>
+          <span class="title">terminal : check capabilities of a running container</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># inside the container</span>
 <span class="cmd">docker</span> exec &lt;container&gt; cat /proc/1/status | grep Cap
@@ -467,11 +467,11 @@ capsh --decode=00000000a80425fb</code></pre>
       <p>Two flags that together close common post-exploitation paths:</p>
 
       <h3>--read-only</h3>
-      <p>Mounts the container's root filesystem as read-only. A compromised process cannot write malware, modify configuration files, or persist state to the container's filesystem. Most well-written apps do not need to write to the root filesystem — they write to specific directories (logs, temp, sockets). Mount those explicitly with <code class="inl">--tmpfs</code> for in-memory scratch space, or a named volume for persistent data.</p>
+      <p>Mounts the container's root filesystem as read-only. A compromised process cannot write malware, modify configuration files, or persist state to the container's filesystem. Most well-written apps do not need to write to the root filesystem; they write to specific directories (logs, temp, sockets). Mount those explicitly with <code class="inl">--tmpfs</code> for in-memory scratch space, or a named volume for persistent data.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — read-only root fs with tmpfs for writable scratch</span><span class="spacer"></span>
+          <span class="title">terminal : read-only root fs with tmpfs for writable scratch</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmd">docker</span> run \
   <span class="flag">--read-only</span> \
@@ -481,11 +481,11 @@ capsh --decode=00000000a80425fb</code></pre>
       </div>
 
       <h3>--security-opt=no-new-privileges</h3>
-      <p>Prevents the container process — and any child process it spawns — from gaining new privileges via <code class="inl">setuid</code>/<code class="inl">setgid</code> binaries or Linux capabilities bounding set manipulation. Without this flag, a non-root process that executes a setuid binary (like <code class="inl">sudo</code>) can escalate. This flag simply locks the privilege ceiling at the level the container started with.</p>
+      <p>Prevents the container process, and any child process it spawns, from gaining new privileges via <code class="inl">setuid</code>/<code class="inl">setgid</code> binaries or Linux capabilities bounding set manipulation. Without this flag, a non-root process that executes a setuid binary (like <code class="inl">sudo</code>) can escalate. This flag simply locks the privilege ceiling at the level the container started with.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — combining read-only + no-new-privileges</span><span class="spacer"></span>
+          <span class="title">terminal : combining read-only + no-new-privileges</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmd">docker</span> run \
   <span class="flag">--read-only</span> \
@@ -499,14 +499,14 @@ capsh --decode=00000000a80425fb</code></pre>
     <!-- 5. SECCOMP + APPARMOR -->
     <section id="seccomp">
       <div class="sec-head"><span class="num">5</span><h2>Seccomp &amp; AppArmor / SELinux</h2></div>
-      <p>Even without capabilities, a process can talk directly to the Linux kernel via <strong>system calls (syscalls)</strong>. There are over 400 syscalls. Most processes use fewer than 50 of them. Seccomp (Secure Computing Mode) filters which syscalls a process is allowed to make — any call not on the allowlist kills the process immediately.</p>
+      <p>Even without capabilities, a process can talk directly to the Linux kernel via <strong>system calls (syscalls)</strong>. There are over 400 syscalls. Most processes use fewer than 50 of them. Seccomp (Secure Computing Mode) filters which syscalls a process is allowed to make. Any call not on the allowlist kills the process immediately.</p>
 
       <h3>The default seccomp profile</h3>
-      <p>Docker ships with a default seccomp profile that blocks approximately 44 dangerous syscalls including <code class="inl">ptrace</code> (attach to other processes), <code class="inl">keyctl</code> (manipulate kernel keyring), <code class="inl">add_key</code>, <code class="inl">mount</code>, <code class="inl">reboot</code>, and others that are almost never needed by applications but are commonly useful in exploits. <strong>This profile is active by default</strong> — you get it for free unless you remove it.</p>
+      <p>Docker ships with a default seccomp profile that blocks approximately 44 dangerous syscalls including <code class="inl">ptrace</code> (attach to other processes), <code class="inl">keyctl</code> (manipulate kernel keyring), <code class="inl">add_key</code>, <code class="inl">mount</code>, <code class="inl">reboot</code>, and others that are almost never needed by applications but are commonly useful in exploits. <strong>This profile is active by default</strong>, so you get it for free unless you remove it.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — using a custom seccomp profile</span><span class="spacer"></span>
+          <span class="title">terminal : using a custom seccomp profile</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># apply a custom profile (JSON file you write defining allowed syscalls)</span>
 <span class="cmd">docker</span> run <span class="flag">--security-opt</span> seccomp=/path/to/profile.json myimage
@@ -516,27 +516,27 @@ capsh --decode=00000000a80425fb</code></pre>
       </div>
 
       <h3>AppArmor and SELinux</h3>
-      <p>These are Mandatory Access Control (MAC) systems that work at the kernel level, separate from and complementary to capabilities and seccomp. AppArmor (default on Ubuntu/Debian-based hosts, including many CachyOS configurations) attaches profiles to executables, constraining what files, network operations, and capabilities the program can access — regardless of what the process itself requests. Docker applies a default AppArmor profile (<code class="inl">docker-default</code>) to all containers on supported hosts.</p>
+      <p>These are Mandatory Access Control (MAC) systems that work at the kernel level, separate from and complementary to capabilities and seccomp. AppArmor (default on Ubuntu/Debian-based hosts, including many CachyOS configurations) attaches profiles to executables, constraining what files, network operations, and capabilities the program can access, regardless of what the process itself requests. Docker applies a default AppArmor profile (<code class="inl">docker-default</code>) to all containers on supported hosts.</p>
       <p>SELinux plays the same role on RHEL/Fedora/CentOS hosts. If your host has SELinux enforcing mode, Docker labels containers and volumes with appropriate SELinux contexts automatically.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Never disable the default profiles casually</span>
-        <p>Running with <code class="inl">--security-opt seccomp=unconfined</code> or <code class="inl">--security-opt apparmor=unconfined</code> removes these protections silently. These flags appear in many "quick fix" Stack Overflow answers when something breaks. Do not use them in production. Investigate which specific syscall or access is being blocked and allow only that — do not disable the whole layer.</p></div>
+        <p>Running with <code class="inl">--security-opt seccomp=unconfined</code> or <code class="inl">--security-opt apparmor=unconfined</code> removes these protections silently. These flags appear in many "quick fix" Stack Overflow answers when something breaks. Do not use them in production. Investigate which specific syscall or access is being blocked and allow only that. Do not disable the whole layer.</p></div>
     </section>
 
     <!-- 6. NEVER --PRIVILEGED -->
     <section id="privileged">
       <div class="sec-head"><span class="num">6</span><h2>Never run --privileged</h2></div>
       <p>The <code class="inl">--privileged</code> flag does the following in a single pass: grants all Linux capabilities, disables the default seccomp profile, disables AppArmor/SELinux confinement, gives the container access to all host devices, and allows the container process to manipulate namespaces directly. It essentially removes the entire isolation stack Docker provides.</p>
-      <p>A process running inside a privileged container can mount the host filesystem, load kernel modules, modify iptables rules, and escape to the host in seconds using well-documented techniques. This is not a theoretical risk — it is a documented, trivially-reproduced attack.</p>
+      <p>A process running inside a privileged container can mount the host filesystem, load kernel modules, modify iptables rules, and escape to the host in seconds using well-documented techniques. This is not a theoretical risk. It is a documented, trivially-reproduced attack.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">--privileged = container escape waiting to happen</span>
-        <p>If you have <code class="inl">--privileged</code> in a production container, you do not have container isolation — you have a process with full host access running inside a container-shaped box. Remove it. If something requires it, that something should run on bare metal or a dedicated VM, not in a shared container environment.</p></div>
+        <p>If you have <code class="inl">--privileged</code> in a production container, you do not have container isolation. You have a process with full host access running inside a container-shaped box. Remove it. If something requires it, that something should run on bare metal or a dedicated VM, not in a shared container environment.</p></div>
 
       <p>The only legitimate uses of <code class="inl">--privileged</code> in practice are: Docker-in-Docker (DinD) build environments in controlled CI where the host is single-purpose, and certain kernel debugging tools. Even in those cases, prefer alternative approaches: Docker socket mounting with explicit access controls, or using <code class="inl">--device</code> to grant access to a specific device rather than all of them.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — the safer alternative to --privileged for device access</span><span class="spacer"></span>
+          <span class="title">terminal : the safer alternative to --privileged for device access</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># instead of --privileged to access a GPU or device, be specific</span>
 <span class="cmd">docker</span> run <span class="flag">--device</span> /dev/nvidia0:/dev/nvidia0 myimage
@@ -552,11 +552,11 @@ capsh --decode=00000000a80425fb</code></pre>
       <p>Module 00 introduced the USER namespace as one of the six Linux namespaces Docker uses. This is where the most powerful isolation improvement lives, and it is often skipped in basic guides.</p>
 
       <h3>User namespace remapping (userns-remap)</h3>
-      <p>By default, UID 0 inside the container maps directly to UID 0 on the host — that is the problem. With <code class="inl">userns-remap</code>, Docker remaps container UIDs to a range of unprivileged host UIDs. Container root (UID 0) becomes, for example, host UID 100000. If the container process escapes, it arrives on the host as UID 100000 — a non-privileged user that owns nothing important.</p>
+      <p>By default, UID 0 inside the container maps directly to UID 0 on the host, and that is the problem. With <code class="inl">userns-remap</code>, Docker remaps container UIDs to a range of unprivileged host UIDs. Container root (UID 0) becomes, for example, host UID 100000. If the container process escapes, it arrives on the host as UID 100000, a non-privileged user that owns nothing important.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">/etc/docker/daemon.json — enable userns-remap</span><span class="spacer"></span>
+          <span class="title">/etc/docker/daemon.json : enable userns-remap</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code>{
   <span class="str">"userns-remap"</span>: <span class="str">"default"</span>
@@ -570,7 +570,7 @@ capsh --decode=00000000a80425fb</code></pre>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — install and use rootless Docker</span><span class="spacer"></span>
+          <span class="title">terminal : install and use rootless Docker</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># install the rootless setup script (requires uidmap package)</span>
 dockerd-rootless-setuptool.sh install
@@ -588,22 +588,22 @@ systemctl --user start docker
 
     <!-- 8. SECRETS -->
     <section id="secrets">
-      <div class="sec-head"><span class="num">8</span><h2>Secrets — the mistake that doesn't go away</h2></div>
-      <p>This is the category where developers most often create vulnerabilities without realising it. The mechanism is subtle enough to trip up experienced engineers: <strong>image layers are permanent and additive</strong>. If you add a secret to a layer and delete it in a later layer, the secret still exists in the earlier layer. Anyone with access to the image can extract it with <code class="inl">docker history</code> or by exporting the image tarball.</p>
+      <div class="sec-head"><span class="num">8</span><h2>Secrets (the mistake that doesn't go away)</h2></div>
+      <p>This is the category that nearly bit Sam. Early on, Sam dropped a <code class="inl">.env</code> into the build and only later wondered who could read it. The mechanism is subtle enough to trip up experienced engineers: <strong>image layers are permanent and additive</strong>. If you add a secret to a layer and delete it in a later layer, the secret still exists in the earlier layer. Anyone with access to the image can extract it with <code class="inl">docker history</code> or by exporting the image tarball.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Deleting a secret in a later layer does NOT remove it</span>
-        <p>This is the most common secrets mistake. The following pattern looks like it cleans up after itself — it does not:</p>
+        <p>This is the most common secrets mistake. The following pattern looks like it cleans up after itself. It does not:</p>
         <pre style="background:var(--code);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:13px;margin:10px 0;overflow-x:auto"><span class="kw">COPY</span> secrets.env .          <span class="cmt"># baked into layer N</span>
 <span class="kw">RUN</span> ./setup.sh              <span class="cmt"># uses it</span>
-<span class="kw">RUN</span> rm secrets.env          <span class="cmt"># removes it from layer N+2 — but layer N still has it</span></pre>
+<span class="kw">RUN</span> rm secrets.env          <span class="cmt"># removes it from layer N+2, but layer N still has it</span></pre>
         <p>Anyone who runs <code class="inl">docker history --no-trunc myimage</code> or extracts the layer tarball reads the secret in plain text.</p></div>
 
       <h3>What to do instead</h3>
       <div class="tablewrap"><table>
         <thead><tr><th>Approach</th><th>When to use</th><th>How</th></tr></thead>
         <tbody>
-          <tr><td><b>Build-time secrets (BuildKit)</b></td><td>Secrets needed only during <code>docker build</code> (e.g. private pip index token)</td><td><code>RUN --mount=type=secret,id=mysecret ...</code> — never written to any layer</td></tr>
-          <tr><td><b>Runtime env from a secrets manager</b></td><td>Secrets the running app needs (DB password, API key)</td><td>Inject at runtime from Vault, AWS Secrets Manager, etc. — not baked in</td></tr>
+          <tr><td><b>Build-time secrets (BuildKit)</b></td><td>Secrets needed only during <code>docker build</code> (e.g. private pip index token)</td><td><code>RUN --mount=type=secret,id=mysecret ...</code>, never written to any layer</td></tr>
+          <tr><td><b>Runtime env from a secrets manager</b></td><td>Secrets the running app needs (DB password, API key)</td><td>Inject at runtime from Vault, AWS Secrets Manager, etc., not baked in</td></tr>
           <tr><td><b>Docker secrets (Swarm)</b></td><td>Swarm or Compose production deployments</td><td>Mounted at <code>/run/secrets/&lt;name&gt;</code> inside the container, never in the image</td></tr>
           <tr><td><b>Mounted file at runtime</b></td><td>Simple cases, dev/staging</td><td><code>docker run -v /host/secrets:/run/secrets:ro myimage</code></td></tr>
         </tbody>
@@ -616,27 +616,27 @@ systemctl --user start docker
     <!-- 9. IMAGE HYGIENE + SCANNING -->
     <section id="scanning">
       <div class="sec-head"><span class="num">9</span><h2>Image hygiene &amp; scanning</h2></div>
-      <p>Every package in your image is a potential CVE waiting to be exploited. The attack surface of an image is directly proportional to its size. This is why Module 02's advice to use <code class="inl">python:3.12-slim</code> instead of <code class="inl">python:3.12</code> was not just about download speed — it was about security posture. Fewer packages means fewer vulnerabilities.</p>
+      <p>Every package in your image is a potential CVE waiting to be exploited. The attack surface of an image is directly proportional to its size. This is why Module 02's advice to use <code class="inl">python:3.12-slim</code> instead of <code class="inl">python:3.12</code> was not just about download speed. It was about security posture. Fewer packages means fewer vulnerabilities.</p>
 
       <h3>Minimal and distroless bases</h3>
-      <p>The progression from most to least attack surface: full OS image → slim image → Alpine → distroless. Google's distroless images contain only the language runtime and its direct dependencies — no shell, no package manager, no coreutils. A compromised process in a distroless container has no <code class="inl">bash</code> to spawn, no <code class="inl">curl</code> to exfiltrate data with, no <code class="inl">apt</code> to install tools. It is significantly harder to move laterally.</p>
+      <p>The progression from most to least attack surface: full OS image → slim image → Alpine → distroless. Google's distroless images contain only the language runtime and its direct dependencies: no shell, no package manager, no coreutils. A compromised process in a distroless container has no <code class="inl">bash</code> to spawn, no <code class="inl">curl</code> to exfiltrate data with, no <code class="inl">apt</code> to install tools. It is significantly harder to move laterally.</p>
 
       <h3>Pinning by digest (from Module 06)</h3>
       <p>Tagging with <code class="inl">:latest</code> or even <code class="inl">:3.12-slim</code> means a future pull might give you a different, potentially vulnerable image. Pin by immutable digest:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">Dockerfile — pin base image by digest</span><span class="spacer"></span>
+          <span class="title">Dockerfile : pin base image by digest</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="kw">FROM</span> python:3.12-slim@sha256:3f4e8c8b...  <span class="cmt"># immutable — always this exact image</span></code></pre>
+        <pre><code><span class="kw">FROM</span> python:3.12-slim@sha256:3f4e8c8b...  <span class="cmt"># immutable, always this exact image</span></code></pre>
       </div>
 
       <h3>Scanning with Docker Scout and Trivy</h3>
-      <p>Image scanning compares every package in your image against a CVE database and reports known vulnerabilities by severity (Critical, High, Medium, Low). This should run in CI on every build — not manually on your laptop occasionally.</p>
+      <p>Image scanning compares every package in your image against a CVE database and reports known vulnerabilities by severity (Critical, High, Medium, Low). This should run in CI on every build, not manually on your laptop occasionally. When Sam wired this into the pipeline, the first run flagged a base-image CVE that nobody would have caught by eye.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — scanning with Docker Scout and Trivy</span><span class="spacer"></span>
+          <span class="title">terminal : scanning with Docker Scout and Trivy</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># Docker Scout (built into Docker CLI, requires login)</span>
 <span class="cmd">docker</span> scout cves myimage:latest
@@ -647,7 +647,7 @@ systemctl --user start docker
 <span class="cmt"># Trivy (open-source, standalone, great for CI)</span>
 trivy image myimage:latest
 
-<span class="cmt"># Trivy — fail CI if any Critical or High CVEs found</span>
+<span class="cmt"># Trivy: fail CI if any Critical or High CVEs found</span>
 trivy image <span class="flag">--exit-code</span> 1 <span class="flag">--severity</span> CRITICAL,HIGH myimage:latest</code></pre>
       </div>
 
@@ -657,12 +657,12 @@ trivy image <span class="flag">--exit-code</span> 1 <span class="flag">--severit
 
     <!-- 10. RESOURCE LIMITS -->
     <section id="limits">
-      <div class="sec-head"><span class="num">10</span><h2>Resource limits — cgroups in practice</h2></div>
+      <div class="sec-head"><span class="num">10</span><h2>Resource limits (cgroups in practice)</h2></div>
       <p>Module 00 established that cgroups are the kernel mechanism that enforces resource limits on container processes. Without limits, a single misbehaving or compromised container can exhaust the host's memory (causing an OOM kill of other containers), saturate all CPU cores, or fork-bomb the system by spawning unlimited processes. Setting limits is both a security and a reliability control.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — setting memory, CPU, and PID limits</span><span class="spacer"></span>
+          <span class="title">terminal : setting memory, CPU, and PID limits</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># limit to 256 MB RAM, 0.5 CPU, and 100 processes max</span>
 <span class="cmd">docker</span> run \
@@ -679,7 +679,7 @@ trivy image <span class="flag">--exit-code</span> 1 <span class="flag">--severit
       <p>Note that <code class="inl">--memory-swap</code> set equal to <code class="inl">--memory</code> disables swap for the container, which prevents a container from silently using disk as memory and masking a memory leak.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Bridge to Kubernetes</span>
-        <p>In Kubernetes, these same cgroup controls are expressed as <code class="inl">resources.requests</code> and <code class="inl">resources.limits</code> in a Pod spec. The concept is identical — Kubernetes simply manages the cgroup configuration for you per container declaration. Understanding <code class="inl">--memory</code> and <code class="inl">--cpus</code> here makes Kubernetes resource management immediately intuitive.</p></div>
+        <p>In Kubernetes, these same cgroup controls are expressed as <code class="inl">resources.requests</code> and <code class="inl">resources.limits</code> in a Pod spec. The concept is identical; Kubernetes simply manages the cgroup configuration for you per container declaration. Understanding <code class="inl">--memory</code> and <code class="inl">--cpus</code> here makes Kubernetes resource management immediately intuitive.</p></div>
     </section>
 
     <!-- 11. HARDENING CHECKLIST -->
@@ -709,21 +709,21 @@ trivy image <span class="flag">--exit-code</span> 1 <span class="flag">--severit
 
     <!-- 12. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">12</span><h2>Hands-on — do this now</h2></div>
-      <p>Each of these exercises will either show you a protection working or show you a protection being violated. Both outcomes are learning. Do not skip these exercises.</p>
+      <div class="sec-head"><span class="num">12</span><h2>Hands-on (do this now)</h2></div>
+      <p>Each of these exercises will either show you a protection working or show you a protection being violated. Both outcomes are learning. This is exactly the loop Sam ran before flipping the app to production, and do not skip it.</p>
 
       <ul class="check">
         <li><svg><use href="#i-checkbox"/></svg>Build a simple image with a <code class="inl">USER appuser</code> instruction. Run it and verify with <code class="inl">docker exec &lt;container&gt; whoami</code> that you are not root inside.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Run an image with <code class="inl">--cap-drop=ALL</code>. Try an operation that requires a capability — for example, run <code class="inl">ping</code> (needs <code class="inl">CAP_NET_RAW</code>) and watch it fail with a permission error. Then add <code class="inl">--cap-add=NET_RAW</code> and watch it succeed.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run an image with <code class="inl">--cap-drop=ALL</code>. Try an operation that requires a capability. For example, run <code class="inl">ping</code> (needs <code class="inl">CAP_NET_RAW</code>) and watch it fail with a permission error. Then add <code class="inl">--cap-add=NET_RAW</code> and watch it succeed.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run a container with <code class="inl">--read-only --tmpfs /tmp</code>. Attempt to write a file to <code class="inl">/app</code> (should fail) then to <code class="inl">/tmp</code> (should succeed). Confirm the filesystem is genuinely immutable.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Build an image that (wrongly) copies a fake credentials file into a layer and then deletes it in a later <code class="inl">RUN rm</code>. Run <code class="inl">docker history --no-trunc &lt;image&gt;</code> and confirm you cannot read it from history directly — then export the image with <code class="inl">docker save | tar -xvf</code> and look inside the layer tarballs to see the file still there.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Scan an image you have built with <code class="inl">docker scout cves &lt;image&gt;</code> or <code class="inl">trivy image &lt;image&gt;</code>. Read the output. Find the CVE IDs, understand what package they are in, and look up one CVE on the NVD (nvd.nist.gov). This is not optional — this is a skill you must actually have.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Build an image that (wrongly) copies a fake credentials file into a layer and then deletes it in a later <code class="inl">RUN rm</code>. Run <code class="inl">docker history --no-trunc &lt;image&gt;</code> and confirm you cannot read it from history directly, then export the image with <code class="inl">docker save | tar -xvf</code> and look inside the layer tarballs to see the file still there.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Scan an image you have built with <code class="inl">docker scout cves &lt;image&gt;</code> or <code class="inl">trivy image &lt;image&gt;</code>. Read the output. Find the CVE IDs, understand what package they are in, and look up one CVE on the NVD (nvd.nist.gov). This is not optional. It is a skill you must actually have.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run a container with <code class="inl">--memory=64m --memory-swap=64m</code>. Write a small program (or use a shell loop) that allocates memory until it runs out. Watch the OOM kill message from the kernel. Then run <code class="inl">docker inspect &lt;container&gt; | grep OOMKilled</code> and see the flag set to <code class="inl">true</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run a container that sets <code class="inl">--security-opt=no-new-privileges</code>. Inside the container, attempt to use <code class="inl">sudo</code> or execute a setuid binary (e.g. <code class="inl">passwd</code>). Confirm it fails to escalate privileges.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Write commands from memory</span>
-        <p>After the first read-through, close this page and try to reproduce each docker run command from memory. If you cannot write <code class="inl">--cap-drop=ALL --cap-add=NET_BIND_SERVICE</code> without looking, you do not own it yet. The hands-on is not a checklist to tick — it is a repetition exercise.</p></div>
+        <p>After the first read-through, close this page and try to reproduce each docker run command from memory. If you cannot write <code class="inl">--cap-drop=ALL --cap-add=NET_BIND_SERVICE</code> without looking, you do not own it yet. The hands-on is not a checklist to tick. It is a repetition exercise.</p></div>
     </section>
 
     <footer>
@@ -737,12 +737,12 @@ trivy image <span class="flag">--exit-code</span> 1 <span class="flag">--severit
       </div>
 
       <div class="next">
-        <a href="module-06.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 06 — Registries</b></span></a>
+        <a href="module-06.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 06 · Registries</b></span></a>
         <a href="index.html"><small>Next →</small><span class="nx"><svg><use href="#i-back"/></svg><b>Back to course index</b></span></a>
       </div>
 
-      <p style="margin-top:24px;color:var(--fg-faint)">You made it through all eight Docker modules. That is not a small thing. Modules 00-07 together cover everything you need to know Docker well — from how the kernel isolates processes (namespaces, cgroups) to building optimised images, managing data, connecting containers, orchestrating multi-service apps with Compose, distributing via registries, and now hardening the whole stack. You can say you know Docker well, and mean it.</p>
-      <p style="color:var(--fg-faint)">The next phase is Kubernetes, and it will feel immediately familiar: cgroups become <code class="inl">resources.limits</code>, network namespaces become pod networking, images become Deployment specs, Compose services become Services and Deployments. Everything you built here carries forward. The concepts do not change — they scale.</p>
+      <p style="margin-top:24px;color:var(--fg-faint)">You made it through all eight Docker modules. That is not a small thing. Modules 00-07 together cover everything you need to know Docker well, from how the kernel isolates processes (namespaces, cgroups) to building optimised images, managing data, connecting containers, orchestrating multi-service apps with Compose, distributing via registries, and now hardening the whole stack. Sam's first containerized app now ships non-root, capability-stripped, scanned, and resource-bounded. You can say you know Docker well, and mean it.</p>
+      <p style="color:var(--fg-faint)">The next phase is Kubernetes, and it will feel immediately familiar: cgroups become <code class="inl">resources.limits</code>, network namespaces become pod networking, images become Deployment specs, Compose services become Services and Deployments. Everything you built here carries forward. The concepts do not change; they scale.</p>
     </footer>
 
   </main>

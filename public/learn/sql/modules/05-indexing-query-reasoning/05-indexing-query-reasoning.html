@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 05 — Indexing &amp; Query Reasoning</title>
+<title>Module 05 · Indexing &amp; Query Reasoning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
   .chip b{color:var(--accent)}
   @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
 
-  /* section heads — editorial */
+  /* section heads, editorial */
   section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
   section:first-of-type{border-top:none}
   .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
@@ -137,7 +137,7 @@
   .note.info{background:var(--bg-2)}
   .note.info .ic,.note.info .tag{color:var(--ink-soft)}
 
-  /* code — dark block on light page */
+  /* code, dark block on light page */
   .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
     overflow:hidden}
   .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
@@ -327,7 +327,7 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 05 · Final</span>
-      <h1>Indexing &amp; Query<br>Reasoning — making it <span class="u">fast</span></h1>
+      <h1>Indexing &amp; Query<br>Reasoning, making it <span class="u">fast</span></h1>
       <p class="lede">You can already write <em>correct</em> SQL. This capstone is about the next question that matters: <em>why is it slow, and how would you fix it?</em> We build the mental model of indexes, learn to read a query plan with <em>EXPLAIN ANALYZE</em>, and turn "my query hangs" into a repeatable diagnosis.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · capstone</span>
@@ -338,17 +338,17 @@
 
     <!-- 0. RECAP -->
     <section id="recap">
-      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Framing</span><h2>From correct to fast</h2></div></div>
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 · Framing</span><h2>From correct to fast</h2></div></div>
       <p>Across the first five modules you learned to produce the <strong>right answer</strong>: select and filter, join tables, group and aggregate, and slide window functions over ordered rows. On a toy schema with six employees, every one of those queries returns instantly. That is the trap. The same query against <strong>millions of rows</strong> can take milliseconds or minutes depending on a single decision: whether the database can use an <strong>index</strong> or has to read the entire table.</p>
-      <p>This module is the one that makes you sound senior. Anyone can memorize <code class="inl">JOIN</code> syntax. The line that separates L3 from L1 is being able to look at a slow query, say <em>"let me check the plan,"</em> read an <code class="inl">EXPLAIN ANALYZE</code> output, and explain precisely why it is slow and what you would change. We are going to imagine our <code class="inl">orders</code> table holds tens of millions of rows from here on — that is where every idea below earns its keep.</p>
+      <p>This module is the one that makes you sound senior. Anyone can memorize <code class="inl">JOIN</code> syntax. The line that separates L3 from L1 is being able to look at a slow query, say <em>"let me check the plan,"</em> read an <code class="inl">EXPLAIN ANALYZE</code> output, and explain precisely why it is slow and what you would change. Meet Maya, a new analyst at our small company (the same <code class="inl">departments</code>, <code class="inl">employees</code>, and <code class="inl">orders</code> schema you have used all along). Her toy queries always returned instantly, until the <code class="inl">orders</code> table grew into tens of millions of rows. That is where every idea below earns its keep, and where we will follow her.</p>
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The whole module in one line</span>
-        <p>An <strong>index</strong> is a separate, sorted data structure the database keeps alongside a table so it can <em>find</em> rows without <em>reading</em> all of them. Everything else here — when it helps, when it does not, and how to prove it — flows from that single idea.</p></div>
+        <p>An <strong>index</strong> is a separate, sorted data structure the database keeps alongside a table so it can <em>find</em> rows without <em>reading</em> all of them. Everything else here (when it helps, when it does not, and how to prove it) flows from that single idea.</p></div>
     </section>
 
     <!-- 1. TABLE SCAN -->
     <section id="scan">
-      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — The problem</span><h2>The full table scan</h2></div></div>
-      <p>Suppose you ask for one employee's orders:</p>
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 · The problem</span><h2>The full table scan</h2></div></div>
+      <p>Maya's first slow query is simple: she wants one employee's orders.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">a simple lookup</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -357,18 +357,18 @@
 
       <p>How does the database actually find those rows? Without help, it does the only thing it can: it starts at the first row and <strong>reads every single row</strong> in the table, testing <code class="inl">emp_id = 42</code> on each one and keeping the matches. This is a <strong>sequential scan</strong> (Postgres calls it a <em>Seq Scan</em>). If the table has 20 million rows, the database inspects all 20 million to find maybe a dozen matching orders.</p>
 
-      <p>The cost of a sequential scan grows <strong>linearly</strong> with table size: this is <strong>O(n)</strong> work. For a small table that is completely fine and often the <em>fastest</em> option — reading a few hundred rows straight off disk beats any cleverness. But as the row count climbs into the millions, "look at everything" becomes catastrophic, and it gets worse every time the table grows.</p>
+      <p>The cost of a sequential scan grows <strong>linearly</strong> with table size: this is <strong>O(n)</strong> work. For a small table that is completely fine and often the <em>fastest</em> option, since reading a few hundred rows straight off disk beats any cleverness. That is why Maya never noticed it before. But as the row count climbs into the millions, "look at everything" becomes catastrophic, and it gets worse every time the table grows.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why this is the right starting point</span>
-        <p>Every performance conversation begins here. An index is only ever interesting <em>because</em> the alternative is scanning the whole table. So the real question is never "should I add an index?" in the abstract — it is "is this query forcing a full scan of a big table, and can I avoid it?"</p></div>
+        <p>Every performance conversation begins here. An index is only ever interesting <em>because</em> the alternative is scanning the whole table. So the real question is never "should I add an index?" in the abstract. It is "is this query forcing a full scan of a big table, and can I avoid it?"</p></div>
     </section>
 
     <!-- 2. B-TREE MENTAL MODEL -->
     <section id="btree">
-      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — Mental model</span><h2>The B-tree index</h2></div></div>
-      <p>Think of the index at the back of a physical textbook. To find every page that mentions "deadlock," you do <strong>not</strong> read the whole book — you flip to the alphabetical index, jump straight to D, and it hands you the page numbers. The index is a <em>sorted</em> structure that maps a value to where the real content lives. A database index is exactly this idea, made out of a tree.</p>
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 · Mental model</span><h2>The B-tree index</h2></div></div>
+      <p>Think of the index at the back of a physical textbook. To find every page that mentions "deadlock," you do <strong>not</strong> read the whole book. You flip to the alphabetical index, jump straight to D, and it hands you the page numbers. The index is a <em>sorted</em> structure that maps a value to where the real content lives. A database index is exactly this idea, made out of a tree.</p>
 
-      <p>The default index type in PostgreSQL is a <strong>B-tree</strong>: a sorted, balanced tree. Each node holds indexed values in sorted order plus pointers — internal nodes point to child nodes, and leaf nodes point to the actual table rows. Because it stays balanced, every leaf sits at the same depth, so any lookup touches the same small number of nodes from root to leaf.</p>
+      <p>The default index type in PostgreSQL is a <strong>B-tree</strong>: a sorted, balanced tree. Each node holds indexed values in sorted order plus pointers. Internal nodes point to child nodes, and leaf nodes point to the actual table rows. Because it stays balanced, every leaf sits at the same depth, so any lookup touches the same small number of nodes from root to leaf.</p>
 
       <div class="stack">
         <div class="layer"><span><span class="n">Root</span> one node</span><small>"emp_id &lt; 5000? go left, else right"</small></div>
@@ -380,12 +380,12 @@
       <p>The payoff is the depth. A balanced tree finding a value is <strong>O(log n)</strong>, not O(n). For a table of 20 million rows, that is roughly <strong>four hops</strong> from root to leaf instead of 20 million comparisons. That is the entire reason indexes exist: they convert "read everything" into "navigate a sorted tree." Because the tree is sorted, the same structure also serves range scans (<code class="inl">&gt;</code>, <code class="inl">BETWEEN</code>) and ordered reads, not just exact matches.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">You already have one index</span>
-        <p>Defining a column as <code class="inl">PRIMARY KEY</code> (or <code class="inl">UNIQUE</code>) <strong>automatically creates a B-tree index</strong> on it. That is why looking up <code class="inl">orders</code> by <code class="inl">order_id</code> is instant even on a huge table — the index was there from the moment you created the table. Plain foreign-key columns like <code class="inl">emp_id</code> get <em>no</em> index automatically; you have to add them yourself.</p></div>
+        <p>Defining a column as <code class="inl">PRIMARY KEY</code> (or <code class="inl">UNIQUE</code>) <strong>automatically creates a B-tree index</strong> on it. That is why looking up <code class="inl">orders</code> by <code class="inl">order_id</code> is instant even on a huge table: the index was there from the moment you created the table. Plain foreign-key columns like <code class="inl">emp_id</code> get <em>no</em> index automatically; you have to add them yourself. This is the gap that bit Maya, since her filter was on <code class="inl">emp_id</code>.</p></div>
     </section>
 
     <!-- 3. CREATING INDEXES -->
     <section id="create">
-      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Syntax</span><h2>Creating an index</h2></div></div>
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 · Syntax</span><h2>Creating an index</h2></div></div>
       <p>Creating one is a single statement. You name the table and the column(s) to index:</p>
 
       <div class="codeblock">
@@ -407,10 +407,10 @@
       <div class="grid two">
         <div class="card"><div class="ico sage"><svg><use href="#i-target"/></svg></div>
           <h4>Equality</h4>
-          <p><code class="inl">WHERE emp_id = 42</code> — walk straight to that value in the tree.</p></div>
+          <p><code class="inl">WHERE emp_id = 42</code>, walk straight to that value in the tree.</p></div>
         <div class="card"><div class="ico grey"><svg><use href="#i-sort"/></svg></div>
           <h4>Range</h4>
-          <p><code class="inl">WHERE emp_id BETWEEN 10 AND 99</code> — the tree is sorted, so scan the slice.</p></div>
+          <p><code class="inl">WHERE emp_id BETWEEN 10 AND 99</code>, the tree is sorted, so scan the slice.</p></div>
         <div class="card"><div class="ico taupe"><svg><use href="#i-arrow"/></svg></div>
           <h4>Joins</h4>
           <p>Joining <code class="inl">orders</code> to <code class="inl">employees</code> on <code class="inl">emp_id</code> can look each one up via the index.</p></div>
@@ -419,20 +419,20 @@
           <p><code class="inl">ORDER BY emp_id</code> can read the index in order, skipping a sort step.</p></div>
       </div>
 
-      <p>Notice the pattern: an index helps when your query needs the data <strong>in the order the index stores it</strong> — to find a value, a range of values, or to return them sorted. That single observation drives everything in the rest of this module.</p>
+      <p>Notice the pattern: an index helps when your query needs the data <strong>in the order the index stores it</strong>, whether to find a value, a range of values, or to return them sorted. That single observation drives everything in the rest of this module.</p>
     </section>
 
     <!-- 4. THE COST -->
     <section id="cost">
-      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The trade-off</span><h2>Indexes are not free</h2></div></div>
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 · The trade-off</span><h2>Indexes are not free</h2></div></div>
       <p>If indexes only made queries faster, you would index every column and be done. The reason you do not is the central trade-off of this entire module.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The core trade-off</span>
-        <p>An index <strong>speeds up reads but slows down writes</strong>. Every <code class="inl">INSERT</code>, <code class="inl">UPDATE</code>, and <code class="inl">DELETE</code> must also update <strong>every index</strong> on the affected columns, because the index has to stay in sync with the table. Indexes also <strong>consume disk space</strong> and memory. So you do not index everything — you index for your actual <em>query patterns</em>.</p></div>
+        <p>An index <strong>speeds up reads but slows down writes</strong>. Every <code class="inl">INSERT</code>, <code class="inl">UPDATE</code>, and <code class="inl">DELETE</code> must also update <strong>every index</strong> on the affected columns, because the index has to stay in sync with the table. Indexes also <strong>consume disk space</strong> and memory. So you do not index everything. You index for your actual <em>query patterns</em>.</p></div>
 
-      <p>Walk through it concretely. Say <code class="inl">orders</code> has five indexes. Inserting one new order is no longer a single write — the database appends the row to the table <em>and</em> inserts the new key into all five B-trees, each of which may need to rebalance. A write-heavy table drowning in indexes can become slower to write than it ever gained in read speed.</p>
+      <p>Walk through it concretely. Say <code class="inl">orders</code> has five indexes. Inserting one new order is no longer a single write. The database appends the row to the table <em>and</em> inserts the new key into all five B-trees, each of which may need to rebalance. A write-heavy table drowning in indexes can become slower to write than it ever gained in read speed.</p>
 
-      <p>This reframes the question. "Should I add an index?" is really a cost-benefit decision: <strong>how often is this column queried</strong> (the benefit) versus <strong>how often is this table written, and how much disk can I spend</strong> (the cost). An index on a column nobody filters by is pure overhead — it slows every write and helps no read. Unused indexes are a real, common problem, not a hypothetical.</p>
+      <p>This reframes the question. "Should I add an index?" is really a cost-benefit decision: <strong>how often is this column queried</strong> (the benefit) versus <strong>how often is this table written, and how much disk can I spend</strong> (the cost). An index on a column nobody filters by is pure overhead, since it slows every write and helps no read. Unused indexes are a real, common problem, not a hypothetical.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Rule of thumb</span>
         <p>Index the columns that appear in <code class="inl">WHERE</code> clauses, <code class="inl">JOIN</code> conditions, and <code class="inl">ORDER BY</code> on your large, frequently-queried tables. Do not reflexively index every column "just in case." Each index is a standing tax on every write.</p></div>
@@ -440,13 +440,13 @@
 
     <!-- 5. EXPLAIN -->
     <section id="explain">
-      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — The key skill</span><h2>EXPLAIN &amp; EXPLAIN ANALYZE</h2></div></div>
-      <p>You never have to <em>guess</em> whether a query uses an index — you can ask the database to show you its plan. This is the single most practical performance skill in the whole course.</p>
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 · The key skill</span><h2>EXPLAIN &amp; EXPLAIN ANALYZE</h2></div></div>
+      <p>Maya never has to <em>guess</em> whether a query uses an index. She can ask the database to show her its plan. This is the single most practical performance skill in the whole course.</p>
 
       <p><code class="inl">EXPLAIN</code> shows the query plan the planner <strong>intends</strong> to run, with cost <em>estimates</em>, without executing it. <code class="inl">EXPLAIN ANALYZE</code> goes further: it <strong>actually runs</strong> the query and reports the <em>real</em> row counts and timing alongside the estimates. When you are debugging slowness, you almost always want <code class="inl">ANALYZE</code>.</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">before any index — a sequential scan</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">before any index, a sequential scan</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="kw">EXPLAIN ANALYZE</span> <span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> emp_id <span class="num">=</span> <span class="num">42</span>;
 
 <span class="out">Seq Scan on orders  (cost=0.00..358000.00 rows=11 width=64)
@@ -457,10 +457,10 @@ Planning Time: 0.12 ms
 Execution Time: 843.1 ms</span></code></pre>
       </div>
 
-      <p>Read that plan top-down. <strong>Seq Scan</strong> means it read the whole table. <code class="inl">cost=0.00..358000.00</code> is the planner's estimate (startup cost..total cost, in arbitrary units); <code class="inl">rows=11</code> is its estimate of matches; <code class="inl">actual time</code> and <code class="inl">rows=12</code> are what really happened. The damning line is <strong><code class="inl">Rows Removed by Filter: 19999988</code></strong> — the database inspected 20 million rows to return 12. Now add the index and look again:</p>
+      <p>Maya reads that plan top-down. <strong>Seq Scan</strong> means it read the whole table. <code class="inl">cost=0.00..358000.00</code> is the planner's estimate (startup cost..total cost, in arbitrary units); <code class="inl">rows=11</code> is its estimate of matches; <code class="inl">actual time</code> and <code class="inl">rows=12</code> are what really happened. The damning line is <strong><code class="inl">Rows Removed by Filter: 19999988</code></strong>: the database inspected 20 million rows to return 12. So she adds the index and looks again.</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">after CREATE INDEX idx_orders_emp — an index scan</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">after CREATE INDEX idx_orders_emp, an index scan</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="kw">EXPLAIN ANALYZE</span> <span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> emp_id <span class="num">=</span> <span class="num">42</span>;
 
 <span class="out">Index Scan using idx_orders_emp on orders
@@ -471,7 +471,7 @@ Planning Time: 0.20 ms
 Execution Time: 0.09 ms</span></code></pre>
       </div>
 
-      <p>Same query, same result — but <strong>843 ms became 0.09 ms</strong>, roughly ten-thousand-fold. The plan now says <strong>Index Scan</strong>, the estimated total cost collapsed from 358000 to 39.7, and there is no "Rows Removed by Filter" line because the index went straight to the matching rows.</p>
+      <p>Same query, same result, but <strong>843 ms became 0.09 ms</strong>, roughly ten-thousand-fold. The plan now says <strong>Index Scan</strong>, the estimated total cost collapsed from 358000 to 39.7, and there is no "Rows Removed by Filter" line because the index went straight to the matching rows. Maya's hang is gone.</p>
 
       <h3>The three scan types you will see</h3>
       <div class="grid three">
@@ -487,18 +487,18 @@ Execution Time: 0.09 ms</span></code></pre>
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">How to read any plan fast</span>
-        <p>Scan top to bottom for the word <strong>Seq Scan</strong> on a large table, then check <strong>Rows Removed by Filter</strong> and the gap between <em>estimated</em> rows and <em>actual</em> rows. A big estimate/actual mismatch often means stale statistics — run <code class="inl">ANALYZE orders;</code> to refresh them. The expensive node is your target.</p></div>
+        <p>Scan top to bottom for the word <strong>Seq Scan</strong> on a large table, then check <strong>Rows Removed by Filter</strong> and the gap between <em>estimated</em> rows and <em>actual</em> rows. A big estimate/actual mismatch often means stale statistics, so run <code class="inl">ANALYZE orders;</code> to refresh them. The expensive node is your target.</p></div>
     </section>
 
     <!-- 6. SARGABILITY -->
     <section id="sargable">
-      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — The silent killer</span><h2>Sargability</h2></div></div>
-      <p>Here is the trap that catches even people who have indexed correctly. You add an index, you write a <code class="inl">WHERE</code> on that exact column — and the query <em>still</em> does a Seq Scan. The cause is almost always <strong>sargability</strong> (a contraction of "Search ARGument ABLE"): whether your condition is written in a form the index can actually use.</p>
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 · The silent killer</span><h2>Sargability</h2></div></div>
+      <p>Here is the trap that catches even people who have indexed correctly. A week later Maya adds an index, writes a <code class="inl">WHERE</code> on that exact column, and the query <em>still</em> does a Seq Scan. The cause is almost always <strong>sargability</strong> (a contraction of "Search ARGument ABLE"): whether your condition is written in a form the index can actually use.</p>
 
-      <p>The rule is simple and follows directly from the B-tree model. The index stores the <strong>raw column value</strong>. The moment you wrap the column in a function or arithmetic, the index no longer holds the value you are asking about — so it cannot help, and the planner falls back to a full scan.</p>
+      <p>The rule is simple and follows directly from the B-tree model. The index stores the <strong>raw column value</strong>. The moment you wrap the column in a function or arithmetic, the index no longer holds the value you are asking about, so it cannot help, and the planner falls back to a full scan.</p>
 
-      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Non-sargable — these kill the index</span>
-        <p>If the indexed column is <strong>transformed</strong> on the left side of the comparison, the index is useless. <code class="inl">WHERE LOWER(name) = 'alice'</code>, <code class="inl">WHERE salary + 1000 &gt; 50000</code>, and <code class="inl">WHERE LIKE '%foo'</code> (leading wildcard) all force a scan, because the index stores <code class="inl">name</code>, <code class="inl">salary</code>, and the raw string — not their transformed versions.</p></div>
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Non-sargable: these kill the index</span>
+        <p>If the indexed column is <strong>transformed</strong> on the left side of the comparison, the index is useless. <code class="inl">WHERE LOWER(name) = 'alice'</code>, <code class="inl">WHERE salary + 1000 &gt; 50000</code>, and <code class="inl">WHERE LIKE '%foo'</code> (leading wildcard) all force a scan, because the index stores <code class="inl">name</code>, <code class="inl">salary</code>, and the raw string, not their transformed versions.</p></div>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">slow form vs. the rewrite</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -516,16 +516,16 @@ Execution Time: 0.09 ms</span></code></pre>
 <span class="cmt">-- now WHERE LOWER(name) = 'alice' CAN use the index</span></code></pre>
       </div>
 
-      <p>Two ways out. <strong>Rewrite the condition</strong> so the raw column stands alone (move the arithmetic to the constant side, as with <code class="inl">salary &gt; 49000</code>). Or, when you genuinely need the transformation, build an <strong>expression index</strong> on the transformed value itself — <code class="inl">CREATE INDEX ... ON employees(LOWER(name))</code> stores the lowercased strings, so the matching query becomes sargable again.</p>
+      <p>Two ways out. <strong>Rewrite the condition</strong> so the raw column stands alone (move the arithmetic to the constant side, as with <code class="inl">salary &gt; 49000</code>). Or, when you genuinely need the transformation, build an <strong>expression index</strong> on the transformed value itself. <code class="inl">CREATE INDEX ... ON employees(LOWER(name))</code> stores the lowercased strings, so the matching query becomes sargable again. Maya picks the rewrite, and the Seq Scan flips back to an Index Scan.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Remember LIKE from Module 00</span>
-        <p>Back in the foundations we noted that <code class="inl">name LIKE 'A%'</code> can use an index but <code class="inl">LIKE '%A%'</code> cannot. Now you know exactly why: an anchored pattern <code class="inl">'A%'</code> pins a known prefix, so the B-tree can jump to the right sorted range. A <em>leading</em> wildcard <code class="inl">'%A%'</code> gives the tree no starting point — the match could be anywhere in the string — so it must scan every row. Same principle as a transformed column.</p></div>
+        <p>Back in the foundations we noted that <code class="inl">name LIKE 'A%'</code> can use an index but <code class="inl">LIKE '%A%'</code> cannot. Now you know exactly why: an anchored pattern <code class="inl">'A%'</code> pins a known prefix, so the B-tree can jump to the right sorted range. A <em>leading</em> wildcard <code class="inl">'%A%'</code> gives the tree no starting point (the match could be anywhere in the string), so it must scan every row. Same principle as a transformed column.</p></div>
     </section>
 
     <!-- 7. COMPOSITE -->
     <section id="composite">
-      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — Multi-column</span><h2>Composite indexes &amp; column order</h2></div></div>
-      <p>An index can cover <strong>more than one column</strong>, and the order of those columns is not cosmetic — it determines which queries the index can serve. A composite index is sorted by the first column, then by the second within each value of the first, exactly like a phone book sorted by last name, then first name.</p>
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 · Multi-column</span><h2>Composite indexes &amp; column order</h2></div></div>
+      <p>An index can cover <strong>more than one column</strong>, and the order of those columns is not cosmetic. It determines which queries the index can serve. A composite index is sorted by the first column, then by the second within each value of the first, exactly like a phone book sorted by last name, then first name.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">a two-column index</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -533,30 +533,30 @@ Execution Time: 0.09 ms</span></code></pre>
   <span class="kw">ON</span> orders(status, order_date);</code></pre>
       </div>
 
-      <p>Because it is sorted by <code class="inl">status</code> first, this index follows the <strong>left-prefix rule</strong>: it can serve any query that filters on a <em>leading prefix</em> of its columns — but not on a later column alone.</p>
+      <p>Because it is sorted by <code class="inl">status</code> first, this index follows the <strong>left-prefix rule</strong>: it can serve any query that filters on a <em>leading prefix</em> of its columns, but not on a later column alone.</p>
 
       <div class="tablewrap">
         <table>
           <thead><tr><th>Query filters on</th><th>Can use idx(status, order_date)?</th></tr></thead>
           <tbody>
-            <tr><td><code>status = 'paid'</code></td><td>Yes — leading column</td></tr>
-            <tr><td><code>status = 'paid' AND order_date &gt; '2024-01-01'</code></td><td>Yes — full prefix, the ideal case</td></tr>
-            <tr><td><code>order_date &gt; '2024-01-01'</code> only</td><td><b>No</b> — skips the leading column</td></tr>
-            <tr><td><code>status = 'paid' ORDER BY order_date</code></td><td>Yes — filter on first, sort on second</td></tr>
+            <tr><td><code>status = 'paid'</code></td><td>Yes, leading column</td></tr>
+            <tr><td><code>status = 'paid' AND order_date &gt; '2024-01-01'</code></td><td>Yes, full prefix, the ideal case</td></tr>
+            <tr><td><code>order_date &gt; '2024-01-01'</code> only</td><td><b>No</b>, skips the leading column</td></tr>
+            <tr><td><code>status = 'paid' ORDER BY order_date</code></td><td>Yes, filter on first, sort on second</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p>The phone-book intuition makes the "No" obvious: a book sorted by last-name-then-first is useless for finding everyone named "James" regardless of surname — the Jameses are scattered across every letter. Filtering on <code class="inl">order_date</code> alone is the same problem.</p>
+      <p>The phone-book intuition makes the "No" obvious: a book sorted by last-name-then-first is useless for finding everyone named "James" regardless of surname, since the Jameses are scattered across every letter. Filtering on <code class="inl">order_date</code> alone is the same problem.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Ordering strategy</span>
-        <p>Put <strong>equality columns first, range columns last</strong>. The index can only do <em>one</em> range scan at the end, so a leading equality (<code class="inl">status = 'paid'</code>) narrows the tree to a contiguous slice, and the trailing range (<code class="inl">order_date &gt; ...</code>) scans within it. Reverse the order and you lose that. As a tiebreaker, put the more <em>selective</em> column first.</p></div>
+        <p>Put <strong>equality columns first, range columns last</strong>. The index can only do <em>one</em> range scan at the end, so a leading equality (<code class="inl">status = 'paid'</code>) narrows the tree to a contiguous slice, and the trailing range (<code class="inl">order_date &gt; ...</code>) scans within it. Reverse the order and you lose that. As a tiebreaker, put the more <em>selective</em> column first. This is the index Maya builds for the dashboard's daily revenue report.</p></div>
     </section>
 
     <!-- 8. COVERING -->
     <section id="covering">
-      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Index-only scans</span><h2>Covering indexes</h2></div></div>
-      <p>Normally an Index Scan is two steps: navigate the B-tree to find <em>where</em> the rows are, then go to the table (the "heap") to <em>fetch</em> them. But if the index already contains <strong>every column the query needs</strong>, the second step is pointless — Postgres can answer entirely from the index. This is an <strong>index-only scan</strong>, and the index is called a <strong>covering index</strong>.</p>
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 · Index-only scans</span><h2>Covering indexes</h2></div></div>
+      <p>Normally an Index Scan is two steps: navigate the B-tree to find <em>where</em> the rows are, then go to the table (the "heap") to <em>fetch</em> them. But if the index already contains <strong>every column the query needs</strong>, the second step is pointless, since Postgres can answer entirely from the index. This is an <strong>index-only scan</strong>, and the index is called a <strong>covering index</strong>.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">covering the query with INCLUDE</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -566,15 +566,15 @@ Execution Time: 0.09 ms</span></code></pre>
 <span class="cmt">-- index that covers it: emp_id to search, amount carried along</span>
 <span class="kw">CREATE INDEX</span> idx_orders_emp_amt
   <span class="kw">ON</span> orders(emp_id) <span class="kw">INCLUDE</span> (amount);
-<span class="cmt">-- plan now shows: Index Only Scan — no heap fetch</span></code></pre>
+<span class="cmt">-- plan now shows: Index Only Scan, no heap fetch</span></code></pre>
       </div>
 
-      <p>The <code class="inl">INCLUDE</code> clause carries extra columns in the index's leaf nodes <em>without</em> making them part of the sort key — so <code class="inl">amount</code> rides along just to be returned, without bloating the searchable part of the tree. The plan changes from <strong>Index Scan</strong> to <strong>Index Only Scan</strong>, skipping the heap visit entirely. It is a real win for hot, read-heavy queries, but keep it in proportion: every extra column makes the index larger and slower to maintain.</p>
+      <p>The <code class="inl">INCLUDE</code> clause carries extra columns in the index's leaf nodes <em>without</em> making them part of the sort key, so <code class="inl">amount</code> rides along just to be returned, without bloating the searchable part of the tree. The plan changes from <strong>Index Scan</strong> to <strong>Index Only Scan</strong>, skipping the heap visit entirely. It is a real win for hot, read-heavy queries, but keep it in proportion: every extra column makes the index larger and slower to maintain.</p>
     </section>
 
     <!-- 9. WHEN NOT + WORKFLOW -->
     <section id="workflow">
-      <div class="sec-head"><span class="num">9</span><div class="htext"><span class="kicker">Section 09 — Judgement</span><h2>When not to index, and how to debug</h2></div></div>
+      <div class="sec-head"><span class="num">9</span><div class="htext"><span class="kicker">Section 09 · Judgement</span><h2>When not to index, and how to debug</h2></div></div>
       <p>Knowing when an index <em>will not help</em> is as senior a skill as knowing when it will. Three cases where adding one is the wrong move:</p>
 
       <div class="grid three">
@@ -589,25 +589,25 @@ Execution Time: 0.09 ms</span></code></pre>
           <p>A table that is mostly inserted/updated and rarely queried pays the write tax for little read benefit.</p></div>
       </div>
 
-      <p><strong>Selectivity</strong> is the idea under all of this. An index pays off when it lets the database skip <em>most</em> of the table. If a filter matches a tiny fraction of rows (high selectivity), an index is a huge win. If it matches a large fraction (low selectivity — like a boolean or a 2-value status), the planner correctly decides scanning is cheaper than bouncing between the index and the table thousands of times, and it will ignore your index even if you build it.</p>
+      <p><strong>Selectivity</strong> is the idea under all of this. An index pays off when it lets the database skip <em>most</em> of the table. If a filter matches a tiny fraction of rows (high selectivity), an index is a huge win. If it matches a large fraction (low selectivity, like a boolean or a 2-value status), the planner correctly decides scanning is cheaper than bouncing between the index and the table thousands of times, and it will ignore your index even if you build it.</p>
 
       <h3>A repeatable workflow for any slow query</h3>
       <p>When someone hands you a slow query, do not guess. Run this loop:</p>
 
       <div class="stack">
-        <div class="layer"><span><span class="n">1</span> Measure</span><small>run EXPLAIN ANALYZE — never optimize blind</small></div>
+        <div class="layer"><span><span class="n">1</span> Measure</span><small>run EXPLAIN ANALYZE, never optimize blind</small></div>
         <div class="layer"><span><span class="n">2</span> Locate</span><small>find the expensive node: a Seq Scan on a big table or a high-cost join</small></div>
         <div class="layer"><span><span class="n">3</span> Inspect</span><small>are the WHERE / JOIN columns indexed, and is the condition sargable?</small></div>
-        <div class="layer"><span><span class="n">4</span> Act</span><small>add or fix an index — composite matching filter+sort, or rewrite the predicate</small></div>
+        <div class="layer"><span><span class="n">4</span> Act</span><small>add or fix an index: composite matching filter+sort, or rewrite the predicate</small></div>
         <div class="layer"><span><span class="n">5</span> Re-measure</span><small>run EXPLAIN ANALYZE again and confirm the plan and time actually changed</small></div>
       </div>
 
-      <p>The first and last steps matter most. People skip straight to "add an index" without measuring, add the wrong one, and never check whether it helped. <strong>Measure, change one thing, measure again.</strong> That discipline — not memorized syntax — is what makes you trustworthy with a production database.</p>
+      <p>The first and last steps matter most. People skip straight to "add an index" without measuring, add the wrong one, and never check whether it helped. <strong>Measure, change one thing, measure again.</strong> That discipline, not memorized syntax, is what turned Maya from someone who filed a ticket into someone who closes them, and it is what makes you trustworthy with a production database.</p>
     </section>
 
     <!-- 10a. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">10</span><div class="htext"><span class="kicker">Section 10 — Practice</span><h2>Hands-on — prove it to yourself</h2></div></div>
+      <div class="sec-head"><span class="num">10</span><div class="htext"><span class="kicker">Section 10 · Practice</span><h2>Hands-on, prove it to yourself</h2></div></div>
       <p>To <em>see</em> a Seq Scan beat into an Index Scan, you need a table big enough to matter. Generate one, then run each task and read the plan before and after every change. Reading about indexes does nothing; watching <code class="inl">843 ms</code> become <code class="inl">0.09 ms</code> in your own terminal is what makes it stick.</p>
 
       <div class="codeblock">
@@ -630,29 +630,29 @@ Execution Time: 0.09 ms</span></code></pre>
         <li><svg><use href="#i-checkbox"/></svg>Create <code class="inl">idx_orders_emp</code> on <code class="inl">emp_id</code>, run the same <code class="inl">EXPLAIN ANALYZE</code> again, and compare. Confirm it flipped to an Index Scan and the time dropped sharply.</li>
         <li><svg><use href="#i-checkbox"/></svg>Write a <strong>non-sargable</strong> query: <code class="inl">WHERE emp_id + 0 = 42</code>. Confirm the plan reverts to a Seq Scan even though the index exists. Then rewrite it sargably and watch the index return.</li>
         <li><svg><use href="#i-checkbox"/></svg>Build a <strong>composite</strong> index on <code class="inl">(status, order_date)</code>. Show it is used for <code class="inl">WHERE status='paid' AND order_date &gt; '2023-01-01'</code>.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Now query <code class="inl">WHERE order_date &gt; '2023-01-01'</code> <em>alone</em>. Prove the composite index is <strong>not</strong> used (left-prefix rule) — it should Seq Scan or use a different index.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Now query <code class="inl">WHERE order_date &gt; '2023-01-01'</code> <em>alone</em>. Prove the composite index is <strong>not</strong> used (left-prefix rule); it should Seq Scan or use a different index.</li>
         <li><svg><use href="#i-checkbox"/></svg>Create an <strong>expression index</strong> on <code class="inl">LOWER(customer)</code>, then confirm <code class="inl">WHERE LOWER(customer) = 'cust_500'</code> uses it.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">EXPLAIN</code> (no ANALYZE) on a query and then <code class="inl">EXPLAIN ANALYZE</code>. Spot the difference: estimated vs. actual rows and the presence of real timing.</li>
         <li><svg><use href="#i-checkbox"/></svg>Build a covering index with <code class="inl">INCLUDE (amount)</code> and confirm a query selecting only <code class="inl">amount</code> shows an <strong>Index Only Scan</strong>.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict the plan first</span>
-        <p>Before each <code class="inl">EXPLAIN ANALYZE</code>, say out loud which scan type you expect and roughly how long it should take. When the plan surprises you, that gap is the lesson — chase it. This is the exact habit you will lean on debugging a real slow query on the job.</p></div>
+        <p>Before each <code class="inl">EXPLAIN ANALYZE</code>, say out loud which scan type you expect and roughly how long it should take. When the plan surprises you, that gap is the lesson, so chase it. This is the exact habit Maya leaned on, and the one you will lean on debugging a real slow query on the job.</p></div>
     </section>
 
     <footer>
       <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
       <div class="refs">
-        <a class="reflink" href="https://www.postgresql.org/docs/current/indexes.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Indexes — PostgreSQL docs</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/indexes.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Indexes, PostgreSQL docs</a>
         <a class="reflink" href="https://www.postgresql.org/docs/current/using-explain.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Using EXPLAIN</a>
         <a class="reflink" href="https://use-the-index-luke.com/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Use The Index, Luke</a>
       </div>
 
       <div class="next">
-        <a href="../04-window-functions/04-window-functions.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 04 — Window Functions</b></span></a>
-        <a href="../../index.html"><small>Finished →</small><span class="nx"><svg><use href="#i-star"/></svg><b>Course home — you finished!</b></span></a>
+        <a href="../04-window-functions/04-window-functions.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 04 · Window Functions</b></span></a>
+        <a href="../../index.html"><small>Finished →</small><span class="nx"><svg><use href="#i-star"/></svg><b>Course home, you finished!</b></span></a>
       </div>
-      <p class="endline">SQL L3 Track · Module 05 · the capstone. This was the last module — you have completed the L3 SQL track. You can now write correct queries <em>and</em> reason about why they are fast or slow, read a query plan, and defend your indexing choices.</p>
+      <p class="endline">SQL L3 Track · Module 05 · the capstone. This was the last module, and you have completed the L3 SQL track. Like Maya, you can now write correct queries <em>and</em> reason about why they are fast or slow, read a query plan, and defend your indexing choices.</p>
     </footer>
 
   </main>

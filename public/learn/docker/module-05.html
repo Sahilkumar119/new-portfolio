@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 05 — Docker Compose: Multi-Container Apps</title>
+<title>Module 05: Docker Compose, Multi-Container Apps</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -328,10 +328,11 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 5</span>
-      <h1>Module 05 — <span class="grad">Docker Compose</span><br>Multi-Container Apps</h1>
+      <h1>Module 05: <span class="grad">Docker Compose</span><br>Multi-Container Apps</h1>
       <p class="lede">You can build images, persist data, and connect containers. Now comes the module where those pieces
-      click together. Compose turns a stack of <em>manual docker run commands</em> into a single declarative file that
-      anyone can run — <em>the foundation of every containerized project you will ever ship</em>.</p>
+      click together. Sam, a developer shipping their first containerized app, has all the parts working in isolation but
+      no clean way to start them together. Compose turns a stack of <em>manual docker run commands</em> into a single
+      declarative file that anyone can run. It is <em>the foundation of every containerized project you will ever ship</em>.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2.5h</b> · project-ready</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>builds on Modules 02, 03 &amp; 04</span>
@@ -345,10 +346,11 @@
       <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
       <p>You have covered a lot of ground. Module 02 taught you how to build images with Dockerfiles and layer caching.
       Module 03 showed you how to persist data outside containers using volumes and bind mounts. Module 04 gave you the
-      networking model: user-defined bridge networks, published ports, and — crucially — container-to-container DNS by
+      networking model: user-defined bridge networks, published ports, and (crucially) container-to-container DNS by
       service name.</p>
 
-      <p>Now imagine a real application: a web API, a Postgres database, and a Redis cache. To run this today you would
+      <p>Sam has exactly these three pieces ready: a web API, a Postgres database, and a Redis cache. The goal is to ship
+      them as one app. The problem shows up the moment Sam tries to run it. To start this stack today you would
       need to:</p>
 
       <div class="codeblock">
@@ -361,7 +363,7 @@
 <span class="cmt"># 2. create the named volume manually</span>
 <span class="cmd">docker</span> volume create pgdata
 
-<span class="cmt"># 3. start postgres — remember every flag every time</span>
+<span class="cmt"># 3. start postgres: remember every flag every time</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> db <span class="flag">--network</span> myapp-net \
   <span class="flag">-e</span> <span class="str">POSTGRES_PASSWORD=secret</span> \
   <span class="flag">-v</span> pgdata:/var/lib/postgresql/data \
@@ -370,7 +372,7 @@
 <span class="cmt"># 4. start redis</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> cache <span class="flag">--network</span> myapp-net redis:7-alpine
 
-<span class="cmt"># 5. build and start the API — hope you remembered the build context</span>
+<span class="cmt"># 5. build and start the API: hope you remembered the build context</span>
 <span class="cmd">docker</span> build <span class="flag">-t</span> myapi:dev .
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> api <span class="flag">--network</span> myapp-net \
   <span class="flag">-p</span> <span class="str">8000:8000</span> \
@@ -379,16 +381,16 @@
   myapi:dev</code></pre>
       </div>
 
-      <p>Every time you tear down and restart, you repeat all of this. Every teammate has to know every flag. There's no
+      <p>Every time Sam tears down and restarts, all of this gets repeated. Every teammate has to know every flag. There's no
       single source of truth for how the app is configured. This is the problem Compose solves.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico violet"><svg><use href="#i-layers"/></svg></div>
-          <h4>Modules 02–04 done</h4>
-          <p>Images, volumes, networking — you know the primitives. Compose is just a <b>declarative wrapper</b> over them.</p></div>
+          <h4>Modules 02 to 04 done</h4>
+          <p>Images, volumes, networking. You know the primitives. Compose is just a <b>declarative wrapper</b> over them.</p></div>
         <div class="card"><div class="ico amber"><svg><use href="#i-bolt"/></svg></div>
           <h4>The pain point</h4>
-          <p>Multi-container setup by hand is <b>tedious, error-prone, and not repeatable</b>. One missed flag and something doesn't connect.</p></div>
+          <p>Multi-container setup by hand is <b>tedious, error-prone, and not repeatable</b>. One missed flag and something doesn't connect, which is precisely where Sam got stuck.</p></div>
         <div class="card"><div class="ico green"><svg><use href="#i-compose"/></svg></div>
           <h4>The fix</h4>
           <p>A single <b>compose.yaml</b> replaces all those commands. <code class="inl">docker compose up</code> does it all, every time, identically.</p></div>
@@ -399,18 +401,18 @@
     <section id="what">
       <div class="sec-head"><span class="num">1</span><h2>What Compose is</h2></div>
       <p>Docker Compose is a tool for defining and running multi-container applications from a single declarative YAML
-      file — conventionally named <code class="inl">compose.yaml</code> (older projects use
+      file, conventionally named <code class="inl">compose.yaml</code> (older projects use
       <code class="inl">docker-compose.yml</code>; the new canonical name is <code class="inl">compose.yaml</code>).</p>
 
-      <p>You describe your entire application — every service, its image or build context, its ports, its environment
-      variables, its volumes, and how services depend on each other — in one file. Then one command brings the whole
-      thing up:</p>
+      <p>You describe your entire application in one file: every service, its image or build context, its ports, its
+      environment variables, its volumes, and how services depend on each other. Then one command brings the whole
+      thing up. This is the file Sam will write once and rerun forever:</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">terminal</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># start everything — builds images if needed, creates network/volumes, starts services</span>
+        <pre><code><span class="cmt"># start everything: builds images if needed, creates network/volumes, starts services</span>
 <span class="cmd">docker</span> compose up <span class="flag">-d</span>
 
 <span class="cmt"># tear it all down</span>
@@ -418,12 +420,12 @@
       </div>
 
       <p>Under the hood, Compose does exactly what you would do manually: it creates a user-defined bridge network,
-      creates named volumes, builds or pulls images, and runs containers — but it reads all the configuration from
-      your YAML file instead of requiring you to type it out every time.</p>
+      creates named volumes, builds or pulls images, and runs containers. The difference is that it reads all the
+      configuration from your YAML file instead of requiring you to type it out every time.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why Compose is the natural next step</span>
         <p>Compose is <b>declarative</b> (you describe the desired end state, not the steps to reach it), <b>version-controllable</b>
-        (it's a text file — commit it to git), and <b>reproducible</b> (same YAML produces the same running environment
+        (it's a text file, so commit it to git), and <b>reproducible</b> (same YAML produces the same running environment
         on any machine with Docker installed). It is the standard way to ship a multi-service app for development
         and small-to-medium production deployments. Every Docker job you encounter will expect you to be comfortable
         with it.</p></div>
@@ -434,12 +436,12 @@
       <div class="sec-head"><span class="num">2</span><h2>The compose file anatomy</h2></div>
       <p>A <code class="inl">compose.yaml</code> has three top-level sections: <code class="inl">services</code>,
       <code class="inl">volumes</code>, and <code class="inl">networks</code>. The most important is
-      <code class="inl">services</code> — each entry under it becomes a container. Here is a fully annotated real-world
-      example: a web API, a Postgres database, and a Redis cache.</p>
+      <code class="inl">services</code>, where each entry under it becomes a container. Here is a fully annotated real-world
+      example, the exact shape of Sam's stack: a web API, a Postgres database, and a Redis cache.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">compose.yaml — annotated 3-service app</span><span class="spacer"></span>
+          <span class="title">compose.yaml: annotated 3-service app</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># ── top-level services block ──────────────────────────────────────────</span>
 <span class="kw">services</span>:
@@ -448,7 +450,7 @@
   <span class="kw">api</span>:
     <span class="kw">build</span>: <span class="str">.</span>                          <span class="cmt"># build from Dockerfile in current dir</span>
     <span class="kw">ports</span>:
-      - <span class="str">"8000:8000"</span>                  <span class="cmt"># host:container — publish to the host</span>
+      - <span class="str">"8000:8000"</span>                  <span class="cmt"># host:container, publish to the host</span>
     <span class="kw">environment</span>:
       <span class="kw">DATABASE_URL</span>: <span class="str">postgresql://postgres:${DB_PASS}@db:5432/app</span>
       <span class="kw">REDIS_URL</span>: <span class="str">redis://cache:6379</span>
@@ -468,7 +470,7 @@
       <span class="kw">POSTGRES_PASSWORD</span>: <span class="str">${DB_PASS}</span>  <span class="cmt"># variable from .env file or shell</span>
       <span class="kw">POSTGRES_DB</span>: <span class="str">app</span>
     <span class="kw">volumes</span>:
-      - <span class="str">pgdata:/var/lib/postgresql/data</span> <span class="cmt"># named volume — data survives compose down</span>
+      - <span class="str">pgdata:/var/lib/postgresql/data</span> <span class="cmt"># named volume, data survives compose down</span>
     <span class="kw">healthcheck</span>:
       <span class="kw">test</span>: [<span class="str">"CMD-SHELL"</span>, <span class="str">"pg_isready -U postgres"</span>]
       <span class="kw">interval</span>: <span class="str">5s</span>
@@ -524,23 +526,23 @@
 
       <div class="grid two">
         <div class="card"><div class="ico cyan"><svg><use href="#i-layers"/></svg></div>
-          <h4>build: — build locally</h4>
+          <h4>build: build locally</h4>
           <p>Points to a directory containing a Dockerfile. Compose runs <code class="inl">docker build</code> and uses
-          the resulting image. Use this for <b>your own services</b> — code you own and actively change.</p></div>
+          the resulting image. Use this for <b>your own services</b>, code you own and actively change. For Sam, that's the API.</p></div>
         <div class="card"><div class="ico amber"><svg><use href="#i-db"/></svg></div>
-          <h4>image: — pull from registry</h4>
-          <p>Pulls an existing image from Docker Hub or any registry. Use this for <b>third-party services</b> —
-          databases, caches, message queues — where you're not writing the image yourself.</p></div>
+          <h4>image: pull from registry</h4>
+          <p>Pulls an existing image from Docker Hub or any registry. Use this for <b>third-party services</b> such as
+          databases, caches, and message queues, where you're not writing the image yourself.</p></div>
       </div>
 
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">build forms</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># short form — Dockerfile lives in the same directory as compose.yaml</span>
+        <pre><code><span class="cmt"># short form: Dockerfile lives in the same directory as compose.yaml</span>
 <span class="kw">build</span>: <span class="str">.</span>
 
-<span class="cmt"># long form — specify a different context and/or Dockerfile name</span>
+<span class="cmt"># long form: specify a different context and/or Dockerfile name</span>
 <span class="kw">build</span>:
   <span class="kw">context</span>: <span class="str">./services/api</span>
   <span class="kw">dockerfile</span>: <span class="str">Dockerfile.prod</span>
@@ -554,8 +556,8 @@
         <p>By default, <code class="inl">docker compose up</code> builds the image only if it does not already exist
         locally. If you change your source code and run <code class="inl">up</code> again, it will use the old cached
         image. To force a rebuild, always run <code class="inl">docker compose up --build</code> during active development.
-        This is one of the most common gotchas: "why isn't my change showing up?" — because the image was not
-        rebuilt.</p></div>
+        This is one of the most common gotchas, the one that cost Sam an afternoon: "why isn't my change showing up?"
+        The answer is that the image was not rebuilt.</p></div>
     </section>
 
     <!-- 4. NETWORKING -->
@@ -566,7 +568,7 @@
       gets a DNS entry equal to its <strong>service name</strong> in the compose file.</p>
 
       <p>That means, inside the <code class="inl">api</code> container, you can connect to Postgres using the hostname
-      <code class="inl">db</code> — not an IP address, not a port number guessing game. This is identical to what you
+      <code class="inl">db</code>, not an IP address, not a port number guessing game. This is identical to what you
       learned in Module 04 when you put containers on the same user-defined bridge and reached them by name. Compose
       just automates that setup.</p>
 
@@ -574,7 +576,7 @@
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">how service discovery works</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># in your application code (Python example — sketch, not full code)</span>
+        <pre><code><span class="cmt"># in your application code (Python example, sketch, not full code)</span>
 <span class="cmt"># the hostname is the Compose SERVICE NAME, not "localhost", not an IP</span>
 <span class="out">DATABASE_URL = "postgresql://postgres:secret@db:5432/app"</span>
 <span class="cmt">#                                              ^^</span>
@@ -582,12 +584,12 @@
 
 <span class="out">REDIS_URL = "redis://cache:6379"</span>
 <span class="cmt">#                    ^^^^^</span>
-<span class="cmt">#                    service name — Compose DNS resolves it to the container's IP</span></code></pre>
+<span class="cmt">#                    service name: Compose DNS resolves it to the container's IP</span></code></pre>
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The tie-back to Module 04</span>
         <p>In Module 04 you manually created a user-defined network and used <code class="inl">--name</code> to give each
-        container a DNS-resolvable hostname. Compose does exactly that, automatically, for every service — the service
+        container a DNS-resolvable hostname. Compose does exactly that, automatically, for every service. The service
         name <b>is</b> the DNS hostname. This is not new magic; it is the same mechanism, just automated. When someone
         asks "how do containers in Compose talk to each other," the answer is: <b>user-defined bridge network with
         automatic DNS on service names</b>.</p></div>
@@ -595,7 +597,7 @@
       <h3>Only expose what needs exposure</h3>
       <p>Notice in the anatomy example that only the <code class="inl">api</code> service has a
       <code class="inl">ports</code> mapping. The <code class="inl">db</code> and <code class="inl">cache</code> services
-      do not publish ports to the host — they are only reachable from inside the Compose network. This is the correct
+      do not publish ports to the host. They are only reachable from inside the Compose network. This is the correct
       posture: your database should not be exposed on <code class="inl">localhost:5432</code> in production. Services
       talk to each other via the Compose network; only the entry point (the API) is published outward.</p>
     </section>
@@ -607,17 +609,17 @@
       <code class="inl">depends_on</code> and then wonder why their app crashes on startup even though it lists the
       database as a dependency.</p>
 
-      <p>The reason is that <code class="inl">depends_on</code> alone only controls <strong>start order</strong> — it
+      <p>The reason is that <code class="inl">depends_on</code> alone only controls <strong>start order</strong>. It
       tells Compose "start the db container before the api container." It does <strong>not</strong> wait for the database
       to actually be ready to accept connections. Postgres takes a few seconds to initialise its data directory after the
-      container starts. If your API tries to connect immediately, it fails.</p>
+      container starts. Sam's API tried to connect immediately on first boot, and it failed.</p>
 
       <div class="grid two">
         <div class="card"><div class="ico red"><svg><use href="#i-warn"/></svg></div>
-          <h4>depends_on alone — NOT readiness</h4>
+          <h4>depends_on alone: NOT readiness</h4>
           <p>Container started <b>does not mean service ready</b>. Postgres may be initialising. Your app will crash, then restart, until Postgres accepts connections.</p></div>
         <div class="card"><div class="ico green"><svg><use href="#i-check"/></svg></div>
-          <h4>depends_on + healthcheck — actual readiness</h4>
+          <h4>depends_on + healthcheck: actual readiness</h4>
           <p>Compose waits until the healthcheck passes before starting dependent services. <b>This is the correct pattern</b> for any service with a startup delay.</p></div>
       </div>
 
@@ -650,9 +652,9 @@
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The three condition values</span>
-        <p><code class="inl">service_started</code> — container has started (the default when you just write
-        <code class="inl">depends_on: [db]</code>). <code class="inl">service_healthy</code> — container has a passing
-        healthcheck. <code class="inl">service_completed_successfully</code> — for init containers or migration jobs that
+        <p><code class="inl">service_started</code> means the container has started (the default when you just write
+        <code class="inl">depends_on: [db]</code>). <code class="inl">service_healthy</code> means the container has a passing
+        healthcheck. <code class="inl">service_completed_successfully</code> is for init containers or migration jobs that
         run once and exit 0. Use <code class="inl">service_healthy</code> for databases. Use
         <code class="inl">service_started</code> only for services that are genuinely ready immediately.</p></div>
     </section>
@@ -667,17 +669,17 @@
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">three ways to pass environment variables</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># 1. inline — simple, but hardcoded values end up committed to git</span>
+        <pre><code><span class="cmt"># 1. inline: simple, but hardcoded values end up committed to git</span>
 <span class="kw">environment</span>:
   <span class="kw">NODE_ENV</span>: <span class="str">production</span>
   <span class="kw">PORT</span>: <span class="str">"8000"</span>
 
-<span class="cmt"># 2. variable substitution — values come from a .env file or from the shell</span>
+<span class="cmt"># 2. variable substitution: values come from a .env file or from the shell</span>
 <span class="kw">environment</span>:
   <span class="kw">DATABASE_URL</span>: <span class="str">postgresql://postgres:${DB_PASS}@db:5432/app</span>
   <span class="cmt"># Compose reads .env in the same directory as compose.yaml automatically</span>
 
-<span class="cmt"># 3. env_file — point to a file; each line is KEY=VALUE</span>
+<span class="cmt"># 3. env_file: point to a file; each line is KEY=VALUE</span>
 <span class="kw">env_file</span>:
   - <span class="str">.env</span>               <span class="cmt"># loaded automatically anyway, but can list other files</span>
   - <span class="str">.env.local</span>         <span class="cmt"># useful for per-developer overrides</span></code></pre>
@@ -701,7 +703,7 @@
 
       <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Keep secrets out of version control</span>
         <p>Add <code class="inl">.env</code> to your <code class="inl">.gitignore</code>. Commit a
-        <code class="inl">.env.example</code> instead — a copy with placeholder values that tells teammates what
+        <code class="inl">.env.example</code> instead, a copy with placeholder values that tells teammates what
         variables are needed without exposing actual credentials. Hardcoding passwords directly in
         <code class="inl">compose.yaml</code> is a serious security mistake because the compose file typically
         <em>is</em> committed to git.</p></div>
@@ -715,14 +717,14 @@
     <!-- 7. CLI -->
     <section id="cli">
       <div class="sec-head"><span class="num">7</span><h2>The Compose CLI</h2></div>
-      <p>The Compose CLI is built into Docker (as <code class="inl">docker compose</code> — note the space, not a hyphen).
+      <p>The Compose CLI is built into Docker (as <code class="inl">docker compose</code>, note the space, not a hyphen).
       You will use a small set of commands constantly. Know these cold.</p>
 
       <div class="tablewrap"><table>
         <thead><tr><th>Command</th><th>What it does</th></tr></thead>
         <tbody>
           <tr><td><code>docker compose up</code></td><td>Build (if needed), create, and start all services. Attaches to logs in the foreground.</td></tr>
-          <tr><td><code>docker compose up -d</code></td><td>Same but detached — returns the prompt immediately. You'll use this most.</td></tr>
+          <tr><td><code>docker compose up -d</code></td><td>Same but detached, returns the prompt immediately. You'll use this most.</td></tr>
           <tr><td><code>docker compose up --build</code></td><td>Force-rebuild all service images before starting. Use whenever you change code.</td></tr>
           <tr><td><code>docker compose down</code></td><td>Stop and remove containers and the default network. <b>Volumes are preserved.</b></td></tr>
           <tr><td><code>docker compose down -v</code></td><td>Down + delete named volumes. Data is gone. Use with intent.</td></tr>
@@ -732,13 +734,13 @@
           <tr><td><code>docker compose exec api sh</code></td><td>Open a shell inside a running service container. Like <code>docker exec -it</code>.</td></tr>
           <tr><td><code>docker compose build</code></td><td>Build all service images without starting them.</td></tr>
           <tr><td><code>docker compose restart api</code></td><td>Restart a specific service without touching others.</td></tr>
-          <tr><td><code>docker compose up --scale api=3</code></td><td>Run 3 instances of the api service. Stateless services only — don't scale services with host port bindings.</td></tr>
+          <tr><td><code>docker compose up --scale api=3</code></td><td>Run 3 instances of the api service. Stateless services only, so don't scale services with host port bindings.</td></tr>
         </tbody>
       </table></div>
 
-      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">down vs down -v — know the difference</span>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">down vs down -v: know the difference</span>
         <p><code class="inl">docker compose down</code> removes containers and networks but <b>leaves named volumes
-        intact</b>. Your Postgres data survives. <code class="inl">docker compose down -v</code> also removes volumes —
+        intact</b>. Your Postgres data survives. <code class="inl">docker compose down -v</code> also removes volumes, so
         the database is wiped. This is intentional in some situations (resetting a dev environment to a clean state)
         but catastrophic if you run it by accident against a volume with real data. Be deliberate.</p></div>
     </section>
@@ -746,7 +748,7 @@
     <!-- 8. WALKTHROUGH -->
     <section id="walkthrough">
       <div class="sec-head"><span class="num">8</span><h2>The full project walkthrough</h2></div>
-      <p>Let's pull everything together and walk through what a real project looks like — from directory layout to
+      <p>Let's pull everything together and walk through Sam's finished project end to end, from directory layout to
       running and tearing down. This is the pattern you will use in every containerized project you build.</p>
 
       <h3>Directory layout</h3>
@@ -756,7 +758,7 @@
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="out">myapp/</span>
 <span class="out">├── compose.yaml</span>         <span class="cmt"># the whole app in one file</span>
-<span class="out">├── .env</span>                 <span class="cmt"># secrets — gitignored</span>
+<span class="out">├── .env</span>                 <span class="cmt"># secrets, gitignored</span>
 <span class="out">├── .env.example</span>         <span class="cmt"># committed placeholder</span>
 <span class="out">├── .gitignore</span>           <span class="cmt"># includes .env</span>
 <span class="out">├── Dockerfile</span>           <span class="cmt"># for the api service</span>
@@ -767,7 +769,7 @@
       <h3>Bring the app up</h3>
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — full workflow</span><span class="spacer"></span>
+          <span class="title">terminal: full workflow</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
         <pre><code><span class="cmt"># from the project root (where compose.yaml lives)</span>
 <span class="cmd">docker</span> compose up <span class="flag">-d</span> <span class="flag">--build</span>
@@ -796,9 +798,9 @@
       <h3>Tear down</h3>
       <div class="codeblock">
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="title">terminal — teardown options</span><span class="spacer"></span>
+          <span class="title">terminal: teardown options</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># stop containers + remove network — volumes survive</span>
+        <pre><code><span class="cmt"># stop containers + remove network, volumes survive</span>
 <span class="cmd">docker</span> compose down
 
 <span class="cmt"># stop + remove everything INCLUDING volumes (data is gone)</span>
@@ -818,7 +820,7 @@
 
     <!-- 9. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">9</span><h2>Hands-on — do this now</h2></div>
+      <div class="sec-head"><span class="num">9</span><h2>Hands-on: do this now</h2></div>
       <p>This module only sticks if you run it yourself. The checklist below takes about 45 minutes if you go through
       it properly. Do not skip it.</p>
 
@@ -828,7 +830,7 @@
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker compose up -d --build</code>. Confirm all three services are running with <code class="inl">docker compose ps</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>From inside the <code class="inl">api</code> container (<code class="inl">docker compose exec api sh</code>), try to connect to the database using the hostname <code class="inl">db</code>. Confirm that service-name DNS works.</li>
         <li><svg><use href="#i-checkbox"/></svg>Add a <code class="inl">healthcheck</code> to the <code class="inl">db</code> service and change the <code class="inl">api</code>'s <code class="inl">depends_on</code> to <code class="inl">condition: service_healthy</code>. Bring the stack down and up again. Watch Compose wait for the healthcheck to pass before starting the API.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Scale the api service to 3 replicas with <code class="inl">docker compose up -d --scale api=3</code>. Check with <code class="inl">docker compose ps</code>. Note: this only works if api has no static host port binding — change <code class="inl">ports</code> to <code class="inl">"8000"</code> (container port only) first.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Scale the api service to 3 replicas with <code class="inl">docker compose up -d --scale api=3</code>. Check with <code class="inl">docker compose ps</code>. Note: this only works if api has no static host port binding, so change <code class="inl">ports</code> to <code class="inl">"8000"</code> (container port only) first.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker compose logs -f</code> and watch log output from all services simultaneously. Then filter to one: <code class="inl">docker compose logs -f db</code>.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker compose down</code> and confirm with <code class="inl">docker volume ls</code> that the named volume still exists.</li>
         <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker compose down -v</code> and confirm the volume is gone. Understand what you just destroyed and why that distinction matters.</li>
@@ -837,7 +839,8 @@
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The goal of the hands-on</span>
         <p>By the time you tick the last box, you have a real multi-service containerized project in a git repo. That
-        is not a tutorial exercise — that is a <b>portfolio item</b>. The muscle memory of writing a Compose file
+        is not a tutorial exercise. That is a <b>portfolio item</b>, and it is exactly where Sam landed: one file, two
+        commands, a stack that comes up the same way every time. The muscle memory of writing a Compose file
         from scratch, making services discover each other, and confidently tearing things down is what "I know Docker
         Compose" actually means.</p></div>
     </section>
@@ -852,8 +855,8 @@
       </div>
 
       <div class="next">
-        <a href="module-04.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 04 — Networking</b></span></a>
-        <a href="module-06.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 06 — Registries</b></span></a>
+        <a href="module-04.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 04: Networking</b></span></a>
+        <a href="module-06.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 06: Registries</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 05 · built for visual learning.
       Once the hands-on checklist is fully ticked, build a real project before moving to Module 06.</p>

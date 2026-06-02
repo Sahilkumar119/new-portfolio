@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 01 — Images &amp; Containers: Lifecycle &amp; the Core CLI</title>
+<title>Module 01: Images &amp; Containers: Lifecycle &amp; the Core CLI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -345,7 +345,7 @@
       <a href="#trace"><svg class="ti"><use href="#i-route"/></svg>What run does</a>
       <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
     </nav>
-    <p class="scrollmsg">Run every command yourself. Docker is muscle memory — reading is not enough.</p>
+    <p class="scrollmsg">Run every command yourself. Docker is muscle memory, and reading is not enough.</p>
   </aside>
 
   <!-- ░░ content ░░ -->
@@ -353,10 +353,10 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 1</span>
-      <h1>Module 01 — <span class="grad">Images &amp; Containers</span><br>The Lifecycle &amp; the Core CLI</h1>
-      <p class="lede">Foundations told you <em>what</em> a container is. This module is where it becomes muscle memory:
-      the lifecycle every container moves through, and the dozen commands you'll type every working day.
-      Reading is not enough here — run every command yourself.</p>
+      <h1>Module 01: <span class="grad">Images &amp; Containers</span><br>The Lifecycle &amp; the Core CLI</h1>
+      <p class="lede">Meet Sam, a developer shipping their first containerized app. Foundations told Sam <em>what</em> a container is.
+      This module is where that knowledge becomes muscle memory: the lifecycle every container moves through, and the
+      dozen commands you'll type every working day. Reading is not enough here, so run every command yourself.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · hands-on heavy</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 00</span>
@@ -368,7 +368,8 @@
     <!-- 0. RECAP -->
     <section id="recap">
       <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
-      <p>From Foundations, hold these three sentences in your head — everything in this module hangs off them:</p>
+      <p>Sam's goal is simple: get one web app running in a container and keep it running. From Foundations,
+      hold these three sentences in your head, because everything in this module hangs off them:</p>
       <div class="grid three">
         <div class="card"><div class="ico violet"><svg><use href="#i-box"/></svg></div>
           <h4>Container = process</h4>
@@ -390,7 +391,8 @@
       <div class="sec-head"><span class="num">1</span><h2>Image and container, made concrete</h2></div>
       <p>The image is layers of read-only filesystem. Starting a container adds <strong>one thin writable layer</strong>
       on top (copy-on-write). Everything the running process writes lands there. Delete the container and that layer
-      vanishes — the image layers are untouched and shared with every other container started from the same image.</p>
+      vanishes (the image layers are untouched and shared with every other container started from the same image).
+      This is the trap Sam hit first: a config file edited inside a running container disappeared on the next run.</p>
 
       <div class="stack">
         <div class="layer rw"><span>⬆ Writable container layer</span><small>per-container · gone on rm</small></div>
@@ -402,7 +404,7 @@
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The mental flip juniors miss</span>
         <p>Data you write inside a running container is <b>not</b> in the image and does <b>not</b> survive
-        <code class="inl">docker rm</code>. Persistence is a separate concern — that's Module 03 (volumes).
+        <code class="inl">docker rm</code>. Persistence is a separate concern, covered in Module 03 (volumes).
         For now: treat container filesystems as disposable.</p></div>
     </section>
 
@@ -447,20 +449,20 @@
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Key insight</span>
         <p><b>run = create + start.</b> And the container lives exactly as long as its <b>PID 1</b> (the main process) lives.
         When PID 1 exits, the container stops. That's why a container running a one-shot command exits immediately,
-        and why <code class="inl">docker run ubuntu</code> stops at once but <code class="inl">docker run nginx</code> keeps running —
-        nginx is a long-lived foreground process.</p></div>
+        and why <code class="inl">docker run ubuntu</code> stops at once but <code class="inl">docker run nginx</code> keeps running.
+        Nginx is a long-lived foreground process. Sam's app needs to stay up, so it needs a process like that as PID 1.</p></div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">stop vs kill</span>
-        <p><code class="inl">docker stop</code> sends <b>SIGTERM</b>, waits (default 10s grace), then <b>SIGKILL</b> — graceful.
-        <code class="inl">docker kill</code> sends SIGKILL immediately — abrupt. In production you almost always want
+        <p><code class="inl">docker stop</code> sends <b>SIGTERM</b>, waits (default 10s grace), then <b>SIGKILL</b>. That is the graceful path.
+        <code class="inl">docker kill</code> sends SIGKILL immediately, which is abrupt. In production you almost always want
         <code class="inl">stop</code> so the app can flush and close connections.</p></div>
     </section>
 
     <!-- 3. ANATOMY OF RUN -->
     <section id="run">
       <div class="sec-head"><span class="num">3</span><h2>Anatomy of <code style="font-size:.7em">docker run</code></h2></div>
-      <p>One command does a lot. Learn to read it by position — the parts before the image name configure Docker;
-      everything after the image name is passed <em>into</em> the container.</p>
+      <p>One command does a lot. The first time Sam typed it, the flag order felt arbitrary. It isn't. Read it by position:
+      the parts before the image name configure Docker, and everything after the image name is passed <em>into</em> the container.</p>
 
       <div class="anat">
         <span class="tok t1">docker run<span class="lbl">create + start</span></span>
@@ -473,12 +475,12 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Flag</th><th>Does</th><th>When</th></tr></thead>
         <tbody>
-          <tr><td><code>-d</code></td><td>Detached — run in background, return the prompt.</td><td>Servers, anything long-lived.</td></tr>
+          <tr><td><code>-d</code></td><td>Detached: run in background, return the prompt.</td><td>Servers, anything long-lived.</td></tr>
           <tr><td><code>-it</code></td><td><code>-i</code> keep STDIN open + <code>-t</code> allocate a TTY.</td><td>Interactive shells: <code>docker run -it ubuntu bash</code>.</td></tr>
           <tr><td><code>--name</code></td><td>Give a stable, human name instead of a random one.</td><td>Always, for anything you'll reference again.</td></tr>
           <tr><td><code>-p H:C</code></td><td>Publish: map <b>host</b> port → <b>container</b> port.</td><td>To reach a server from your browser (full detail in Module 04).</td></tr>
           <tr><td><code>-e K=V</code></td><td>Set an environment variable inside the container.</td><td>Config, secrets-ish (real secrets = Module 07).</td></tr>
-          <tr><td><code>--rm</code></td><td>Auto-remove the container when it exits.</td><td>Throwaway / test runs — keeps your machine clean.</td></tr>
+          <tr><td><code>--rm</code></td><td>Auto-remove the container when it exits.</td><td>Throwaway / test runs, keeps your machine clean.</td></tr>
           <tr><td><code>--restart</code></td><td>Restart policy: <code>no</code> / <code>on-failure</code> / <code>always</code> / <code>unless-stopped</code>.</td><td>Resilience for long-running services.</td></tr>
         </tbody>
       </table></div>
@@ -551,14 +553,14 @@
 <span class="cmd">docker</span> inspect <span class="flag">-f</span> <span class="str">'{{.State.Status}} {{.State.ExitCode}}'</span> web
 <span class="out">running 0</span></code></pre></div>
 
-      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">exec vs attach — a classic trap</span>
-        <p><code class="inl">docker exec</code> starts a <b>new</b> process (e.g. a second shell) — exiting it leaves the container running.
-        <code class="inl">docker attach</code> connects to the <b>existing PID 1's</b> streams — Ctrl-C there can kill the container.
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">exec vs attach, a classic trap</span>
+        <p><code class="inl">docker exec</code> starts a <b>new</b> process (e.g. a second shell), so exiting it leaves the container running.
+        <code class="inl">docker attach</code> connects to the <b>existing PID 1's</b> streams, where Ctrl-C can kill the container. Sam learned this the hard way.
         For debugging, you almost always want <code class="inl">exec</code>.</p></div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Why exec'd changes don't persist to the image</span>
         <p>Install a package via <code class="inl">exec</code> and it lands in the writable layer, gone on <code class="inl">rm</code>.
-        To bake changes into an image you edit the <b>Dockerfile</b> and rebuild — Module 02. Never "fix" images by hand inside a container.</p></div>
+        To bake changes into an image you edit the <b>Dockerfile</b> and rebuild, which is Module 02. Never "fix" images by hand inside a container.</p></div>
     </section>
 
     <!-- 6. MANAGING IMAGES -->
@@ -577,7 +579,7 @@
         </tbody>
       </table></div>
 
-      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Tags are not versions — they're mutable pointers</span>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Tags are not versions; they're mutable pointers</span>
         <p><code class="inl">nginx:latest</code> today and next month can be different images. For reproducibility, pin a specific
         tag (<code class="inl">nginx:1.27</code>) or, best, a digest (<code class="inl">nginx@sha256:…</code>). This is a real
         production pitfall. Registries, digests, and signing are Module 06.</p></div>
@@ -610,8 +612,9 @@
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><h2>Hands-on — do this now</h2></div>
-      <p>Docker is muscle memory. Run every line, predict the output before you hit enter, then check.</p>
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: do this now</h2></div>
+      <p>This is the exact sequence that took Sam's app from "won't stay up" to shipped. Docker is muscle memory.
+      Run every line, predict the output before you hit enter, then check.</p>
       <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: drive a container through its whole lifecycle</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Start a named web server, detached, on host port 8080</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> web <span class="flag">-p</span> <span class="str">8080:80</span> nginx:1.27
 
@@ -633,7 +636,7 @@ curl <span class="flag">-s</span> localhost:8080 | head <span class="flag">-n</s
 <span class="cmd">docker</span> exec web sh <span class="flag">-c</span> <span class="str">'echo hi > /tmp/proof'</span>
 <span class="cmd">docker</span> rm <span class="flag">-f</span> web
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> web <span class="flag">-p</span> <span class="str">8080:80</span> nginx:1.27
-<span class="cmd">docker</span> exec web ls /tmp        <span class="cmt"># /tmp/proof is GONE — new writable layer</span>
+<span class="cmd">docker</span> exec web ls /tmp        <span class="cmt"># /tmp/proof is GONE: new writable layer</span>
 
 <span class="cmt"># 7. Clean up</span>
 <span class="cmd">docker</span> rm <span class="flag">-f</span> web</code></pre></div>
@@ -657,8 +660,8 @@ curl <span class="flag">-s</span> localhost:8080 | head <span class="flag">-n</s
       </div>
 
       <div class="next">
-        <a href="module-00.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 00 — Foundations</b></span></a>
-        <a href="module-02.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 02 — Dockerfiles: build, layers, cache</b></span></a>
+        <a href="module-00.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 00: Foundations</b></span></a>
+        <a href="module-02.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 02: Dockerfiles: build, layers, cache</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 01 · built for visual learning.
       Once the hands-on checklist is all ticked, move on to Module 02.</p>

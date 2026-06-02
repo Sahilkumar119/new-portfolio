@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 04 — Window Functions: Calculate Across Rows</title>
+<title>Module 04: Window Functions, Calculate Across Rows</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
   .chip b{color:var(--accent)}
   @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
 
-  /* section heads — editorial */
+  /* section heads, editorial */
   section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
   section:first-of-type{border-top:none}
   .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
@@ -137,7 +137,7 @@
   .note.info{background:var(--bg-2)}
   .note.info .ic,.note.info .tag{color:var(--ink-soft)}
 
-  /* code — dark block on light page */
+  /* code, dark block on light page */
   .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
     overflow:hidden}
   .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
@@ -326,7 +326,7 @@
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 04</span>
       <h1>Window Functions<br>Calculate <span class="u">across rows</span></h1>
-      <p class="lede">An aggregate collapses many rows into one. A <em>window function</em> does the same math — sum, average, rank, running total — but keeps <em>every row intact</em>. Each row holds onto its own identity <em>and</em> gains a value computed over a "window" of related rows. This is the thing <em>GROUP BY</em> simply cannot do, and the single most common topic that separates an L3 SQL candidate from an L1 one.</p>
+      <p class="lede">An aggregate collapses many rows into one. A <em>window function</em> does the same math (sum, average, rank, running total) but keeps <em>every row intact</em>. Each row holds onto its own identity <em>and</em> gains a value computed over a "window" of related rows. This is the thing <em>GROUP BY</em> simply cannot do, and the single most common topic that separates an L3 SQL candidate from an L1 one. Maya, the new analyst at our small company, learns it the week she gets handed her first real reporting request.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · core technique</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>needs Modules 00–03</span>
@@ -336,20 +336,20 @@
 
     <!-- 0. RECAP & CORE IDEA -->
     <section id="recap">
-      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>Recap &amp; the core idea</h2></div></div>
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 · Orientation</span><h2>Recap &amp; the core idea</h2></div></div>
       <p>By now you can filter (<code class="inl">WHERE</code>), aggregate (<code class="inl">GROUP BY</code> with <code class="inl">SUM</code>, <code class="inl">AVG</code>, <code class="inl">COUNT</code>), join multiple tables, and reach for subqueries and CTEs to compose logic. Every aggregate you have written so far shares one trait: it <strong>collapses</strong>. Ten employees in a department become a single row holding their average salary. The individual rows are gone.</p>
 
-      <p>That is exactly the limitation window functions remove. Suppose the question is: <em>"show every employee, their salary, and the average salary of their department, on the same row."</em> With <code class="inl">GROUP BY</code> you are stuck — grouping destroys the per-employee rows, so you would need a self-join or a correlated subquery to glue the average back on. A window function answers it directly.</p>
+      <p>That is exactly the limitation window functions remove. Maya's first ticket reads: <em>"show every employee, their salary, and the average salary of their department, on the same row."</em> She tries <code class="inl">GROUP BY</code> and gets stuck. Grouping destroys the per-employee rows, so she would need a self-join or a correlated subquery to glue the average back on. A window function answers it directly.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The one-sentence definition</span>
-        <p>A <strong>window function</strong> performs a calculation across a set of rows that are related to the current row — its <em>window</em> — and returns a value <strong>for each row, without collapsing them</strong>. Same family of math as aggregates; opposite effect on row count. GROUP BY reduces rows; a window function annotates them.</p></div>
+        <p>A <strong>window function</strong> performs a calculation across a set of rows related to the current row (its <em>window</em>) and returns a value <strong>for each row, without collapsing them</strong>. Same family of math as aggregates, opposite effect on row count. GROUP BY reduces rows; a window function annotates them.</p></div>
 
       <p>The mechanism is a single new clause, <code class="inl">OVER(...)</code>, bolted onto a function call. When the database sees <code class="inl">OVER</code>, it switches that function from "collapse mode" into "window mode." Everything in this module is really just learning what you can put inside those parentheses.</p>
     </section>
 
     <!-- 1. OVER CLAUSE -->
     <section id="over">
-      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 — Anatomy</span><h2>The OVER() clause</h2></div></div>
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 · Anatomy</span><h2>The OVER() clause</h2></div></div>
       <p>A window function is any aggregate-or-window function followed by <code class="inl">OVER (...)</code>. Three optional pieces live inside the parentheses, and each one shapes the window differently.</p>
 
       <div class="anat">
@@ -357,7 +357,7 @@
         <span class="lbl">the function &nbsp;·&nbsp; OVER keyword &nbsp;·&nbsp; split into groups &nbsp;·&nbsp; order within group &nbsp;·&nbsp; which rows count</span>
       </div>
 
-      <p>Start with the simplest possible window: empty parentheses. <code class="inl">OVER ()</code> means "the window is the entire result set" — every row sees every other row.</p>
+      <p>Maya starts with the simplest possible window: empty parentheses. <code class="inl">OVER ()</code> means "the window is the entire result set." Every row sees every other row.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">whole-table average attached to every row</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -378,7 +378,7 @@
 
       <p>Six rows in, six rows out. The average <code class="inl">(185000+120000+135000+98000+105000+72000)/6 = 119167</code> is computed once and stamped onto every row. No <code class="inl">GROUP BY</code> appeared anywhere, and we did not lose a single employee.</p>
 
-      <p>Now add <code class="inl">PARTITION BY dept_id</code>. This splits the rows into independent groups (partitions) and computes the average <em>separately within each one</em> — but, crucially, still emits one row per employee.</p>
+      <p>Now add <code class="inl">PARTITION BY dept_id</code>. This splits the rows into independent groups (partitions) and computes the average <em>separately within each one</em>, but, crucially, still emits one row per employee. That is what Maya's ticket actually asked for.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">per-department average, rows preserved</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -397,35 +397,35 @@
  Frank |  (null) |  72000 |    72000   &lt;- NULL is its own partition</span></code></pre>
       </div>
 
-      <p>Look at what you get: <code class="inl">salary</code> and <code class="inl">dept_avg</code> sitting side by side on every row. Alice can instantly be compared to her department's mean (185000 vs 152500) without losing the row. That side-by-side shape is the whole point, and it is impossible with a plain <code class="inl">GROUP BY</code>.</p>
+      <p>Look at what Maya gets: <code class="inl">salary</code> and <code class="inl">dept_avg</code> sitting side by side on every row. Alice can instantly be compared to her department's mean (185000 vs 152500) without losing the row. That side-by-side shape is the whole point, and it is impossible with a plain <code class="inl">GROUP BY</code>.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">NULL forms its own partition</span>
-        <p>Frank's <code class="inl">dept_id</code> is <code class="inl">NULL</code>, so he lands in a partition by himself — his <code class="inl">dept_avg</code> is just his own salary. <code class="inl">PARTITION BY</code> treats all NULLs as one group (the same way <code class="inl">GROUP BY</code> does), which here means a partition of one.</p></div>
+        <p>Frank's <code class="inl">dept_id</code> is <code class="inl">NULL</code>, so he lands in a partition by himself. His <code class="inl">dept_avg</code> is just his own salary. <code class="inl">PARTITION BY</code> treats all NULLs as one group (the same way <code class="inl">GROUP BY</code> does), which here means a partition of one.</p></div>
     </section>
 
     <!-- 2. PARTITION BY vs GROUP BY -->
     <section id="vs-group">
-      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 — The contrast</span><h2>PARTITION BY vs GROUP BY</h2></div></div>
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 · The contrast</span><h2>PARTITION BY vs GROUP BY</h2></div></div>
       <p>Let us make it razor-sharp. Both clauses carve the data into the same groups using the same columns. The difference is what happens to the rows afterward.</p>
 
       <div class="grid two">
         <div class="card"><div class="ico grey"><svg><use href="#i-layers"/></svg></div>
-          <h4>GROUP BY — collapses</h4>
+          <h4>GROUP BY (collapses)</h4>
           <p>Takes each group and returns <b>one row</b> for it. The detail rows vanish. <code class="inl">SELECT dept_id, AVG(salary)</code> gives you 3 rows for 3 departments. You cannot also show an individual name.</p></div>
         <div class="card"><div class="ico sage"><svg><use href="#i-table"/></svg></div>
-          <h4>PARTITION BY — preserves</h4>
+          <h4>PARTITION BY (preserves)</h4>
           <p>Computes the same per-group value but <b>keeps every original row</b>, stamping the result onto each. 6 employees in, 6 rows out, each carrying its department's average alongside its own salary.</p></div>
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Same partitions, different row count</span>
         <p><code class="inl">GROUP BY dept_id</code> and <code class="inl">PARTITION BY dept_id</code> build the <strong>identical buckets</strong>. The only difference: <code class="inl">GROUP BY</code> emits one summary row per bucket and throws the detail away; the window keeps every detail row and attaches the summary. Reach for the window whenever you need both the row <em>and</em> a figure computed over its group at the same time.</p></div>
 
-      <p>A practical tell: if your question contains the word "each" pointing at individual records — "show <em>each</em> order with its running total," "rank <em>each</em> employee within their department" — you almost certainly want a window function, not <code class="inl">GROUP BY</code>.</p>
+      <p>A practical tell Maya now uses: if your question contains the word "each" pointing at individual records ("show <em>each</em> order with its running total," "rank <em>each</em> employee within their department"), you almost certainly want a window function, not <code class="inl">GROUP BY</code>.</p>
     </section>
 
     <!-- 3. RANKING -->
     <section id="ranking">
-      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 — Ordering within a window</span><h2>Ranking: ROW_NUMBER, RANK, DENSE_RANK</h2></div></div>
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 · Ordering within a window</span><h2>Ranking: ROW_NUMBER, RANK, DENSE_RANK</h2></div></div>
       <p>Once a window has an <code class="inl">ORDER BY</code> inside it, you can number the rows. Three functions do this, and they differ <em>only</em> in how they treat ties. Knowing the difference cold is worth the few minutes it takes.</p>
 
       <div class="grid three">
@@ -437,7 +437,7 @@
           <p>Ties get the <b>same</b> rank, then the next rank <b>skips</b>. Two rows tied at 1 → next is 3. Leaves gaps, like Olympic medals (two golds, no silver).</p></div>
         <div class="card"><div class="ico taupe"><svg><use href="#i-sort"/></svg></div>
           <h4>DENSE_RANK()</h4>
-          <p>Ties get the same rank, but the next rank is <b>contiguous</b> — no gap. Two rows tied at 1 → next is 2. Dense, no holes in the sequence.</p></div>
+          <p>Ties get the same rank, but the next rank is <b>contiguous</b>, no gap. Two rows tied at 1 → next is 2. Dense, no holes in the sequence.</p></div>
       </div>
 
       <p>Here is the classic task: rank employees by salary <em>within each department</em>, highest first. The <code class="inl">PARTITION BY</code> restarts the numbering for every department; the <code class="inl">ORDER BY</code> decides who is rank 1.</p>
@@ -452,7 +452,7 @@
 <span class="kw">ORDER BY</span> dept_id, salary <span class="kw">DESC</span>;</code></pre>
       </div>
 
-      <p>To <em>see</em> the tie behavior, imagine department 20 had a tie — say Carol and a second employee both earn 135000. This is the difference the three functions produce on that tie:</p>
+      <p>To <em>see</em> the tie behavior, imagine department 20 had a tie, say Carol and a second employee both earn 135000. This is the difference the three functions produce on that tie:</p>
 
       <div class="tablewrap">
         <table class="resultset">
@@ -465,19 +465,19 @@
         </table>
       </div>
 
-      <p>Read the bottom row carefully — that is the whole lesson. After a two-way tie: <code class="inl">ROW_NUMBER</code> just kept counting (3). <code class="inl">RANK</code> <strong>skipped</strong> 2 and jumped to 3 (the gap). <code class="inl">DENSE_RANK</code> stayed <strong>contiguous</strong> at 2 (no gap).</p>
+      <p>Read the bottom row carefully. That is the whole lesson. After a two-way tie: <code class="inl">ROW_NUMBER</code> just kept counting (3). <code class="inl">RANK</code> <strong>skipped</strong> 2 and jumped to 3 (the gap). <code class="inl">DENSE_RANK</code> stayed <strong>contiguous</strong> at 2 (no gap).</p>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">ROW_NUMBER ties are non-deterministic</span>
-        <p>Because <code class="inl">ROW_NUMBER</code> must produce unique numbers, when two rows tie on the <code class="inl">ORDER BY</code> key it breaks the tie <strong>arbitrarily</strong> — and that choice can change between runs. If you need a stable, reproducible ordering, add a tiebreaker column: <code class="inl">ORDER BY salary DESC, emp_id</code>. Never rely on the engine's accidental order.</p></div>
+        <p>Because <code class="inl">ROW_NUMBER</code> must produce unique numbers, when two rows tie on the <code class="inl">ORDER BY</code> key it breaks the tie <strong>arbitrarily</strong>, and that choice can change between runs. If you need a stable, reproducible ordering, add a tiebreaker column: <code class="inl">ORDER BY salary DESC, emp_id</code>. Never rely on the engine's accidental order.</p></div>
     </section>
 
     <!-- 4. TOP-N-PER-GROUP -->
     <section id="top-n">
-      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 — The killer pattern</span><h2>Top-N-per-group</h2></div></div>
-      <p>"Find the highest-paid employee in each department."  the clean answer is the canonical window-function pattern: number the rows, then keep the ones you want. But there is a catch that trips people, and understanding it is the real lesson.</p>
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 · The killer pattern</span><h2>Top-N-per-group</h2></div></div>
+      <p>Maya's next ticket: "Find the highest-paid employee in each department." The clean answer is the canonical window-function pattern: number the rows, then keep the ones you want. But there is a catch that trips people, and understanding it is the real lesson.</p>
 
       <div class="codeblock">
-        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">highest paid per department — CTE pattern</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">highest paid per department (CTE pattern)</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
 <pre><code><span class="kw">WITH</span> ranked <span class="kw">AS</span> (
   <span class="kw">SELECT</span> name, dept_id, salary,
          <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id
@@ -510,10 +510,10 @@
                        <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="num">=</span> <span class="num">1</span>;</code></pre>
       </div>
 
-      <p>Recall the logical order of operations from Module 00: <code class="inl">FROM</code> → <code class="inl">WHERE</code> → <code class="inl">GROUP BY</code> → <code class="inl">HAVING</code> → <code class="inl">SELECT</code> → <code class="inl">ORDER BY</code>. Window functions are computed at the <strong>SELECT stage</strong> — step 5 — because they need the rows already filtered and grouped before they can rank them. But <code class="inl">WHERE</code> runs at step 2, <em>before</em> the window function exists. You cannot filter on a value that has not been calculated yet.</p>
+      <p>Recall the logical order of operations from Module 00: <code class="inl">FROM</code> → <code class="inl">WHERE</code> → <code class="inl">GROUP BY</code> → <code class="inl">HAVING</code> → <code class="inl">SELECT</code> → <code class="inl">ORDER BY</code>. Window functions are computed at the <strong>SELECT stage</strong> (step 5) because they need the rows already filtered and grouped before they can rank them. But <code class="inl">WHERE</code> runs at step 2, <em>before</em> the window function exists. You cannot filter on a value that has not been calculated yet.</p>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The wrap is a stage shift</span>
-        <p>Wrapping the query in a CTE or subquery forces the window function to finish in the <strong>inner</strong> query's SELECT stage. Its output (<code class="inl">rn</code>) becomes an ordinary column of an ordinary result set. The <strong>outer</strong> query's <code class="inl">WHERE</code> then filters that column like any other. You are not working around a quirk — you are respecting the execution order.</p></div>
+        <p>Wrapping the query in a CTE or subquery forces the window function to finish in the <strong>inner</strong> query's SELECT stage. Its output (<code class="inl">rn</code>) becomes an ordinary column of an ordinary result set. The <strong>outer</strong> query's <code class="inl">WHERE</code> then filters that column like any other. You are not working around a quirk, you are respecting the execution order.</p></div>
 
       <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">ROW_NUMBER vs RANK for ties matters here</span>
         <p>If two employees tie for the top salary in a department and you want <strong>both</strong>, use <code class="inl">RANK() ... WHERE rnk = 1</code> (ties share rank 1, so both survive). <code class="inl">ROW_NUMBER</code> would arbitrarily pick just one. Choosing the right ranking function is a deliberate decision, not a coin flip.</p></div>
@@ -521,8 +521,8 @@
 
     <!-- 5. LAG / LEAD -->
     <section id="lag-lead">
-      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 — Reaching across rows</span><h2>LAG &amp; LEAD</h2></div></div>
-      <p>Sometimes a row needs to look at its neighbor. <code class="inl">LAG</code> fetches a value from a <strong>previous</strong> row; <code class="inl">LEAD</code> fetches from a <strong>following</strong> row — both relative to the window's <code class="inl">ORDER BY</code>. This makes period-over-period comparisons ("how did this order compare to the last one?") trivial.</p>
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 · Reaching across rows</span><h2>LAG &amp; LEAD</h2></div></div>
+      <p>Sometimes a row needs to look at its neighbor. When Maya is asked how each order compares to the one before it, this is the tool. <code class="inl">LAG</code> fetches a value from a <strong>previous</strong> row; <code class="inl">LEAD</code> fetches from a <strong>following</strong> row, both relative to the window's <code class="inl">ORDER BY</code>. That makes period-over-period comparisons trivial.</p>
 
       <p>Let us use <code class="inl">orders</code>, sorted by <code class="inl">order_date</code>. Each row should show the previous order's amount and the change from it.</p>
 
@@ -542,18 +542,18 @@
      1004 | 2024-01-22 |    950 |         300 |    650</span></code></pre>
       </div>
 
-      <p>The very first row has no predecessor, so <code class="inl">LAG</code> returns <code class="inl">NULL</code> — and any arithmetic with that NULL is also NULL (recall Module 00's three-valued logic). <code class="inl">LEAD(amount)</code> works identically but looks <em>forward</em>, which is handy for "what is the next order" style questions.</p>
+      <p>The very first row has no predecessor, so <code class="inl">LAG</code> returns <code class="inl">NULL</code>, and any arithmetic with that NULL is also NULL (recall Module 00's three-valued logic). <code class="inl">LEAD(amount)</code> works identically but looks <em>forward</em>, which is handy for "what is the next order" style questions.</p>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Offset and default arguments</span>
         <p>Both take two optional extra arguments: <code class="inl">LAG(amount, 2, 0)</code> means "go back <strong>2</strong> rows, and if there is no such row, use <strong>0</strong> instead of NULL." The offset defaults to 1 and the fallback defaults to NULL. Supplying a default like <code class="inl">0</code> is a clean way to avoid NULL-propagation in the very first rows.</p></div>
 
-      <p>You can partition too. <code class="inl">LAG(amount) OVER (PARTITION BY emp_id ORDER BY order_date)</code> compares each order to that employee's <em>own</em> previous order — the <code class="inl">LAG</code> resets at every employee boundary, never bleeding across partitions.</p>
+      <p>You can partition too. <code class="inl">LAG(amount) OVER (PARTITION BY emp_id ORDER BY order_date)</code> compares each order to that employee's <em>own</em> previous order. The <code class="inl">LAG</code> resets at every employee boundary, never bleeding across partitions.</p>
     </section>
 
     <!-- 6. RUNNING TOTALS & FRAMES -->
     <section id="frames">
-      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 — The frame clause</span><h2>Running totals &amp; frames</h2></div></div>
-      <p>An aggregate inside a window with an <code class="inl">ORDER BY</code> becomes a <strong>running</strong> aggregate. A running total of order amounts — the cumulative sum as time moves forward — is the textbook example.</p>
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 · The frame clause</span><h2>Running totals &amp; frames</h2></div></div>
+      <p>An aggregate inside a window with an <code class="inl">ORDER BY</code> becomes a <strong>running</strong> aggregate. A running total of order amounts (the cumulative sum as time moves forward) is the textbook example, and the next thing finance asks Maya for.</p>
 
       <div class="codeblock">
         <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">running total of order amounts</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
@@ -583,18 +583,18 @@
         <div class="layer"><span><code class="inl">CURRENT ROW</code> → <code class="inl">UNBOUNDED FOLLOWING</code></span><small>reverse running total (here to the end)</small></div>
       </div>
 
-      <h3>ROWS vs RANGE — the surprise</h3>
-      <p>The frame can count in two units, and confusing them is a genuine trap. <code class="inl">ROWS</code> counts <strong>physical rows</strong> — "the 2 rows before this one," full stop. <code class="inl">RANGE</code> counts by <strong>value</strong> of the <code class="inl">ORDER BY</code> key — it includes <em>all peer rows that share the current row's ordering value</em>, treating them as a single logical block.</p>
+      <h3>ROWS vs RANGE, the surprise</h3>
+      <p>The frame can count in two units, and confusing them is a genuine trap. <code class="inl">ROWS</code> counts <strong>physical rows</strong>, "the 2 rows before this one," full stop. <code class="inl">RANGE</code> counts by <strong>value</strong> of the <code class="inl">ORDER BY</code> key: it includes <em>all peer rows that share the current row's ordering value</em>, treating them as a single logical block.</p>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The default frame is RANGE, not ROWS</span>
-        <p>If you write <code class="inl">SUM(amount) OVER (ORDER BY order_date)</code> with <strong>no</strong> explicit frame, PostgreSQL silently applies <code class="inl">RANGE UNBOUNDED PRECEDING AND CURRENT ROW</code>. Usually identical to <code class="inl">ROWS</code> — until you have <strong>ties</strong> in the <code class="inl">ORDER BY</code> column. With <code class="inl">RANGE</code>, two orders on the <em>same date</em> are peers: each one's running total includes <em>both</em>, so they show the <strong>same</strong> cumulative value. People expecting a row-by-row total are baffled when the running total "jumps" by both amounts at once. When you mean physical rows, <strong>write <code class="inl">ROWS</code> explicitly.</strong></p></div>
+        <p>If you write <code class="inl">SUM(amount) OVER (ORDER BY order_date)</code> with <strong>no</strong> explicit frame, PostgreSQL silently applies <code class="inl">RANGE UNBOUNDED PRECEDING AND CURRENT ROW</code>. Usually identical to <code class="inl">ROWS</code>, until you have <strong>ties</strong> in the <code class="inl">ORDER BY</code> column. With <code class="inl">RANGE</code>, two orders on the <em>same date</em> are peers: each one's running total includes <em>both</em>, so they show the <strong>same</strong> cumulative value. This is the exact bug Maya hits when two orders land on one date. The total "jumps" by both amounts at once. When you mean physical rows, <strong>write <code class="inl">ROWS</code> explicitly.</strong></p></div>
 
-      <p>A moving average — say, the average of the last three orders — is just a <code class="inl">ROWS</code> frame around <code class="inl">AVG</code>: <code class="inl">AVG(amount) OVER (ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</code>. The frame is what turns a static aggregate into a sliding one.</p>
+      <p>A moving average (say, the average of the last three orders) is just a <code class="inl">ROWS</code> frame around <code class="inl">AVG</code>: <code class="inl">AVG(amount) OVER (ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</code>. The frame is what turns a static aggregate into a sliding one.</p>
     </section>
 
     <!-- 7. FIRST/LAST_VALUE, NTILE -->
     <section id="first-last">
-      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 — More window tools</span><h2>FIRST_VALUE, LAST_VALUE, NTILE</h2></div></div>
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 · More window tools</span><h2>FIRST_VALUE, LAST_VALUE, NTILE</h2></div></div>
       <p>Beyond ranking and offsets, a few more functions reach into the window to pull out positional values or to slice rows into buckets.</p>
 
       <div class="grid two">
@@ -616,15 +616,15 @@
       </div>
 
       <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The LAST_VALUE default-frame trap</span>
-        <p>Naively, <code class="inl">LAST_VALUE(name) OVER (PARTITION BY dept_id ORDER BY salary DESC)</code> looks like it returns the lowest earner. It does <strong>not</strong>. The default frame is <code class="inl">RANGE ... CURRENT ROW</code>, so the frame ends at the current row — meaning <code class="inl">LAST_VALUE</code> just returns the current row's own value, which is useless. To get the true last row of the partition, give it a full frame: <code class="inl">LAST_VALUE(name) OVER (PARTITION BY dept_id ORDER BY salary DESC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)</code>. <code class="inl">FIRST_VALUE</code> is safe because the default frame already starts at the partition's first row.</p></div>
+        <p>Naively, <code class="inl">LAST_VALUE(name) OVER (PARTITION BY dept_id ORDER BY salary DESC)</code> looks like it returns the lowest earner. It does <strong>not</strong>. The default frame is <code class="inl">RANGE ... CURRENT ROW</code>, so the frame ends at the current row, meaning <code class="inl">LAST_VALUE</code> just returns the current row's own value, which is useless. To get the true last row of the partition, give it a full frame: <code class="inl">LAST_VALUE(name) OVER (PARTITION BY dept_id ORDER BY salary DESC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)</code>. <code class="inl">FIRST_VALUE</code> is safe because the default frame already starts at the partition's first row.</p></div>
 
       <p>For true statistical percentiles, PostgreSQL offers <code class="inl">PERCENT_RANK()</code> and <code class="inl">CUME_DIST()</code> as window functions, plus the ordered-set aggregates <code class="inl">PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary)</code> for an interpolated median. <code class="inl">NTILE</code> is the quick, good-enough bucketing tool for most reporting.</p>
     </section>
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 — Practice</span><h2>Hands-on — do this now</h2></div></div>
-      <p>Use the same three-table schema from Module 00, and add a handful of <code class="inl">orders</code> rows with varied <code class="inl">order_date</code> and <code class="inl">amount</code> values (include at least two orders on the same date — you will want that for the ROWS-vs-RANGE task). Write each query <em>before</em> peeking at any hint.</p>
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 · Practice</span><h2>Hands-on, do this now</h2></div></div>
+      <p>Step into Maya's seat. Use the same three-table schema from Module 00, and add a handful of <code class="inl">orders</code> rows with varied <code class="inl">order_date</code> and <code class="inl">amount</code> values (include at least two orders on the same date, since you will want that for the ROWS-vs-RANGE task). Write each query <em>before</em> peeking at any hint.</p>
 
       <ul class="check">
         <li><svg><use href="#i-checkbox"/></svg>Show every employee with their <code class="inl">salary</code> and the <strong>company-wide average</strong> on the same row, using <code class="inl">AVG(...) OVER ()</code>. Confirm row count stays at 6.</li>
@@ -633,26 +633,26 @@
         <li><svg><use href="#i-checkbox"/></svg>Use the CTE + <code class="inl">ROW_NUMBER</code> pattern to return the <strong>highest-paid employee per department</strong>. Then change it to the top 2.</li>
         <li><svg><use href="#i-checkbox"/></svg>Try filtering on <code class="inl">ROW_NUMBER() ... = 1</code> directly in <code class="inl">WHERE</code>, watch it error, and explain to yourself why (which execution stage).</li>
         <li><svg><use href="#i-checkbox"/></svg>On <code class="inl">orders</code> ordered by date, add <code class="inl">prev_amount</code> via <code class="inl">LAG</code> and <code class="inl">delta = amount - prev_amount</code>. Then use <code class="inl">LAG(amount, 1, 0)</code> so the first row shows 0 instead of NULL.</li>
-        <li><svg><use href="#i-checkbox"/></svg>Build a <strong>running total</strong> of <code class="inl">amount</code> with an explicit <code class="inl">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> frame. Then remove the frame entirely and compare the two same-date rows — observe the RANGE default difference.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Build a <strong>running total</strong> of <code class="inl">amount</code> with an explicit <code class="inl">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> frame. Then remove the frame entirely and compare the two same-date rows, observing the RANGE default difference.</li>
         <li><svg><use href="#i-checkbox"/></svg>Compute a <strong>3-order moving average</strong> of <code class="inl">amount</code> with <code class="inl">ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code>. Then try <code class="inl">LAST_VALUE</code> and reproduce the default-frame trap before fixing it with a full frame.</li>
       </ul>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Predict, then run</span>
-        <p>Before each query executes, say out loud what value you expect in the new column for the first two or three rows. Window functions are where intuition quietly drifts from reality — especially around frames and ties. When the output disagrees with your prediction, <em>that gap is the lesson</em>. Chase it before moving on.</p></div>
+        <p>Before each query executes, say out loud what value you expect in the new column for the first two or three rows. Window functions are where intuition quietly drifts from reality, especially around frames and ties. When the output disagrees with your prediction, <em>that gap is the lesson</em>. Chase it before moving on.</p></div>
     </section>
 
     <footer>
       <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
       <div class="refs">
-        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-window.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Window Functions — PostgreSQL tutorial</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-window.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Window Functions, PostgreSQL tutorial</a>
         <a class="reflink" href="https://www.postgresql.org/docs/current/functions-window.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Window function reference</a>
       </div>
 
       <div class="next">
-        <a href="../03-subqueries-cte/03-subqueries-cte.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 03 — Subqueries &amp; CTEs</b></span></a>
-        <a href="../05-indexing-query-reasoning/05-indexing-query-reasoning.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 05 — Indexing &amp; Query Reasoning</b></span></a>
+        <a href="../03-subqueries-cte/03-subqueries-cte.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 03 · Subqueries &amp; CTEs</b></span></a>
+        <a href="../05-indexing-query-reasoning/05-indexing-query-reasoning.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 05 · Indexing &amp; Query Reasoning</b></span></a>
       </div>
-      <p class="endline">SQL L3 Track · Module 04 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 05 — Indexing &amp; Query Reasoning.</p>
+      <p class="endline">SQL L3 Track · Module 04 · built for visual, eye-easy reading. Work through the hands-on checklist, then move on to Module 05, Indexing &amp; Query Reasoning.</p>
     </footer>
 
   </main>

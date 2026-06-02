@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 01 — Joins: Combining Tables</title>
+<title>Module 01 · Joins: Combining Tables</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
   .chip b{color:var(--accent)}
   @media(max-width:620px){.meta{flex-direction:column}.chip{border-right:none;border-bottom:1px solid var(--line)}}
 
-  /* section heads — editorial */
+  /* section heads - editorial */
   section{margin:0;scroll-margin-top:84px;padding:46px 0 4px;border-top:1px solid var(--line)}
   section:first-of-type{border-top:none}
   .sec-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 6px}
@@ -137,7 +137,7 @@
   .note.info{background:var(--bg-2)}
   .note.info .ic,.note.info .tag{color:var(--ink-soft)}
 
-  /* code — dark block on light page */
+  /* code - dark block on light page */
   .codeblock{background:var(--code-bg);border:1px solid var(--line-strong);border-radius:var(--radius);margin:22px 0;
     overflow:hidden}
   .codeblock .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
@@ -326,8 +326,8 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>SQL · L3 Track · Module 01</span>
-      <h1>Joins —<br>combining <span class="u">tables</span></h1>
-      <p class="lede">Real data is never in one table. It is <em>split apart</em> on purpose, then stitched back together with keys. A join is how you recombine it — and which join you pick decides <em>which rows survive</em>. Get the four core joins and the NULL behaviour right and most "my query is wrong" mysteries disappear.</p>
+      <h1>Joins:<br>combining <span class="u">tables</span></h1>
+      <p class="lede">Maya just joined a small company as an analyst, and her first task lands in her inbox: list every employee next to their department name. Easy, she thinks, until she opens the database and finds the two facts living in different tables. Real data is never in one place. It is <em>split apart</em> on purpose, then stitched back together with keys. A join is how you recombine it, and which join you pick decides <em>which rows survive</em>. Get the four core joins and the NULL behaviour right, and most "my query is wrong" mysteries disappear.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · hands-on</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>needs Module 00</span>
@@ -337,10 +337,10 @@
 
     <!-- 0. WHY JOINS -->
     <section id="why">
-      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 — Orientation</span><h2>Why joins exist</h2></div></div>
-      <p>In Module 00 you queried single tables. But notice the schema was already split: an employee's <code class="inl">dept_id</code> is just a number — <code class="inl">10</code>, <code class="inl">20</code> — and the human-readable <code class="inl">dept_name</code> "Engineering" lives in a <em>separate</em> <code class="inl">departments</code> table. That split is deliberate. It is called <strong>normalization</strong>: each fact is stored exactly once, in one place. The department name "Engineering" appears a single time, not copied onto every employee row.</p>
+      <div class="sec-head"><span class="num">0</span><div class="htext"><span class="kicker">Section 00 · Orientation</span><h2>Why joins exist</h2></div></div>
+      <p>In Module 00 you queried single tables. Maya hits her first snag here. The schema was already split: an employee's <code class="inl">dept_id</code> is just a number (<code class="inl">10</code>, <code class="inl">20</code>), and the human-readable <code class="inl">dept_name</code> "Engineering" lives in a <em>separate</em> <code class="inl">departments</code> table. That split is deliberate. It is called <strong>normalization</strong>: each fact is stored exactly once, in one place. The department name "Engineering" appears a single time, not copied onto every employee row.</p>
 
-      <p>Normalization keeps data consistent (rename the department once and every employee inherits it) and small (no repeated text). The trade-off is that answering a human question — "who works in <em>Engineering</em>?" — now requires pulling rows from two tables and matching them up on the shared key. <strong>That matching operation is a join.</strong> It is the price you pay for clean storage, and it is the single most-used feature of SQL after <code class="inl">SELECT</code> itself.</p>
+      <p>Normalization keeps data consistent (rename the department once and every employee inherits it) and small (no repeated text). The trade-off is that answering Maya's question, "who works in <em>Engineering</em>?", now requires pulling rows from two tables and matching them up on the shared key. <strong>That matching operation is a join.</strong> It is the price you pay for clean storage, and it is the single most-used feature of SQL after <code class="inl">SELECT</code> itself.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico grey"><svg><use href="#i-table"/></svg></div>
@@ -355,7 +355,7 @@
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The one sentence to remember</span>
-        <p>A join answers: <strong>"for each row in table A, which rows in table B share a matching key — and what do I do with the rows that match nothing?"</strong> Every join type is just a different answer to that second half. Work through the hands-on checklist, then move on to Module 02 — Aggregation.</p>
+        <p>A join answers the question Maya keeps coming back to: <strong>"for each row in table A, which rows in table B share a matching key, and what do I do with the rows that match nothing?"</strong> Every join type is just a different answer to that second half. Work through the hands-on checklist, then move on to Module 02, Aggregation.</p>
     </footer>
 
   </main>

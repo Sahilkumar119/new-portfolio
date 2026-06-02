@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 04 — Networking: Bridges, Ports &amp; Container DNS</title>
+<title>Module 04: Networking: Bridges, Ports &amp; Container DNS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -328,10 +328,11 @@
 
     <div class="hero">
       <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 4</span>
-      <h1>Module 04 — <span class="grad">Networking</span><br>Bridges, Ports &amp; Container DNS</h1>
-      <p class="lede">You have containers that run. Now they need to <em>talk</em> — to each other, and to the outside world.
+      <h1>Module 04: <span class="grad">Networking</span><br>Bridges, Ports &amp; Container DNS</h1>
+      <p class="lede">Sam has containers that run. Now they need to <em>talk</em>, to each other and to the outside world.
+      Sam's first containerized app, a web service plus a database, runs each piece fine in isolation but cannot connect them.
       This module explains how Docker wires containers together and why one configuration detail, the
-      <em>user-defined bridge</em>, is something every multi-container app depends on.</p>
+      <em>user-defined bridge</em>, is what every multi-container app depends on.</p>
       <div class="meta">
         <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · hands-on heavy</span>
         <span class="chip"><svg><use href="#i-brain"/></svg>builds on Modules 00–03</span>
@@ -344,18 +345,19 @@
     <section id="recap">
       <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
       <p>Module 00 introduced Linux namespaces as the kernel mechanism that isolates containers from each other and from the
-      host. One of those namespaces — the <strong>NET namespace</strong> — gives each container its own completely isolated
+      host. One of those namespaces, the <strong>NET namespace</strong>, gives each container its own completely isolated
       network stack: its own network interfaces, its own routing table, its own IP address, and its own port space. From
       inside a container, the network looks like a freshly booted machine that happens to have no physical NIC.</p>
 
-      <p>That isolation is good for security. But taken alone, it means containers are islands — they cannot reach each
-      other or the internet. Docker's job in this module is to build the bridges between those islands without collapsing
-      the isolation that makes them safe.</p>
+      <p>That isolation is good for security. But taken alone, it means containers are islands. They cannot reach each
+      other or the internet. This is exactly where Sam is stuck: the app container is up, the database container is up,
+      and neither can see the other. Docker's job in this module is to build the bridges between those islands without
+      collapsing the isolation that makes them safe.</p>
 
       <div class="grid three">
         <div class="card"><div class="ico violet"><svg><use href="#i-box"/></svg></div>
           <h4>NET namespace</h4>
-          <p>Each container gets its own isolated network stack — its own <b style="color:var(--fg)">lo</b>, its own <b style="color:var(--fg)">eth0</b>, its own IP.</p></div>
+          <p>Each container gets its own isolated network stack: its own <b style="color:var(--fg)">lo</b>, its own <b style="color:var(--fg)">eth0</b>, its own IP.</p></div>
         <div class="card"><div class="ico blue"><svg><use href="#i-network"/></svg></div>
           <h4>Docker bridges the gap</h4>
           <p>Virtual ethernet pairs (<b style="color:var(--fg)">veth</b>) connect each container's namespace to a bridge on the host.</p></div>
@@ -365,19 +367,19 @@
       </div>
 
       <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why networking matters right now</span>
-        <p>Module 05 is Docker Compose — which is entirely about wiring multi-container apps together. Everything Compose
+        <p>Module 05 is Docker Compose, which is entirely about wiring multi-container apps together. Everything Compose
         does with networking is a thin wrapper over what you are learning here. Understand the fundamentals now, and Compose
         will feel obvious rather than magical.</p></div>
     </section>
 
     <!-- 1. THE MODEL -->
     <section id="model">
-      <div class="sec-head"><span class="num">1</span><h2>The network model — what actually happens</h2></div>
+      <div class="sec-head"><span class="num">1</span><h2>The network model: what actually happens</h2></div>
       <p>When Docker starts a container, it does four things under the hood to give it connectivity:</p>
 
       <ol style="padding-left:1.4em;color:var(--fg-dim);font-size:15px;line-height:2">
         <li>Creates a new <strong>NET namespace</strong> for the container (its isolated stack).</li>
-        <li>Creates a <strong>virtual ethernet pair</strong> (veth pair) — a pair of virtual NICs joined end-to-end. Think of it as a network cable with a NIC at each end.</li>
+        <li>Creates a <strong>virtual ethernet pair</strong> (veth pair), a pair of virtual NICs joined end-to-end. Think of it as a network cable with a NIC at each end.</li>
         <li>Puts one end of that pair (<code class="inl">eth0</code>) inside the container's namespace and assigns it an IP address from the bridge's subnet.</li>
         <li>Attaches the other end to a <strong>Linux bridge</strong> on the host (e.g. <code class="inl">docker0</code>).</li>
       </ol>
@@ -391,7 +393,7 @@
         <div class="layer ro"><span>Host NIC (eth0 / wlan0)</span><small>host network namespace</small></div>
         <div class="layer hit"><span>iptables NAT / routing</span><small>masquerades container traffic</small></div>
         <div class="layer hit"><span>docker0 bridge (172.17.0.0/16)</span><small>virtual switch on host</small></div>
-        <div class="layer rw"><span>veth pair — one end per container</span><small>container ↔ bridge wire</small></div>
+        <div class="layer rw"><span>veth pair: one end per container</span><small>container ↔ bridge wire</small></div>
         <div class="layer rw"><span>Container eth0 (172.17.0.2, .3, …)</span><small>inside NET namespace</small></div>
       </div>
 
@@ -402,7 +404,7 @@
 
     <!-- 2. DRIVERS -->
     <section id="drivers">
-      <div class="sec-head"><span class="num">2</span><h2>Network drivers — five modes, one table</h2></div>
+      <div class="sec-head"><span class="num">2</span><h2>Network drivers: five modes, one table</h2></div>
       <p>Docker supports multiple <strong>network drivers</strong>. Each is a different answer to the question "how should
       this container's network namespace connect to the outside world?" You pick the driver when you create a network with
       <code class="inl">docker network create --driver &lt;name&gt;</code>. If you don't pick, you get <code class="inl">bridge</code>.</p>
@@ -417,18 +419,18 @@
           </tr>
           <tr>
             <td><code>host</code></td>
-            <td>The container shares the host's network namespace directly — no isolation. The container's process listens on the host's ports. No veth pair, no bridge. Fastest possible networking, zero overhead.</td>
+            <td>The container shares the host's network namespace directly, with no isolation. The container's process listens on the host's ports. No veth pair, no bridge. Fastest possible networking, zero overhead.</td>
             <td>Performance-critical workloads where the NAT overhead matters (e.g. high-throughput proxies). Use sparingly. Linux only.</td>
           </tr>
           <tr>
             <td><code>none</code></td>
-            <td>The container gets a NET namespace but no external connectivity — only a loopback interface. Completely airgapped.</td>
+            <td>The container gets a NET namespace but no external connectivity, only a loopback interface. Completely airgapped.</td>
             <td>Batch jobs that must not reach the network, or as a base when you will manually configure networking.</td>
           </tr>
           <tr>
             <td><code>overlay</code></td>
             <td>Multi-host networking for Docker Swarm clusters. Creates an encrypted VXLAN tunnel across hosts so containers on different machines appear on the same L2 network.</td>
-            <td>Docker Swarm services. Also the conceptual ancestor of Kubernetes pod networking — each K8s CNI plugin (Flannel, Calico, Cilium) implements a similar idea, connecting pods across nodes in a cluster.</td>
+            <td>Docker Swarm services. Also the conceptual ancestor of Kubernetes pod networking, where each K8s CNI plugin (Flannel, Calico, Cilium) implements a similar idea, connecting pods across nodes in a cluster.</td>
           </tr>
           <tr>
             <td><code>macvlan</code></td>
@@ -447,10 +449,10 @@
 
       <div class="grid two">
         <div class="card"><div class="ico amber"><svg><use href="#i-bolt"/></svg></div>
-          <h4>host — the speed trade-off</h4>
-          <p>No NAT, no bridge overhead, no port mapping — the container's process binds directly to the host's port. But you lose all network isolation: a bug in the container can bind to host ports and interfere with host services.</p></div>
+          <h4>host: the speed trade-off</h4>
+          <p>No NAT, no bridge overhead, no port mapping. The container's process binds directly to the host's port. But you lose all network isolation: a bug in the container can bind to host ports and interfere with host services.</p></div>
         <div class="card"><div class="ico red"><svg><use href="#i-danger"/></svg></div>
-          <h4>macvlan — the LAN trick</h4>
+          <h4>macvlan: the LAN trick</h4>
           <p>Real IP, real MAC, visible on the LAN. Great for legacy apps. The catch: most Wi-Fi drivers do not support promiscuous mode, so macvlan usually requires a wired interface or a virtual machine.</p></div>
       </div>
     </section>
@@ -469,15 +471,15 @@
         <thead><tr><th>Feature</th><th>Default bridge</th><th>User-defined bridge</th></tr></thead>
         <tbody>
           <tr><td><b>Container-to-container by IP</b></td><td>Yes</td><td>Yes</td></tr>
-          <tr><td><b>Container-to-container by name (DNS)</b></td><td><b style="color:var(--red)">No</b></td><td><b style="color:var(--accent)">Yes — automatic</b></td></tr>
-          <tr><td><b>Scope</b></td><td>All containers without a network spec land here together — no isolation between unrelated containers</td><td>Only containers you explicitly connect are in the network</td></tr>
+          <tr><td><b>Container-to-container by name (DNS)</b></td><td><b style="color:var(--red)">No</b></td><td><b style="color:var(--accent)">Yes, automatic</b></td></tr>
+          <tr><td><b>Scope</b></td><td>All containers without a network spec land here together, with no isolation between unrelated containers</td><td>Only containers you explicitly connect are in the network</td></tr>
           <tr><td><b>Created how</b></td><td>Automatically on Docker install, always exists</td><td><code>docker network create mynet</code></td></tr>
-          <tr><td><b>Connect/disconnect without restart</b></td><td>No</td><td>Yes — live connect/disconnect</td></tr>
+          <tr><td><b>Connect/disconnect without restart</b></td><td>No</td><td>Yes, live connect/disconnect</td></tr>
         </tbody>
       </table></div>
 
       <p>The DNS point is the critical one. On the default bridge, containers can only find each other by their
-      <strong>IP address</strong> — which changes every time you restart a container. That makes anything but the simplest
+      <strong>IP address</strong>, which changes every time you restart a container. That makes anything but the simplest
       setup fragile. On a user-defined bridge, Docker runs an <strong>embedded DNS server</strong> that resolves container
       names to their current IP addresses automatically. You can address a database by the name <code class="inl">db</code>
       and it will always resolve correctly, even after a restart.</p>
@@ -495,19 +497,19 @@
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> app <span class="flag">--network</span> mynet nginx:alpine
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> db  <span class="flag">--network</span> mynet postgres:16-alpine
 
-<span class="cmt"># From 'app', reach 'db' by NAME — this works because of the embedded DNS</span>
+<span class="cmt"># From 'app', reach 'db' by NAME: this works because of the embedded DNS</span>
 <span class="cmd">docker</span> exec app ping <span class="flag">-c</span> 3 db
 <span class="out">PING db (172.18.0.3): 56 data bytes
 64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.123 ms
 ...</span>
 
-<span class="cmt"># Now try the SAME thing on the default bridge — it will FAIL by name</span>
+<span class="cmt"># Now try the SAME thing on the default bridge: it will FAIL by name</span>
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> c1 nginx:alpine
 <span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> c2 nginx:alpine
 <span class="cmd">docker</span> exec c1 ping <span class="flag">-c</span> 1 c2
 <span class="out">ping: bad address 'c2'    &lt;-- no DNS on default bridge</span>
 
-<span class="cmt"># But it WORKS by IP (fragile — IP changes on restart)</span>
+<span class="cmt"># But it WORKS by IP (fragile: IP changes on restart)</span>
 <span class="cmd">docker</span> inspect <span class="flag">-f</span> <span class="str">'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'</span> c2
 <span class="out">172.17.0.3</span>
 <span class="cmd">docker</span> exec c1 ping <span class="flag">-c</span> 1 172.17.0.3
@@ -516,14 +518,14 @@
 
       <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The rule you always apply</span>
         <p>For any multi-container application, <b>always create a user-defined bridge</b>. Never rely on the default
-        bridge for inter-container communication. Docker Compose follows this rule automatically — it creates a
+        bridge for inter-container communication. Docker Compose follows this rule automatically, creating a
         project-scoped user-defined network for every Compose project. This is exactly why Compose services can
         reach each other by service name.</p></div>
     </section>
 
     <!-- 4. PUBLISHING PORTS -->
     <section id="ports">
-      <div class="sec-head"><span class="num">4</span><h2>Publishing ports — connecting containers to the host</h2></div>
+      <div class="sec-head"><span class="num">4</span><h2>Publishing ports: connecting containers to the host</h2></div>
       <p>Containers are isolated. Their ports are only reachable from inside the same Docker network by default. To make a
       service reachable from the host machine (or from outside it), you must <strong>publish</strong> a port. Publishing
       tells Docker to add an <code class="inl">iptables</code> rule that forwards traffic arriving on a host port to the
@@ -562,14 +564,14 @@
 <span class="cmt"># -P: publish ALL EXPOSEd ports to random host ports</span>
 <span class="cmd">docker</span> run <span class="flag">-P</span> nginx
 
-<span class="cmt"># Bind to localhost ONLY — not reachable from outside the host</span>
+<span class="cmt"># Bind to localhost ONLY, not reachable from outside the host</span>
 <span class="cmd">docker</span> run <span class="flag">-p</span> 127.0.0.1:8080:80 nginx
 
 <span class="cmt"># Explicitly bind to all interfaces (the default when no address given)</span>
 <span class="cmd">docker</span> run <span class="flag">-p</span> 0.0.0.0:8080:80 nginx</code></pre>
       </div>
 
-      <h3>EXPOSE vs -p — the thing everyone confuses</h3>
+      <h3>EXPOSE vs -p: the thing everyone confuses</h3>
       <p><code class="inl">EXPOSE 80</code> in a Dockerfile is <strong>documentation</strong>. It tells humans and
       tooling "this container's application listens on port 80." It does <em>not</em> make any port reachable from the
       host or from the internet. Nothing is actually published until you use <code class="inl">-p</code> at
@@ -584,9 +586,9 @@
           <p>Passed at <code class="inl">docker run</code>. Creates an iptables rule. Makes the port reachable from the host (or beyond). <b style="color:var(--fg)">This is what opens the port.</b></p></div>
       </div>
 
-      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Security — 0.0.0.0 vs 127.0.0.1</span>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Security: 0.0.0.0 vs 127.0.0.1</span>
         <p>When you run <code class="inl">-p 8080:80</code>, the default binding address is <code class="inl">0.0.0.0</code>
-        — meaning the port is reachable from <b>any network interface</b>, including external ones. On a cloud VM,
+        meaning the port is reachable from <b>any network interface</b>, including external ones. On a cloud VM,
         this exposes the port to the internet (subject to your firewall rules). If you are running a dev database and
         only want it accessible from your own machine, use <code class="inl">-p 127.0.0.1:5432:5432</code>. This is a
         real-world security consideration, not just theory.</p></div>
@@ -596,6 +598,7 @@
     <section id="c2c">
       <div class="sec-head"><span class="num">5</span><h2>Container-to-container communication</h2></div>
       <p>The most common real-world scenario: an application container that needs to reach a database container. This is
+      Sam's exact problem from the start of the module, the app and the database that could not see each other. It is also
       the pattern that underpins every multi-container app, and it is exactly what Docker Compose was built to
       automate.</p>
 
@@ -603,7 +606,7 @@
       <ol style="padding-left:1.4em;color:var(--fg-dim);font-size:15px;line-height:2">
         <li>Create a <strong>user-defined bridge</strong> network.</li>
         <li>Run both containers on that network, giving each a <code class="inl">--name</code>.</li>
-        <li>In the application config, set the database host to the container's <strong>name</strong> — the embedded DNS handles the rest.</li>
+        <li>In the application config, set the database host to the container's <strong>name</strong>, and the embedded DNS handles the rest.</li>
       </ol>
 
       <div class="codeblock">
@@ -628,17 +631,18 @@
   <span class="flag">-e</span> <span class="str">DATABASE_URL=postgres://postgres:secret@db:5432/mydb</span> \
   myapp:1.0
 
-<span class="cmt"># Note: the hostname in DATABASE_URL is "db" — the container name.
+<span class="cmt"># Note: the hostname in DATABASE_URL is "db", the container name.
 # Docker's embedded DNS resolves "db" to the db container's current IP.
 # No IP addresses in config. No hardcoded values that break on restart.</span></code></pre>
       </div>
 
       <p>Notice that <code class="inl">app</code> publishes its port 8000 to the host with <code class="inl">-p</code>,
-      so users can reach the web app. But <code class="inl">db</code> has <em>no</em> <code class="inl">-p</code> flag —
-      it is reachable only from other containers on <code class="inl">appnet</code>, which is exactly the right security
-      posture for a database.</p>
+      so users can reach the web app. But <code class="inl">db</code> has <em>no</em> <code class="inl">-p</code> flag.
+      It is reachable only from other containers on <code class="inl">appnet</code>, which is exactly the right security
+      posture for a database. This is the moment Sam's app finally ships: the web service answers on the published port,
+      it talks to the database by name, and the database stays private.</p>
 
-      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Forward reference — Module 05</span>
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Forward reference: Module 05</span>
         <p>This three-step pattern (create network → run containers → use name as hostname) is precisely what
         <code class="inl">docker compose up</code> does for you from a YAML file. Each service becomes a container,
         Docker Compose creates a project-scoped network, and each service is reachable by its service name. The
@@ -671,7 +675,7 @@
         <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
           <span class="title">inspect for IPs</span><span class="spacer"></span>
           <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
-        <pre><code><span class="cmt"># Full JSON — look for NetworkSettings.Networks</span>
+        <pre><code><span class="cmt"># Full JSON: look for NetworkSettings.Networks</span>
 <span class="cmd">docker</span> inspect mycontainer
 
 <span class="cmt"># Just the IP on the default bridge</span>
@@ -701,7 +705,7 @@ d4e5f6a1b2c3   appnet    bridge    local</span></code></pre>
 
       <h3>localhost inside a container is not the host</h3>
       <p>This is the most frequent confusion. Inside a container, <code class="inl">localhost</code> (or
-      <code class="inl">127.0.0.1</code>) refers to the container's own loopback interface — not the host machine's
+      <code class="inl">127.0.0.1</code>) refers to the container's own loopback interface, not the host machine's
       loopback. If your app inside the container tries to connect to <code class="inl">localhost:5432</code>, it is trying
       to reach a Postgres that must also be <em>inside that same container</em>. If Postgres is running as a separate
       container or directly on the host, <code class="inl">localhost</code> will not find it.</p>
@@ -728,7 +732,7 @@ d4e5f6a1b2c3   appnet    bridge    local</span></code></pre>
 <span class="cmt"># Now inside the container, this resolves to the host machine:</span>
 <span class="out">host.docker.internal  →  172.17.0.1  (the bridge gateway = host)</span>
 
-<span class="cmt"># On Docker Desktop (Mac/Windows), it works automatically — no flag needed</span></code></pre>
+<span class="cmt"># On Docker Desktop (Mac/Windows), it works automatically, no flag needed</span></code></pre>
       </div>
 
       <h3>Port already in use</h3>
@@ -737,7 +741,7 @@ d4e5f6a1b2c3   appnet    bridge    local</span></code></pre>
       <code class="inl">lsof -i :8080</code>. Either stop that process or pick a different host port.</p>
 
       <h3>Default bridge has no DNS</h3>
-      <p>If two containers on the default bridge cannot reach each other by name, that is not a bug — it is by design.
+      <p>If two containers on the default bridge cannot reach each other by name, that is not a bug. It is by design.
       The default bridge predates Docker's embedded DNS. The fix is always the same: move them to a user-defined bridge.
       This is not a workaround; it is the correct architecture.</p>
 
@@ -764,7 +768,7 @@ d4e5f6a1b2c3   appnet    bridge    local</span></code></pre>
 
     <!-- 8. HANDS-ON -->
     <section id="handson">
-      <div class="sec-head"><span class="num">8</span><h2>Hands-on — do this now</h2></div>
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: do this now</h2></div>
       <p>Networking is the kind of topic that feels clear when you read it and murky when you try it. The commands below
       are short. Do not skip them.</p>
 
@@ -797,8 +801,8 @@ d4e5f6a1b2c3   appnet    bridge    local</span></code></pre>
       </div>
 
       <div class="next">
-        <a href="module-03.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 03 — Volumes &amp; Storage</b></span></a>
-        <a href="module-05.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 05 — Docker Compose</b></span></a>
+        <a href="module-03.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 03: Volumes &amp; Storage</b></span></a>
+        <a href="module-05.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 05: Docker Compose</b></span></a>
       </div>
       <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 04 · built for visual learning.
       Once the hands-on checklist is all ticked, move on to Module 05.</p>

@@ -101,7 +101,15 @@ const useStyles = makeStyles((theme) => ({
 export const Learn = () => {
   const classes = useStyles();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const active = COURSES[activeIndex] || COURSES[0];
+
+  // Render the interactive body on the client only. react-snapshot prerenders
+  // this page without MUI's runtime (JSS) styles, so the static HTML served on
+  // direct loads collapsed into a broken, stuck layout. Gating the body behind
+  // a mount flag keeps the prerender a clean tinted placeholder and lets the
+  // client paint the real, fully styled page (the same path as in-app nav).
+  useEffect(() => setMounted(true), []);
 
   // Direct loads of /learn can restore a stale scroll position from history,
   // which makes the page open in the middle of the course stack. Always start
@@ -152,7 +160,7 @@ export const Learn = () => {
   return (
     <div
       className={classes.root}
-      style={{ color: active.text, backgroundColor: active.tint }}
+      style={{ color: active.text, backgroundColor: active.tint, minHeight: "100vh" }}
     >
       <Helmet>
         <html lang="en" />
@@ -193,34 +201,38 @@ export const Learn = () => {
         <script type="application/ld+json">{JSON.stringify(courseSchema)}</script>
       </Helmet>
 
-      <div className={classes.tint} style={{ backgroundColor: active.tint }} aria-hidden="true" />
-      <div className={classes.watermark} style={{ color: active.accent }} aria-hidden="true">
-        {active.name}
-      </div>
+      {mounted && (
+        <>
+          <div className={classes.tint} style={{ backgroundColor: active.tint }} aria-hidden="true" />
+          <div className={classes.watermark} style={{ color: active.accent }} aria-hidden="true">
+            {active.name}
+          </div>
 
-      <header className={classes.header}>
-        <Link to="/" className={classes.back}>
-          ← Portfolio
-        </Link>
-        <span className={classes.eyebrow}>Learn</span>
-      </header>
+          <header className={classes.header}>
+            <Link to="/" className={classes.back}>
+              ← Portfolio
+            </Link>
+            <span className={classes.eyebrow}>Learn</span>
+          </header>
 
-      <CourseVisual course={active} />
+          <CourseVisual course={active} />
 
-      <main className={classes.content}>
-        <h1 style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
-          Learn — courses by {Resume.basics.name}
-        </h1>
-        <CourseList
-          courses={COURSES}
-          activeIndex={activeIndex}
-          setActiveIndex={setActiveIndex}
-        />
-      </main>
+          <main className={classes.content}>
+            <h1 style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+              Learn, courses by {Resume.basics.name}
+            </h1>
+            <CourseList
+              courses={COURSES}
+              activeIndex={activeIndex}
+              setActiveIndex={setActiveIndex}
+            />
+          </main>
 
-      <p className={classes.blurb} style={{ color: active.text }}>
-        {active.blurb}
-      </p>
+          <p className={classes.blurb} style={{ color: active.text }}>
+            {active.blurb}
+          </p>
+        </>
+      )}
     </div>
   );
 };

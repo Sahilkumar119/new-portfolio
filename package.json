@@ -41,11 +41,10 @@
     "eject": "react-scripts eject"
   },
   "reactSnapshot": {
-    "include": [
-      "/learn"
-    ],
+    "include": [],
     "exclude": [
-      "/resume"
+      "/resume",
+      "/learn"
     ],
     "snapshotDelay": 1000
   },

@@ -103,6 +103,13 @@ export const Learn = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const active = COURSES[activeIndex] || COURSES[0];
 
+  // Direct loads of /learn can restore a stale scroll position from history,
+  // which makes the page open in the middle of the course stack. Always start
+  // this landing page from the top.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Warm the cache + force-decode every course logo once on mount. The logos
   // render as CSS masks (see CourseVisual); if the SVG isn't decoded before
   // first reveal the mask paints at the SVG's tiny intrinsic size, then snaps

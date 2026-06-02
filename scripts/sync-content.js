@@ -267,6 +267,7 @@ const syncTerminal = () => {
 // Execute
 console.log('Starting content synchronization...');
 try {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
   syncBlogs();
   syncProjects();
   syncCertifications();

@@ -7,6 +7,8 @@ tags: ["Software 3.0", "AI", "LLM", "Andrej Karpathy"]
 excerpt: "I just watched a talk by Andrej Karpathy that fundamentally shifted how I see the future of coding. He argues that we're in the middle of the biggest change in 70 years. He calls it Software 3.0."
 slug: "software-3-karpathy"
 readTime: "5 min read"
+coverImage: "/images/llm_coding.png"
+featured: false
 ---
 
 I just watched a talk by Andrej Karpathy (formerly of Tesla and OpenAI), and I have to say, it's fundamentally shifted how I see the future of coding. He argues that we're in the middle of a massive change, the biggest in 70 years. He calls it **Software 3.0**.

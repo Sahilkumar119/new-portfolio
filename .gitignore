@@ -50,3 +50,7 @@ GEMINI.md
 # MacOS
 .AppleDouble
 .LSOverride
+
+# Playwright MCP artifacts
+.playwright-mcp/
+learn-icon-check.png

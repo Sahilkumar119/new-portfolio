@@ -17,6 +17,14 @@ const generateSlug = (title) => {
     .trim();
 };
 
+const normalizeCoverImage = (value) => {
+  if (!value || typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/')) return trimmed;
+  return `/blogs/${trimmed.replace(/^\.?\//, '')}`;
+};
+
 /**
  * Sync Blogs
  */
@@ -42,6 +50,8 @@ const syncBlogs = () => {
       const slug = data.slug || generateSlug(data.title);
       // Deterministic ID generation based on slug to prevent collisions
       const id = data.id || Math.abs(slug.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0));
+      const readTime = data.readTime || `${Math.ceil(content.split(/\s+/).length / 200)} min read`;
+      const coverImage = normalizeCoverImage(data.coverImage || data.cover || data.image);
 
       // Field Whitelisting for security & clean data
       const blogSummary = {
@@ -51,6 +61,9 @@ const syncBlogs = () => {
         excerpt: data.excerpt || content.split('\n').slice(0, 3).join(' ').substring(0, 150) + '...',
         slug,
         tags: data.tags || [],
+        readTime,
+        coverImage,
+        image: coverImage,
       };
 
       const fullBlogPost = {
@@ -59,8 +72,10 @@ const syncBlogs = () => {
         date: data.date || new Date().toISOString().split('T')[0],
         author: data.author || 'Archie',
         tags: data.tags || [],
-        readTime: data.readTime || `${Math.ceil(content.split(/\s+/).length / 200)} min read`,
+        readTime,
         excerpt: blogSummary.excerpt,
+        coverImage,
+        image: coverImage,
         content: content.trim(),
       };
 
@@ -113,6 +128,29 @@ const generateSitemap = (blogs) => {
   xml += `    <changefreq>weekly</changefreq>\n`;
   xml += `    <priority>1.0</priority>\n`;
   xml += `  </url>\n`;
+
+  // Learn hub (React route) + static Docker course (served straight from public/)
+  xml += `  <url>\n`;
+  xml += `    <loc>${baseUrl}/learn</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>weekly</changefreq>\n`;
+  xml += `    <priority>0.9</priority>\n`;
+  xml += `  </url>\n`;
+  xml += `  <url>\n`;
+  xml += `    <loc>${baseUrl}/learn/docker/</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>monthly</changefreq>\n`;
+  xml += `    <priority>0.8</priority>\n`;
+  xml += `  </url>\n`;
+  for (let i = 0; i <= 7; i++) {
+    const mod = String(i).padStart(2, '0');
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/learn/docker/module-${mod}.html</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.6</priority>\n`;
+    xml += `  </url>\n`;
+  }
 
   // Blog pages
   blogs.forEach((blog) => {

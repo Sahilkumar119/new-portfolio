@@ -106,8 +106,18 @@ const useStyles = makeStyles(() => ({
         gap: "1rem",
         flexWrap: "wrap",
         paddingBottom: "1.5rem",
-        marginBottom: "2rem",
+        marginBottom: "1.25rem",
         borderBottom: "1px solid var(--divider)",
+    },
+    coverImageWrap: {
+        marginBottom: "2rem",
+    },
+    coverImage: {
+        width: "100%",
+        borderRadius: "14px",
+        border: "1px solid var(--glass-border)",
+        objectFit: "cover",
+        maxHeight: "430px",
     },
     metaItem: {
         fontSize: "0.75rem",
@@ -287,6 +297,10 @@ export const BlogPost = () => {
 
     const blogUrl = `${Resume.basics.url}/blog/${slug}`;
     const siteTitle = `${post.title} | ${Resume.basics.name}`;
+    const coverImage = post.coverImage || post.cover || post.image || "/android-chrome-512x512.png";
+    const absoluteCoverImage = /^https?:\/\//i.test(coverImage)
+        ? coverImage
+        : `${Resume.basics.url}${coverImage.startsWith("/") ? "" : "/"}${coverImage}`;
     let isoDate = post.date;
     try {
         isoDate = new Date(post.date).toISOString();
@@ -296,7 +310,7 @@ export const BlogPost = () => {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         "headline": post.title,
-        "image": `${Resume.basics.url}/android-chrome-512x512.png`,
+        "image": absoluteCoverImage,
         "datePublished": isoDate,
         "author": {
             "@type": "Person",
@@ -328,7 +342,7 @@ export const BlogPost = () => {
                 <meta property="og:url" content={blogUrl} />
                 <meta property="og:title" content={siteTitle} />
                 <meta property="og:description" content={post.excerpt} />
-                <meta property="og:image" content={`${Resume.basics.url}/android-chrome-512x512.png`} />
+                <meta property="og:image" content={absoluteCoverImage} />
                 <meta property="article:published_time" content={isoDate} />
                 <meta property="article:author" content={post.author} />
 
@@ -337,7 +351,7 @@ export const BlogPost = () => {
                 <meta property="twitter:url" content={blogUrl} />
                 <meta property="twitter:title" content={siteTitle} />
                 <meta property="twitter:description" content={post.excerpt} />
-                <meta property="twitter:image" content={`${Resume.basics.url}/android-chrome-512x512.png`} />
+                <meta property="twitter:image" content={absoluteCoverImage} />
 
                 {/* Structured Data Schema */}
                 <script type="application/ld+json">
@@ -368,6 +382,11 @@ export const BlogPost = () => {
                             </>
                         )}
                     </div>
+                    {(post.coverImage || post.cover || post.image) && (
+                        <div className={classes.coverImageWrap}>
+                            <img src={post.coverImage || post.cover || post.image} alt={`${post.title} cover`} className={classes.coverImage} />
+                        </div>
+                    )}
                     <div className={classes.bodyText}>{renderContent()}</div>
                 </article>
             </Container>

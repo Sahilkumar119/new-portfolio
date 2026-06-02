@@ -41,6 +41,9 @@
     "eject": "react-scripts eject"
   },
   "reactSnapshot": {
+    "include": [
+      "/learn"
+    ],
     "exclude": [
       "/resume"
     ],

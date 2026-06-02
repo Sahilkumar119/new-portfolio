@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 06 — Registries: Distributing Images</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F172A;
+    --surface:#131c30;
+    --surface-2:#1b2740;
+    --muted:#272F42;
+    --line:#2c3a52;
+    --line-soft:#222d44;
+    --fg:#F8FAFC;
+    --fg-dim:#aab6c8;
+    --fg-faint:#7e8ba1;
+    --primary:#cbd5e1;
+    --accent:#2496ED;
+    --accent-dim:#1b6fc0;
+    --blue:#60a5fa;
+    --violet:#a78bfa;
+    --cyan:#22d3ee;
+    --amber:#fbbf24;
+    --red:#f87171;
+    --code:#0a1120;
+    --radius:14px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 2px rgba(0,0,0,.4);
+    --shadow-2:0 8px 30px rgba(0,0,0,.35);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
+    font-feature-settings:"cv05","ss01"}
+  a{color:var(--blue);text-decoration:none;transition:color .18s var(--ease)}
+  a:hover{color:#93c5fd}
+  ::selection{background:rgba(36,150,237,.28)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;
+    background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .1s linear}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(15,23,42,.82);
+    backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#0ea5e9,#2496ed);color:#ffffff}
+  .brand .crumb{color:var(--fg-faint);font-weight:400}
+  .brand .crumb b{color:var(--fg-dim);font-weight:500}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .pill b{color:var(--accent)}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;
+    grid-template-columns:248px minmax(0,1fr);gap:48px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:72px;align-self:start;padding:32px 0;max-height:calc(100vh - 72px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--fg-faint);padding:0 12px;margin-bottom:10px}
+  aside nav{display:flex;flex-direction:column;gap:1px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;
+    color:var(--fg-faint);font-size:13.5px;font-weight:500;line-height:1.3;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:16px;height:16px;flex:none;opacity:.7}
+  aside nav a:hover{background:var(--surface);color:var(--fg-dim)}
+  aside nav a.active{color:var(--fg);background:var(--surface);border-left-color:var(--accent)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:18px 12px 0;font-size:12px;color:var(--fg-faint);line-height:1.5}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:14px 0 4px;border-bottom:1px solid var(--line-soft)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px}
+    aside nav a.active{border-color:var(--accent)}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:36px 0 120px;min-width:0;max-width:760px}
+
+  .hero{padding:8px 0 30px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    background:rgba(36,150,237,.08);border:1px solid rgba(36,150,237,.25);padding:6px 13px;border-radius:999px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(36,150,237,.2)}
+  h1{font-size:clamp(30px,4.4vw,44px);line-height:1.12;margin:20px 0 14px;letter-spacing:-.025em;font-weight:700}
+  h1 .grad{background:linear-gradient(95deg,#7dd3fc,#a78bfa 55%,#22d3ee);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--fg-dim);font-size:18px;max-width:62ch;margin:0}
+  .lede em{color:var(--fg);font-style:normal;font-weight:500}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
+  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
+  .chip b{color:var(--accent);font-family:var(--mono)}
+
+  section{margin:0 0 12px;scroll-margin-top:88px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:52px 0 4px}
+  .sec-head .num{font-family:var(--mono);font-size:14px;color:#ffffff;font-weight:700;
+    width:36px;height:36px;display:grid;place-items:center;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,#5aa9f2,#2496ed);box-shadow:var(--shadow-1)}
+  h2{font-size:25px;margin:0;letter-spacing:-.015em;font-weight:650;line-height:1.25}
+  h3{font-size:18px;margin:30px 0 4px;color:var(--primary);font-weight:600}
+  p{margin:13px 0;max-width:68ch}
+  .sub{color:var(--fg-dim);font-size:14.5px}
+
+  .note{position:relative;border:1px solid var(--line);background:var(--surface);
+    padding:15px 18px 15px 48px;border-radius:12px;margin:20px 0}
+  .note .ic{position:absolute;left:16px;top:16px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--fg-faint);display:block;margin-bottom:4px}
+  .note p{margin:0}
+  .note.key{border-color:rgba(167,139,250,.4);background:linear-gradient(180deg,rgba(167,139,250,.07),transparent)}
+  .note.key .ic,.note.key .tag{color:var(--violet)}
+  .note.warn{border-color:rgba(251,191,36,.4);background:linear-gradient(180deg,rgba(251,191,36,.07),transparent)}
+  .note.warn .ic,.note.warn .tag{color:var(--amber)}
+  .note.danger{border-color:rgba(248,113,113,.4);background:linear-gradient(180deg,rgba(248,113,113,.07),transparent)}
+  .note.danger .ic,.note.danger .tag{color:var(--red)}
+  .note.info .ic,.note.info .tag{color:var(--blue)}
+  .note.info{border-color:rgba(96,165,250,.35)}
+
+  .codeblock{background:var(--code);border:1px solid var(--line);border-radius:13px;margin:20px 0;
+    overflow:hidden;box-shadow:var(--shadow-2)}
+  .codeblock .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;
+    border-bottom:1px solid var(--line);background:#0d1424}
+  .codeblock .bar .lights{display:flex;gap:6px}
+  .codeblock .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .codeblock .bar .r{background:#ff5f56}.codeblock .bar .y{background:#ffbd2e}.codeblock .bar .g{background:#27c93f}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11.5px;color:var(--fg-faint);margin-left:6px}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+    color:var(--fg-dim);background:transparent;border:1px solid var(--line);border-radius:7px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease)}
+  .copybtn:hover{border-color:var(--accent);color:var(--accent)}
+  .copybtn svg{width:13px;height:13px}
+  .copybtn.done{color:var(--accent);border-color:var(--accent)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.8;color:#e8eefc;overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.86em;background:var(--muted);border:1px solid var(--line);
+    padding:1.5px 6px;border-radius:6px;color:#ffd9a6;white-space:nowrap}
+  .cmt{color:#5f6b85}.cmd{color:#7dd3fc}.flag{color:#c4b5fd}.str{color:#9ed0f7}.out{color:#6b7894}.kw{color:#fcd34d}
+
+  .tablewrap{margin:20px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    box-shadow:var(--shadow-1)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{background:var(--surface-2);color:var(--primary);font-size:11.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:#ffd9a6}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--surface)}
+
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;
+    transition:transform .2s var(--ease),border-color .2s var(--ease)}
+  .card:hover{transform:translateY(-2px);border-color:var(--line)}
+  .card .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:11px;
+    background:var(--muted)}
+  .card .ico svg{width:18px;height:18px}
+  .card h4{margin:0 0 5px;font-size:15px;font-weight:600;color:var(--fg)}
+  .card p{margin:0;font-size:13.5px;color:var(--fg-dim);max-width:none}
+  .ico.violet svg{color:var(--violet)} .ico.blue svg{color:var(--blue)} .ico.green svg{color:var(--accent)}
+  .ico.amber svg{color:var(--amber)} .ico.cyan svg{color:var(--cyan)} .ico.red svg{color:var(--red)}
+
+  /* ── layer / cache stack ── */
+  .stack{display:flex;flex-direction:column;gap:5px;max-width:480px;margin:18px auto 6px;
+    font-family:var(--mono);font-size:13px}
+  .layer{padding:12px 16px;border-radius:9px;border:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:10px;transition:transform .18s var(--ease)}
+  .layer:hover{transform:translateX(3px)}
+  .layer.rw{background:rgba(36,150,237,.1);border-color:rgba(36,150,237,.45);color:#9ed0f7}
+  .layer.ro{background:var(--surface);color:var(--fg-dim)}
+  .layer.hit{background:rgba(36,150,237,.08);border-color:rgba(36,150,237,.4);color:#9ed0f7}
+  .layer.miss{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.45);color:#fca5a5}
+  .layer small{color:var(--fg-faint);font-size:11px;font-family:var(--sans)}
+  .layer.hit small{color:#9ed0f7}.layer.miss small{color:#fca5a5}
+
+  /* ── command anatomy ── */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code);border:1px solid var(--line);
+    border-radius:13px;padding:24px 18px;margin:20px 0;text-align:center;line-height:2.6;box-shadow:var(--shadow-1)}
+  .anat .tok{padding:5px 10px;border-radius:8px;position:relative;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(125,211,252,.14);color:#7dd3fc}
+  .t2{background:rgba(167,139,250,.16);color:#c4b5fd}
+  .t3{background:rgba(36,150,237,.15);color:#9ed0f7}
+  .t4{background:rgba(251,191,36,.14);color:#fcd34d}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:var(--fg-faint);
+    margin-top:6px;letter-spacing:.03em}
+
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:11px 0;
+    overflow:hidden;transition:border-color .2s var(--ease)}
+  details[open]{border-color:rgba(36,150,237,.4)}
+  details:hover{border-color:var(--line)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11.5px;color:#ffffff;background:var(--accent);
+    border-radius:6px;padding:3px 8px;flex:none;font-weight:600}
+  summary .star{color:var(--amber);flex:none;display:inline-flex}
+  summary .star svg{width:15px;height:15px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--fg-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--fg-dim);font-size:14.5px;
+    border-top:1px solid var(--line-soft);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--fg)}
+
+  .check{list-style:none;padding:0;margin:16px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .check li{padding:13px 16px 13px 48px;position:relative;border-bottom:1px solid var(--line-soft);font-size:14.5px}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:16px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding-top:30px;color:var(--fg-dim);font-size:14.5px}
+  footer h3{margin:0 0 14px}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;
+    transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
+  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
+  .reflink:hover svg{color:var(--accent)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .next a{flex:1;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:13px;
+    padding:16px 18px;display:flex;flex-direction:column;gap:3px;transition:all .2s var(--ease)}
+  .next a:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .next small{color:var(--fg-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  .next b{font-size:15.5px;color:var(--fg);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:7px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .card:hover,.layer:hover,.state:hover,.next a:hover,.reflink:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ░░ inline icon sprite (Lucide-style, no emoji) ░░ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-cycle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></symbol>
+  <symbol id="i-cli" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="5" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.17-2.83L3 3"/><path d="m15 9 6-6"/></symbol>
+  <symbol id="i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-whale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c2 2 4 2 6 0"/><path d="M9 13c2 2 4 2 6 0"/><path d="M15 13c2 2 4 2 6 0"/><path d="M3 17c2 2 4 2 6 0 2 2 4 2 6 0 2 2 4 2 6 0"/><path d="M12 4v5"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-arrows" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 6h18"/><path d="m7 22-4-4 4-4"/><path d="M21 18H3"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></symbol>
+</svg>
+
+<!-- ░░ top bar ░░ -->
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn" style="text-decoration:none;margin-right:6px">&larr; Learn</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-whale"/></svg></span>
+      <span class="crumb"><b>Docker Course</b> &nbsp;/&nbsp; Phase 1 &nbsp;/&nbsp; Module 06</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 6</span>
+    <span class="pill"><b>~1.5h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ░░ sidebar TOC ░░ -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#recap"><svg class="ti"><use href="#i-cycle"/></svg>Where we left off</a>
+      <a href="#what-registry"><svg class="ti"><use href="#i-server"/></svg>What a registry is</a>
+      <a href="#major-registries"><svg class="ti"><use href="#i-layers"/></svg>Major registries</a>
+      <a href="#naming"><svg class="ti"><use href="#i-tag"/></svg>Image naming &amp; tags</a>
+      <a href="#push-pull"><svg class="ti"><use href="#i-upload"/></svg>Login, tag, push, pull</a>
+      <a href="#digests"><svg class="ti"><use href="#i-hash"/></svg>Tags vs digests</a>
+      <a href="#strategy"><svg class="ti"><use href="#i-git"/></svg>Tagging strategy</a>
+      <a href="#scanning"><svg class="ti"><use href="#i-scan"/></svg>Scanning &amp; signing</a>
+      <a href="#ci"><svg class="ti"><use href="#i-bolt"/></svg>Private registries &amp; CI</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">Do the push/pull flow yourself. Watch only changed layers upload. That's the whole point of a registry.</p>
+  </aside>
+
+  <!-- ░░ content ░░ -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 6</span>
+      <h1>Module 06 — <span class="grad">Registries</span><br>Distributing Images</h1>
+      <p class="lede">You can build images (Module 02) and run full multi-container apps (Module 05). The missing piece is
+      <em>how images get from your machine to CI, to production, to a teammate's laptop</em>. That answer is a
+      <em>registry</em> — and this module covers everything from pushing your first image to pinning by digest for
+      reproducible, secure deploys.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · hands-on</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Modules 00, 02, 05</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>push · pull · tags · digests · CI</span>
+        <span class="chip"><svg><use href="#i-whale"/></svg>Docker 29.5 · CachyOS</span>
+      </div>
+    </div>
+
+    <!-- 0. RECAP -->
+    <section id="recap">
+      <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
+      <p>Go back to Module 00 for a moment. The very first diagram showed three actors: the <strong>Docker client</strong>
+      (your CLI), the <strong>Docker daemon</strong> (the engine running on your machine), and a
+      <strong>registry</strong> (the remote store). Every time you ran <code class="inl">docker pull nginx</code> back in
+      Module 01, the daemon silently reached out to Docker Hub — that's a registry — and downloaded layers. You've been
+      using registries from day one without thinking about them.</p>
+
+      <p>By Module 02 you learned to <em>build</em> images: layers, Dockerfiles, the cache. By Module 05 you could
+      orchestrate full multi-container applications with Compose. But every image you built stayed local on your machine.
+      The second you need to:</p>
+
+      <ul>
+        <li>deploy that image to a cloud server or Kubernetes cluster,</li>
+        <li>share it with a teammate or a CI pipeline,</li>
+        <li>roll back production to a known-good version,</li>
+      </ul>
+
+      <p>you need to <strong>push it to a registry</strong>. That's this module.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico blue"><svg><use href="#i-box"/></svg></div>
+          <h4>Build (Module 02)</h4>
+          <p>You can produce an image from a Dockerfile. Layers are local, cached, composable.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-layers"/></svg></div>
+          <h4>Run (Modules 01–05)</h4>
+          <p>You can run containers, volumes, networks, full Compose stacks — all on your machine.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-upload"/></svg></div>
+          <h4>Share (this module)</h4>
+          <p>Push to a registry so CI, production, and teammates can pull the exact same image.</p></div>
+      </div>
+    </section>
+
+    <!-- 1. WHAT A REGISTRY IS -->
+    <section id="what-registry">
+      <div class="sec-head"><span class="num">1</span><h2>What a registry is</h2></div>
+      <p>A registry is a server that <strong>stores and distributes image layers</strong>. When you push an image, the
+      daemon uploads each layer as a blob identified by its <code class="inl">sha256</code> content hash. When you pull,
+      the daemon downloads only the layers it doesn't already have locally.</p>
+
+      <p>That last sentence is important: <strong>layers are content-addressed</strong>. If two images share a base
+      layer — say, both start from <code class="inl">python:3.12-slim</code> — that layer is stored once in the registry
+      and once on every machine that has pulled either image. A push doesn't re-upload layers that are already there. Docker
+      checks each layer's digest against the registry before uploading; only genuinely new or changed layers travel over
+      the wire.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Tie to Module 02 layers</span>
+        <p>Remember the layer diagram from Module 02? Every <code class="inl">RUN</code> and <code class="inl">COPY</code>
+        instruction produced a layer with a <code class="inl">sha256</code> digest. The registry uses those exact same
+        digests to decide what to store and what to skip on push. <b>Write a Dockerfile with cache-friendly layer order
+        and your CI pushes get faster too</b> — only the changed bottom layers upload each time.</p></div>
+
+      <p>Docker Hub is the default public registry. When you type <code class="inl">docker pull nginx</code> without
+      specifying a host, the daemon talks to <code class="inl">registry-1.docker.io</code>. The registry protocol itself
+      is an open standard (OCI Distribution Spec), which is why every major cloud and self-hosted solution speaks the same
+      push/pull API.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The registry API in one sentence</span>
+        <p>A registry exposes an HTTP API. Clients check which layers exist (<code class="inl">HEAD /blobs/sha256:…</code>),
+        upload missing ones (<code class="inl">PUT /blobs/uploads/…</code>), then push a manifest JSON that references
+        those layer digests. A pull reverses the process. This is why any OCI-compliant client works with any
+        OCI-compliant registry.</p></div>
+    </section>
+
+    <!-- 2. MAJOR REGISTRIES -->
+    <section id="major-registries">
+      <div class="sec-head"><span class="num">2</span><h2>The major registries</h2></div>
+      <p>You will encounter these on the job. Know the trade-offs.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Registry</th><th>Best for</th><th>Auth model</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Docker Hub</b><br><code>docker.io</code></td>
+            <td>Public open-source images, learning, small personal projects</td>
+            <td>Docker account / PAT</td>
+            <td>The default. Free tier has pull-rate limits (unauthenticated: 100/6h per IP, authenticated: 200/6h). Unlimited public pushes. 1 free private repo.</td>
+          </tr>
+          <tr>
+            <td><b>GHCR</b><br><code>ghcr.io</code></td>
+            <td>Projects hosted on GitHub; seamless GitHub Actions integration</td>
+            <td>GitHub PAT or <code>GITHUB_TOKEN</code></td>
+            <td>Free for public repos. Private images tied to org/repo permissions. Best choice if your CI is GitHub Actions — no separate secrets for auth.</td>
+          </tr>
+          <tr>
+            <td><b>AWS ECR</b><br><code>&lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com</code></td>
+            <td>Workloads running on ECS, EKS, Lambda</td>
+            <td>IAM roles / <code>aws ecr get-login-password</code></td>
+            <td>No pull-rate limits within AWS. Pay per GB stored + transferred out. Scan on push via Inspector. Short-lived tokens (12h).</td>
+          </tr>
+          <tr>
+            <td><b>GCP Artifact Registry</b><br><code>&lt;region&gt;-docker.pkg.dev</code></td>
+            <td>Workloads on GKE / Cloud Run</td>
+            <td>Workload Identity / service account JSON</td>
+            <td>Replaced GCR. Supports multi-format repos (Docker, npm, Maven). IAM-integrated. Free first 0.5 GB/month.</td>
+          </tr>
+          <tr>
+            <td><b>Azure ACR</b><br><code>&lt;registry&gt;.azurecr.io</code></td>
+            <td>Workloads on AKS / Azure Container Apps</td>
+            <td>Service principal / managed identity</td>
+            <td>Geo-replication on Premium tier. Built-in vulnerability scanning (Defender for Containers). Task runner for building inside Azure.</td>
+          </tr>
+          <tr>
+            <td><b>Self-hosted</b><br><code>registry:2</code> / Harbor</td>
+            <td>Air-gapped environments, on-prem, full control over retention</td>
+            <td>Basic auth or LDAP (Harbor)</td>
+            <td><code>registry:2</code> is the official minimal CNCF distribution — one container, no UI. Harbor adds RBAC, scanning, replication, a UI. Both speak OCI.</td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">How to choose</span>
+        <p>Start on Docker Hub or GHCR while learning. When you join a company using AWS, use ECR — it integrates
+        with IAM and eliminates the need to manage separate credentials. On GCP, use Artifact Registry. Self-hosting with
+        Harbor makes sense when your organisation has compliance requirements that forbid data leaving its own
+        infrastructure, or when you need fine-grained RBAC and image lifecycle policies in one place.</p></div>
+    </section>
+
+    <!-- 3. NAMING & TAGS -->
+    <section id="naming">
+      <div class="sec-head"><span class="num">3</span><h2>Image naming &amp; tags</h2></div>
+      <p>Before you can push, you need to understand the full image reference format. Every image reference has the same
+      anatomy:</p>
+
+      <div class="anat">
+        <span class="tok t1">ghcr.io</span> / <span class="tok t2">user</span> / <span class="tok t3">app</span> : <span class="tok t4">1.2.0</span>
+        <span class="lbl">registry host &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; namespace &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; repository &nbsp;&nbsp;&nbsp;&nbsp; tag</span>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Part</th><th>What it is</th><th>When omitted</th></tr></thead>
+        <tbody>
+          <tr><td><b>Registry host</b></td><td>The hostname (and optional port) of the registry server. <code>ghcr.io</code>, <code>docker.io</code>, <code>123456789.dkr.ecr.us-east-1.amazonaws.com</code></td><td>Defaults to <code>docker.io</code> (Docker Hub)</td></tr>
+          <tr><td><b>Namespace</b></td><td>Your Docker Hub username, GitHub username, or organisation name. On ECR it's the AWS account + region prefix.</td><td>On Docker Hub defaults to <code>library</code> (official images like <code>nginx</code>)</td></tr>
+          <tr><td><b>Repository</b></td><td>The name of the image — typically the app name: <code>app</code>, <code>api</code>, <code>worker</code></td><td>Required — there is no default</td></tr>
+          <tr><td><b>Tag</b></td><td>A human-readable pointer to a specific image manifest. Mutable — the registry can move it to a different manifest at any time.</td><td>Defaults to <code>:latest</code></td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>The :latest trap — a callback to Module 01</h3>
+      <p>In Module 01 you were told never to rely on <code class="inl">:latest</code> for anything important.
+      Here is the full reason: <code class="inl">:latest</code> is just a <strong>mutable tag</strong>. It points to
+      whatever manifest was pushed most recently. Push a new version and <code class="inl">:latest</code> now means
+      something different. Two machines that pull <code class="inl">:latest</code> at different times can get completely
+      different images with no warning.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Never pin :latest in production</span>
+        <p>A Kubernetes deployment using <code class="inl">image: myapp:latest</code> will silently run a different version
+        than the one you tested the moment anyone pushes a new build. In the best case this causes confusing behaviour; in
+        the worst case it silently ships a regression to production. Pin a specific version tag — or better, a digest
+        (Section 5).</p></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Official images have a short name</span>
+        <p><code class="inl">docker pull nginx</code> expands to <code class="inl">docker.io/library/nginx:latest</code>.
+        The <code class="inl">library</code> namespace is Docker's official image program. When you push your own image,
+        you always need your own namespace: <code class="inl">docker.io/yourname/app:1.0</code>.</p></div>
+    </section>
+
+    <!-- 4. LOGIN TAG PUSH PULL -->
+    <section id="push-pull">
+      <div class="sec-head"><span class="num">4</span><h2>Login, tag, push, pull</h2></div>
+      <p>Four commands cover the entire publish flow. Here they all are together, in order, for a real GHCR example. Read
+      the whole block first, then we break down each step.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">terminal — full publish flow (GHCR)</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># 1. Authenticate — use a Personal Access Token, not your password</span>
+<span class="cmd">echo</span> <span class="str">"&lt;YOUR_GITHUB_PAT&gt;"</span> | <span class="cmd">docker</span> login ghcr.io <span class="flag">-u</span> &lt;github-username&gt; <span class="flag">--password-stdin</span>
+
+<span class="cmt"># 2. Build your image locally (you already know this from Module 02)</span>
+<span class="cmd">docker</span> build <span class="flag">-t</span> myapp:1.0 .
+
+<span class="cmt"># 3. Tag it with the full registry reference</span>
+<span class="cmd">docker</span> tag myapp:1.0 ghcr.io/&lt;github-username&gt;/myapp:1.0
+
+<span class="cmt"># 4. Push — only layers the registry doesn't already have are uploaded</span>
+<span class="cmd">docker</span> push ghcr.io/&lt;github-username&gt;/myapp:1.0
+
+<span class="cmt"># --- on another machine / in CI / in production ---</span>
+
+<span class="cmt"># 5. Pull the image</span>
+<span class="cmd">docker</span> pull ghcr.io/&lt;github-username&gt;/myapp:1.0
+
+<span class="cmt"># 6. Run it</span>
+<span class="cmd">docker</span> run <span class="flag">-p</span> 8000:8000 ghcr.io/&lt;github-username&gt;/myapp:1.0</code></pre>
+      </div>
+
+      <h3>Step-by-step explanation</h3>
+
+      <p><strong>docker login</strong> writes an auth token to <code class="inl">~/.docker/config.json</code>. The daemon
+      attaches this token to every push/pull request to that registry host. Always pipe the token via
+      <code class="inl">--password-stdin</code> rather than passing it as a CLI argument — otherwise it appears in your
+      shell history and in <code class="inl">ps</code> output on shared machines. Use a <strong>Personal Access Token
+      (PAT)</strong> or a CI-managed secret, never your account password.</p>
+
+      <p><strong>docker tag</strong> does not copy or move anything. It creates a second name for the exact same image
+      manifest that already exists locally. The image has one set of layers; it now has two names. Think of it as an
+      alias.</p>
+
+      <p><strong>docker push</strong> contacts the registry, walks each layer's digest, and asks "do you already have
+      this?" Only missing layers are uploaded. You will see output like:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">push output</span></div>
+        <pre><code><span class="out">The push refers to repository [ghcr.io/user/myapp]
+a3f42e8c1b20: Pushed          ← new layer, uploaded
+7d3c1f9a2044: Layer already exists  ← base layer already in registry
+e9c3d8b71a11: Layer already exists  ← shared with another image
+1.0: digest: sha256:c8f2... size: 1234</span></code></pre>
+      </div>
+
+      <p><strong>docker pull</strong> is the reverse: the daemon downloads the manifest, checks which layers it already has
+      locally, and fetches only the missing ones. This is why pulling a second image that shares a base is fast —
+      the base layers are already there.</p>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Private images require login on every machine</span>
+        <p>If your image is private, every machine that needs to pull it must be authenticated. On a developer laptop that
+        means <code class="inl">docker login</code>. In Kubernetes that means an <code class="inl">imagePullSecret</code>
+        (a Secret containing registry credentials that you attach to a Pod spec). This is a forward reference to
+        Kubernetes — keep it in mind.</p></div>
+    </section>
+
+    <!-- 5. TAGS VS DIGESTS -->
+    <section id="digests">
+      <div class="sec-head"><span class="num">5</span><h2>Tags vs digests — the reproducibility difference</h2></div>
+      <p>This is a concept worth mastering. Tags and digests both refer to an image, but they have fundamentally
+      different guarantees.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico amber"><svg><use href="#i-tag"/></svg></div>
+          <h4>Tags — mutable pointers</h4>
+          <p>A tag is a string label that a registry associates with a manifest. Anyone with push access can move it to a
+          different manifest at any time. <code>:1.0</code>, <code>:latest</code>, <code>:stable</code> — all mutable.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-hash"/></svg></div>
+          <h4>Digests — immutable content addresses</h4>
+          <p>A digest is the <code>sha256</code> hash of the manifest JSON. It can never change — the content <em>is</em>
+          the address. Pull the same digest on any machine, anywhere, at any time: you get the identical image.</p></div>
+      </div>
+
+      <p>To pull or reference an image by digest:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">terminal</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># pull by digest — immune to tag mutation</span>
+<span class="cmd">docker</span> pull ghcr.io/user/myapp@<span class="str">sha256:c8f2a91b3d4e7f6082c1a9b5d8e3f2a7b4c6d9e1f3a5b7c9d2e4f6a8b0c1d3e5</span>
+
+<span class="cmt"># inspect an image's digest locally</span>
+<span class="cmd">docker</span> inspect <span class="flag">--format</span> <span class="str">'{{index .RepoDigests 0}}'</span> ghcr.io/user/myapp:1.0
+
+<span class="cmt"># see the digest returned after a push (last line of push output)</span>
+<span class="cmt"># 1.0: digest: sha256:c8f2... size: 1234</span></code></pre>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The clean answer</span>
+        <p>Tags are mutable — they can be moved to a different image at any time. <b>Digests are immutable</b> — they are
+        the <code class="inl">sha256</code> hash of the manifest itself, so they uniquely and permanently identify one
+        exact image. For reproducible, secure production deployments, <b>pin the digest</b>. Your CI pipeline should
+        record the digest from the push output and use it in the deployment manifest, not the tag.</p></div>
+
+      <p>In a Kubernetes deployment manifest, a digest pin looks like this:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">k8s deployment snippet (forward reference)</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># tag alone — mutable, not recommended for prod</span>
+image: ghcr.io/user/myapp:<span class="str">1.2.0</span>
+
+<span class="cmt"># tag + digest — best of both: human-readable AND immutable</span>
+image: ghcr.io/user/myapp:<span class="str">1.2.0</span>@<span class="str">sha256:c8f2a91b3d4e7f...</span></code></pre>
+      </div>
+    </section>
+
+    <!-- 6. TAGGING STRATEGY -->
+    <section id="strategy">
+      <div class="sec-head"><span class="num">6</span><h2>Tagging strategy</h2></div>
+      <p>A consistent tagging strategy is something engineering teams set up once and rely on forever. This is what
+      professional CI pipelines look like.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Tag pattern</th><th>Example</th><th>When to use it</th></tr></thead>
+        <tbody>
+          <tr><td>Semantic version</td><td><code>1.2.0</code></td><td>Every release. Stable, human-readable, allows rollback by version name.</td></tr>
+          <tr><td>Git commit SHA</td><td><code>a3f42e8</code></td><td>Every CI build. Links the image directly to the exact commit that produced it. Most useful for debugging.</td></tr>
+          <tr><td>Branch name</td><td><code>main</code>, <code>feature-login</code></td><td>Mutable pointer to the latest build on that branch. Good for staging environments.</td></tr>
+          <tr><td><code>latest</code></td><td><code>latest</code></td><td>Acceptable as a convenience alias for the most recent stable build. <b>Never as the only tag</b>, never for prod deploys.</td></tr>
+          <tr><td>Date / build number</td><td><code>2026-06-01</code>, <code>build-1234</code></td><td>Some teams use these for auditability. Less common than git SHA.</td></tr>
+        </tbody>
+      </table></div>
+
+      <p>A solid CI pipeline applies <strong>multiple tags to the same image</strong> on every build. That means a single
+      push produces: a git SHA tag (traceable), a semver tag (releasable), and optionally moves <code class="inl">latest</code>.
+      The layers are stored once; multiple tag labels just point to the same manifest. There is no storage penalty.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">CI tagging pattern (pseudo-shell)</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># CI environment variables (GitHub Actions example)</span>
+SHA=<span class="str">$(git rev-parse --short HEAD)</span>    <span class="cmt"># e.g. a3f42e8</span>
+VERSION=<span class="str">1.2.0</span>                         <span class="cmt"># from package.json / pyproject.toml / tag</span>
+REGISTRY=<span class="str">ghcr.io/myorg/myapp</span>
+
+<span class="cmt"># build once</span>
+<span class="cmd">docker</span> build <span class="flag">-t</span> <span class="str">$REGISTRY:$SHA</span> .
+
+<span class="cmt"># apply additional tags (no re-build, just aliases)</span>
+<span class="cmd">docker</span> tag <span class="str">$REGISTRY:$SHA</span> <span class="str">$REGISTRY:$VERSION</span>
+<span class="cmd">docker</span> tag <span class="str">$REGISTRY:$SHA</span> <span class="str">$REGISTRY:latest</span>
+
+<span class="cmt"># push all three — same layers, three manifest pointers</span>
+<span class="cmd">docker</span> push <span class="str">$REGISTRY:$SHA</span>
+<span class="cmd">docker</span> push <span class="str">$REGISTRY:$VERSION</span>
+<span class="cmd">docker</span> push <span class="str">$REGISTRY:latest</span></code></pre>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why CI should tag with the git SHA</span>
+        <p>The git SHA creates a direct, unambiguous link between the running container and the source code that produced
+        it. When a bug appears in production, you can read the SHA from the container's image reference, check it out
+        locally, and reproduce the exact build. Without a SHA tag you have to guess which commit is in the running image.
+        <b>SHA tagging is the single most useful debugging practice in containerised CI/CD.</b></p></div>
+    </section>
+
+    <!-- 7. SCANNING & SIGNING -->
+    <section id="scanning">
+      <div class="sec-head"><span class="num">7</span><h2>Scanning &amp; signing — intro to supply-chain safety</h2></div>
+      <p>Pushing an image to a registry makes it available to anyone (or any system) that pulls it. Before you do that in
+      a production context, you want to know two things: <em>does this image contain known vulnerabilities?</em> and
+      <em>can the recipient trust that this image came from you and hasn't been tampered with?</em> That's vulnerability
+      scanning and image signing, respectively.</p>
+
+      <h3>Vulnerability scanning</h3>
+      <p>Every layer in your image contains OS packages, language runtimes, and libraries. Any of those can have published
+      CVEs. A scanner compares the image's bill of materials (SBOM) against a vulnerability database and reports what it
+      finds.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">terminal — docker scout (built-in since Docker Desktop 4.17)</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># quick overview — shows CVE count by severity</span>
+<span class="cmd">docker</span> scout quickview ghcr.io/user/myapp:1.0
+
+<span class="cmt"># full CVE list</span>
+<span class="cmd">docker</span> scout cves ghcr.io/user/myapp:1.0
+
+<span class="cmt"># compare two versions to see what changed</span>
+<span class="cmd">docker</span> scout compare ghcr.io/user/myapp:1.0 <span class="flag">--to</span> ghcr.io/user/myapp:1.1</code></pre>
+      </div>
+
+      <p><strong>Trivy</strong> (by Aqua Security) is the most widely deployed open-source scanner. It runs as a single
+      binary or container, scans local images or remote references, and integrates easily into CI pipelines:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">terminal — trivy</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># scan a local image</span>
+<span class="cmd">trivy</span> image myapp:1.0
+
+<span class="cmt"># fail CI if any CRITICAL CVEs are found</span>
+<span class="cmd">trivy</span> image <span class="flag">--exit-code</span> 1 <span class="flag">--severity</span> CRITICAL myapp:1.0</code></pre>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Scan before push, not after</span>
+        <p>Scan your image as part of the CI build — <em>before</em> it reaches the registry. Catching a critical CVE
+        after the image is in production is a fire drill. Catching it in CI is a five-second fix. Most teams gate the push
+        step: <code class="inl">trivy image --exit-code 1 --severity CRITICAL myapp:$SHA &amp;&amp; docker push ...</code>.</p></div>
+
+      <h3>Image signing and provenance (intro)</h3>
+      <p>Signing answers: <em>"is this image actually what it claims to be, and did it come from the pipeline I trust?"</em>
+      The CNCF tool <strong>cosign</strong> (part of the Sigstore project) attaches a cryptographic signature to an image's
+      digest in the registry. A deploy pipeline can verify the signature before running a container — if the signature is
+      missing or invalid, the deploy is rejected.</p>
+
+      <p>Docker also ships an older, built-in mechanism called <strong>Docker Content Trust (DCT)</strong>, backed by The Update
+      Framework / Notary. Setting <code class="inl">DOCKER_CONTENT_TRUST=1</code> makes the client sign tags on push and refuse to
+      pull any unsigned tag. It predates Sigstore and is largely superseded by <strong>cosign</strong> in modern pipelines —
+      cosign is keyless, registry-agnostic, and signs the immutable digest rather than the mutable tag — but you will still see
+      DCT referenced in legacy setups.</p>
+
+      <p><strong>Attestations</strong> go further: they attach machine-readable provenance metadata — which git commit, which
+      CI run, which Dockerfile — to the image in the registry. GitHub Actions can generate these automatically with
+      <code class="inl">actions/attest-build-provenance</code>.</p>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">This is intro-level — Module 07 goes deeper</span>
+        <p>Supply-chain security (cosign, Sigstore, SBOM generation, policy enforcement with OPA/Kyverno) is covered in
+        depth in Module 07 — Security &amp; Hardening. For now, the key takeaways are: <b>always scan before pushing</b>,
+        and know that signing/attestations exist as the next level of trust beyond scanning.</p></div>
+    </section>
+
+    <!-- 8. PRIVATE REGISTRIES & CI -->
+    <section id="ci">
+      <div class="sec-head"><span class="num">8</span><h2>Private registries &amp; CI</h2></div>
+
+      <h3>Pushing from GitHub Actions</h3>
+      <p>GitHub Actions has a built-in <code class="inl">GITHUB_TOKEN</code> that is scoped to the repository and has
+      write access to GHCR for that repo. You don't need to create a separate secret — just log in with it:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">.github/workflows/build-push.yml (key steps)</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">- name:</span> <span class="str">Log in to GHCR</span>
+  <span class="kw">uses:</span> docker/login-action@v3
+  <span class="kw">with:</span>
+    <span class="kw">registry:</span> ghcr.io
+    <span class="kw">username:</span> <span class="str">${{ github.actor }}</span>
+    <span class="kw">password:</span> <span class="str">${{ secrets.GITHUB_TOKEN }}</span>
+
+<span class="kw">- name:</span> <span class="str">Build and push</span>
+  <span class="kw">uses:</span> docker/build-push-action@v5
+  <span class="kw">with:</span>
+    <span class="kw">context:</span> .
+    <span class="kw">push:</span> <span class="str">true</span>
+    <span class="kw">tags:</span> |
+      ghcr.io/<span class="str">${{ github.repository_owner }}</span>/myapp:<span class="str">${{ github.sha }}</span>
+      ghcr.io/<span class="str">${{ github.repository_owner }}</span>/myapp:latest</code></pre>
+      </div>
+
+      <p>For other registries (ECR, Docker Hub) you store the credentials as encrypted repository secrets
+      (<code class="inl">secrets.DOCKERHUB_TOKEN</code>, etc.) and reference them the same way. Never hard-code tokens in
+      the workflow file itself.</p>
+
+      <h3>Pulling in production with imagePullSecrets</h3>
+      <p>When Kubernetes pulls a private image, it needs credentials. You create a Kubernetes Secret of type
+      <code class="inl">kubernetes.io/dockerconfigjson</code> containing the registry auth, then reference it in your Pod
+      spec under <code class="inl">imagePullSecrets</code>. This is a forward reference to the Kubernetes phase — just know
+      that the registry credential problem you solved locally with <code class="inl">docker login</code> has a direct
+      equivalent in every orchestrator.</p>
+
+      <h3>Self-hosting with registry:2</h3>
+      <p>Running your own registry is genuinely one command. The official <code class="inl">registry:2</code> image is the
+      CNCF Distribution reference implementation — no UI, no RBAC, just the OCI-compliant HTTP API. Useful for
+      air-gapped labs or local testing:</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">terminal — local registry</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># start a local registry on port 5000, persist data in a volume</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">-p</span> 5000:5000 <span class="flag">--name</span> registry <span class="flag">-v</span> registry-data:/var/lib/registry registry:2
+
+<span class="cmt"># tag and push to it</span>
+<span class="cmd">docker</span> tag myapp:1.0 localhost:5000/myapp:1.0
+<span class="cmd">docker</span> push localhost:5000/myapp:1.0
+
+<span class="cmt"># pull from it on the same machine</span>
+<span class="cmd">docker</span> pull localhost:5000/myapp:1.0</code></pre>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">When to reach for Harbor instead</span>
+        <p><code class="inl">registry:2</code> has no UI, no user management, no vulnerability scanning, and no replication.
+        For a production on-prem registry that needs role-based access, a web UI, integrated Trivy scanning, and
+        cross-datacenter replication, use <strong>Harbor</strong> (CNCF graduated project). It wraps
+        <code class="inl">registry:2</code> internally but adds all of the above.</p></div>
+    </section>
+
+    <!-- 9. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">9</span><h2>Hands-on — do this now</h2></div>
+      <p>The only way to understand push/pull is to do it yourself and watch only the changed layers travel. This checklist
+      should take 30–45 minutes.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Create a free Docker Hub account at hub.docker.com — or enable GHCR on any GitHub repo (it's free for public repos).</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker login docker.io</code> (or <code class="inl">docker login ghcr.io</code>) and verify you get "Login Succeeded".</li>
+        <li><svg><use href="#i-checkbox"/></svg>Take any local image you built in Modules 02–05. Tag it: <code class="inl">docker tag myapp:1.0 &lt;yournamespace&gt;/myapp:1.0</code>.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Push it: <code class="inl">docker push &lt;yournamespace&gt;/myapp:1.0</code>. Watch the output — note which layers say "Pushed" vs "Layer already exists".</li>
+        <li><svg><use href="#i-checkbox"/></svg>Delete the local image: <code class="inl">docker rmi &lt;yournamespace&gt;/myapp:1.0</code>. Then pull it back: <code class="inl">docker pull &lt;yournamespace&gt;/myapp:1.0</code>. Confirm it runs.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Make a trivial one-line change to the app (e.g., edit a string), rebuild, retag as <code class="inl">:1.1</code>, and push again. Observe that only the changed layers upload — the base layers say "Layer already exists".</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find the digest: run <code class="inl">docker inspect --format '{{index .RepoDigests 0}}' &lt;image&gt;</code>. Copy the <code class="inl">sha256:...</code> and pull by that digest directly.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker scout quickview &lt;yourimage&gt;</code> (or <code class="inl">trivy image &lt;yourimage&gt;</code> if Trivy is installed). Read the CVE summary. Note that even a minimal image may have findings.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Optional: start a local <code class="inl">registry:2</code> container, push and pull to <code class="inl">localhost:5000</code> to see that the same commands work against a self-hosted registry.</li>
+      </ul>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">What to observe, not just do</span>
+        <p>The most important moment in this hands-on is watching the <em>second push</em> — where only one or two layers
+        upload instead of all of them. That is the content-addressed deduplication that makes registries fast and storage
+        efficient. The registry didn't need you to tell it what changed; it figured it out from the layer digests. <b>If
+        you understand why that works, you understand how registries work.</b></p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://docs.docker.com/reference/cli/docker/image/push/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>docker push reference</a>
+        <a class="reflink" href="https://docs.docker.com/docker-hub/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Docker Hub docs</a>
+        <a class="reflink" href="https://docs.docker.com/scout/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Docker Scout</a>
+        <a class="reflink" href="https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>GHCR docs</a>
+        <a class="reflink" href="https://opencontainers.org/release-notices/v1-0-0-distribution-spec/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>OCI Distribution Spec</a>
+        <a class="reflink" href="https://aquasecurity.github.io/trivy/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Trivy scanner</a>
+      </div>
+
+      <div class="next">
+        <a href="module-05.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 05 — Docker Compose</b></span></a>
+        <a href="module-07.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 07 — Security &amp; Hardening</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 06 · built for visual learning.
+      Once the hands-on checklist is all ticked, move on to Module 07.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

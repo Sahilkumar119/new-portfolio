@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 01 — Images &amp; Containers: Lifecycle &amp; the Core CLI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* slate-based dark system (ui-ux-pro-max design system) */
+    --bg:#0F172A;            /* background */
+    --surface:#131c30;       /* card / panel */
+    --surface-2:#1b2740;     /* raised */
+    --muted:#272F42;         /* muted surface */
+    --line:#2c3a52;          /* border */
+    --line-soft:#222d44;
+    --fg:#F8FAFC;            /* foreground */
+    --fg-dim:#aab6c8;        /* secondary text (≥3:1) */
+    --fg-faint:#7e8ba1;      /* tertiary */
+    --primary:#cbd5e1;       /* slate-300, headings accents */
+    --accent:#22C55E;        /* run/success green CTA */
+    --accent-dim:#16a34a;
+    --blue:#60a5fa;
+    --violet:#a78bfa;
+    --cyan:#22d3ee;
+    --amber:#fbbf24;
+    --red:#f87171;
+    --code:#0a1120;
+    --radius:14px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 2px rgba(0,0,0,.4);
+    --shadow-2:0 8px 30px rgba(0,0,0,.35);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
+    font-feature-settings:"cv05","ss01"}
+  a{color:var(--blue);text-decoration:none;transition:color .18s var(--ease)}
+  a:hover{color:#93c5fd}
+  ::selection{background:rgba(34,197,94,.28)}
+
+  /* focus visibility (a11y) */
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  /* ── reading progress bar ── */
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;
+    background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .1s linear}
+
+  /* ── top bar ── */
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(15,23,42,.82);
+    backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#0ea5e9,#22c55e);color:#06210f}
+  .brand .crumb{color:var(--fg-faint);font-weight:400}
+  .brand .crumb b{color:var(--fg-dim);font-weight:500}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .pill b{color:var(--accent)}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  /* ── layout shell ── */
+  .shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;
+    grid-template-columns:248px minmax(0,1fr);gap:48px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  /* ── sidebar TOC ── */
+  aside{position:sticky;top:72px;align-self:start;padding:32px 0;max-height:calc(100vh - 72px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--fg-faint);padding:0 12px;margin-bottom:10px}
+  aside nav{display:flex;flex-direction:column;gap:1px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;
+    color:var(--fg-faint);font-size:13.5px;font-weight:500;line-height:1.3;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:16px;height:16px;flex:none;opacity:.7}
+  aside nav a:hover{background:var(--surface);color:var(--fg-dim)}
+  aside nav a.active{color:var(--fg);background:var(--surface);border-left-color:var(--accent)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:18px 12px 0;font-size:12px;color:var(--fg-faint);line-height:1.5}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:14px 0 4px;border-bottom:1px solid var(--line-soft)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px}
+    aside nav a.active{border-color:var(--accent)}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:36px 0 120px;min-width:0;max-width:760px}
+
+  /* ── hero ── */
+  .hero{padding:8px 0 30px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);padding:6px 13px;border-radius:999px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+  h1{font-size:clamp(30px,4.4vw,44px);line-height:1.12;margin:20px 0 14px;letter-spacing:-.025em;font-weight:700}
+  h1 .grad{background:linear-gradient(95deg,#7dd3fc,#a78bfa 55%,#22d3ee);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--fg-dim);font-size:18px;max-width:62ch;margin:0}
+  .lede em{color:var(--fg);font-style:normal;font-weight:500}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
+  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
+  .chip b{color:var(--accent);font-family:var(--mono)}
+
+  /* ── sections ── */
+  section{margin:0 0 12px;scroll-margin-top:88px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:52px 0 4px}
+  .sec-head .num{font-family:var(--mono);font-size:14px;color:#06210f;font-weight:700;
+    width:36px;height:36px;display:grid;place-items:center;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,#34d399,#22c55e);box-shadow:var(--shadow-1)}
+  h2{font-size:25px;margin:0;letter-spacing:-.015em;font-weight:650;line-height:1.25}
+  h3{font-size:18px;margin:30px 0 4px;color:var(--primary);font-weight:600}
+  p{margin:13px 0;max-width:68ch}
+  .sub{color:var(--fg-dim);font-size:14.5px}
+
+  /* ── callouts ── */
+  .note{position:relative;border:1px solid var(--line);background:var(--surface);
+    padding:15px 18px 15px 48px;border-radius:12px;margin:20px 0}
+  .note .ic{position:absolute;left:16px;top:16px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--fg-faint);display:block;margin-bottom:4px}
+  .note p{margin:0}
+  .note.key{border-color:rgba(167,139,250,.4);background:linear-gradient(180deg,rgba(167,139,250,.07),transparent)}
+  .note.key .ic,.note.key .tag{color:var(--violet)}
+  .note.warn{border-color:rgba(251,191,36,.4);background:linear-gradient(180deg,rgba(251,191,36,.07),transparent)}
+  .note.warn .ic,.note.warn .tag{color:var(--amber)}
+  .note.danger{border-color:rgba(248,113,113,.4);background:linear-gradient(180deg,rgba(248,113,113,.07),transparent)}
+  .note.danger .ic,.note.danger .tag{color:var(--red)}
+  .note.info .ic,.note.info .tag{color:var(--blue)}
+  .note.info{border-color:rgba(96,165,250,.35)}
+
+  /* ── code ── */
+  .codeblock{background:var(--code);border:1px solid var(--line);border-radius:13px;margin:20px 0;
+    overflow:hidden;box-shadow:var(--shadow-2)}
+  .codeblock .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;
+    border-bottom:1px solid var(--line);background:#0d1424}
+  .codeblock .bar .lights{display:flex;gap:6px}
+  .codeblock .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .codeblock .bar .r{background:#ff5f56}.codeblock .bar .y{background:#ffbd2e}.codeblock .bar .g{background:#27c93f}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11.5px;color:var(--fg-faint);margin-left:6px}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+    color:var(--fg-dim);background:transparent;border:1px solid var(--line);border-radius:7px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease)}
+  .copybtn:hover{border-color:var(--accent);color:var(--accent)}
+  .copybtn svg{width:13px;height:13px}
+  .copybtn.done{color:var(--accent);border-color:var(--accent)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.8;color:#e8eefc;overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.86em;background:var(--muted);border:1px solid var(--line);
+    padding:1.5px 6px;border-radius:6px;color:#ffd9a6;white-space:nowrap}
+  .cmt{color:#5f6b85}.cmd{color:#7dd3fc}.flag{color:#c4b5fd}.str{color:#86efac}.out{color:#6b7894}
+
+  /* ── tables ── */
+  .tablewrap{margin:20px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    box-shadow:var(--shadow-1)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{background:var(--surface-2);color:var(--primary);font-size:11.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:#ffd9a6}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--surface)}
+
+  /* ── concept cards ── */
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;
+    transition:transform .2s var(--ease),border-color .2s var(--ease)}
+  .card:hover{transform:translateY(-2px);border-color:var(--line)}
+  .card .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:11px;
+    background:var(--muted)}
+  .card .ico svg{width:18px;height:18px}
+  .card h4{margin:0 0 5px;font-size:15px;font-weight:600;color:var(--fg)}
+  .card p{margin:0;font-size:13.5px;color:var(--fg-dim);max-width:none}
+  .ico.violet svg{color:var(--violet)} .ico.blue svg{color:var(--blue)} .ico.green svg{color:var(--accent)}
+  .ico.amber svg{color:var(--amber)} .ico.cyan svg{color:var(--cyan)}
+
+  /* ── lifecycle diagram ── */
+  .life{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px 20px;
+    margin:22px 0;box-shadow:var(--shadow-1)}
+  .life .flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px}
+  .life .flow+.flow{margin-top:18px}
+  .state{font-family:var(--mono);font-size:12.5px;padding:11px 16px;border-radius:11px;border:1.5px solid;
+    background:#0c1426;font-weight:600;text-align:center;min-width:94px;line-height:1.3;transition:transform .2s var(--ease)}
+  .state:hover{transform:scale(1.04)}
+  .s-img{border-color:var(--violet);color:var(--violet)}
+  .s-created{border-color:var(--blue);color:var(--blue)}
+  .s-running{border-color:var(--accent);color:#86efac;box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+  .s-paused{border-color:var(--cyan);color:var(--cyan)}
+  .s-stopped{border-color:var(--amber);color:var(--amber)}
+  .s-removed{border-color:var(--red);color:var(--red)}
+  .arrow{display:flex;flex-direction:column;align-items:center;line-height:1.15;padding:0 2px;flex:none}
+  .arrow svg{width:22px;height:22px;color:var(--line);stroke-width:1.5}
+  .arrow b{font-family:var(--mono);color:var(--blue);font-size:11px;font-weight:500;margin-top:2px}
+
+  /* ── layer stack ── */
+  .stack{display:flex;flex-direction:column;gap:5px;max-width:430px;margin:18px auto 6px;
+    font-family:var(--mono);font-size:13px}
+  .layer{padding:12px 16px;border-radius:9px;border:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:10px;transition:transform .18s var(--ease)}
+  .layer:hover{transform:translateX(3px)}
+  .layer.rw{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.45);color:#86efac}
+  .layer.ro{background:var(--surface);color:var(--fg-dim)}
+  .layer small{color:var(--fg-faint);font-size:11px;font-family:var(--sans)}
+
+  /* ── command anatomy ── */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code);border:1px solid var(--line);
+    border-radius:13px;padding:24px 18px;margin:20px 0;text-align:center;line-height:2.6;box-shadow:var(--shadow-1)}
+  .anat .tok{padding:5px 10px;border-radius:8px;position:relative;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(125,211,252,.14);color:#7dd3fc}
+  .t2{background:rgba(167,139,250,.16);color:#c4b5fd}
+  .t3{background:rgba(34,197,94,.15);color:#86efac}
+  .t4{background:rgba(251,191,36,.14);color:#fcd34d}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:var(--fg-faint);
+    margin-top:6px;letter-spacing:.03em}
+
+  /* ── Q&A accordion ── */
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:11px 0;
+    overflow:hidden;transition:border-color .2s var(--ease)}
+  details[open]{border-color:rgba(34,197,94,.4)}
+  details:hover{border-color:var(--line)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11.5px;color:#06210f;background:var(--accent);
+    border-radius:6px;padding:3px 8px;flex:none;font-weight:600}
+  summary .star{color:var(--amber);flex:none;display:inline-flex}
+  summary .star svg{width:15px;height:15px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--fg-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--fg-dim);font-size:14.5px;
+    border-top:1px solid var(--line-soft);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--fg)}
+
+  /* ── checklist ── */
+  .check{list-style:none;padding:0;margin:16px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .check li{padding:13px 16px 13px 48px;position:relative;border-bottom:1px solid var(--line-soft);font-size:14.5px}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:16px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  /* ── footer / refs ── */
+  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding-top:30px;color:var(--fg-dim);font-size:14.5px}
+  footer h3{margin:0 0 14px}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;
+    transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
+  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
+  .reflink:hover svg{color:var(--accent)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .next a{flex:1;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:13px;
+    padding:16px 18px;display:flex;flex-direction:column;gap:3px;transition:all .2s var(--ease)}
+  .next a:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .next small{color:var(--fg-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  .next b{font-size:15.5px;color:var(--fg);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:7px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+
+  /* reduced motion */
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .card:hover,.layer:hover,.state:hover,.next a:hover,.reflink:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ░░ inline icon sprite (Lucide-style, no emoji) ░░ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-cycle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></symbol>
+  <symbol id="i-cli" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="5" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-whale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c2 2 4 2 6 0"/><path d="M9 13c2 2 4 2 6 0"/><path d="M15 13c2 2 4 2 6 0"/><path d="M3 17c2 2 4 2 6 0 2 2 4 2 6 0 2 2 4 2 6 0"/><path d="M12 4v5"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-arrows" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 6h18"/><path d="m7 22-4-4 4-4"/><path d="M21 18H3"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+</svg>
+
+<!-- ░░ top bar ░░ -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-whale"/></svg></span>
+      <span class="crumb"><b>Docker Course</b> &nbsp;/&nbsp; Phase 1 &nbsp;/&nbsp; Module 01</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 1</span>
+    <span class="pill"><b>~1.5h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ░░ sidebar TOC ░░ -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#recap"><svg class="ti"><use href="#i-cycle"/></svg>Where we left off</a>
+      <a href="#imgctr"><svg class="ti"><use href="#i-layers"/></svg>Image &amp; container</a>
+      <a href="#lifecycle"><svg class="ti"><use href="#i-cycle"/></svg>The lifecycle</a>
+      <a href="#run"><svg class="ti"><use href="#i-terminal"/></svg>Anatomy of run</a>
+      <a href="#cli"><svg class="ti"><use href="#i-cli"/></svg>The core CLI</a>
+      <a href="#inspect"><svg class="ti"><use href="#i-search"/></svg>exec · logs · inspect</a>
+      <a href="#images"><svg class="ti"><use href="#i-image"/></svg>Managing images</a>
+      <a href="#trace"><svg class="ti"><use href="#i-route"/></svg>What run does</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">Run every command yourself. Docker is muscle memory — reading is not enough.</p>
+  </aside>
+
+  <!-- ░░ content ░░ -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 1</span>
+      <h1>Module 01 — <span class="grad">Images &amp; Containers</span><br>The Lifecycle &amp; the Core CLI</h1>
+      <p class="lede">Foundations told you <em>what</em> a container is. This module is where it becomes muscle memory:
+      the lifecycle every container moves through, and the dozen commands you'll type every working day.
+      Reading is not enough here — run every command yourself.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · hands-on heavy</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 00</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>daily CLI + lifecycle</span>
+        <span class="chip"><svg><use href="#i-whale"/></svg>Docker 29.5 · CachyOS</span>
+      </div>
+    </div>
+
+    <!-- 0. RECAP -->
+    <section id="recap">
+      <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
+      <p>From Foundations, hold these three sentences in your head — everything in this module hangs off them:</p>
+      <div class="grid three">
+        <div class="card"><div class="ico violet"><svg><use href="#i-box"/></svg></div>
+          <h4>Container = process</h4>
+          <p>A normal host process, isolated by <b style="color:var(--fg)">namespaces</b>, bounded by <b style="color:var(--fg)">cgroups</b>, on a copy-on-write filesystem.</p></div>
+        <div class="card"><div class="ico blue"><svg><use href="#i-layers"/></svg></div>
+          <h4>Image = blueprint</h4>
+          <p>An immutable stack of read-only layers. The class. You run many containers from one image.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-cli"/></svg></div>
+          <h4>Container = instance</h4>
+          <p>A running/stopped image with a thin <b style="color:var(--fg)">writable layer</b> + its own namespaces. The object.</p></div>
+      </div>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why this module matters</span>
+        <p>Memorising the flags of <code class="inl">docker run</code> matters far less than two things: being able to
+        walk through a container's lifecycle, and knowing how to debug a container that won't start. Both are below.</p></div>
+    </section>
+
+    <!-- 1. IMAGE vs CONTAINER -->
+    <section id="imgctr">
+      <div class="sec-head"><span class="num">1</span><h2>Image and container, made concrete</h2></div>
+      <p>The image is layers of read-only filesystem. Starting a container adds <strong>one thin writable layer</strong>
+      on top (copy-on-write). Everything the running process writes lands there. Delete the container and that layer
+      vanishes — the image layers are untouched and shared with every other container started from the same image.</p>
+
+      <div class="stack">
+        <div class="layer rw"><span>⬆ Writable container layer</span><small>per-container · gone on rm</small></div>
+        <div class="layer ro"><span>RO layer · app code</span><small>image</small></div>
+        <div class="layer ro"><span>RO layer · pip/npm deps</span><small>image · shared</small></div>
+        <div class="layer ro"><span>RO layer · base OS (e.g. debian)</span><small>image · shared</small></div>
+      </div>
+      <p class="sub" style="text-align:center">Two containers from the same image share the three RO layers; only the top layer differs.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The mental flip juniors miss</span>
+        <p>Data you write inside a running container is <b>not</b> in the image and does <b>not</b> survive
+        <code class="inl">docker rm</code>. Persistence is a separate concern — that's Module 03 (volumes).
+        For now: treat container filesystems as disposable.</p></div>
+    </section>
+
+    <!-- 2. LIFECYCLE -->
+    <section id="lifecycle">
+      <div class="sec-head"><span class="num">2</span><h2>The container lifecycle</h2></div>
+      <p>This is the single most important diagram in the module. Every command you learn is a transition between these states.</p>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-img">image</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>create</b></div>
+          <div class="state s-created">Created</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>start</b></div>
+          <div class="state s-running">Running</div>
+          <div class="arrow"><svg><use href="#i-arrows"/></svg><b>pause /<br>unpause</b></div>
+          <div class="state s-paused">Paused</div>
+        </div>
+        <div class="flow">
+          <div class="state s-running">Running</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>stop / kill</b></div>
+          <div class="state s-stopped">Stopped<br>(Exited)</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>start</b></div>
+          <div class="state s-running">Running</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>rm</b></div>
+          <div class="state s-removed">Removed</div>
+        </div>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>State</th><th>Means</th><th>Enters via</th></tr></thead>
+        <tbody>
+          <tr><td><b style="color:var(--violet)">(image)</b></td><td>Just a template on disk. No process.</td><td><code>docker pull</code> / <code>build</code></td></tr>
+          <tr><td><b style="color:var(--blue)">Created</b></td><td>Container exists, namespaces set up, but the process hasn't started.</td><td><code>docker create</code></td></tr>
+          <tr><td><b style="color:var(--accent)">Running</b></td><td>PID 1 is alive and executing.</td><td><code>docker run</code> / <code>start</code></td></tr>
+          <tr><td><b style="color:var(--cyan)">Paused</b></td><td>Processes frozen (SIGSTOP via cgroup freezer). RAM kept.</td><td><code>docker pause</code></td></tr>
+          <tr><td><b style="color:var(--amber)">Stopped / Exited</b></td><td>Process ended (cleanly or killed). Writable layer still on disk.</td><td><code>docker stop</code> / process exits</td></tr>
+          <tr><td><b style="color:var(--red)">Removed</b></td><td>Gone. Writable layer deleted.</td><td><code>docker rm</code></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Key insight</span>
+        <p><b>run = create + start.</b> And the container lives exactly as long as its <b>PID 1</b> (the main process) lives.
+        When PID 1 exits, the container stops. That's why a container running a one-shot command exits immediately,
+        and why <code class="inl">docker run ubuntu</code> stops at once but <code class="inl">docker run nginx</code> keeps running —
+        nginx is a long-lived foreground process.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">stop vs kill</span>
+        <p><code class="inl">docker stop</code> sends <b>SIGTERM</b>, waits (default 10s grace), then <b>SIGKILL</b> — graceful.
+        <code class="inl">docker kill</code> sends SIGKILL immediately — abrupt. In production you almost always want
+        <code class="inl">stop</code> so the app can flush and close connections.</p></div>
+    </section>
+
+    <!-- 3. ANATOMY OF RUN -->
+    <section id="run">
+      <div class="sec-head"><span class="num">3</span><h2>Anatomy of <code style="font-size:.7em">docker run</code></h2></div>
+      <p>One command does a lot. Learn to read it by position — the parts before the image name configure Docker;
+      everything after the image name is passed <em>into</em> the container.</p>
+
+      <div class="anat">
+        <span class="tok t1">docker run<span class="lbl">create + start</span></span>
+        <span class="tok t2">-d --name web -p 8080:80<span class="lbl">DOCKER options (before image)</span></span>
+        <span class="tok t3">nginx:1.27<span class="lbl">IMAGE:TAG</span></span>
+        <span class="tok t4">nginx -g 'daemon off;'<span class="lbl">COMMAND + args (into container)</span></span>
+      </div>
+
+      <h3>The flags you'll reach for constantly</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Flag</th><th>Does</th><th>When</th></tr></thead>
+        <tbody>
+          <tr><td><code>-d</code></td><td>Detached — run in background, return the prompt.</td><td>Servers, anything long-lived.</td></tr>
+          <tr><td><code>-it</code></td><td><code>-i</code> keep STDIN open + <code>-t</code> allocate a TTY.</td><td>Interactive shells: <code>docker run -it ubuntu bash</code>.</td></tr>
+          <tr><td><code>--name</code></td><td>Give a stable, human name instead of a random one.</td><td>Always, for anything you'll reference again.</td></tr>
+          <tr><td><code>-p H:C</code></td><td>Publish: map <b>host</b> port → <b>container</b> port.</td><td>To reach a server from your browser (full detail in Module 04).</td></tr>
+          <tr><td><code>-e K=V</code></td><td>Set an environment variable inside the container.</td><td>Config, secrets-ish (real secrets = Module 07).</td></tr>
+          <tr><td><code>--rm</code></td><td>Auto-remove the container when it exits.</td><td>Throwaway / test runs — keeps your machine clean.</td></tr>
+          <tr><td><code>--restart</code></td><td>Restart policy: <code>no</code> / <code>on-failure</code> / <code>always</code> / <code>unless-stopped</code>.</td><td>Resilience for long-running services.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">foreground vs detached</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Foreground: logs stream to your terminal, Ctrl-C stops it</span>
+<span class="cmd">docker</span> run nginx
+
+<span class="cmt"># Detached + named + port-mapped: the real-world pattern</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> web <span class="flag">-p</span> <span class="str">8080:80</span> nginx:1.27
+<span class="cmt"># → open http://localhost:8080</span>
+
+<span class="cmt"># Interactive shell inside a fresh ubuntu (exits when you type `exit`)</span>
+<span class="cmd">docker</span> run <span class="flag">-it</span> <span class="flag">--rm</span> ubuntu bash</code></pre></div>
+    </section>
+
+    <!-- 4. CORE CLI -->
+    <section id="cli">
+      <div class="sec-head"><span class="num">4</span><h2>The daily-driver CLI</h2></div>
+      <p>These map one-to-one onto the lifecycle diagram. Commit the shape of each to memory.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Command</th><th>Transition / purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>docker ps</code></td><td>List <b>running</b> containers. <code>-a</code> = include stopped. <code>-q</code> = IDs only.</td></tr>
+          <tr><td><code>docker create IMAGE</code></td><td>image → Created (no process yet).</td></tr>
+          <tr><td><code>docker start NAME</code></td><td>Created/Stopped → Running.</td></tr>
+          <tr><td><code>docker stop NAME</code></td><td>Running → Stopped (SIGTERM → SIGKILL).</td></tr>
+          <tr><td><code>docker restart NAME</code></td><td>stop then start in one call.</td></tr>
+          <tr><td><code>docker pause / unpause</code></td><td>Running ⇄ Paused (freeze without stopping).</td></tr>
+          <tr><td><code>docker rm NAME</code></td><td>Stopped → Removed. <code>-f</code> force-removes a running one.</td></tr>
+          <tr><td><code>docker rename OLD NEW</code></td><td>Rename without recreating.</td></tr>
+          <tr><td><code>docker cp src dst</code></td><td>Copy files between host and container.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a typical session</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmd">docker</span> ps <span class="flag">-a</span>                      <span class="cmt"># see everything, running or not</span>
+<span class="cmd">docker</span> stop web                    <span class="cmt"># graceful shutdown</span>
+<span class="cmd">docker</span> start web                   <span class="cmt"># bring it back, same writable layer</span>
+<span class="cmd">docker</span> rm <span class="flag">-f</span> web                   <span class="cmt"># nuke it, running or not</span>
+
+<span class="cmt"># Clean up ALL stopped containers at once</span>
+<span class="cmd">docker</span> container prune</code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Naming &amp; IDs</span>
+        <p>Every container has a 64-char ID; you can use any unambiguous prefix (<code class="inl">docker stop a3f</code>).
+        No <code class="inl">--name</code>? Docker invents one like <code class="inl">nostalgic_turing</code>. Name things you care about.</p></div>
+    </section>
+
+    <!-- 5. EXEC LOGS INSPECT -->
+    <section id="inspect">
+      <div class="sec-head"><span class="num">5</span><h2>Looking inside: <code style="font-size:.62em">exec · logs · inspect</code></h2></div>
+      <p>This trio is your debugging toolkit. When a container is misbehaving, this is what you reach for.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico cyan"><svg><use href="#i-terminal"/></svg></div>
+          <h4>exec</h4><p>Run a <b style="color:var(--fg)">new</b> process in a running container. Your way in to poke around live.</p></div>
+        <div class="card"><div class="ico amber"><svg><use href="#i-cli"/></svg></div>
+          <h4>logs</h4><p>Read what PID 1 wrote to stdout/stderr. First stop for "why did it crash?".</p></div>
+        <div class="card"><div class="ico blue"><svg><use href="#i-search"/></svg></div>
+          <h4>inspect</h4><p>Full JSON: config, mounts, network, state, exit code. The ground truth.</p></div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">debugging a live container</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Get a shell inside the running 'web' container</span>
+<span class="cmd">docker</span> exec <span class="flag">-it</span> web sh
+
+<span class="cmt"># Follow logs live (like tail -f); --tail limits history</span>
+<span class="cmd">docker</span> logs <span class="flag">-f</span> <span class="flag">--tail</span> <span class="str">50</span> web
+
+<span class="cmt"># Pull one field out of the JSON with a Go template</span>
+<span class="cmd">docker</span> inspect <span class="flag">-f</span> <span class="str">'{{.State.Status}} {{.State.ExitCode}}'</span> web
+<span class="out">running 0</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">exec vs attach — a classic trap</span>
+        <p><code class="inl">docker exec</code> starts a <b>new</b> process (e.g. a second shell) — exiting it leaves the container running.
+        <code class="inl">docker attach</code> connects to the <b>existing PID 1's</b> streams — Ctrl-C there can kill the container.
+        For debugging, you almost always want <code class="inl">exec</code>.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Why exec'd changes don't persist to the image</span>
+        <p>Install a package via <code class="inl">exec</code> and it lands in the writable layer, gone on <code class="inl">rm</code>.
+        To bake changes into an image you edit the <b>Dockerfile</b> and rebuild — Module 02. Never "fix" images by hand inside a container.</p></div>
+    </section>
+
+    <!-- 6. MANAGING IMAGES -->
+    <section id="images">
+      <div class="sec-head"><span class="num">6</span><h2>Managing images</h2></div>
+      <p>Containers come from images; images come from a registry (or your own builds). The image-side commands:</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>docker pull IMAGE:TAG</code></td><td>Download an image (layer by layer) from a registry.</td></tr>
+          <tr><td><code>docker images</code></td><td>List local images, their tags and sizes.</td></tr>
+          <tr><td><code>docker rmi IMAGE</code></td><td>Remove an image (must have no containers using it).</td></tr>
+          <tr><td><code>docker tag SRC NEW</code></td><td>Add another name/tag to the same image ID.</td></tr>
+          <tr><td><code>docker image prune -a</code></td><td>Reclaim disk: delete dangling / unused images.</td></tr>
+          <tr><td><code>docker history IMAGE</code></td><td>Show the layers and the command that made each.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Tags are not versions — they're mutable pointers</span>
+        <p><code class="inl">nginx:latest</code> today and next month can be different images. For reproducibility, pin a specific
+        tag (<code class="inl">nginx:1.27</code>) or, best, a digest (<code class="inl">nginx@sha256:…</code>). This is a real
+        production pitfall. Registries, digests, and signing are Module 06.</p></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">image housekeeping</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmd">docker</span> images
+<span class="out">REPOSITORY   TAG     IMAGE ID       SIZE</span>
+<span class="out">nginx        1.27    a1b2c3d4e5f6   188MB</span>
+
+<span class="cmd">docker</span> history nginx:1.27        <span class="cmt"># see how the layers were built</span>
+<span class="cmd">docker</span> image prune <span class="flag">-a</span>           <span class="cmt"># free disk (careful: removes unused images)</span></code></pre></div>
+    </section>
+
+    <!-- 7. TRACE -->
+    <section id="trace">
+      <div class="sec-head"><span class="num">7</span><h2>Tying it together: what <code style="font-size:.6em">docker run nginx</code> really does</h2></div>
+      <p>The exact trace from Foundations, now grounded in the lifecycle. Be able to narrate this end to end:</p>
+      <ol>
+        <li><b>Client → daemon.</b> Your CLI sends a REST request over <code class="inl">/var/run/docker.sock</code>.</li>
+        <li><b>Image resolution.</b> Daemon checks for <code class="inl">nginx</code> locally; if missing it <b>pulls</b> the layers from the registry.</li>
+        <li><b>Create.</b> Daemon → <b>containerd</b> prepares the container: assembles the overlay filesystem + a writable layer, sets up namespaces. → state <span style="color:var(--blue)"><b>Created</b></span>.</li>
+        <li><b>Start.</b> <b>runc</b> applies cgroups and spawns PID 1 (the nginx master process). → state <span style="color:var(--accent)"><b>Running</b></span>.</li>
+        <li><b>Live.</b> Networking attached, ports published. Container lives as long as PID 1 lives.</li>
+        <li><b>Exit.</b> PID 1 ends → <span style="color:var(--amber)"><b>Stopped</b></span>. <code class="inl">docker rm</code> drops the writable layer → <span style="color:var(--red)"><b>Removed</b></span>.</li>
+      </ol>
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The clean mental model</span>
+        <p>"<i>run is create plus start; create sets up namespaces and the writable layer via containerd, start applies cgroups
+        and launches PID 1 via runc, and the container survives only as long as that PID 1.</i>" That sentence signals you
+        understand the whole stack, not just the CLI.</p></div>
+    </section>
+
+    <!-- 8. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on — do this now</h2></div>
+      <p>Docker is muscle memory. Run every line, predict the output before you hit enter, then check.</p>
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: drive a container through its whole lifecycle</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Start a named web server, detached, on host port 8080</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> web <span class="flag">-p</span> <span class="str">8080:80</span> nginx:1.27
+
+<span class="cmt"># 2. Confirm it's running, then hit it</span>
+<span class="cmd">docker</span> ps
+curl <span class="flag">-s</span> localhost:8080 | head <span class="flag">-n</span> 5
+
+<span class="cmt"># 3. Look inside: shell in, check the nginx process is PID 1</span>
+<span class="cmd">docker</span> exec <span class="flag">-it</span> web sh <span class="flag">-c</span> <span class="str">'ps -ef | head'</span>
+
+<span class="cmt"># 4. Watch logs, then refresh the browser/curl and watch a line appear</span>
+<span class="cmd">docker</span> logs <span class="flag">-f</span> web   <span class="cmt"># Ctrl-C to stop following</span>
+
+<span class="cmt"># 5. Lifecycle: stop → see it Exited → start → it's back</span>
+<span class="cmd">docker</span> stop web && <span class="cmd">docker</span> ps <span class="flag">-a</span>
+<span class="cmd">docker</span> start web
+
+<span class="cmt"># 6. Prove the writable layer is disposable</span>
+<span class="cmd">docker</span> exec web sh <span class="flag">-c</span> <span class="str">'echo hi > /tmp/proof'</span>
+<span class="cmd">docker</span> rm <span class="flag">-f</span> web
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> web <span class="flag">-p</span> <span class="str">8080:80</span> nginx:1.27
+<span class="cmd">docker</span> exec web ls /tmp        <span class="cmt"># /tmp/proof is GONE — new writable layer</span>
+
+<span class="cmt"># 7. Clean up</span>
+<span class="cmd">docker</span> rm <span class="flag">-f</span> web</code></pre></div>
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You saw <code class="inl">nginx</code> as PID 1 inside the container.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You watched a request appear in <code class="inl">logs -f</code> in real time.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You proved a file written inside the container did <b>not</b> survive <code class="inl">rm</code> + re-run.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can recite: <code class="inl">run = create + start</code>, container lives = PID 1 lives.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://docs.docker.com/reference/cli/docker/container/run/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>docker run reference</a>
+        <a class="reflink" href="https://docs.docker.com/engine/containers/run/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Running containers</a>
+        <a class="reflink" href="https://docs.docker.com/reference/cli/docker/container/exec/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>docker exec</a>
+        <a class="reflink" href="https://docs.docker.com/engine/containers/start-containers-automatically/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Restart policies</a>
+        <a class="reflink" href="https://docs.docker.com/get-started/docker_cheatsheet.pdf" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Official CLI cheat-sheet (PDF)</a>
+        <a class="reflink" href="https://github.com/wsargent/docker-cheat-sheet" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Community cheat-sheet</a>
+      </div>
+
+      <div class="next">
+        <a href="module-00.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 00 — Foundations</b></span></a>
+        <a href="module-02.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 02 — Dockerfiles: build, layers, cache</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 01 · built for visual learning.
+      Once the hands-on checklist is all ticked, move on to Module 02.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

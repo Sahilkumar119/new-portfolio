@@ -83,12 +83,18 @@ const useStyles = makeStyles(() => ({
     },
     imageContainer: {
         width: "36%",
+        minWidth: "220px",
         position: "relative",
         flexShrink: 0,
         overflow: "hidden",
         borderRight: "1px solid var(--glass-border)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0a0a0c",
         "@media (max-width: 767px)": {
             width: "100%",
+            minWidth: "auto",
             height: "180px",
             borderRight: "none",
             borderBottom: "1px solid var(--glass-border)",
@@ -98,6 +104,8 @@ const useStyles = makeStyles(() => ({
         width: "100%",
         height: "100%",
         objectFit: "cover",
+        objectPosition: "center center",
+        display: "block",
     },
     featuredBadge: {
         position: "absolute",
@@ -116,6 +124,7 @@ const useStyles = makeStyles(() => ({
     },
     contentArea: {
         width: "64%",
+        minWidth: 0,
         padding: "1.5rem 1.75rem",
         display: "flex",
         flexDirection: "column",
@@ -129,7 +138,8 @@ const useStyles = makeStyles(() => ({
     entryMeta: {
         display: "flex",
         alignItems: "center",
-        gap: "1.25rem",
+        flexWrap: "wrap",
+        gap: "0.85rem",
         marginBottom: "0.6rem",
         color: "var(--text-tertiary)",
         fontSize: "0.75rem",
@@ -148,6 +158,8 @@ const useStyles = makeStyles(() => ({
         lineHeight: 1.25,
         margin: "0 0 0.6rem 0",
         transition: "color 180ms ease",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
     },
     entryArrow: {
         fontSize: "1.1rem",
@@ -314,8 +326,8 @@ export const LatestBlogs = () => {
                                     {(blog.featured || i === 0) && (
                                         <div className={classes.featuredBadge}>Featured</div>
                                     )}
-                                    {blog.cover || blog.image ? (
-                                        <img src={blog.cover || blog.image} alt={blog.title} className={classes.coverImage} />
+                                    {blog.coverImage || blog.cover || blog.image ? (
+                                        <img src={blog.coverImage || blog.cover || blog.image} alt={blog.title} className={classes.coverImage} />
                                     ) : (
                                         <NetworkSvg />
                                     )}

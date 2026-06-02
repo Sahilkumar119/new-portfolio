@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
 
 const NAV_LINKS = [
     { label: "Terminal", to: "#terminal" },
@@ -8,6 +9,8 @@ const NAV_LINKS = [
     { label: "Certifications", to: "#certifications" },
     { label: "Blog", to: "#blogs" },
     { label: "Connect", to: "#connect" },
+    // Real route (not a hash anchor) so react-snapshot crawls + prerenders it.
+    { label: "Learn", to: "/learn", route: true },
 ];
 
 const useStyles = makeStyles(() => ({
@@ -78,21 +81,29 @@ export const NavigationButtons = () => {
 
     return (
         <nav className={classes.nav} aria-label="Main navigation">
-            {NAV_LINKS.map(({ label, to }) => (
-                <Tooltip title={label} placement="left" arrow key={to}>
-                    <a
-                        href={to}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            document.querySelector(to)?.scrollIntoView({ behavior: 'smooth' });
-                            window.history.pushState(null, '', to);
-                        }}
-                        className={`${classes.pill} ${activeHash === to ? classes.pillActive : ""}`}
-                    >
-                        {label}
-                    </a>
-                </Tooltip>
-            ))}
+            {NAV_LINKS.map(({ label, to, route }) =>
+                route ? (
+                    <Tooltip title={label} placement="left" arrow key={to}>
+                        <Link to={to} className={classes.pill}>
+                            {label}
+                        </Link>
+                    </Tooltip>
+                ) : (
+                    <Tooltip title={label} placement="left" arrow key={to}>
+                        <a
+                            href={to}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.querySelector(to)?.scrollIntoView({ behavior: 'smooth' });
+                                window.history.pushState(null, '', to);
+                            }}
+                            className={`${classes.pill} ${activeHash === to ? classes.pillActive : ""}`}
+                        >
+                            {label}
+                        </a>
+                    </Tooltip>
+                )
+            )}
         </nav>
     );
 };

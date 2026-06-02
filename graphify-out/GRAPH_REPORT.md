@@ -1,11 +1,11 @@
-# Graph Report - new-portfolio  (2026-05-27)
+# Graph Report - new-portfolio  (2026-05-28)
 
 ## Corpus Check
-- 68 files · ~183,029 words
+- 68 files · ~214,376 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 239 nodes · 267 edges · 26 communities detected
+- 240 nodes · 268 edges · 26 communities detected
 - Extraction: 75% EXTRACTED · 25% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.76)
 - Token cost: 0 input · 0 output
 
@@ -16,9 +16,9 @@
 - [[_COMMUNITY_Community 3|Community 3]]
 - [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
@@ -69,16 +69,16 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.21
-Nodes (18): get_settings(), Settings, _chunk_markdown(), _deterministic_id(), load_all_sources(), _load_blogs(), _load_json_collection(), _load_resume() (+10 more)
+Cohesion: 0.14
+Nodes (15): BaseModel, get_settings(), Settings, chat(), ChatRequest, ChatResponse, CitationResponse, ingest() (+7 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.18
-Nodes (12): BaseModel, chat(), ChatRequest, ChatResponse, CitationResponse, ingest(), lifespan(), AssistantService (+4 more)
-
-### Community 2 - "Community 2"
 Cohesion: 0.13
 Nodes (11): AIProjects(), Certifications(), Connect(), LatestBlogs(), displayCwd(), isDir(), LinuxTerminal(), lookup() (+3 more)
+
+### Community 2 - "Community 2"
+Cohesion: 0.29
+Nodes (15): _chunk_markdown(), _deterministic_id(), load_all_sources(), _load_blogs(), _load_json_collection(), _load_resume(), _load_terminal(), _parse_frontmatter() (+7 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.21
@@ -92,15 +92,15 @@ Nodes (9): bm25_sparse_rank(), dense_lexical_rank(), hybrid_rank(), reciprocal_r
 Cohesion: 0.29
 Nodes (4): ColorOrb(), DockBar(), useFormContext(), cn()
 
-### Community 7 - "Community 7"
-Cohesion: 0.33
+### Community 6 - "Community 6"
+Cohesion: 0.29
 Nodes (2): generateSitemap(), syncBlogs()
 
 ### Community 8 - "Community 8"
 Cohesion: 0.33
 Nodes (3): DisplacementSphere(), useInViewport(), usePrefersReducedMotion()
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.5
 Nodes (2): App(), logCredits()
 
@@ -142,15 +142,15 @@ Nodes (2): Graphify Agent Rules, Graph Report Summary
 
 ### Community 45 - "Community 45"
 Cohesion: 1.0
-Nodes (2): Retro CRT 'Sahil' icon (SVG with embedded raster image), Retro CRT 'Sahil' icon (SVG with embedded raster image)
+Nodes (2): Retro CRT 'Sahil' icon (96x96 favicon), Retro CRT 'Sahil' icon (96x96 favicon)
 
 ### Community 46 - "Community 46"
 Cohesion: 1.0
-Nodes (2): Retro CRT 'Sahil' icon (16x16 favicon), Retro CRT 'Sahil' icon (16x16 favicon)
+Nodes (2): Retro CRT 'Sahil' icon (SVG with embedded raster image), Retro CRT 'Sahil' icon (SVG with embedded raster image)
 
 ### Community 47 - "Community 47"
 Cohesion: 1.0
-Nodes (2): Retro CRT 'Sahil' icon (96x96 favicon), Retro CRT 'Sahil' icon (96x96 favicon)
+Nodes (2): Retro CRT 'Sahil' icon (16x16 favicon), Retro CRT 'Sahil' icon (16x16 favicon)
 
 ### Community 63 - "Community 63"
 Cohesion: 1.0
@@ -179,9 +179,9 @@ Nodes (1): Citation Grounded Response Model
 ## Knowledge Gaps
 - **26 isolated node(s):** `RetrievedChunk`, `npm start Command`, `npm run build Command`, `Assistant Backend Architecture`, `Hybrid Retrieval RRF Reranker Pipeline` (+21 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 7`** (7 nodes): `sync-content.js`, `generateSitemap()`, `generateSlug()`, `syncBlogs()`, `syncCertifications()`, `syncProjects()`, `syncTerminal()`
+- **Thin community `Community 6`** (8 nodes): `sync-content.js`, `generateSitemap()`, `generateSlug()`, `normalizeCoverImage()`, `syncBlogs()`, `syncCertifications()`, `syncProjects()`, `syncTerminal()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 10`** (4 nodes): `App()`, `logCredits()`, `App.js`, `logCredits.js`
+- **Thin community `Community 11`** (4 nodes): `App()`, `logCredits()`, `App.js`, `logCredits.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 14`** (4 nodes): `__init__.py`, `__init__.py`, `__init__.py`, `Test package for backend.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -191,11 +191,11 @@ Nodes (1): Citation Grounded Response Model
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 44`** (2 nodes): `Graphify Agent Rules`, `Graph Report Summary`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 45`** (2 nodes): `Retro CRT 'Sahil' icon (SVG with embedded raster image)`, `Retro CRT 'Sahil' icon (SVG with embedded raster image)`
+- **Thin community `Community 45`** (2 nodes): `Retro CRT 'Sahil' icon (96x96 favicon)`, `Retro CRT 'Sahil' icon (96x96 favicon)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 46`** (2 nodes): `Retro CRT 'Sahil' icon (16x16 favicon)`, `Retro CRT 'Sahil' icon (16x16 favicon)`
+- **Thin community `Community 46`** (2 nodes): `Retro CRT 'Sahil' icon (SVG with embedded raster image)`, `Retro CRT 'Sahil' icon (SVG with embedded raster image)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 47`** (2 nodes): `Retro CRT 'Sahil' icon (96x96 favicon)`, `Retro CRT 'Sahil' icon (96x96 favicon)`
+- **Thin community `Community 47`** (2 nodes): `Retro CRT 'Sahil' icon (16x16 favicon)`, `Retro CRT 'Sahil' icon (16x16 favicon)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 63`** (1 nodes): `npm start Command`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -213,9 +213,9 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Public Resume PDF Asset` and `Root Resume PDF Asset`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AssistantService` connect `Community 1` to `Community 0`?**
+- **Why does `AssistantService` connect `Community 0` to `Community 2`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `DocumentRecord` connect `Community 0` to `Community 1`?**
+- **Why does `DocumentRecord` connect `Community 2` to `Community 0`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Are the 9 inferred relationships involving `AssistantService` (e.g. with `ChatRequest` and `CitationResponse`) actually correct?**
   _`AssistantService` has 9 INFERRED edges - model-reasoned connections that need verification._

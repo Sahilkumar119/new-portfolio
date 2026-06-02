@@ -7,7 +7,8 @@ tags: ["ROS2", "micro-ROS", "Robotics", "Embedded", "UDP", "DDS"]
 excerpt: "How do you run a resource-heavy middleware like ROS2 on a tiny microcontroller like an ESP32? Enter micro-ROS and XRCE-DDS: the client-agent bridge that offloads heavy discovery to the host."
 slug: "micro-ros-xrce-dds"
 readTime: "4 min read"
-featured: false
+coverImage: "/images/micro-ros.png"
+featured: true
 ---
 
 While working on a robotics project recently, I ran into a classic problem: **how do you use a comparatively heavy software stack like ROS2 on a microcontroller?** 

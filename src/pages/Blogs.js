@@ -133,6 +133,11 @@ const useStyles = makeStyles(() => ({
         justifyContent: "space-between",
         gap: "1rem",
     },
+    entryBody: {
+        display: "flex",
+        gap: "1rem",
+        alignItems: "flex-start",
+    },
     entryTitle: {
         fontSize: "clamp(1.05rem, 2vw, 1.2rem)",
         fontWeight: 600,
@@ -156,6 +161,18 @@ const useStyles = makeStyles(() => ({
         color: "var(--text-secondary)",
         marginTop: "0.5rem",
         maxWidth: "640px",
+    },
+    entryThumb: {
+        width: "120px",
+        height: "72px",
+        objectFit: "cover",
+        borderRadius: "8px",
+        border: "1px solid var(--glass-border)",
+        flexShrink: 0,
+        marginTop: "0.35rem",
+        "@media (max-width: 600px)": {
+            display: "none",
+        },
     },
 
     emptyState: {
@@ -215,7 +232,16 @@ export const Blogs = () => {
                                     <h2 className={classes.entryTitle}>{blog.title}</h2>
                                     <span className={classes.entryArrow} aria-hidden="true">→</span>
                                 </div>
-                                <p className={classes.entryExcerpt}>{blog.excerpt}</p>
+                                <div className={classes.entryBody}>
+                                    <p className={classes.entryExcerpt}>{blog.excerpt}</p>
+                                    {(blog.coverImage || blog.cover || blog.image) && (
+                                        <img
+                                            src={blog.coverImage || blog.cover || blog.image}
+                                            alt={`${blog.title} cover`}
+                                            className={classes.entryThumb}
+                                        />
+                                    )}
+                                </div>
                             </Link>
                         ))}
                     </div>

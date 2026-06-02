@@ -42,6 +42,7 @@ tags: ["JavaScript", "Tutorial"]
 excerpt: "A short summary of what this post is about."
 slug: "my-first-blog-post"
 readTime: "5 min read"
+coverImage: "/blogs/my-first-post-cover.jpg"
 ---
 
 Your blog content goes here. You can write normally.
@@ -69,6 +70,9 @@ console.log(greeting);
 **Tips:**
 - The `slug` must be unique. If omitted, the script will generate one from the title.
 - The `excerpt` and `readTime` are optional and will be auto-generated if omitted.
+- To set a custom blog cover image, add `coverImage` in frontmatter.
+- Put image files in `public/blogs/` and reference them like `coverImage: "/blogs/your-image-name.png"`.
+- You can also use a full external URL, e.g. `coverImage: "https://..."`.
 
 ---
 

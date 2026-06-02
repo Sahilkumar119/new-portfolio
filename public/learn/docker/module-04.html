@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 04 — Networking: Bridges, Ports &amp; Container DNS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F172A;
+    --surface:#131c30;
+    --surface-2:#1b2740;
+    --muted:#272F42;
+    --line:#2c3a52;
+    --line-soft:#222d44;
+    --fg:#F8FAFC;
+    --fg-dim:#aab6c8;
+    --fg-faint:#7e8ba1;
+    --primary:#cbd5e1;
+    --accent:#2496ED;
+    --accent-dim:#1b6fc0;
+    --blue:#60a5fa;
+    --violet:#a78bfa;
+    --cyan:#22d3ee;
+    --amber:#fbbf24;
+    --red:#f87171;
+    --code:#0a1120;
+    --radius:14px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 2px rgba(0,0,0,.4);
+    --shadow-2:0 8px 30px rgba(0,0,0,.35);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
+    font-feature-settings:"cv05","ss01"}
+  a{color:var(--blue);text-decoration:none;transition:color .18s var(--ease)}
+  a:hover{color:#93c5fd}
+  ::selection{background:rgba(36,150,237,.28)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;
+    background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .1s linear}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(15,23,42,.82);
+    backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#0ea5e9,#2496ed);color:#ffffff}
+  .brand .crumb{color:var(--fg-faint);font-weight:400}
+  .brand .crumb b{color:var(--fg-dim);font-weight:500}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .pill b{color:var(--accent)}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;
+    grid-template-columns:248px minmax(0,1fr);gap:48px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:72px;align-self:start;padding:32px 0;max-height:calc(100vh - 72px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--fg-faint);padding:0 12px;margin-bottom:10px}
+  aside nav{display:flex;flex-direction:column;gap:1px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;
+    color:var(--fg-faint);font-size:13.5px;font-weight:500;line-height:1.3;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:16px;height:16px;flex:none;opacity:.7}
+  aside nav a:hover{background:var(--surface);color:var(--fg-dim)}
+  aside nav a.active{color:var(--fg);background:var(--surface);border-left-color:var(--accent)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:18px 12px 0;font-size:12px;color:var(--fg-faint);line-height:1.5}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:14px 0 4px;border-bottom:1px solid var(--line-soft)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px}
+    aside nav a.active{border-color:var(--accent)}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  main{padding:36px 0 120px;min-width:0;max-width:760px}
+
+  .hero{padding:8px 0 30px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    background:rgba(36,150,237,.08);border:1px solid rgba(36,150,237,.25);padding:6px 13px;border-radius:999px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(36,150,237,.2)}
+  h1{font-size:clamp(30px,4.4vw,44px);line-height:1.12;margin:20px 0 14px;letter-spacing:-.025em;font-weight:700}
+  h1 .grad{background:linear-gradient(95deg,#7dd3fc,#a78bfa 55%,#22d3ee);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--fg-dim);font-size:18px;max-width:62ch;margin:0}
+  .lede em{color:var(--fg);font-style:normal;font-weight:500}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
+  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
+  .chip b{color:var(--accent);font-family:var(--mono)}
+
+  section{margin:0 0 12px;scroll-margin-top:88px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:52px 0 4px}
+  .sec-head .num{font-family:var(--mono);font-size:14px;color:#ffffff;font-weight:700;
+    width:36px;height:36px;display:grid;place-items:center;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,#5aa9f2,#2496ed);box-shadow:var(--shadow-1)}
+  h2{font-size:25px;margin:0;letter-spacing:-.015em;font-weight:650;line-height:1.25}
+  h3{font-size:18px;margin:30px 0 4px;color:var(--primary);font-weight:600}
+  p{margin:13px 0;max-width:68ch}
+  .sub{color:var(--fg-dim);font-size:14.5px}
+
+  .note{position:relative;border:1px solid var(--line);background:var(--surface);
+    padding:15px 18px 15px 48px;border-radius:12px;margin:20px 0}
+  .note .ic{position:absolute;left:16px;top:16px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--fg-faint);display:block;margin-bottom:4px}
+  .note p{margin:0}
+  .note.key{border-color:rgba(167,139,250,.4);background:linear-gradient(180deg,rgba(167,139,250,.07),transparent)}
+  .note.key .ic,.note.key .tag{color:var(--violet)}
+  .note.warn{border-color:rgba(251,191,36,.4);background:linear-gradient(180deg,rgba(251,191,36,.07),transparent)}
+  .note.warn .ic,.note.warn .tag{color:var(--amber)}
+  .note.danger{border-color:rgba(248,113,113,.4);background:linear-gradient(180deg,rgba(248,113,113,.07),transparent)}
+  .note.danger .ic,.note.danger .tag{color:var(--red)}
+  .note.info .ic,.note.info .tag{color:var(--blue)}
+  .note.info{border-color:rgba(96,165,250,.35)}
+
+  .codeblock{background:var(--code);border:1px solid var(--line);border-radius:13px;margin:20px 0;
+    overflow:hidden;box-shadow:var(--shadow-2)}
+  .codeblock .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;
+    border-bottom:1px solid var(--line);background:#0d1424}
+  .codeblock .bar .lights{display:flex;gap:6px}
+  .codeblock .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .codeblock .bar .r{background:#ff5f56}.codeblock .bar .y{background:#ffbd2e}.codeblock .bar .g{background:#27c93f}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11.5px;color:var(--fg-faint);margin-left:6px}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+    color:var(--fg-dim);background:transparent;border:1px solid var(--line);border-radius:7px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease)}
+  .copybtn:hover{border-color:var(--accent);color:var(--accent)}
+  .copybtn svg{width:13px;height:13px}
+  .copybtn.done{color:var(--accent);border-color:var(--accent)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.8;color:#e8eefc;overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.86em;background:var(--muted);border:1px solid var(--line);
+    padding:1.5px 6px;border-radius:6px;color:#ffd9a6;white-space:nowrap}
+  .cmt{color:#5f6b85}.cmd{color:#7dd3fc}.flag{color:#c4b5fd}.str{color:#9ed0f7}.out{color:#6b7894}.kw{color:#fcd34d}
+
+  .tablewrap{margin:20px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    box-shadow:var(--shadow-1)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{background:var(--surface-2);color:var(--primary);font-size:11.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:#ffd9a6}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--surface)}
+
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;
+    transition:transform .2s var(--ease),border-color .2s var(--ease)}
+  .card:hover{transform:translateY(-2px);border-color:var(--line)}
+  .card .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:11px;
+    background:var(--muted)}
+  .card .ico svg{width:18px;height:18px}
+  .card h4{margin:0 0 5px;font-size:15px;font-weight:600;color:var(--fg)}
+  .card p{margin:0;font-size:13.5px;color:var(--fg-dim);max-width:none}
+  .ico.violet svg{color:var(--violet)} .ico.blue svg{color:var(--blue)} .ico.green svg{color:var(--accent)}
+  .ico.amber svg{color:var(--amber)} .ico.cyan svg{color:var(--cyan)} .ico.red svg{color:var(--red)}
+
+  /* ── layer / cache stack ── */
+  .stack{display:flex;flex-direction:column;gap:5px;max-width:480px;margin:18px auto 6px;
+    font-family:var(--mono);font-size:13px}
+  .layer{padding:12px 16px;border-radius:9px;border:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:10px;transition:transform .18s var(--ease)}
+  .layer:hover{transform:translateX(3px)}
+  .layer.rw{background:rgba(36,150,237,.1);border-color:rgba(36,150,237,.45);color:#9ed0f7}
+  .layer.ro{background:var(--surface);color:var(--fg-dim)}
+  .layer.hit{background:rgba(36,150,237,.08);border-color:rgba(36,150,237,.4);color:#9ed0f7}
+  .layer.miss{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.45);color:#fca5a5}
+  .layer small{color:var(--fg-faint);font-size:11px;font-family:var(--sans)}
+  .layer.hit small{color:#9ed0f7}.layer.miss small{color:#fca5a5}
+
+  /* ── command anatomy ── */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code);border:1px solid var(--line);
+    border-radius:13px;padding:24px 18px;margin:20px 0;text-align:center;line-height:2.6;box-shadow:var(--shadow-1)}
+  .anat .tok{padding:5px 10px;border-radius:8px;position:relative;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(125,211,252,.14);color:#7dd3fc}
+  .t2{background:rgba(167,139,250,.16);color:#c4b5fd}
+  .t3{background:rgba(36,150,237,.15);color:#9ed0f7}
+  .t4{background:rgba(251,191,36,.14);color:#fcd34d}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:var(--fg-faint);
+    margin-top:6px;letter-spacing:.03em}
+
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:11px 0;
+    overflow:hidden;transition:border-color .2s var(--ease)}
+  details[open]{border-color:rgba(36,150,237,.4)}
+  details:hover{border-color:var(--line)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;
+    align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11.5px;color:#ffffff;background:var(--accent);
+    border-radius:6px;padding:3px 8px;flex:none;font-weight:600}
+  summary .star{color:var(--amber);flex:none;display:inline-flex}
+  summary .star svg{width:15px;height:15px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--fg-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--fg-dim);font-size:14.5px;
+    border-top:1px solid var(--line-soft);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--fg)}
+
+  .check{list-style:none;padding:0;margin:16px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .check li{padding:13px 16px 13px 48px;position:relative;border-bottom:1px solid var(--line-soft);font-size:14.5px}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:16px;top:14px;width:20px;height:20px;color:var(--accent)}
+
+  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding-top:30px;color:var(--fg-dim);font-size:14.5px}
+  footer h3{margin:0 0 14px}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;
+    transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
+  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
+  .reflink:hover svg{color:var(--accent)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .next a{flex:1;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:13px;
+    padding:16px 18px;display:flex;flex-direction:column;gap:3px;transition:all .2s var(--ease)}
+  .next a:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .next small{color:var(--fg-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  .next b{font-size:15.5px;color:var(--fg);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:7px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .card:hover,.layer:hover,.state:hover,.next a:hover,.reflink:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ░░ inline icon sprite (Lucide-style, no emoji) ░░ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-cycle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></symbol>
+  <symbol id="i-cli" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="5" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.17-2.83L3 3"/><path d="m15 9 6-6"/></symbol>
+  <symbol id="i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-whale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c2 2 4 2 6 0"/><path d="M9 13c2 2 4 2 6 0"/><path d="M15 13c2 2 4 2 6 0"/><path d="M3 17c2 2 4 2 6 0 2 2 4 2 6 0 2 2 4 2 6 0"/><path d="M12 4v5"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-arrows" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 6h18"/><path d="m7 22-4-4 4-4"/><path d="M21 18H3"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/></symbol>
+  <symbol id="i-network" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-4h14v4"/><path d="M12 12V8"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V8h12v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4Z"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01"/><path d="M6 18h.01"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+</svg>
+
+<!-- ░░ top bar ░░ -->
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn" style="text-decoration:none;margin-right:6px">&larr; Learn</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-whale"/></svg></span>
+      <span class="crumb"><b>Docker Course</b> &nbsp;/&nbsp; Phase 1 &nbsp;/&nbsp; Module 04</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 4</span>
+    <span class="pill"><b>~2h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ░░ sidebar TOC ░░ -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#recap"><svg class="ti"><use href="#i-cycle"/></svg>Where we left off</a>
+      <a href="#model"><svg class="ti"><use href="#i-network"/></svg>The network model</a>
+      <a href="#drivers"><svg class="ti"><use href="#i-layers"/></svg>Network drivers</a>
+      <a href="#bridge"><svg class="ti"><use href="#i-route"/></svg>Default vs user-defined bridge</a>
+      <a href="#ports"><svg class="ti"><use href="#i-plug"/></svg>Publishing ports</a>
+      <a href="#c2c"><svg class="ti"><use href="#i-server"/></svg>Container-to-container</a>
+      <a href="#inspect"><svg class="ti"><use href="#i-cli"/></svg>Inspect &amp; manage</a>
+      <a href="#gotchas"><svg class="ti"><use href="#i-warn"/></svg>Common gotchas</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+    </nav>
+    <p class="scrollmsg">Run every command yourself. The default-vs-user-defined bridge difference must become muscle memory.</p>
+  </aside>
+
+  <!-- ░░ content ░░ -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Phase 1 · Docker · Day 4</span>
+      <h1>Module 04 — <span class="grad">Networking</span><br>Bridges, Ports &amp; Container DNS</h1>
+      <p class="lede">You have containers that run. Now they need to <em>talk</em> — to each other, and to the outside world.
+      This module explains how Docker wires containers together and why one configuration detail, the
+      <em>user-defined bridge</em>, is something every multi-container app depends on.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · hands-on heavy</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Modules 00–03</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>bridge · DNS · ports · drivers</span>
+        <span class="chip"><svg><use href="#i-whale"/></svg>Docker 29.5 · CachyOS</span>
+      </div>
+    </div>
+
+    <!-- 0. RECAP -->
+    <section id="recap">
+      <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
+      <p>Module 00 introduced Linux namespaces as the kernel mechanism that isolates containers from each other and from the
+      host. One of those namespaces — the <strong>NET namespace</strong> — gives each container its own completely isolated
+      network stack: its own network interfaces, its own routing table, its own IP address, and its own port space. From
+      inside a container, the network looks like a freshly booted machine that happens to have no physical NIC.</p>
+
+      <p>That isolation is good for security. But taken alone, it means containers are islands — they cannot reach each
+      other or the internet. Docker's job in this module is to build the bridges between those islands without collapsing
+      the isolation that makes them safe.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico violet"><svg><use href="#i-box"/></svg></div>
+          <h4>NET namespace</h4>
+          <p>Each container gets its own isolated network stack — its own <b style="color:var(--fg)">lo</b>, its own <b style="color:var(--fg)">eth0</b>, its own IP.</p></div>
+        <div class="card"><div class="ico blue"><svg><use href="#i-network"/></svg></div>
+          <h4>Docker bridges the gap</h4>
+          <p>Virtual ethernet pairs (<b style="color:var(--fg)">veth</b>) connect each container's namespace to a bridge on the host.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-globe"/></svg></div>
+          <h4>Host NATs outbound traffic</h4>
+          <p>The host's <b style="color:var(--fg)">iptables</b> rules masquerade container traffic so it can reach the internet.</p></div>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why networking matters right now</span>
+        <p>Module 05 is Docker Compose — which is entirely about wiring multi-container apps together. Everything Compose
+        does with networking is a thin wrapper over what you are learning here. Understand the fundamentals now, and Compose
+        will feel obvious rather than magical.</p></div>
+    </section>
+
+    <!-- 1. THE MODEL -->
+    <section id="model">
+      <div class="sec-head"><span class="num">1</span><h2>The network model — what actually happens</h2></div>
+      <p>When Docker starts a container, it does four things under the hood to give it connectivity:</p>
+
+      <ol style="padding-left:1.4em;color:var(--fg-dim);font-size:15px;line-height:2">
+        <li>Creates a new <strong>NET namespace</strong> for the container (its isolated stack).</li>
+        <li>Creates a <strong>virtual ethernet pair</strong> (veth pair) — a pair of virtual NICs joined end-to-end. Think of it as a network cable with a NIC at each end.</li>
+        <li>Puts one end of that pair (<code class="inl">eth0</code>) inside the container's namespace and assigns it an IP address from the bridge's subnet.</li>
+        <li>Attaches the other end to a <strong>Linux bridge</strong> on the host (e.g. <code class="inl">docker0</code>).</li>
+      </ol>
+
+      <p>The bridge is a virtual switch on the host. Every container attached to the same bridge can talk to each other
+      through it, just as machines on the same LAN switch can talk to each other. The host's kernel also sets up
+      <code class="inl">iptables</code> NAT rules so containers can reach the internet through the host's real NIC.</p>
+
+      <div class="stack">
+        <div class="layer ro"><span>Internet / external network</span><small>outside the host</small></div>
+        <div class="layer ro"><span>Host NIC (eth0 / wlan0)</span><small>host network namespace</small></div>
+        <div class="layer hit"><span>iptables NAT / routing</span><small>masquerades container traffic</small></div>
+        <div class="layer hit"><span>docker0 bridge (172.17.0.0/16)</span><small>virtual switch on host</small></div>
+        <div class="layer rw"><span>veth pair — one end per container</span><small>container ↔ bridge wire</small></div>
+        <div class="layer rw"><span>Container eth0 (172.17.0.2, .3, …)</span><small>inside NET namespace</small></div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The one sentence to remember</span>
+        <p>A container's network isolation comes from its <b>NET namespace</b>; Docker's connectivity comes from
+        <b>veth pairs attached to a bridge</b>. These two facts explain everything else in this module.</p></div>
+    </section>
+
+    <!-- 2. DRIVERS -->
+    <section id="drivers">
+      <div class="sec-head"><span class="num">2</span><h2>Network drivers — five modes, one table</h2></div>
+      <p>Docker supports multiple <strong>network drivers</strong>. Each is a different answer to the question "how should
+      this container's network namespace connect to the outside world?" You pick the driver when you create a network with
+      <code class="inl">docker network create --driver &lt;name&gt;</code>. If you don't pick, you get <code class="inl">bridge</code>.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Driver</th><th>What it does</th><th>When to use it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>bridge</code></td>
+            <td>Default. Creates a Linux bridge on the host. Containers on the same bridge network can talk to each other. Docker manages IP assignment and (on user-defined networks) DNS.</td>
+            <td>Single-host, multi-container apps. The right choice 90% of the time for development and small deployments.</td>
+          </tr>
+          <tr>
+            <td><code>host</code></td>
+            <td>The container shares the host's network namespace directly — no isolation. The container's process listens on the host's ports. No veth pair, no bridge. Fastest possible networking, zero overhead.</td>
+            <td>Performance-critical workloads where the NAT overhead matters (e.g. high-throughput proxies). Use sparingly. Linux only.</td>
+          </tr>
+          <tr>
+            <td><code>none</code></td>
+            <td>The container gets a NET namespace but no external connectivity — only a loopback interface. Completely airgapped.</td>
+            <td>Batch jobs that must not reach the network, or as a base when you will manually configure networking.</td>
+          </tr>
+          <tr>
+            <td><code>overlay</code></td>
+            <td>Multi-host networking for Docker Swarm clusters. Creates an encrypted VXLAN tunnel across hosts so containers on different machines appear on the same L2 network.</td>
+            <td>Docker Swarm services. Also the conceptual ancestor of Kubernetes pod networking — each K8s CNI plugin (Flannel, Calico, Cilium) implements a similar idea, connecting pods across nodes in a cluster.</td>
+          </tr>
+          <tr>
+            <td><code>macvlan</code></td>
+            <td>Assigns a real MAC address and a real IP from your LAN's subnet directly to the container. The container appears as a first-class device on the physical network, visible to routers and other LAN devices.</td>
+            <td>Legacy apps that expect to be directly addressable on the LAN; network monitoring tools that need a real MAC; any scenario where NAT is unacceptable.</td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The path to Kubernetes</span>
+        <p>The <b>overlay</b> driver is the single-host taste of what Kubernetes does at scale. Every K8s node runs a
+        <b>CNI</b> (Container Network Interface) plugin that gives each pod its own IP and connects pods across nodes.
+        Flannel uses VXLAN (just like Docker overlay). Calico uses BGP. Cilium uses eBPF. They all solve the same
+        fundamental problem: make containers on different machines look like they're on the same network. Once you
+        understand Docker's bridge model, the K8s networking model is the same concept scaled out.</p></div>
+
+      <div class="grid two">
+        <div class="card"><div class="ico amber"><svg><use href="#i-bolt"/></svg></div>
+          <h4>host — the speed trade-off</h4>
+          <p>No NAT, no bridge overhead, no port mapping — the container's process binds directly to the host's port. But you lose all network isolation: a bug in the container can bind to host ports and interfere with host services.</p></div>
+        <div class="card"><div class="ico red"><svg><use href="#i-danger"/></svg></div>
+          <h4>macvlan — the LAN trick</h4>
+          <p>Real IP, real MAC, visible on the LAN. Great for legacy apps. The catch: most Wi-Fi drivers do not support promiscuous mode, so macvlan usually requires a wired interface or a virtual machine.</p></div>
+      </div>
+    </section>
+
+    <!-- 3. DEFAULT VS USER-DEFINED BRIDGE -->
+    <section id="bridge">
+      <div class="sec-head"><span class="num">3</span><h2>Default bridge vs user-defined bridge</h2></div>
+      <p>This is the single most important distinction in Docker networking, and it is a core
+      concept. Read this section carefully.</p>
+
+      <p>Docker ships with a pre-created network called <code class="inl">bridge</code> (backed by the kernel bridge
+      <code class="inl">docker0</code>). When you run a container without specifying a network, it lands on this default
+      bridge automatically. The problem is what the default bridge <em>does not</em> provide.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Default bridge</th><th>User-defined bridge</th></tr></thead>
+        <tbody>
+          <tr><td><b>Container-to-container by IP</b></td><td>Yes</td><td>Yes</td></tr>
+          <tr><td><b>Container-to-container by name (DNS)</b></td><td><b style="color:var(--red)">No</b></td><td><b style="color:var(--accent)">Yes — automatic</b></td></tr>
+          <tr><td><b>Scope</b></td><td>All containers without a network spec land here together — no isolation between unrelated containers</td><td>Only containers you explicitly connect are in the network</td></tr>
+          <tr><td><b>Created how</b></td><td>Automatically on Docker install, always exists</td><td><code>docker network create mynet</code></td></tr>
+          <tr><td><b>Connect/disconnect without restart</b></td><td>No</td><td>Yes — live connect/disconnect</td></tr>
+        </tbody>
+      </table></div>
+
+      <p>The DNS point is the critical one. On the default bridge, containers can only find each other by their
+      <strong>IP address</strong> — which changes every time you restart a container. That makes anything but the simplest
+      setup fragile. On a user-defined bridge, Docker runs an <strong>embedded DNS server</strong> that resolves container
+      names to their current IP addresses automatically. You can address a database by the name <code class="inl">db</code>
+      and it will always resolve correctly, even after a restart.</p>
+
+      <h3>Creating a user-defined bridge and using it</h3>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">terminal</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># Create a user-defined bridge network</span>
+<span class="cmd">docker</span> network create <span class="str">mynet</span>
+
+<span class="cmt"># Run two containers on it, giving them names</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> app <span class="flag">--network</span> mynet nginx:alpine
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> db  <span class="flag">--network</span> mynet postgres:16-alpine
+
+<span class="cmt"># From 'app', reach 'db' by NAME — this works because of the embedded DNS</span>
+<span class="cmd">docker</span> exec app ping <span class="flag">-c</span> 3 db
+<span class="out">PING db (172.18.0.3): 56 data bytes
+64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.123 ms
+...</span>
+
+<span class="cmt"># Now try the SAME thing on the default bridge — it will FAIL by name</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> c1 nginx:alpine
+<span class="cmd">docker</span> run <span class="flag">-d</span> <span class="flag">--name</span> c2 nginx:alpine
+<span class="cmd">docker</span> exec c1 ping <span class="flag">-c</span> 1 c2
+<span class="out">ping: bad address 'c2'    &lt;-- no DNS on default bridge</span>
+
+<span class="cmt"># But it WORKS by IP (fragile — IP changes on restart)</span>
+<span class="cmd">docker</span> inspect <span class="flag">-f</span> <span class="str">'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'</span> c2
+<span class="out">172.17.0.3</span>
+<span class="cmd">docker</span> exec c1 ping <span class="flag">-c</span> 1 172.17.0.3
+<span class="out">PING 172.17.0.3: 56 data bytes  &lt;-- works, but only until c2 restarts</span></code></pre>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The rule you always apply</span>
+        <p>For any multi-container application, <b>always create a user-defined bridge</b>. Never rely on the default
+        bridge for inter-container communication. Docker Compose follows this rule automatically — it creates a
+        project-scoped user-defined network for every Compose project. This is exactly why Compose services can
+        reach each other by service name.</p></div>
+    </section>
+
+    <!-- 4. PUBLISHING PORTS -->
+    <section id="ports">
+      <div class="sec-head"><span class="num">4</span><h2>Publishing ports — connecting containers to the host</h2></div>
+      <p>Containers are isolated. Their ports are only reachable from inside the same Docker network by default. To make a
+      service reachable from the host machine (or from outside it), you must <strong>publish</strong> a port. Publishing
+      tells Docker to add an <code class="inl">iptables</code> rule that forwards traffic arriving on a host port to the
+      container's port.</p>
+
+      <h3>The -p flag, broken down</h3>
+
+      <div class="anat">
+        <span class="tok t1">docker run</span>
+        <span class="tok t2">-p 8080:80</span>
+        <span class="tok t3">nginx</span>
+        <br>
+        <span class="tok t1" style="font-size:10.5px">command</span>
+        <span class="tok t2" style="font-size:10.5px">HOST_PORT:CONTAINER_PORT</span>
+        <span class="tok t3" style="font-size:10.5px">image</span>
+      </div>
+
+      <p>Traffic arriving at port <strong>8080 on the host</strong> is forwarded into the container's port <strong>80</strong>.
+      The container port is fixed by what the app listens on. The host port is whatever is free and convenient on your machine.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">port publishing examples</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># Publish a specific host port → container port</span>
+<span class="cmd">docker</span> run <span class="flag">-p</span> 8080:80 nginx
+
+<span class="cmt"># Publish multiple ports</span>
+<span class="cmd">docker</span> run <span class="flag">-p</span> 80:80 <span class="flag">-p</span> 443:443 nginx
+
+<span class="cmt"># Let Docker pick a random available host port (use docker port to find it)</span>
+<span class="cmd">docker</span> run <span class="flag">-p</span> 80 nginx
+<span class="cmd">docker</span> port &lt;container-id&gt; 80
+<span class="out">0.0.0.0:49153</span>
+
+<span class="cmt"># -P: publish ALL EXPOSEd ports to random host ports</span>
+<span class="cmd">docker</span> run <span class="flag">-P</span> nginx
+
+<span class="cmt"># Bind to localhost ONLY — not reachable from outside the host</span>
+<span class="cmd">docker</span> run <span class="flag">-p</span> 127.0.0.1:8080:80 nginx
+
+<span class="cmt"># Explicitly bind to all interfaces (the default when no address given)</span>
+<span class="cmd">docker</span> run <span class="flag">-p</span> 0.0.0.0:8080:80 nginx</code></pre>
+      </div>
+
+      <h3>EXPOSE vs -p — the thing everyone confuses</h3>
+      <p><code class="inl">EXPOSE 80</code> in a Dockerfile is <strong>documentation</strong>. It tells humans and
+      tooling "this container's application listens on port 80." It does <em>not</em> make any port reachable from the
+      host or from the internet. Nothing is actually published until you use <code class="inl">-p</code> at
+      <code class="inl">docker run</code> time.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico cyan"><svg><use href="#i-file"/></svg></div>
+          <h4>EXPOSE = documentation</h4>
+          <p>Written in the Dockerfile. Tells operators which port to publish. Used by <code class="inl">-P</code> to know which ports to forward. <b style="color:var(--fg)">Does not open anything.</b></p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-plug"/></svg></div>
+          <h4>-p = actually publishes</h4>
+          <p>Passed at <code class="inl">docker run</code>. Creates an iptables rule. Makes the port reachable from the host (or beyond). <b style="color:var(--fg)">This is what opens the port.</b></p></div>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Security — 0.0.0.0 vs 127.0.0.1</span>
+        <p>When you run <code class="inl">-p 8080:80</code>, the default binding address is <code class="inl">0.0.0.0</code>
+        — meaning the port is reachable from <b>any network interface</b>, including external ones. On a cloud VM,
+        this exposes the port to the internet (subject to your firewall rules). If you are running a dev database and
+        only want it accessible from your own machine, use <code class="inl">-p 127.0.0.1:5432:5432</code>. This is a
+        real-world security consideration, not just theory.</p></div>
+    </section>
+
+    <!-- 5. CONTAINER-TO-CONTAINER -->
+    <section id="c2c">
+      <div class="sec-head"><span class="num">5</span><h2>Container-to-container communication</h2></div>
+      <p>The most common real-world scenario: an application container that needs to reach a database container. This is
+      the pattern that underpins every multi-container app, and it is exactly what Docker Compose was built to
+      automate.</p>
+
+      <p>The recipe is simple:</p>
+      <ol style="padding-left:1.4em;color:var(--fg-dim);font-size:15px;line-height:2">
+        <li>Create a <strong>user-defined bridge</strong> network.</li>
+        <li>Run both containers on that network, giving each a <code class="inl">--name</code>.</li>
+        <li>In the application config, set the database host to the container's <strong>name</strong> — the embedded DNS handles the rest.</li>
+      </ol>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">app + db on a shared network</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># 1. Create the shared network</span>
+<span class="cmd">docker</span> network create appnet
+
+<span class="cmt"># 2. Start the database container</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> \
+  <span class="flag">--name</span> db \
+  <span class="flag">--network</span> appnet \
+  <span class="flag">-e</span> POSTGRES_PASSWORD=secret \
+  postgres:16-alpine
+
+<span class="cmt"># 3. Start the application container</span>
+<span class="cmd">docker</span> run <span class="flag">-d</span> \
+  <span class="flag">--name</span> app \
+  <span class="flag">--network</span> appnet \
+  <span class="flag">-p</span> 8000:8000 \
+  <span class="flag">-e</span> <span class="str">DATABASE_URL=postgres://postgres:secret@db:5432/mydb</span> \
+  myapp:1.0
+
+<span class="cmt"># Note: the hostname in DATABASE_URL is "db" — the container name.
+# Docker's embedded DNS resolves "db" to the db container's current IP.
+# No IP addresses in config. No hardcoded values that break on restart.</span></code></pre>
+      </div>
+
+      <p>Notice that <code class="inl">app</code> publishes its port 8000 to the host with <code class="inl">-p</code>,
+      so users can reach the web app. But <code class="inl">db</code> has <em>no</em> <code class="inl">-p</code> flag —
+      it is reachable only from other containers on <code class="inl">appnet</code>, which is exactly the right security
+      posture for a database.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Forward reference — Module 05</span>
+        <p>This three-step pattern (create network → run containers → use name as hostname) is precisely what
+        <code class="inl">docker compose up</code> does for you from a YAML file. Each service becomes a container,
+        Docker Compose creates a project-scoped network, and each service is reachable by its service name. The
+        manual steps you just learned are what Compose is automating.</p></div>
+    </section>
+
+    <!-- 6. INSPECT & MANAGE -->
+    <section id="inspect">
+      <div class="sec-head"><span class="num">6</span><h2>Inspecting &amp; managing networks</h2></div>
+      <p>The full <code class="inl">docker network</code> subcommand family. You will use these constantly when debugging
+      connectivity issues.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>docker network ls</code></td><td>List all networks on the host. Shows driver and scope.</td></tr>
+          <tr><td><code>docker network create mynet</code></td><td>Create a user-defined bridge network named <code>mynet</code>.</td></tr>
+          <tr><td><code>docker network create --driver host mynet</code></td><td>Create a network with a specific driver.</td></tr>
+          <tr><td><code>docker network create --subnet 192.168.10.0/24 mynet</code></td><td>Create with a custom subnet.</td></tr>
+          <tr><td><code>docker network inspect mynet</code></td><td>Full JSON details: subnet, gateway, all connected containers and their IPs.</td></tr>
+          <tr><td><code>docker network connect mynet container1</code></td><td>Attach a running container to an additional network (live, no restart).</td></tr>
+          <tr><td><code>docker network disconnect mynet container1</code></td><td>Detach a running container from a network (live).</td></tr>
+          <tr><td><code>docker network rm mynet</code></td><td>Remove a network (only works if no containers are attached).</td></tr>
+          <tr><td><code>docker network prune</code></td><td>Remove all unused networks.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Finding a container's IP address</h3>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">inspect for IPs</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># Full JSON — look for NetworkSettings.Networks</span>
+<span class="cmd">docker</span> inspect mycontainer
+
+<span class="cmt"># Just the IP on the default bridge</span>
+<span class="cmd">docker</span> inspect <span class="flag">-f</span> <span class="str">'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'</span> mycontainer
+<span class="out">172.17.0.3</span>
+
+<span class="cmt"># See which containers are on a network, and their IPs</span>
+<span class="cmd">docker</span> network inspect appnet <span class="flag">--format</span> <span class="str">'{{range .Containers}}{{.Name}} {{.IPv4Address}}{{"\n"}}{{end}}'</span>
+<span class="out">app   172.18.0.2/16
+db    172.18.0.3/16</span>
+
+<span class="cmt"># List all networks on the host</span>
+<span class="cmd">docker</span> network ls
+<span class="out">NETWORK ID     NAME      DRIVER    SCOPE
+a1b2c3d4e5f6   bridge    bridge    local
+b2c3d4e5f6a1   host      host      local
+c3d4e5f6a1b2   none      null      local
+d4e5f6a1b2c3   appnet    bridge    local</span></code></pre>
+      </div>
+    </section>
+
+    <!-- 7. GOTCHAS -->
+    <section id="gotchas">
+      <div class="sec-head"><span class="num">7</span><h2>Common gotchas</h2></div>
+      <p>These are the mistakes that actually cost people hours. They are all common enough to bite you in real work as
+      "what would you check first if X is broken?"</p>
+
+      <h3>localhost inside a container is not the host</h3>
+      <p>This is the most frequent confusion. Inside a container, <code class="inl">localhost</code> (or
+      <code class="inl">127.0.0.1</code>) refers to the container's own loopback interface — not the host machine's
+      loopback. If your app inside the container tries to connect to <code class="inl">localhost:5432</code>, it is trying
+      to reach a Postgres that must also be <em>inside that same container</em>. If Postgres is running as a separate
+      container or directly on the host, <code class="inl">localhost</code> will not find it.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Classic failure scenario</span>
+        <p>Developer runs Postgres natively on their laptop at <code class="inl">localhost:5432</code>. Puts their app in
+        a Docker container with <code class="inl">DATABASE_URL=postgres://localhost:5432/mydb</code>. App fails to
+        connect. Localhost inside the container does not mean the laptop. Use
+        <code class="inl">host.docker.internal</code> instead.</p></div>
+
+      <h3>Connecting to host services from inside a container</h3>
+      <p>Docker Desktop (Mac and Windows) provides the special hostname
+      <code class="inl">host.docker.internal</code> which resolves to the host machine's IP from inside any container.
+      On Linux with Docker Engine (not Desktop), you need to pass <code class="inl">--add-host=host.docker.internal:host-gateway</code>
+      when starting the container, or use the host network driver.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">reaching host services from Linux containers</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># On Linux (Docker Engine without Desktop), add this flag:</span>
+<span class="cmd">docker</span> run <span class="flag">--add-host</span>=host.docker.internal:host-gateway myapp
+
+<span class="cmt"># Now inside the container, this resolves to the host machine:</span>
+<span class="out">host.docker.internal  →  172.17.0.1  (the bridge gateway = host)</span>
+
+<span class="cmt"># On Docker Desktop (Mac/Windows), it works automatically — no flag needed</span></code></pre>
+      </div>
+
+      <h3>Port already in use</h3>
+      <p>If <code class="inl">docker run -p 8080:80</code> fails with "port is already allocated," something on the host
+      is already bound to port 8080. Find it with <code class="inl">ss -tlnp | grep 8080</code> or
+      <code class="inl">lsof -i :8080</code>. Either stop that process or pick a different host port.</p>
+
+      <h3>Default bridge has no DNS</h3>
+      <p>If two containers on the default bridge cannot reach each other by name, that is not a bug — it is by design.
+      The default bridge predates Docker's embedded DNS. The fix is always the same: move them to a user-defined bridge.
+      This is not a workaround; it is the correct architecture.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="title">quick gotcha reference</span><span class="spacer"></span>
+          <button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># Symptom: "Connection refused" connecting to localhost from inside container
+# Cause: localhost resolves to the container's own loopback, not the host
+# Fix: use host.docker.internal (or move the service to a container)</span>
+
+<span class="cmt"># Symptom: ping by name fails between two containers
+# Cause: they're on the default bridge (no DNS)
+# Fix: create a user-defined bridge and move both containers to it</span>
+<span class="cmd">docker</span> network create mynet
+<span class="cmd">docker</span> network connect mynet container1
+<span class="cmd">docker</span> network connect mynet container2
+
+<span class="cmt"># Symptom: -p 8080:80 fails with "address already in use"
+# Fix: find and stop whatever holds the host port</span>
+<span class="cmd">ss</span> <span class="flag">-tlnp</span> | grep 8080</code></pre>
+      </div>
+    </section>
+
+    <!-- 8. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on — do this now</h2></div>
+      <p>Networking is the kind of topic that feels clear when you read it and murky when you try it. The commands below
+      are short. Do not skip them.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker network ls</code> and identify which three networks exist by default (<code class="inl">bridge</code>, <code class="inl">host</code>, <code class="inl">none</code>) and what driver each uses.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Create a user-defined bridge: <code class="inl">docker network create testnet</code>. Run two Alpine containers on it with distinct names. From one, ping the other by name. Confirm it works.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Repeat the same test on the <em>default bridge</em> (no <code class="inl">--network</code> flag). Confirm the ping by name fails. Then get the second container's IP via <code class="inl">docker inspect</code> and confirm ping by IP works.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run an nginx container with <code class="inl">-p 8080:80</code>. Open a browser to <code class="inl">http://localhost:8080</code> or <code class="inl">curl localhost:8080</code> from the host. Confirm you get nginx's default page.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run the same nginx with <code class="inl">-p 127.0.0.1:8081:80</code>. Confirm it is reachable from localhost but think through why it would not be reachable from another machine on your network.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Run <code class="inl">docker network inspect testnet</code> and find the subnet, gateway, and the IP addresses of the connected containers in the JSON output.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Connect a running container to a second network with <code class="inl">docker network connect</code>. Run <code class="inl">docker inspect</code> on it and find both network entries in the output.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Clean up: <code class="inl">docker stop</code> and <code class="inl">docker rm</code> your test containers, then <code class="inl">docker network prune</code> to remove unused networks.</li>
+      </ul>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Build, don't just run</span>
+        <p>For the container-to-container exercise, try writing a tiny Python or Node app that actually makes an HTTP
+        request to the other container's name as hostname. The point of this course is that you should be able to
+        sketch the wiring from memory. Commands you have typed yourself stick far better than ones
+        you have only read.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://docs.docker.com/engine/network/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Docker networking overview</a>
+        <a class="reflink" href="https://docs.docker.com/engine/network/drivers/bridge/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Bridge network driver</a>
+        <a class="reflink" href="https://docs.docker.com/engine/network/drivers/host/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Host network driver</a>
+        <a class="reflink" href="https://docs.docker.com/reference/cli/docker/network/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>docker network CLI reference</a>
+        <a class="reflink" href="https://docs.docker.com/engine/network/drivers/overlay/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Overlay network driver</a>
+      </div>
+
+      <div class="next">
+        <a href="module-03.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 03 — Volumes &amp; Storage</b></span></a>
+        <a href="module-05.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 05 — Docker Compose</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Docker → Kubernetes → Orchestration → MLOps course · Module 04 · built for visual learning.
+      Once the hands-on checklist is all ticked, move on to Module 05.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // reading progress bar
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // copy-to-clipboard for code blocks
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  // scroll-spy: highlight active TOC link
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

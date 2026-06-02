@@ -10,6 +10,7 @@ import { initGA, AnalyticsTracker } from "../utils/Analytics";
 import { Home } from "../pages/Home";
 import BlogPost from "../pages/BlogPost";
 import PageNotFound from "../pages/PageNotFound";
+import Learn from "../pages/Learn";
 
 export const App = () => {
   logCredits();
@@ -26,6 +27,7 @@ export const App = () => {
         <HelmetMeta />
         <Switch>
           <Route path="/" exact component={Home} />
+          <Route path="/learn" exact component={Learn} />
           <Route path="/blog/:slug" component={BlogPost} />
           <Route path="*" component={PageNotFound} />
         </Switch>

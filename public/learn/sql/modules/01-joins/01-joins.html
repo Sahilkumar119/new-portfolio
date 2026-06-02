@@ -355,7 +355,292 @@
       </div>
 
       <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The one sentence to remember</span>
-        <p>A join answers the question Maya keeps coming back to: <strong>"for each row in table A, which rows in table B share a matching key, and what do I do with the rows that match nothing?"</strong> Every join type is just a different answer to that second half. Work through the hands-on checklist, then move on to Module 02, Aggregation.</p>
+        <p>A join answers the question Maya keeps coming back to: <strong>"for each row in table A, which rows in table B share a matching key, and what do I do with the rows that match nothing?"</strong> Every join type is just a different answer to that second half.</p></div>
+    </section>
+
+    <!-- 1. THE MENTAL MODEL -->
+    <section id="model">
+      <div class="sec-head"><span class="num">1</span><div class="htext"><span class="kicker">Section 01 · The picture in your head</span><h2>The mental model</h2></div></div>
+      <p>Before any syntax, Maya draws the two tables on a sticky note. This habit will save her more debugging time than any single keyword. Here is the data she is working with for the whole module.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the two tables, drawn out</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- departments: 4 rows. Operations (40) has nobody in it yet.</span>
+<span class="out"> dept_id | dept_name
+---------+-------------
+      10 | Engineering
+      20 | Sales
+      30 | Marketing
+      40 | Operations</span>
+
+<span class="cmt">-- employees: 6 rows. Frank's dept_id is NULL (not assigned yet).</span>
+<span class="out"> emp_id | name  | dept_id | salary
+--------+-------+---------+--------
+      1 | Alice |      10 | 185000
+      2 | Bob   |      10 | 120000
+      3 | Carol |      20 | 135000
+      4 | Dan   |      20 |  98000
+      5 | Eve   |      30 | 105000
+      6 | Frank |  (null) |  72000</span></code></pre>
+      </div>
+
+      <p>Look at the two odd ones out, because every join type is really a story about them. <strong>Frank</strong> has no department (his <code class="inl">dept_id</code> is <code class="inl">NULL</code>), and <strong>Operations</strong> has no employees (no row in <code class="inl">employees</code> points at dept 40). A join walks one table, and for each row asks "which rows in the other table share my key?" The only real decision is what to do with rows that find <em>no</em> partner: Frank and Operations. Keep them or drop them. That single choice is the difference between every join you will ever write.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico sage"><svg><use href="#i-key"/></svg></div>
+          <h4>The match condition</h4>
+          <p>The <code class="inl">ON</code> clause says which columns must be equal for two rows to count as a pair. Usually a foreign key meeting a primary key.</p></div>
+        <div class="card"><div class="ico grey"><svg><use href="#i-db"/></svg></div>
+          <h4>The matched rows</h4>
+          <p>Every pair whose keys agree is glued into one wide row. This part is identical for all join types.</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-null"/></svg></div>
+          <h4>The leftovers</h4>
+          <p>Rows with no partner (Frank, Operations). Whether they survive, padded with <code class="inl">NULL</code>s, is what names the join.</p></div>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Aliases keep joins readable</span>
+        <p>Once two tables are in play, columns like <code class="inl">dept_id</code> exist on both sides and become ambiguous. Give each table a short alias (<code class="inl">employees e</code>, <code class="inl">departments d</code>) and prefix every column (<code class="inl">e.dept_id</code>, <code class="inl">d.dept_name</code>). Maya does this from the first query so the database never has to guess which table she means.</p></div>
+    </section>
+
+    <!-- 2. INNER JOIN -->
+    <section id="inner">
+      <div class="sec-head"><span class="num">2</span><div class="htext"><span class="kicker">Section 02 · Keep only the matches</span><h2>INNER JOIN</h2></div></div>
+      <p>Maya's actual task was "list every employee next to their department name." The most common join, <code class="inl">INNER JOIN</code>, gives exactly that: rows that have a partner on <em>both</em> sides, and nothing else.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">employee + department name</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name, d.dept_name
+<span class="kw">FROM</span> employees e
+<span class="kw">INNER JOIN</span> departments d <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id;
+<span class="cmt">-- INNER is the default; "JOIN" alone means the same thing</span>
+
+<span class="out"> name  | dept_name
+-------+-------------
+ Alice | Engineering
+ Bob   | Engineering
+ Carol | Sales
+ Dan   | Sales
+ Eve   | Marketing</span></code></pre>
+      </div>
+
+      <p>Five rows, not six, and not seven. Frank vanished because his <code class="inl">NULL</code> dept_id matches no department (and <code class="inl">NULL</code> never equals anything, even another <code class="inl">NULL</code>). Operations vanished because no employee points at dept 40. <strong>An inner join keeps a row only when both sides have a partner.</strong> The leftovers are silently dropped, which is exactly why Maya's first headcount came up one short and confused her until she remembered Frank.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The silent-drop trap</span>
+        <p>The most common join bug is not an error message, it is <em>missing rows</em>. An inner join that quietly excludes Frank looks like it worked. Always ask "could either side have unmatched rows, and do I want them?" If the answer is yes, you need an outer join, coming up next.</p></div>
+    </section>
+
+    <!-- 3. LEFT JOIN -->
+    <section id="left">
+      <div class="sec-head"><span class="num">3</span><div class="htext"><span class="kicker">Section 03 · Keep all of the left</span><h2>LEFT JOIN</h2></div></div>
+      <p>Maya's manager corrects the request: "I want <em>every</em> employee, even ones without a department yet." That word "every" is the signal for a <code class="inl">LEFT JOIN</code>. It keeps every row from the left table, and fills in <code class="inl">NULL</code> wherever the right table has no match.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">keep Frank, even with no department</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name, d.dept_name
+<span class="kw">FROM</span> employees e
+<span class="kw">LEFT JOIN</span> departments d <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id;
+<span class="cmt">-- "LEFT OUTER JOIN" is the full name; OUTER is optional</span>
+
+<span class="out"> name  | dept_name
+-------+-------------
+ Alice | Engineering
+ Bob   | Engineering
+ Carol | Sales
+ Dan   | Sales
+ Eve   | Marketing
+ Frank | (null)</span></code></pre>
+      </div>
+
+      <p>Now all six employees survive. Frank stays, but his <code class="inl">dept_name</code> is <code class="inl">NULL</code> because there was nothing to fill it with. The left table (<code class="inl">employees</code>, the one named right after <code class="inl">FROM</code>) is protected: every one of its rows appears, matched or not. Operations is still gone, because it lives only on the right side and the right side has no such protection in a left join.</p>
+
+      <p>This is also how Maya answers "which employees are <em>not</em> assigned to a department?" She keeps the left join and filters for the rows where the right side came back empty.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">find the unmatched left rows</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name
+<span class="kw">FROM</span> employees e
+<span class="kw">LEFT JOIN</span> departments d <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id
+<span class="kw">WHERE</span> d.dept_id <span class="kw">IS NULL</span>;   <span class="cmt">-- only rows that found no partner</span>
+<span class="cmt">-- result: just Frank</span></code></pre>
+      </div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Filter on the right table and you cancel the join</span>
+        <p>Put a condition on the right table in <code class="inl">WHERE</code> (like <code class="inl">WHERE d.dept_name = 'Sales'</code>) and a <code class="inl">LEFT JOIN</code> quietly behaves like an <code class="inl">INNER JOIN</code>, because Frank's <code class="inl">NULL</code> dept_name fails the test and gets dropped. If you need to filter the right side <em>but still keep unmatched left rows</em>, move that condition into the <code class="inl">ON</code> clause instead of <code class="inl">WHERE</code>. This catches almost everyone once.</p></div>
+    </section>
+
+    <!-- 4. RIGHT & FULL OUTER -->
+    <section id="right-full">
+      <div class="sec-head"><span class="num">4</span><div class="htext"><span class="kicker">Section 04 · The other two outer joins</span><h2>RIGHT &amp; FULL OUTER JOIN</h2></div></div>
+      <p>A <code class="inl">RIGHT JOIN</code> is a <code class="inl">LEFT JOIN</code> looking in the mirror: it protects the <em>right</em> table instead. Maya needs it to answer the opposite question, "show every department, even the empty ones," so Operations finally appears.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">keep every department, even empty ones</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name, d.dept_name
+<span class="kw">FROM</span> employees e
+<span class="kw">RIGHT JOIN</span> departments d <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id;
+
+<span class="out"> name  | dept_name
+-------+-------------
+ Alice | Engineering
+ Bob   | Engineering
+ Carol | Sales
+ Dan   | Sales
+ Eve   | Marketing
+ (null)| Operations</span></code></pre>
+      </div>
+
+      <p>Operations now shows up with a <code class="inl">NULL</code> employee name. Frank is gone again, because the left side is no longer protected. In practice most people just swap the table order and use a <code class="inl">LEFT JOIN</code>, since left joins read more naturally, but you should recognize <code class="inl">RIGHT JOIN</code> when you meet it.</p>
+
+      <p>A <code class="inl">FULL OUTER JOIN</code> protects <strong>both</strong> sides at once. Nobody gets dropped: every unmatched left row and every unmatched right row survives, padded with <code class="inl">NULL</code>s. It is how Maya audits both problems in a single query.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">keep everyone and every department</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name, d.dept_name
+<span class="kw">FROM</span> employees e
+<span class="kw">FULL OUTER JOIN</span> departments d <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id;
+
+<span class="out"> name  | dept_name
+-------+-------------
+ Alice | Engineering
+ Bob   | Engineering
+ Carol | Sales
+ Dan   | Sales
+ Eve   | Marketing
+ Frank | (null)        <span class="cmt">-- employee with no department</span>
+ (null)| Operations    <span class="cmt">-- department with no employees</span></code></pre>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">One idea, four results</span>
+        <p>Inner, left, right, and full are the same matching engine with a different answer to "what about the leftovers?" Inner drops both. Left keeps left's leftovers. Right keeps right's. Full keeps both. Memorize that table and you have memorized joins.</p></div>
+    </section>
+
+    <!-- 5. CROSS JOIN -->
+    <section id="cross">
+      <div class="sec-head"><span class="num">5</span><div class="htext"><span class="kicker">Section 05 · Every pair, on purpose</span><h2>CROSS JOIN</h2></div></div>
+      <p>A <code class="inl">CROSS JOIN</code> has no <code class="inl">ON</code> clause at all. It pairs <em>every</em> row of the left with <em>every</em> row of the right, the full Cartesian product. With 6 employees and 4 departments that is 6 &times; 4 = 24 rows. It is rarely what you want by accident, but useful on purpose for generating combinations, like every employee against every possible shift.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">every employee paired with every shift</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name, s.shift
+<span class="kw">FROM</span> employees e
+<span class="kw">CROSS JOIN</span> (<span class="kw">VALUES</span> (<span class="str">'morning'</span>), (<span class="str">'evening'</span>)) <span class="kw">AS</span> s(shift);
+<span class="cmt">-- 6 employees x 2 shifts = 12 rows</span></code></pre>
+      </div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The accidental cross join</span>
+        <p>Forget the <code class="inl">ON</code> clause on a normal join (or use the old comma syntax <code class="inl">FROM employees, departments</code> with no <code class="inl">WHERE</code> link) and you get a cross join by accident. Row counts explode: two tables of a thousand rows each become a million. If a query is suddenly enormous and slow, a missing join condition is the first thing to check.</p></div>
+    </section>
+
+    <!-- 6. SELF-JOIN -->
+    <section id="self">
+      <div class="sec-head"><span class="num">6</span><div class="htext"><span class="kicker">Section 06 · A table joined to itself</span><h2>Self-join</h2></div></div>
+      <p>Sometimes the two tables you want to match are the <em>same</em> table. Suppose each employee row also carries a <code class="inl">manager_id</code> that points at another employee's <code class="inl">emp_id</code>. To list each person next to their manager's name, Maya joins <code class="inl">employees</code> to itself, giving the two copies different aliases so the database can tell them apart.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">each employee next to their manager</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name      <span class="kw">AS</span> employee,
+       m.name      <span class="kw">AS</span> manager
+<span class="kw">FROM</span> employees e
+<span class="kw">LEFT JOIN</span> employees m <span class="kw">ON</span> e.manager_id <span class="num">=</span> m.emp_id;
+<span class="cmt">-- e is "the worker", m is "the same table, seen as managers"</span>
+<span class="cmt">-- LEFT JOIN so the top boss (no manager) is not dropped</span></code></pre>
+      </div>
+
+      <p>The trick is purely the aliases: <code class="inl">e</code> and <code class="inl">m</code> are two windows onto one table. A <code class="inl">LEFT JOIN</code> is the safe default here so that the person at the top, whose <code class="inl">manager_id</code> is <code class="inl">NULL</code>, still appears with a <code class="inl">NULL</code> manager instead of disappearing. Self-joins handle any "row relates to another row in the same table" question: managers, reply-to comments, prerequisite courses.</p>
+    </section>
+
+    <!-- 7. ON, USING, NATURAL -->
+    <section id="using-natural">
+      <div class="sec-head"><span class="num">7</span><div class="htext"><span class="kicker">Section 07 · Three ways to state the match</span><h2>ON, USING, and NATURAL</h2></div></div>
+      <p>There are three ways to tell SQL which columns make a match. They differ in how much they trust your naming, and that trust is exactly where bugs hide.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">the same join, three spellings</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="cmt">-- 1. ON: most explicit, works for any condition. Always safe.</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees e <span class="kw">JOIN</span> departments d <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id;
+
+<span class="cmt">-- 2. USING: shorthand when the column name is identical on both sides.</span>
+<span class="cmt">--    Also collapses the two dept_id columns into one in the output.</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees e <span class="kw">JOIN</span> departments d <span class="kw">USING</span> (dept_id);
+
+<span class="cmt">-- 3. NATURAL: auto-matches on EVERY same-named column. Convenient, risky.</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees <span class="kw">NATURAL JOIN</span> departments;</code></pre>
+      </div>
+
+      <p>Reach for <code class="inl">ON</code> by default. It is explicit, it handles conditions beyond simple equality, and a reader can see precisely what is matched. <code class="inl">USING</code> is a tidy shortcut when the key column has the exact same name on both sides. <code class="inl">NATURAL JOIN</code> looks elegant but matches on <em>every</em> identically named column automatically, so the day someone adds a <code class="inl">created_at</code> column to both tables, the join silently starts matching on that too and the results quietly change.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Avoid NATURAL JOIN in real code</span>
+        <p>It depends on column names you do not control and gives no error when it guesses wrong, just different rows. Maya treats it as a demo curiosity and writes <code class="inl">ON</code> in anything that ships. Explicit beats clever when wrong answers look like right ones.</p></div>
+    </section>
+
+    <!-- 8. ANTI-JOINS & NULL TRAPS -->
+    <section id="anti">
+      <div class="sec-head"><span class="num">8</span><div class="htext"><span class="kicker">Section 08 · The rows that are missing</span><h2>Anti-joins &amp; NULL traps</h2></div></div>
+      <p>Often the interesting question is about absence: departments with <em>no</em> employees, customers with <em>no</em> orders. That is an <strong>anti-join</strong>, and the classic recipe is an outer join plus an <code class="inl">IS NULL</code> filter on the side that should have matched.</p>
+
+      <div class="codeblock">
+        <div class="bar"><span class="dotn"><i></i><i></i><i></i></span><span class="title">departments with nobody in them</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+<pre><code><span class="kw">SELECT</span> d.dept_name
+<span class="kw">FROM</span> departments d
+<span class="kw">LEFT JOIN</span> employees e <span class="kw">ON</span> e.dept_id <span class="num">=</span> d.dept_id
+<span class="kw">WHERE</span> e.emp_id <span class="kw">IS NULL</span>;   <span class="cmt">-- no employee matched this department</span>
+<span class="cmt">-- result: Operations</span></code></pre>
+      </div>
+
+      <p>Keep every department with the left join, then keep only the ones where the employee side came back empty. The same shape, with the tables flipped, finds employees with no department (Frank). Read it as "keep all of A, then throw away the ones that <em>did</em> match B, leaving only the unmatched."</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">NULL never equals NULL</span>
+        <p>This is the single biggest source of join confusion. In SQL, <code class="inl">NULL = NULL</code> is not <code class="inl">true</code>, it is <code class="inl">NULL</code> (which counts as "not matched"). So Frank's <code class="inl">NULL</code> dept_id will <em>never</em> join to anything, even another <code class="inl">NULL</code>. That is why he drops from every inner join. To test for absence you must use <code class="inl">IS NULL</code>, never <code class="inl">= NULL</code>. Whenever a join returns fewer rows than you expect, a <code class="inl">NULL</code> in the key column is the prime suspect.</p></div>
+
+      <div class="grid three">
+        <div class="card"><div class="ico sage"><svg><use href="#i-key"/></svg></div>
+          <h4>Need the matches</h4>
+          <p>Use <code class="inl">INNER JOIN</code>. Both sides must have a partner.</p></div>
+        <div class="card"><div class="ico grey"><svg><use href="#i-arrow"/></svg></div>
+          <h4>Need all of one side</h4>
+          <p>Use <code class="inl">LEFT JOIN</code> and protect the table you cannot afford to lose.</p></div>
+        <div class="card"><div class="ico taupe"><svg><use href="#i-null"/></svg></div>
+          <h4>Need the absences</h4>
+          <p>Use <code class="inl">LEFT JOIN ... WHERE other.key IS NULL</code>, the anti-join.</p></div>
+      </div>
+    </section>
+
+    <!-- 9. HANDS-ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">9</span><div class="htext"><span class="kicker">Section 09 · Practice</span><h2>Hands-on, do this now</h2></div></div>
+      <p>Sit in Maya's chair. Build the same <code class="inl">departments</code> and <code class="inl">employees</code> tables (include dept 40 Operations with no staff, and Frank with a <code class="inl">NULL</code> dept_id). Before running each query, predict how many rows come back and which of Frank or Operations survives. The gap between your guess and the result is the lesson.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Write the <code class="inl">INNER JOIN</code> of employees and departments. Confirm it returns 5 rows and explain why Frank and Operations are both absent.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Change it to a <code class="inl">LEFT JOIN</code>. Verify Frank reappears with a <code class="inl">NULL</code> department, for 6 rows total.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Swap to a <code class="inl">RIGHT JOIN</code>, then a <code class="inl">FULL OUTER JOIN</code>. Note exactly which of Frank and Operations shows up in each.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find every employee with no department using <code class="inl">LEFT JOIN ... WHERE d.dept_id IS NULL</code>. You should get just Frank.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Find every department with no employees (an anti-join). You should get just Operations.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Add a <code class="inl">manager_id</code> column, point a few employees at a manager, and self-join the table to list each person beside their manager's name. Use a <code class="inl">LEFT JOIN</code> so the top boss is not dropped.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Take your <code class="inl">LEFT JOIN</code> and add <code class="inl">WHERE d.dept_name = 'Sales'</code>. Watch it silently behave like an inner join, then fix it by moving that condition into the <code class="inl">ON</code> clause.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Write a <code class="inl">CROSS JOIN</code> of employees against two shift values and confirm the row count is exactly employees &times; 2.</li>
+      </ul>
+
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">The one sentence to remember</span>
+        <p>A join answers Maya's recurring question: <strong>"for each row in table A, which rows in table B share a matching key, and what do I do with the rows that match nothing?"</strong> Every join type is just a different answer to that second half. Work through this checklist, then move on to Module 02, Aggregation, where you start summarizing these joined rows into counts and totals.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--accent);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://www.postgresql.org/docs/current/tutorial-join.html" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Table joins · PostgreSQL tutorial</a>
+        <a class="reflink" href="https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-JOIN" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Joined tables · PostgreSQL reference</a>
+        <a class="reflink" href="https://use-the-index-luke.com/sql/join" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Joins &amp; performance · Use The Index, Luke</a>
+      </div>
+
+      <div class="next">
+        <a href="../00-foundations/00-foundations.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 00 · Foundations</b></span></a>
+        <a href="../02-aggregation/02-aggregation.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 02 · Aggregation</b></span></a>
+      </div>
+      <div class="next">
+        <a href="../../index.html"><small>↑ Course home</small><span class="nx"><svg><use href="#i-book"/></svg><b>SQL Course · all modules</b></span></a>
+      </div>
+      <p class="endline">SQL L3 Track · Module 01 · built for visual, eye-easy reading. Trace each join on paper, finish the hands-on checklist, then move on to Module 02, Aggregation.</p>
     </footer>
 
   </main>

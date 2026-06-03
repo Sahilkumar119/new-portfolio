@@ -47,11 +47,23 @@ const useStyles = makeStyles((theme) => ({
     WebkitMaskPosition: "center",
     WebkitMaskSize: "contain",
   },
+  // Full-colour artwork (e.g. Tux): painted straight, no accent mask.
+  logoFull: {
+    width: "100%",
+    height: "100%",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    backgroundSize: "contain",
+  },
 }), { name: "CourseVisual" });
 
 export const CourseVisual = ({ course }) => {
   const classes = useStyles();
   const reduce = useReducedMotion();
+
+  // Some logos ship as full-colour art (Tux). Those render as a plain image so
+  // their real colours survive; the rest are tinted to the accent via mask.
+  const full = Boolean(course.fullColor);
 
   return (
     <div className={classes.stage} aria-hidden="true">
@@ -59,12 +71,16 @@ export const CourseVisual = ({ course }) => {
       <AnimatePresence mode="wait">
         <motion.div
           key={course.slug}
-          className={classes.logo}
-          style={{
-            backgroundColor: course.accent,
-            maskImage: `url(${course.logo})`,
-            WebkitMaskImage: `url(${course.logo})`,
-          }}
+          className={full ? classes.logoFull : classes.logo}
+          style={
+            full
+              ? { backgroundImage: `url(${course.logo})` }
+              : {
+                  backgroundColor: course.accent,
+                  maskImage: `url(${course.logo})`,
+                  WebkitMaskImage: `url(${course.logo})`,
+                }
+          }
           initial={reduce ? { opacity: 0 } : { opacity: 0, x: 70 }}
           animate={reduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
           exit={reduce ? { opacity: 0 } : { opacity: 0, x: -50 }}

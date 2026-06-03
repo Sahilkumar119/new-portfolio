@@ -47,6 +47,7 @@ export const COURSES = [
     status: "live",
     href: "/learn/linux/",
     logo: "/images/learn/linux.svg",
+    fullColor: true,
   },
   {
     slug: "kubernetes",

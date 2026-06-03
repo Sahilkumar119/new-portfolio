@@ -21,7 +21,7 @@ export const COURSES = [
     blurb:
       "Containers from first principles — images, Dockerfiles, volumes, networking, Compose, registries, and security. Eight hands-on modules.",
     status: "live",
-    href: "/learn/docker/",
+    href: "/learn/docker",
     logo: "/images/learn/docker.svg",
   },
   {
@@ -33,7 +33,7 @@ export const COURSES = [
     blurb:
       "Query data like you mean it — joins, aggregation, subqueries and CTEs, window functions, and the indexing intuition behind fast queries. Six hands-on modules.",
     status: "live",
-    href: "/learn/sql/",
+    href: "/learn/sql",
     logo: "/images/learn/sql.svg",
   },
   {
@@ -45,7 +45,7 @@ export const COURSES = [
     blurb:
       "Live in the terminal — navigating the filesystem, finding things, permissions, processes, packages, networking, services, and the shell. One field guide, eleven sections.",
     status: "live",
-    href: "/learn/linux/",
+    href: "/learn/linux",
     logo: "/images/learn/linux.svg",
     fullColor: true,
   },

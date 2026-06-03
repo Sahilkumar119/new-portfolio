@@ -4,6 +4,19 @@
   },
   "buildCommand": "npm run build",
   "outputDirectory": "build",
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/learn/sql/modules/:slug/:file",
+      "destination": "/learn/sql/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/learn/sql/modules/:slug",
+      "destination": "/learn/sql/:slug",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

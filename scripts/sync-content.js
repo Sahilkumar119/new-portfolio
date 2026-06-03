@@ -137,7 +137,7 @@ const generateSitemap = (blogs) => {
   xml += `    <priority>0.9</priority>\n`;
   xml += `  </url>\n`;
   xml += `  <url>\n`;
-  xml += `    <loc>${baseUrl}/learn/docker/</loc>\n`;
+  xml += `    <loc>${baseUrl}/learn/docker</loc>\n`;
   xml += `    <lastmod>${today}</lastmod>\n`;
   xml += `    <changefreq>monthly</changefreq>\n`;
   xml += `    <priority>0.8</priority>\n`;
@@ -145,7 +145,7 @@ const generateSitemap = (blogs) => {
   for (let i = 0; i <= 7; i++) {
     const mod = String(i).padStart(2, '0');
     xml += `  <url>\n`;
-    xml += `    <loc>${baseUrl}/learn/docker/module-${mod}.html</loc>\n`;
+    xml += `    <loc>${baseUrl}/learn/docker/module-${mod}</loc>\n`;
     xml += `    <lastmod>${today}</lastmod>\n`;
     xml += `    <changefreq>monthly</changefreq>\n`;
     xml += `    <priority>0.6</priority>\n`;
@@ -154,7 +154,7 @@ const generateSitemap = (blogs) => {
 
   // Static SQL course (served straight from public/, nested module layout)
   xml += `  <url>\n`;
-  xml += `    <loc>${baseUrl}/learn/sql/</loc>\n`;
+  xml += `    <loc>${baseUrl}/learn/sql</loc>\n`;
   xml += `    <lastmod>${today}</lastmod>\n`;
   xml += `    <changefreq>monthly</changefreq>\n`;
   xml += `    <priority>0.8</priority>\n`;
@@ -169,7 +169,7 @@ const generateSitemap = (blogs) => {
   ];
   sqlModules.forEach((mod) => {
     xml += `  <url>\n`;
-    xml += `    <loc>${baseUrl}/learn/sql/modules/${mod}/${mod}.html</loc>\n`;
+    xml += `    <loc>${baseUrl}/learn/sql/${mod}</loc>\n`;
     xml += `    <lastmod>${today}</lastmod>\n`;
     xml += `    <changefreq>monthly</changefreq>\n`;
     xml += `    <priority>0.6</priority>\n`;
@@ -178,7 +178,7 @@ const generateSitemap = (blogs) => {
 
   // Static Linux course (single-page field guide, served straight from public/)
   xml += `  <url>\n`;
-  xml += `    <loc>${baseUrl}/learn/linux/</loc>\n`;
+  xml += `    <loc>${baseUrl}/learn/linux</loc>\n`;
   xml += `    <lastmod>${today}</lastmod>\n`;
   xml += `    <changefreq>monthly</changefreq>\n`;
   xml += `    <priority>0.8</priority>\n`;

@@ -176,6 +176,14 @@ const generateSitemap = (blogs) => {
     xml += `  </url>\n`;
   });
 
+  // Static Linux course (single-page field guide, served straight from public/)
+  xml += `  <url>\n`;
+  xml += `    <loc>${baseUrl}/learn/linux/</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>monthly</changefreq>\n`;
+  xml += `    <priority>0.8</priority>\n`;
+  xml += `  </url>\n`;
+
   // Blog pages
   blogs.forEach((blog) => {
     const blogUrl = `${baseUrl}/blog/${blog.slug}`;

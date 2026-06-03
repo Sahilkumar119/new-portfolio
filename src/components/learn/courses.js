@@ -37,6 +37,18 @@ export const COURSES = [
     logo: "/images/learn/sql.svg",
   },
   {
+    slug: "linux",
+    name: "Linux",
+    accent: "#1E66F5",
+    tint: "#e8f0ff",
+    text: "#0a1733",
+    blurb:
+      "Live in the terminal — navigating the filesystem, finding things, permissions, processes, packages, networking, services, and the shell. One field guide, eleven sections.",
+    status: "live",
+    href: "/learn/linux/",
+    logo: "/images/learn/linux.svg",
+  },
+  {
     slug: "kubernetes",
     name: "Kubernetes",
     accent: "#326CE5",

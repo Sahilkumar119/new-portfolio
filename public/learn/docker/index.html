@@ -15,289 +15,328 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Course","name":"Docker from Scratch","description":"Eight hands-on modules that build a real mental model of Docker: containers, images, Dockerfiles, volumes, networking, Compose, registries, and security.","url":"https://sahilkumar.dev/learn/docker/","inLanguage":"en","provider":{"@type":"Person","name":"Sahil Kumar","url":"https://sahilkumar.dev"},"hasCourseInstance":{"@type":"CourseInstance","courseMode":"online","courseWorkload":"PT10H"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0F172A; --surface:#131c30; --surface-2:#1b2740; --muted:#272F42;
-    --line:#2c3a52; --line-soft:#222d44;
-    --fg:#F8FAFC; --fg-dim:#aab6c8; --fg-faint:#7e8ba1;
-    --primary:#cbd5e1; --accent:#2496ED; --accent-dim:#1b6fc0;
-    --blue:#60a5fa; --violet:#a78bfa; --cyan:#22d3ee; --amber:#fbbf24; --red:#f87171;
-    --code:#0a1120; --radius:14px;
+    --paper:#f4f0e6; --paper-2:#ece5d6; --paper-3:#e2dac6;
+    --ink:#1b1815; --ink-2:#403930; --ink-3:#6e6556;
+    --rule:#1b1815; --rule-soft:#c8bda6;
+    --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --serif:"Playfair Display",Georgia,"Times New Roman",serif;
     --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    --shadow-1:0 1px 2px rgba(0,0,0,.4); --shadow-2:0 8px 30px rgba(0,0,0,.35);
-    --ease:cubic-bezier(.16,1,.3,1);
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
-    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
-    font-feature-settings:"cv05","ss01"}
-  a{color:var(--blue);text-decoration:none;transition:color .18s var(--ease)}
-  a:hover{color:#93c5fd}
-  ::selection{background:rgba(36,150,237,.28)}
-  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--mono);
+    font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:.05;mix-blend-mode:multiply}
+  a{color:var(--ink);text-decoration:none}
+  ::selection{background:var(--ink);color:var(--paper)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
-  /* ── decorative background glow ── */
-  .bg-glow{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-  .bg-glow span{position:absolute;border-radius:50%;filter:blur(120px);opacity:.13}
-  .bg-glow .g1{width:540px;height:540px;background:#0ea5e9;top:-180px;left:-120px}
-  .bg-glow .g2{width:480px;height:480px;background:#2496ed;top:120px;right:-160px}
-  .bg-glow .g3{width:420px;height:420px;background:#a78bfa;bottom:-200px;left:40%}
+  /* ── page frame ── */
+  .page{position:relative;z-index:1;max-width:1180px;margin:22px auto;background:var(--paper);
+    border:1.5px solid var(--ink);padding:0}
+  @media(max-width:640px){.page{margin:0;border-left:none;border-right:none}}
 
-  /* ── top bar ── */
-  .topbar{position:sticky;top:0;z-index:100;background:rgba(15,23,42,.82);
-    backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
-  .topbar .inner{max-width:1100px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
-  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
-    background:linear-gradient(135deg,#0ea5e9,#2496ed);color:#ffffff}
-  .brand .crumb{color:var(--fg-faint);font-weight:400}
-  .topbar .spacer{flex:1}
-  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);
-    border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
-  .pill b{color:var(--accent)}
-  @media(max-width:680px){.pill.hideSm{display:none}}
-
-  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
-
-  /* ── hero ── */
-  .hero{padding:64px 0 40px;text-align:center}
-  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
-    background:rgba(36,150,237,.08);border:1px solid rgba(36,150,237,.25);padding:6px 13px;border-radius:999px}
-  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(36,150,237,.2)}
-  h1{font-size:clamp(34px,6vw,60px);line-height:1.08;margin:22px 0 16px;letter-spacing:-.03em;font-weight:700}
-  h1 .grad{background:linear-gradient(95deg,#7dd3fc,#a78bfa 55%,#22d3ee);
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .lede{color:var(--fg-dim);font-size:18.5px;max-width:64ch;margin:0 auto}
-  .lede em{color:var(--fg);font-style:normal;font-weight:500}
-  .meta{display:flex;flex-wrap:wrap;gap:9px;margin:28px 0 0;justify-content:center}
-  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
-    background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
-  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
-  .chip b{color:var(--accent);font-family:var(--mono)}
-  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
-  .btn{display:inline-flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;
-    padding:12px 22px;border-radius:12px;border:1px solid transparent;transition:all .2s var(--ease)}
-  .btn svg{width:17px;height:17px}
-  .btn.primary{background:linear-gradient(135deg,#5aa9f2,#2496ed);color:#ffffff;box-shadow:var(--shadow-1)}
-  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(36,150,237,.3);color:#ffffff}
-  .btn.ghost{background:var(--surface);border-color:var(--line);color:var(--fg)}
-  .btn.ghost:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-2px)}
-
-  /* ── section label ── */
-  .seclabel{display:flex;align-items:center;gap:14px;margin:56px 0 22px}
-  .seclabel h2{font-size:22px;margin:0;font-weight:650;letter-spacing:-.015em;white-space:nowrap}
-  .seclabel .rule{flex:1;height:1px;background:var(--line-soft)}
-  .seclabel .count{font-family:var(--mono);font-size:12px;color:var(--fg-faint);
-    border:1px solid var(--line);border-radius:999px;padding:4px 11px}
-
-  /* ── module grid ── */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
-  .modcard{position:relative;display:flex;flex-direction:column;gap:12px;
-    background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;
-    transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease);overflow:hidden}
-  .modcard::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
-    background:linear-gradient(90deg,var(--accent),var(--cyan));transform:scaleX(0);transform-origin:left;
-    transition:transform .3s var(--ease)}
-  .modcard:hover{transform:translateY(-4px);border-color:rgba(36,150,237,.4);box-shadow:var(--shadow-2)}
-  .modcard:hover::before{transform:scaleX(1)}
-  .modcard .top{display:flex;align-items:center;gap:13px}
-  .modcard .num{font-family:var(--mono);font-size:14px;color:#ffffff;font-weight:700;
-    width:40px;height:40px;display:grid;place-items:center;border-radius:11px;flex:none;
-    background:linear-gradient(135deg,#5aa9f2,#2496ed);box-shadow:var(--shadow-1)}
-  .modcard .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:none;
-    background:var(--muted);margin-left:auto}
-  .modcard .ico svg{width:20px;height:20px;color:var(--fg-dim)}
-  .modcard h3{margin:2px 0 0;font-size:17px;font-weight:600;color:var(--fg);line-height:1.3}
-  .modcard p{margin:0;font-size:14px;color:var(--fg-dim);flex:1}
-  .modcard .foot{display:flex;align-items:center;gap:8px;margin-top:4px}
-  .modcard .tag{font-family:var(--mono);font-size:11px;color:var(--fg-faint);
-    background:var(--code);border:1px solid var(--line-soft);border-radius:7px;padding:3px 9px}
-  .modcard .go{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;
-    font-weight:600;color:var(--accent);font-family:var(--mono)}
-  .modcard .go svg{width:14px;height:14px;transition:transform .2s var(--ease)}
-  .modcard:hover .go svg{transform:translateX(3px)}
-
-  /* ── path note ── */
-  .note{position:relative;border:1px solid var(--line);background:var(--surface);
-    padding:16px 18px 16px 50px;border-radius:13px;margin:30px 0}
-  .note .ic{position:absolute;left:16px;top:17px;width:20px;height:20px;color:var(--blue)}
-  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--fg-faint);display:block;margin-bottom:4px}
-  .note p{margin:0;color:var(--fg-dim);font-size:14.5px}
-  .note p b{color:var(--fg)}
-
-  /* ── footer ── */
-  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding:34px 0 60px;color:var(--fg-faint);font-size:13.5px}
-  footer .inner{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
-  footer .refs{display:flex;flex-wrap:wrap;gap:8px}
-  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
-    background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;transition:all .18s var(--ease)}
-  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
-  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
-  .reflink:hover svg{color:var(--accent)}
-
-  @media(prefers-reduced-motion:reduce){
-    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
-    .modcard:hover,.btn:hover,.reflink:hover{transform:none}
+  /* ── masthead ── */
+  .masthead{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    border-bottom:1px solid var(--ink)}
+  .mh-side{padding:14px 22px;font-family:var(--display);font-weight:600;font-size:11px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);line-height:1.5}
+  .mh-side.r{text-align:right}
+  .mh-side .em{display:block;color:var(--ink);font-weight:800}
+  .nameplate{text-align:center;padding:18px 26px;border-left:1px solid var(--ink);border-right:1px solid var(--ink)}
+  .nameplate .logo{display:inline-flex;margin-bottom:4px;color:var(--ink)}
+  .nameplate .logo svg{width:34px;height:34px}
+  .nameplate h1{margin:0;font-family:var(--display);font-weight:900;font-size:clamp(38px,9vw,78px);
+    letter-spacing:.02em;line-height:.92;text-transform:uppercase}
+  .nameplate .sub{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--ink-2)}
+  @media(max-width:760px){
+    .masthead{grid-template-columns:1fr}
+    .mh-side,.mh-side.r{text-align:center;border-top:1px solid var(--rule-soft);order:2}
+    .nameplate{border:none;order:1}
   }
+
+  /* ── nav rule ── */
+  .navrule{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:4px double var(--ink)}
+  .navrule a,.navrule span{padding:11px 16px;text-align:center;font-family:var(--display);font-weight:700;
+    font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);
+    border-right:1px solid var(--ink)}
+  .navrule a:last-child,.navrule span:last-child{border-right:none}
+  .navrule a:hover{background:var(--ink);color:var(--paper)}
+  @media(max-width:640px){.navrule{grid-template-columns:repeat(2,1fr)}
+    .navrule a:nth-child(2){border-right:none}.navrule a:nth-child(1),.navrule a:nth-child(2){border-bottom:1px solid var(--ink)}}
+
+  .body-pad{padding:30px 30px 8px}
+  @media(max-width:640px){.body-pad{padding:22px 18px 8px}}
+
+  /* ── lead story ── */
+  .lead{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center;
+    border-bottom:3px double var(--ink);padding-bottom:30px;margin-bottom:8px}
+  @media(max-width:820px){.lead{grid-template-columns:1fr;gap:18px}}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-2);border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:14px;
+    display:flex;justify-content:space-between;gap:10px}
+  .lead h2{font-family:var(--serif);font-weight:900;font-size:clamp(34px,5.4vw,58px);line-height:1;
+    margin:0 0 16px;letter-spacing:-.01em}
+  .lead h2 em{font-style:italic}
+  .deck{font-family:var(--mono);font-size:14px;color:var(--ink-2);line-height:1.7;margin:0 0 18px;max-width:54ch}
+  .deck b{color:var(--ink);font-weight:700}
+  .byline{font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);margin:0 0 20px}
+  .cta{display:flex;gap:0;flex-wrap:wrap;border:1.5px solid var(--ink);width:fit-content;max-width:100%}
+  .cta a{display:inline-flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;
+    font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:13px 20px}
+  .cta a svg{width:16px;height:16px}
+  .cta a.primary{background:var(--ink);color:var(--paper)}
+  .cta a.primary:hover{background:var(--ink-2)}
+  .cta a.ghost{border-left:1.5px solid var(--ink)}
+  .cta a.ghost:hover{background:var(--paper-3)}
+  @media(max-width:420px){.cta{width:100%}.cta a{flex:1;justify-content:center}.cta a.ghost{border-top:1.5px solid var(--ink);border-left:none;flex-basis:100%}}
+  .lead .art{border:1px solid var(--ink);background:var(--paper-2);padding:18px;text-align:center}
+  .lead .art svg{width:100%;height:auto;max-height:280px;color:var(--ink)}
+  .lead .art .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);margin-top:12px;border-top:1px solid var(--rule-soft);padding-top:9px}
+
+  /* ── section divider ── */
+  .sectitle{display:flex;align-items:center;gap:16px;margin:30px 0 18px}
+  .sectitle h3{font-family:var(--serif);font-weight:800;font-size:26px;margin:0;white-space:nowrap}
+  .sectitle .ln{flex:1;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);height:5px}
+  .sectitle .ct{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-2);border:1px solid var(--ink);padding:4px 11px}
+
+  /* ── module columns ── */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);border-left:1px solid var(--ink)}
+  @media(max-width:840px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:540px){.grid{grid-template-columns:1fr}}
+  .col{position:relative;display:flex;flex-direction:column;gap:9px;padding:20px;
+    border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper)}
+  .col:hover{background:var(--paper-2)}
+  .col .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    border-bottom:1px solid var(--rule-soft);padding-bottom:9px}
+  .col .no{font-family:var(--display);font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+  .col .day{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .col h4{font-family:var(--serif);font-weight:800;font-size:21px;line-height:1.08;margin:2px 0 0}
+  .col p{font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink-2);margin:0;flex:1}
+  .col .go{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin-top:2px}
+  .col .go svg{width:14px;height:14px;transition:transform .15s ease}
+  .col:hover .go svg{transform:translateX(3px)}
+
+  /* ── editor's note ── */
+  .note{border:1px solid var(--ink);background:var(--paper-2);padding:18px 20px;margin:26px 0 4px;
+    position:relative}
+  .note .tag{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:9px;margin-bottom:8px;
+    border-bottom:1px solid var(--rule-soft);padding-bottom:8px}
+  .note .tag svg{width:16px;height:16px}
+  .note p{font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--ink-2);margin:0}
+  .note p b{color:var(--ink);font-weight:700}
+
+  /* ── colophon ── */
+  footer{border-top:4px double var(--ink);margin-top:30px;padding:18px 30px 26px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  footer .col-l{font-family:var(--display);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+  footer .col-l b{color:var(--ink);font-weight:800;font-size:14px;letter-spacing:.02em;display:block;margin-bottom:3px}
+  footer .refs{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--ink)}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;
+    color:var(--ink);padding:9px 13px;border-right:1px solid var(--ink)}
+  .reflink:last-child{border-right:none}
+  .reflink:hover{background:var(--ink);color:var(--paper)}
+  .reflink svg{width:13px;height:13px}
+  @media(max-width:640px){footer{padding:16px 18px 22px}}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.col:hover .go svg{transform:none}}
 </style>
 </head>
 <body>
-<div class="bg-glow" aria-hidden="true"><span class="g1"></span><span class="g2"></span><span class="g3"></span></div>
 
 <!-- ░░ icon sprite (Lucide-style) ░░ -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-whale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c2 2 4 2 6 0"/><path d="M9 13c2 2 4 2 6 0"/><path d="M15 13c2 2 4 2 6 0"/><path d="M3 17c2 2 4 2 6 0 2 2 4 2 6 0 2 2 4 2 6 0"/><path d="M12 4v5"/></symbol>
-  <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></symbol>
-  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
-  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13h6M9 17h6"/></symbol>
-  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
-  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
-  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
-  <symbol id="i-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 7 7 0 0 0-13.6 1.5A4 4 0 0 0 5 19Z"/></symbol>
-  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></symbol>
-  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
-  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
-  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
   <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
-  <symbol id="i-github" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 1 5 1 5 1c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 8c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
 </svg>
 
-<!-- ░░ top bar ░░ -->
-<header class="topbar">
-  <div class="inner">
-    <a class="pill" href="/learn" style="text-decoration:none;margin-right:6px">&larr; Learn</a>
-    <div class="brand">
-      <span class="logo"><svg width="17" height="17"><use href="#i-whale"/></svg></span>
-      <span class="crumb"><b style="color:var(--fg)">Docker from Scratch</b></span>
+<div class="page">
+
+  <!-- ░░ masthead ░░ -->
+  <header class="masthead">
+    <div class="mh-side">
+      <span class="em" id="md-date">A Hands-On Field Guide</span>
+      Sahil Kumar · Learn
     </div>
-    <span class="spacer"></span>
-    <span class="pill hideSm">8 modules</span>
-    <span class="pill"><b>~10h</b> · hands-on</span>
-  </div>
-</header>
-
-<div class="wrap">
-
-  <!-- ░░ hero ░░ -->
-  <section class="hero">
-    <span class="eyebrow"><span class="dot"></span>A hands-on course</span>
-    <h1>Learn <span class="grad">Docker</span><br>from first principles</h1>
-    <p class="lede">Not a flag-memorisation tutorial. Eight modules that build a real mental model:
-      <em>what a container actually is</em>, how images are layered, and how to run, network, store, ship,
-      and secure them. Every module is hands-on: you run the commands yourself.</p>
-    <div class="meta">
-      <span class="chip"><svg><use href="#i-clock"/></svg>~<b>10h</b> total</span>
-      <span class="chip"><svg><use href="#i-target"/></svg>beginner → confident</span>
-      <span class="chip"><svg><use href="#i-flask"/></svg>hands-on every module</span>
-      <span class="chip"><svg><use href="#i-whale"/></svg>Docker 29.x</span>
+    <div class="nameplate">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c2 2 4 2 6 0"/><path d="M9 13c2 2 4 2 6 0"/><path d="M15 13c2 2 4 2 6 0"/><path d="M3 17c2 2 4 2 6 0 2 2 4 2 6 0 2 2 4 2 6 0"/><path d="M12 4v5"/></svg></span>
+      <h1>Docker</h1>
+      <p class="sub">From Scratch &middot; The Field Guide</p>
     </div>
-    <div class="cta">
-      <a class="btn primary" href="/learn/docker/module-00"><svg><use href="#i-arrow"/></svg>Start with Module 00</a>
-      <a class="btn ghost" href="/learn/docker/module-01"><svg><use href="#i-box"/></svg>Already know the basics? Jump to 01</a>
+    <div class="mh-side r">
+      <span class="em">8 Modules</span>
+      ~10 Hours &middot; Docker 29.x
     </div>
-  </section>
+  </header>
 
-  <!-- ░░ module grid ░░ -->
-  <div class="seclabel">
-    <h2>The modules</h2>
-    <span class="rule"></span>
-    <span class="count">00 → 07</span>
+  <!-- ░░ nav rule ░░ -->
+  <nav class="navrule">
+    <a href="/learn">&larr; All Courses</a>
+    <a href="/learn/docker/module-00">Start Here</a>
+    <a href="#modules">The Modules</a>
+    <a href="https://docs.docker.com/" target="_blank" rel="noopener">Reference</a>
+  </nav>
+
+  <div class="body-pad">
+
+    <!-- ░░ lead story ░░ -->
+    <section class="lead">
+      <div class="story">
+        <div class="kicker"><span>A Hands-On Course</span><span>No. 00 &mdash; 07</span></div>
+        <h2>From the docks, <em>straight to your shell</em></h2>
+        <p class="deck">Not a flag-memorisation tutorial. Eight modules that build a real mental model:
+          <b>what a container actually is</b>, how images are layered, and how to run, network, store,
+          ship, and secure them. Every module is hands-on &mdash; you run the commands yourself and
+          predict the output before you hit enter.</p>
+        <p class="byline">Beginner &rarr; Confident &middot; Hands-On Every Module</p>
+        <div class="cta">
+          <a class="primary" href="/learn/docker/module-00"><svg><use href="#i-arrow"/></svg>Start with Module 00</a>
+          <a class="ghost" href="/learn/docker/module-01"><svg><use href="#i-box"/></svg>Know the basics? Skip to 01</a>
+        </div>
+      </div>
+      <figure class="art">
+        <svg viewBox="0 0 320 220" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-label="Engraving of a whale carrying shipping containers">
+          <!-- sea -->
+          <path d="M6 168c18 8 30-6 48 0s30 8 48 2 30-10 48-4 30 8 48 2 30-10 48-4" stroke-width="1.4" opacity=".7"/>
+          <path d="M6 182c18 8 30-6 48 0s30 8 48 2 30-10 48-4 30 8 48 2 30-10 48-4" stroke-width="1.2" opacity=".5"/>
+          <!-- whale body -->
+          <path d="M52 132c-12-30 6-66 44-74 44-9 92 6 120 30 12 10 24 14 40 12-8 14-22 20-36 20 6 12 4 26-4 36" stroke-width="2.2"/>
+          <path d="M52 132c14 16 40 26 72 26 40 0 74-16 88-38" stroke-width="2.2"/>
+          <!-- tail -->
+          <path d="M52 132c-14-2-28 4-40-6 8 16 4 30-6 40 18 4 34-4 46-18" stroke-width="2.2"/>
+          <!-- eye -->
+          <circle cx="92" cy="96" r="3.4" fill="currentColor" stroke="none"/>
+          <!-- mouth line -->
+          <path d="M60 118c14 6 30 8 44 6" stroke-width="1.3" opacity=".8"/>
+          <!-- spout -->
+          <path d="M150 56c-2-12 2-22 8-30M150 56c4-10 12-16 22-18M150 56c0-14-4-24-12-30" stroke-width="1.5" opacity=".85"/>
+          <!-- container stack on back -->
+          <rect x="150" y="74" width="30" height="20" stroke-width="2"/><path d="M150 84h30" stroke-width="1.1" opacity=".7"/>
+          <rect x="182" y="74" width="30" height="20" stroke-width="2"/><path d="M182 84h30" stroke-width="1.1" opacity=".7"/>
+          <rect x="166" y="52" width="30" height="20" stroke-width="2"/><path d="M166 62h30" stroke-width="1.1" opacity=".7"/>
+          <!-- hatching on flank -->
+          <path d="M70 138l10 10M84 140l9 9M98 141l9 9M112 141l9 9" stroke-width="1" opacity=".45"/>
+        </svg>
+        <figcaption class="cap">Moby &middot; carrier of containers, est. 2013</figcaption>
+      </figure>
+    </section>
+
+    <!-- ░░ the modules ░░ -->
+    <div class="sectitle" id="modules">
+      <h3>The Modules</h3>
+      <span class="ln"></span>
+      <span class="ct">00 &rarr; 07</span>
+    </div>
+
+    <div class="grid">
+
+      <a class="col" href="/learn/docker/module-00">
+        <div class="top"><span class="no">No. 00</span><span class="day">Day 0</span></div>
+        <h4>Foundations</h4>
+        <p>What a container really is: namespaces, cgroups, the copy-on-write filesystem, images vs containers, and Docker's architecture end to end.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-01">
+        <div class="top"><span class="no">No. 01</span><span class="day">Day 1</span></div>
+        <h4>Images &amp; Containers</h4>
+        <p>The container lifecycle and the dozen CLI commands you'll type every working day, including run, exec, logs, inspect, and friends.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-02">
+        <div class="top"><span class="no">No. 02</span><span class="day">Day 2</span></div>
+        <h4>Dockerfiles</h4>
+        <p>Build your own images: the core instructions, how layers and the build cache work, and the habits that separate a clean image from a bloated one.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-03">
+        <div class="top"><span class="no">No. 03</span><span class="day">Day 3</span></div>
+        <h4>Volumes &amp; Storage</h4>
+        <p>Persist data beyond the container's lifetime (named volumes, bind mounts, and tmpfs) and how to run a database without losing your data.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-04">
+        <div class="top"><span class="no">No. 04</span><span class="day">Day 4</span></div>
+        <h4>Networking</h4>
+        <p>Connect containers together: bridge networks, built-in DNS, port publishing, and why containers on the same network find each other by name.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-05">
+        <div class="top"><span class="no">No. 05</span><span class="day">Day 5</span></div>
+        <h4>Compose</h4>
+        <p>Define and run multi-service apps from a single YAML file: services, networks, volumes, and dependencies, all brought up with one command.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-06">
+        <div class="top"><span class="no">No. 06</span><span class="day">Day 6</span></div>
+        <h4>Registries</h4>
+        <p>Distribute images: push and pull, tags vs digests, public and private registries, and how to make your builds reproducible.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+      <a class="col" href="/learn/docker/module-07">
+        <div class="top"><span class="no">No. 07</span><span class="day">Day 7</span></div>
+        <h4>Security</h4>
+        <p>Harden the whole stack: least privilege, non-root containers, image scanning for CVEs, and the supply-chain basics every production setup needs.</p>
+        <span class="go">Read on &rarr;<svg><use href="#i-arrow"/></svg></span>
+      </a>
+
+    </div>
+
+    <!-- ░░ editor's note ░░ -->
+    <div class="note">
+      <span class="tag"><svg><use href="#i-book"/></svg>How to read this course</span>
+      <p>Work through the modules <b>in order</b> &mdash; each builds on the last. Reading is not enough:
+        Docker is muscle memory, so run every command yourself and predict the output before you hit enter.
+        Complete beginners start at <b>Module 00</b>; if you already know what a container is, jump straight to <b>Module 01</b>.</p>
+    </div>
+
   </div>
 
-  <div class="grid">
-
-    <a class="modcard" href="/learn/docker/module-00">
-      <div class="top"><span class="num">00</span>
-        <span class="ico"><svg><use href="#i-cpu"/></svg></span></div>
-      <h3>Foundations</h3>
-      <p>What a container really is: namespaces, cgroups, the copy-on-write filesystem, images vs containers, and Docker's architecture end to end.</p>
-      <div class="foot"><span class="tag">Day 0</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-01">
-      <div class="top"><span class="num">01</span>
-        <span class="ico"><svg><use href="#i-box"/></svg></span></div>
-      <h3>Images &amp; Containers</h3>
-      <p>The container lifecycle and the dozen CLI commands you'll type every working day, including run, exec, logs, inspect, and friends.</p>
-      <div class="foot"><span class="tag">Day 1</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-02">
-      <div class="top"><span class="num">02</span>
-        <span class="ico"><svg><use href="#i-file"/></svg></span></div>
-      <h3>Dockerfiles</h3>
-      <p>Build your own images: the core instructions, how layers and the build cache work, and the habits that separate a clean image from a bloated one.</p>
-      <div class="foot"><span class="tag">Day 2</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-03">
-      <div class="top"><span class="num">03</span>
-        <span class="ico"><svg><use href="#i-db"/></svg></span></div>
-      <h3>Volumes &amp; Storage</h3>
-      <p>Persist data beyond the container's lifetime (named volumes, bind mounts, and tmpfs) and how to run a database without losing your data.</p>
-      <div class="foot"><span class="tag">Day 3</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-04">
-      <div class="top"><span class="num">04</span>
-        <span class="ico"><svg><use href="#i-route"/></svg></span></div>
-      <h3>Networking</h3>
-      <p>Connect containers together: bridge networks, built-in DNS, port publishing, and why containers on the same network find each other by name.</p>
-      <div class="foot"><span class="tag">Day 4</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-05">
-      <div class="top"><span class="num">05</span>
-        <span class="ico"><svg><use href="#i-layers"/></svg></span></div>
-      <h3>Compose</h3>
-      <p>Define and run multi-service apps from a single YAML file: services, networks, volumes, and dependencies, all brought up with one command.</p>
-      <div class="foot"><span class="tag">Day 5</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-06">
-      <div class="top"><span class="num">06</span>
-        <span class="ico"><svg><use href="#i-cloud"/></svg></span></div>
-      <h3>Registries</h3>
-      <p>Distribute images: push and pull, tags vs digests, public and private registries, and how to make your builds reproducible.</p>
-      <div class="foot"><span class="tag">Day 6</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-    <a class="modcard" href="/learn/docker/module-07">
-      <div class="top"><span class="num">07</span>
-        <span class="ico"><svg><use href="#i-shield"/></svg></span></div>
-      <h3>Security</h3>
-      <p>Harden the whole stack: least privilege, non-root containers, image scanning for CVEs, and the supply-chain basics every production setup needs.</p>
-      <div class="foot"><span class="tag">Day 7</span><span class="go">Open<svg><use href="#i-arrow"/></svg></span></div>
-    </a>
-
-  </div>
-
-  <div class="note">
-    <svg class="ic"><use href="#i-book"/></svg>
-    <span class="tag">How to use this course</span>
-    <p>Work through the modules <b>in order</b>. Each builds on the last. Reading is not enough:
-      Docker is muscle memory, so run every command yourself and predict the output before you hit enter.
-      Complete beginners start at <b>Module 00</b>; if you already know what a container is, jump straight to <b>Module 01</b>.</p>
-  </div>
+  <!-- ░░ colophon ░░ -->
+  <footer>
+    <div class="col-l">
+      <b>Docker from Scratch</b>
+      8 hands-on modules &middot; built for visual, from-zero learning
+    </div>
+    <div class="refs">
+      <a class="reflink" href="https://docs.docker.com/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Docker Docs</a>
+      <a class="reflink" href="https://docs.docker.com/get-started/docker_cheatsheet.pdf" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>CLI Cheat-Sheet</a>
+    </div>
+  </footer>
 
 </div>
 
-<footer>
-  <div class="wrap inner">
-    <span>Docker from Scratch · 8 hands-on modules · built for visual, from-zero learning.</span>
-    <div class="refs">
-      <a class="reflink" href="https://docs.docker.com/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Official Docker docs</a>
-      <a class="reflink" href="https://docs.docker.com/get-started/docker_cheatsheet.pdf" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>CLI cheat-sheet</a>
-    </div>
-  </div>
-</footer>
+<script>
+  /* fill the masthead with today's date, newspaper-style; static fallback stays if JS is off */
+  (function(){
+    try{
+      var d=new Date();
+      var s=d.toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      var el=document.getElementById('md-date');
+      if(el) el.textContent=s.toUpperCase();
+    }catch(e){}
+  })();
+</script>
 
 </body>
 </html>

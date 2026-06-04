@@ -1,0 +1,171 @@
+/* ============================================================
+   SEA HARVEST — vintage newspaper theme for the Docker course.
+   Shared override loaded after each page's original dark theme.
+   It repoints the legacy CSS variables to ink-on-cream and
+   restyles every component. `body`-prefixed selectors win on
+   specificity over the dark theme without needing !important.
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,700;0,800;0,900;1,500;1,700&display=swap");
+
+:root{
+  --paper:#f4f0e6; --paper-2:#ece5d6; --paper-3:#e2dac6;
+  --code-bg:#faf7ef;
+  --ink:#1b1815; --ink-2:#403930; --ink-3:#6e6556;
+  --rule:#1b1815; --rule-soft:#c8bda6;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --serif:"Playfair Display",Georgia,"Times New Roman",serif;
+  /* repoint legacy vars -> ink-on-cream so inline styles inherit the theme */
+  --bg:var(--paper); --surface:var(--paper-2); --surface-2:var(--paper-3); --muted:var(--paper-3);
+  --line:var(--rule); --line-soft:var(--rule-soft);
+  --fg:var(--ink); --fg-dim:var(--ink-2); --fg-faint:var(--ink-3); --primary:var(--ink);
+  --accent:var(--ink); --accent-dim:var(--ink-2);
+  --blue:var(--ink); --violet:var(--ink); --cyan:var(--ink); --amber:var(--ink); --red:var(--ink);
+  --code:var(--code-bg);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:var(--display);
+  --shadow-1:none; --shadow-2:none;
+}
+body{background:var(--paper);color:var(--ink);font-family:var(--mono);
+  font-size:15.5px;line-height:1.72;font-feature-settings:normal}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.05;mix-blend-mode:multiply}
+body a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+body a:hover{color:var(--ink);background:var(--paper-3)}
+::selection{background:var(--ink);color:var(--paper)}
+body :focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:0}
+body #progress{background:var(--ink)}
+
+/* -- masthead strip -- */
+body .topbar{background:var(--paper);backdrop-filter:none;border-bottom:3px double var(--ink)}
+body .pill{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);
+  background:var(--paper);border:1px solid var(--ink);border-radius:0}
+body .pill b{color:var(--ink);font-weight:700}
+body .brand{color:var(--ink)}
+body .brand .logo{background:var(--ink);color:var(--paper);border-radius:0;box-shadow:none}
+body .brand .crumb{color:var(--ink-3);font-family:var(--display);text-transform:uppercase;letter-spacing:.04em;font-size:12.5px}
+body .brand .crumb b{color:var(--ink);font-weight:800}
+
+/* -- contents sidebar -- */
+body aside .label{font-family:var(--display);color:var(--ink);letter-spacing:.16em;font-weight:700;
+  border-bottom:1px solid var(--ink);padding-bottom:8px;margin:0 12px 12px}
+body aside nav a{color:var(--ink-3);border-left:2px solid transparent;border-radius:0;font-family:var(--mono);font-size:13px}
+body aside nav a:hover{background:var(--paper-2);color:var(--ink)}
+body aside nav a.active{color:var(--ink);background:var(--paper-2);border-left-color:var(--ink);font-weight:700}
+body aside nav a.active .ti{color:var(--ink)}
+body aside .scrollmsg{color:var(--ink-3)}
+@media(max-width:1000px){
+  body aside{border-bottom:3px double var(--ink)}
+  body aside nav a{border:1px solid var(--ink);border-radius:0}
+  body aside nav a.active{border-color:var(--ink)}
+}
+
+/* -- hero -- */
+body .hero{border-bottom:3px double var(--ink)}
+body .eyebrow{font-family:var(--display);font-weight:700;color:var(--ink);background:var(--paper);
+  border:1px solid var(--ink);border-radius:0;letter-spacing:.16em}
+body .eyebrow .dot{background:var(--ink);border-radius:0;box-shadow:none;width:8px;height:8px}
+body h1{font-family:var(--serif);font-weight:900;color:var(--ink);letter-spacing:-.01em;line-height:1.04}
+body h1 .grad{background:none;-webkit-text-fill-color:var(--ink);color:var(--ink);font-style:italic}
+body .lede{color:var(--ink-2);font-family:var(--mono);font-size:16px}
+body .lede em{color:var(--ink);font-weight:700;font-style:normal}
+body .chip{color:var(--ink-2);background:var(--paper);border:1px solid var(--ink);border-radius:0;font-family:var(--mono)}
+body .chip svg{color:var(--ink)} body .chip b{color:var(--ink)}
+
+/* -- section heads -- */
+body .sec-head{border-top:3px double var(--ink);padding-top:18px;margin-top:52px}
+body .sec-head .num{font-family:var(--display);background:var(--ink);color:var(--paper);
+  border-radius:0;box-shadow:none;font-weight:800}
+body h2{font-family:var(--serif);font-weight:800;color:var(--ink);letter-spacing:0;line-height:1.1}
+body h3{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:20px}
+body p{color:var(--ink);max-width:68ch}
+body .sub{color:var(--ink-3)}
+
+/* -- callouts (differentiated by border + label, not colour) -- */
+body .note{background:var(--paper-2);border:1px solid var(--ink);border-radius:0;box-shadow:none}
+body .note .ic{color:var(--ink)}
+body .note .tag{font-family:var(--display);color:var(--ink);font-weight:700;letter-spacing:.14em}
+body .note.key{border-left:5px solid var(--ink)}
+body .note.warn{border:1px dashed var(--ink)}
+body .note.danger{border:3px double var(--ink)}
+body .note.info{border:1px solid var(--ink)}
+body .note.key .ic,body .note.key .tag,body .note.warn .ic,body .note.warn .tag,
+body .note.danger .ic,body .note.danger .tag,body .note.info .ic,body .note.info .tag{color:var(--ink)}
+
+/* -- code: ink on cream -- */
+body .codeblock{background:var(--code-bg);border:3px double var(--ink);border-radius:0;box-shadow:none}
+body .codeblock .bar{background:var(--paper-2);border-bottom:1px solid var(--ink)}
+body .codeblock .bar i{background:transparent;border:1px solid var(--ink);width:9px;height:9px}
+body .codeblock .bar .title{font-family:var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em}
+body .copybtn{color:var(--ink-2);background:var(--paper);border:1px solid var(--ink);border-radius:0}
+body .copybtn:hover,body .copybtn.done{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+body .codeblock code{color:var(--ink)}
+body .cmt{color:var(--ink-3);font-style:italic}
+body .cmd{color:var(--ink);font-weight:700}
+body .flag{color:var(--ink-2)}
+body .str{color:var(--ink)}
+body .out{color:var(--ink-3)}
+body .kw{color:var(--ink);font-weight:700}
+body code.inl{background:var(--paper-2);border:1px solid var(--rule-soft);border-radius:0;color:var(--ink)}
+
+/* -- tables -- */
+body .tablewrap{border:1px solid var(--ink);border-radius:0;box-shadow:none}
+body th{background:var(--ink);color:var(--paper);font-family:var(--display);letter-spacing:.08em}
+body td{border-bottom:1px solid var(--rule-soft)}
+body td code{color:var(--ink)}
+body tbody tr:hover{background:var(--paper-2)}
+
+/* -- concept cards -- */
+body .card{background:var(--paper-2);border:1px solid var(--ink);border-radius:0;box-shadow:none}
+body .card:hover{transform:none;border-color:var(--ink);background:var(--paper-3)}
+body .card .ico{background:var(--paper);border:1px solid var(--ink);border-radius:0}
+body .card .ico svg,body .ico.violet svg,body .ico.blue svg,body .ico.green svg,
+body .ico.amber svg,body .ico.cyan svg,body .ico.red svg{color:var(--ink)}
+body .card h4{font-family:var(--serif);font-weight:700;color:var(--ink)}
+body .card p{color:var(--ink-2)}
+
+/* -- flow diagram -- */
+body .life{background:var(--paper-2);border:1px solid var(--ink);border-radius:0;box-shadow:none}
+body .state{background:var(--paper);border-radius:0;box-shadow:none;color:var(--ink)}
+body .s-img,body .s-created,body .s-running,body .s-paused,body .s-stopped,body .s-removed{border-color:var(--ink);color:var(--ink)}
+body .s-running{background:var(--paper-3);box-shadow:none}
+body .arrow svg{color:var(--ink)} body .arrow b{color:var(--ink-2);font-family:var(--mono)}
+
+/* -- layer / cache stack -- */
+body .layer{border:1px solid var(--ink);border-radius:0;background:var(--paper)}
+body .layer:hover{transform:none}
+body .layer.rw,body .layer.hit{background:var(--paper-3);border-color:var(--ink);color:var(--ink)}
+body .layer.ro{background:var(--paper);color:var(--ink-2)}
+body .layer.miss{background:var(--paper);border:1px dashed var(--ink);color:var(--ink)}
+body .layer small,body .layer.hit small,body .layer.miss small{color:var(--ink-3);font-family:var(--mono)}
+
+/* -- command anatomy -- */
+body .anat{background:var(--code-bg);border:3px double var(--ink);border-radius:0;box-shadow:none}
+body .anat .tok{border-radius:0}
+body .t1,body .t2,body .t3,body .t4{background:var(--paper-2);color:var(--ink);border:1px solid var(--ink)}
+body .anat .lbl{color:var(--ink-3);font-family:var(--display)}
+
+/* -- details / FAQ -- */
+body details{background:var(--paper-2);border:1px solid var(--ink);border-radius:0}
+body details[open]{border-color:var(--ink)}
+body summary .q{background:var(--ink);color:var(--paper);border-radius:0;font-family:var(--display)}
+body summary .star,body summary .chev{color:var(--ink)}
+body details .ans{color:var(--ink-2);border-top:1px solid var(--rule-soft)}
+body details .ans b{color:var(--ink)}
+
+/* -- checklist -- */
+body .check{border:1px solid var(--ink);border-radius:0}
+body .check li{border-bottom:1px solid var(--rule-soft)}
+body .check li svg{color:var(--ink)}
+
+/* -- footer / next -- */
+body footer{border-top:3px double var(--ink);color:var(--ink-2)}
+body footer h3{font-family:var(--serif);color:var(--ink)}
+body .reflink{color:var(--ink-2);background:var(--paper);border:1px solid var(--ink);border-radius:0}
+body .reflink:hover{background:var(--ink);color:var(--paper);transform:none}
+body .reflink svg{color:var(--ink)} body .reflink:hover svg{color:var(--paper)}
+body .next a{background:var(--paper-2);border:1px solid var(--ink);border-radius:0}
+body .next a:hover{background:var(--paper-3);transform:none;border-color:var(--ink)}
+body .next small{color:var(--ink-3);font-family:var(--display)}
+body .next b{color:var(--ink);font-family:var(--serif)}
+body .next .nx svg{color:var(--ink)}

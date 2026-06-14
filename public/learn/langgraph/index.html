@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LangGraph Course · Agent Engineering Track</title>
+<meta name="description" content="Learn LangGraph from first principles: graph mental model, state + memory + persistence, control flow + HITL, multi-agent systems, and interview gauntlet.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://sahilkumar.dev/learn/langgraph/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sahilkumar.dev/learn/langgraph/">
+<meta property="og:title" content="LangGraph Course · Agent Engineering Track">
+<meta property="og:description" content="Five hands-on modules to build production-ready agents: graph mental model, state + persistence, control flow + HITL, multi-agent orchestration, and interview prep.">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:title" content="LangGraph Course · Agent Engineering Track">
+<meta property="twitter:description" content="Five hands-on modules to build production-ready agents: graph mental model, state + persistence, control flow + HITL, multi-agent orchestration, and interview prep.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Course","name":"LangGraph: Agent Engineering Track","description":"Five hands-on modules to build production-ready agents with LangGraph: graph mental model, state + memory + persistence, control flow + HITL, multi-agent orchestration, and interview prep.","url":"https://sahilkumar.dev/learn/langgraph/","inLanguage":"en","provider":{"@type":"Person","name":"Sahil Kumar","url":"https://sahilkumar.dev"},"hasCourseInstance":{"@type":"CourseInstance","courseMode":"online","courseWorkload":"PT10H"}}</script>
+<style>
+  :root{--bg:#0a0a0a;--panel:#111;--card:#151515;--line:#272727;--text:#f5f5f5;--muted:#b4b4b4;--faint:#7a7a7a;--accent:#00bfa5;--radius:14px}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  a{color:inherit;text-decoration:none}
+  .top{position:sticky;top:0;z-index:10;background:rgba(10,10,10,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .in{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:10px}
+  .sp{flex:1}.pill{font:600 11px/1.1 ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+  .wrap{max-width:1100px;margin:0 auto;padding:36px 20px 80px}
+  h1{font-size:clamp(34px,8vw,72px);line-height:1.02;letter-spacing:-.03em;margin:14px 0 12px}
+  .lede{max-width:68ch;color:var(--muted);margin:0 0 24px}
+  .meta{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin:0 0 30px}
+  .meta .m{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .meta b{display:block;font-size:20px}.meta span{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em}
+  .mods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  @media(max-width:760px){.mods{grid-template-columns:1fr}.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .mod{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;min-height:180px;transition:.2s ease}
+  .mod:hover{border-color:#3a3a3a;transform:translateY(-2px)}
+  .num{font:700 40px/1 Inter,sans-serif;color:#fff;opacity:.88}
+  .tag{font:600 11px/1.1 ui-monospace,Menlo,monospace;color:var(--faint);text-transform:uppercase;letter-spacing:.08em}
+  h3{margin:2px 0;font-size:21px;line-height:1.2} p{margin:0;color:var(--muted);font-size:14px}
+  .go{margin-top:auto;font:600 12px/1 ui-monospace,Menlo,monospace;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+</style>
+</head>
+<body>
+  <header class="top"><div class="in"><a href="/learn">&larr; Learn</a><span class="sp"></span><span class="pill">Agent Engineering</span></div></header>
+  <main class="wrap">
+    <h1>LangGraph</h1>
+    <p class="lede">A practical 5-module track to build production-ready agents: start from the graph runtime mental model, then layer state + persistence, branching + human-in-the-loop, multi-agent orchestration, and final interview prep.</p>
+    <div class="meta">
+      <div class="m"><b>5</b><span>Modules</span></div>
+      <div class="m"><b>L1→L3</b><span>Target</span></div>
+      <div class="m"><b>~10h</b><span>Hands-on</span></div>
+      <div class="m"><b>Python</b><span>Stack</span></div>
+    </div>
+
+    <section class="mods">
+      <a class="mod" href="/learn/langgraph/01-foundations.html"><span class="num">01</span><span class="tag">Foundations</span><h3>Graph Mental Model</h3><p>Why graphs over loops, nodes/edges/state, reducers, compile/invoke, and basic chat loop.</p><span class="go">Open module →</span></a>
+      <a class="mod" href="/learn/langgraph/02-state-memory-persistence.html"><span class="num">02</span><span class="tag">State & memory</span><h3>Persistence That Survives Restarts</h3><p>Threads, checkpointers, reducers, short/long-term memory, and state design that scales.</p><span class="go">Open module →</span></a>
+      <a class="mod" href="/learn/langgraph/03-control-flow-hitl.html"><span class="num">03</span><span class="tag">Control flow</span><h3>Branching + Human-in-the-Loop</h3><p>Conditional routing, Send, Command, interrupts, approval gates, and safe resumes.</p><span class="go">Open module →</span></a>
+      <a class="mod" href="/learn/langgraph/04-multi-agent-production.html"><span class="num">04</span><span class="tag">Production</span><h3>Multi-Agent + Observability</h3><p>Supervisor patterns, orchestration trade-offs, tracing, reliability and deployment shape.</p><span class="go">Open module →</span></a>
+      <a class="mod" href="/learn/langgraph/05-interview-gauntlet.html"><span class="num">05</span><span class="tag">Interview</span><h3>Gauntlet + System Design</h3><p>Rapid-fire questions, architecture drills, trap cards, and final confidence checks.</p><span class="go">Open module →</span></a>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LangGraph Module 05: The Interview Gauntlet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+    --bg:#000000;
+    --surface:#0a0a0a;
+    --surface-2:#111111;
+    --muted:#171717;
+    --line:#262626;
+    --line-soft:#1f1f1f;
+    --fg:#f5f5f5;
+    --fg-dim:#b3b3b3;
+    --fg-faint:#7a7a7a;
+    --primary:#f0f0f0;
+    --accent:#e5e5e5;
+    --accent-dim:#a3a3a3;
+    --node:#d4d4d4;
+    --blue:#cfcfcf;
+    --violet:#c7c7c7;
+    --cyan:#bdbdbd;
+    --amber:#d0d0d0;
+    --red:#bcbcbc;
+    --code:#0b0f14;
+    --radius:14px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 2px rgba(0,0,0,.45);
+    --shadow-2:0 8px 30px rgba(0,0,0,.4);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;font-feature-settings:"cv05","ss01";}
+  a{color:var(--accent);text-decoration:none;transition:color .18s var(--ease)}
+  a:hover{color:#f5f5f5}
+  ::selection{background:rgba(255,255,255,.28)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;background:linear-gradient(90deg,var(--node),var(--accent),var(--violet));transition:width .1s linear}
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(0,0,0,.82);backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,#262626,#d4d4d4);color:#111111}
+  .brand .crumb{color:var(--fg-faint);font-weight:400}
+  .brand .crumb b{color:var(--fg-dim);font-weight:500}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .pill b{color:var(--accent)}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+  .shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:248px minmax(0,1fr);gap:48px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+  aside{position:sticky;top:72px;align-self:start;padding:32px 0;max-height:calc(100vh - 72px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-faint);padding:0 12px;margin-bottom:10px}
+  aside nav{display:flex;flex-direction:column;gap:1px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;color:var(--fg-faint);font-size:13.5px;font-weight:500;line-height:1.3;border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:16px;height:16px;flex:none;opacity:.7}
+  aside nav a:hover{background:var(--surface);color:var(--fg-dim)}
+  aside nav a.active{color:var(--fg);background:var(--surface);border-left-color:var(--accent)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:18px 12px 0;font-size:12px;color:var(--fg-faint);line-height:1.5}
+  @media(max-width:1000px){aside{position:static;max-height:none;padding:14px 0 4px;border-bottom:1px solid var(--line-soft)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px}
+    aside nav a.active{border-color:var(--accent)}
+    aside .scrollmsg,aside .label{display:none}}
+  /* LangSmith-like TOC panel */
+  aside{background:#0a0a0a;border:1px solid #262626;border-radius:12px;padding:18px 10px}
+  aside .label{color:#7a7a7a;font-size:12px;letter-spacing:.08em;padding:0 12px;margin-bottom:8px}
+  aside nav a{color:#a3a3a3;font-weight:500;border-left:2px solid transparent;border-radius:0;padding:6px 12px;background:transparent}
+  aside nav a .ti{display:none}
+  aside nav a:hover{background:transparent;color:#d4d4d4}
+  aside nav a.active{color:#f5f5f5;background:transparent;border-left-color:#f5f5f5;padding-left:10px}
+  aside .scrollmsg{color:#7a7a7a}
+  @media(max-width:1000px){
+    aside{background:transparent;border:none;border-radius:0;padding:14px 0 4px}
+    aside nav a{border-radius:999px;border:1px solid var(--line);padding:7px 12px}
+    aside nav a.active{border-color:var(--accent);padding:7px 12px}
+  }
+
+  main{padding:36px 0 120px;min-width:0;max-width:760px}
+  .hero{padding:8px 0 30px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);padding:6px 13px;border-radius:999px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+  h1{font-size:clamp(30px,4.4vw,44px);line-height:1.12;margin:20px 0 14px;letter-spacing:-.025em;font-weight:700}
+  h1 .grad{background:linear-gradient(95deg,#f5f5f5,#d4d4d4 50%,#262626);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--fg-dim);font-size:18px;max-width:62ch;margin:0}
+  .lede em{color:var(--fg);font-style:normal;font-weight:500}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
+  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
+  .chip b{color:var(--accent);font-family:var(--mono)}
+  section{margin:0 0 12px;scroll-margin-top:88px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:52px 0 8px}
+  .sec-head .num{font-family:var(--mono);font-size:13px;color:#111111;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;flex:none;background:linear-gradient(135deg,#f5f5f5,#d4d4d4);box-shadow:var(--shadow-1)}
+  h2{font-size:25px;margin:0;letter-spacing:-.015em;font-weight:650;line-height:1.25}
+  p{margin:13px 0;max-width:68ch}
+  .sub{color:var(--fg-dim);font-size:14.5px}
+  strong{color:var(--fg)}
+  code.inl{font-family:var(--mono);font-size:.86em;background:#111827;border:1px solid #334155;padding:1.5px 6px;border-radius:6px;color:#c4b5fd;white-space:nowrap}
+  .note{position:relative;border:1px solid var(--line);background:var(--surface);padding:15px 18px 15px 48px;border-radius:12px;margin:20px 0}
+  .note .ic{position:absolute;left:16px;top:16px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-faint);display:block;margin-bottom:4px}
+  .note p{margin:0}
+  .note.key{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.key .ic,.note.key .tag{color:var(--violet)}
+  .note.info .ic,.note.info .tag{color:var(--blue)}
+  .note.info{border-color:rgba(255,255,255,.35)}
+  .note b{color:var(--fg)}
+  /* flashcard rapid-fire grid */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+  @media(max-width:620px){.cards{grid-template-columns:1fr}}
+  .fc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;transition:border-color .2s var(--ease)}
+  .fc:hover{border-color:var(--accent-dim)}
+  .fc .term{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px}
+  .fc .def{font-size:13.5px;color:var(--fg-dim)}
+  .fc .def b{color:var(--fg)}
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:11px 0;overflow:hidden;transition:border-color .2s var(--ease)}
+  details[open]{border-color:rgba(255,255,255,.4)}
+  details:hover{border-color:var(--accent-dim)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11.5px;color:#111111;background:var(--accent);border-radius:6px;padding:3px 8px;flex:none;font-weight:600}
+  summary .star{color:var(--amber);flex:none;display:inline-flex}
+  summary .star svg{width:15px;height:15px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--fg-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--fg-dim);font-size:14.5px;border-top:1px solid var(--line-soft);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--fg)}
+  details .ans code.inl{font-family:var(--mono);font-size:.86em;background:#111827;border:1px solid #334155;padding:1.5px 6px;border-radius:6px;color:#c4b5fd;white-space:nowrap}
+  .scenario{border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,rgba(255,255,255,.05),transparent);border-radius:12px;margin:11px 0;overflow:hidden}
+  .scenario summary .q{background:var(--violet)}
+  .scenario[open]{border-color:rgba(255,255,255,.55)}
+  .trap{border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,rgba(255,255,255,.05),transparent);border-radius:12px;margin:11px 0;overflow:hidden}
+  .trap summary .q{background:var(--red);color:#111111}
+  .trap[open]{border-color:rgba(255,255,255,.55)}
+  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding-top:30px;color:var(--fg-dim);font-size:14.5px}
+  footer h3{margin:0 0 14px}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
+  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
+  .reflink:hover svg{color:var(--accent)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .next a{flex:1;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px 18px;display:flex;flex-direction:column;gap:3px;transition:all .2s var(--ease)}
+  .next a:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .next small{color:var(--fg-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  .next b{font-size:15.5px;color:var(--fg);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:7px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+  .eyebrow{display:none !important}
+  .meta{display:none !important}
+  .note .tag{display:none !important}
+  aside .scrollmsg{display:none !important}
+  .pill{display:none !important}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .fc:hover,.next a:hover,.reflink:hover{transform:none}}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M16.8 7.6 13.4 16M7.4 6h9.2"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+  <symbol id="i-foundation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-design" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></symbol>
+  <symbol id="i-trap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-graph"/></svg></span>
+      <span class="crumb"><b>LangGraph Track</b> &nbsp;/&nbsp; Module 05 &nbsp;/&nbsp; Interview Gauntlet</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Module 5 of 5</span>
+    <span class="pill"><b>40+</b> questions</span>
+  </div>
+</header>
+
+<div class="shell">
+  <aside>
+    <div class="label">Question banks</div>
+    <nav id="toc">
+      <a href="#how"><svg class="ti"><use href="#i-target"/></svg>How to drill this</a>
+      <a href="#rapid"><svg class="ti"><use href="#i-zap"/></svg>Rapid-fire flashcards</a>
+      <a href="#fundamentals"><svg class="ti"><use href="#i-foundation"/></svg>Fundamentals</a>
+      <a href="#statemem"><svg class="ti"><use href="#i-db"/></svg>State &amp; memory</a>
+      <a href="#control"><svg class="ti"><use href="#i-route"/></svg>Control flow &amp; HITL</a>
+      <a href="#multiagent"><svg class="ti"><use href="#i-users"/></svg>Multi-agent &amp; prod</a>
+      <a href="#design"><svg class="ti"><use href="#i-design"/></svg>System design</a>
+      <a href="#traps"><svg class="ti"><use href="#i-trap"/></svg>Gotchas &amp; traps</a>
+    </nav>
+    <p class="scrollmsg">Say the answer out loud before you open the card. Recognition is not recall. Interviews test recall.</p>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>LangGraph · Module 05 · Interview Prep</span>
+      <h1>The <span class="grad">Interview Gauntlet</span><br>40+ questions, said out loud</h1>
+      <p class="lede">No new concepts here, just pressure. This is the separate interview bank: rapid-fire flashcards, deep questions
+      by topic, system-design scenarios, and the gotchas that catch people who only read. <em>Cover the answer, say yours, then check.</em>
+      The starred questions are the ones you must be able to answer cold.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>drill in <b>20-min</b> blocks</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>covers Modules 01-04</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>recall, not recognition</span>
+        <span class="chip"><svg><use href="#i-star"/></svg>★ = must-know cold</span>
+      </div>
+    </div>
+
+    <section id="how">
+      <div class="sec-head"><span class="num">0</span><h2>How to drill this so it sticks</h2></div>
+      <p>Reading answers feels productive and teaches you almost nothing. The only thing that survives interview nerves is active
+      recall. So work this bank in one discipline: read the question, <strong>say your full answer aloud</strong> as if a person is
+      across the table, <em>then</em> open the card and compare. If your spoken answer missed the key term, that card is not done. Come
+      back to it tomorrow. A few honest passes beat ten lazy re-reads.</p>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The one-line spine</span>
+        <p>If you can say this sentence and unpack each clause, you can carry most of a LangGraph interview: <b>LangGraph models an
+        agent as a graph of nodes over shared state, where a checkpointer persists that state after every step, which is what unlocks
+        memory, human-in-the-loop, durability, and time travel.</b> Almost every question is a zoom into one clause of that sentence.</p></div>
+    </section>
+
+    <section id="rapid">
+      <div class="sec-head"><span class="num">1</span><h2>Rapid-fire flashcards</h2></div>
+      <p class="sub">One term, one crisp definition. Glance at the term, define it aloud, then read. These are the vocabulary you must own.</p>
+      <div class="cards">
+        <div class="fc"><div class="term">State</div><div class="def">The shared, typed object every node reads and writes. The agent's memory <b>for one run</b>.</div></div>
+        <div class="fc"><div class="term">Node</div><div class="def">A function: takes state, returns a <b>partial update</b>. Where work happens.</div></div>
+        <div class="fc"><div class="term">Edge</div><div class="def">Wiring deciding the next node. <b>Normal</b> = fixed; <b>conditional</b> = router function.</div></div>
+        <div class="fc"><div class="term">Reducer</div><div class="def">Rule merging a node's update into a field. Default <b>overwrite</b>; <code class="inl">add</code> appends.</div></div>
+        <div class="fc"><div class="term">Checkpointer</div><div class="def">Backend saving a state snapshot after <b>every step</b>. Short-term memory + durability.</div></div>
+        <div class="fc"><div class="term">Thread</div><div class="def">An independent timeline of state, keyed by <code class="inl">thread_id</code>. One conversation.</div></div>
+        <div class="fc"><div class="term">Store</div><div class="def">Long-term memory <b>across</b> threads, keyed by namespace (e.g. user id).</div></div>
+        <div class="fc"><div class="term">MessagesState</div><div class="def">Built-in state with a <code class="inl">messages</code> list that <b>appends</b> via a reducer.</div></div>
+        <div class="fc"><div class="term">Command</div><div class="def">A node return carrying <code class="inl">update</code> + <code class="inl">goto</code>: change state and route in one move.</div></div>
+        <div class="fc"><div class="term">interrupt()</div><div class="def">Durably pause mid-node for a human; resume with <code class="inl">Command(resume=...)</code>.</div></div>
+        <div class="fc"><div class="term">Send</div><div class="def">Dynamic parallel fan-out (map-reduce): one worker per item, reducer merges results.</div></div>
+        <div class="fc"><div class="term">Subgraph</div><div class="def">A compiled graph used as a <b>node</b> in a bigger graph. Reuse + isolation.</div></div>
+        <div class="fc"><div class="term">RetryPolicy</div><div class="def">Per-node auto-retry on transient failure. Part of durable execution.</div></div>
+        <div class="fc"><div class="term">create_react_agent</div><div class="def">Prebuilt tool-calling agent (think → call tool → observe). Returns a compiled graph.</div></div>
+        <div class="fc"><div class="term">Supervisor</div><div class="def">Central agent that routes to specialist workers one at a time.</div></div>
+        <div class="fc"><div class="term">Swarm</div><div class="def">Peers that hand off directly to each other, no central router.</div></div>
+        <div class="fc"><div class="term">LangSmith</div><div class="def">Tracing/eval tool: see every node, prompt, tool call, token, and latency per run.</div></div>
+        <div class="fc"><div class="term">Durable execution</div><div class="def">Crash mid-run resumes from the last checkpoint instead of restarting.</div></div>
+      </div>
+    </section>
+
+    <section id="fundamentals">
+      <div class="sec-head"><span class="num">2</span><h2>Fundamentals</h2></div>
+
+      <details><summary><span class="q">F1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">What is LangGraph and what problem does it solve?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A low-level orchestration framework for building stateful, long-running agents as <b>graphs</b>: nodes (steps) over shared
+        state, connected by edges. It solves the problem that real agents need branching, loops, memory, pausing, and recovery, which
+        become an unmaintainable tangle of conditionals in plain code. Modelling the agent as a graph makes control flow explicit and
+        lets the runtime persist, resume, stream, and pause.</div></details>
+
+      <details><summary><span class="q">F2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">LangGraph vs LangChain, vs a plain while-loop?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">LangChain provides building blocks (models, tools, prompts); LangGraph provides <b>orchestration</b>, deciding what runs
+        next and carrying state, and can be used without LangChain. Versus a plain while-loop, the graph makes branches and cycles
+        explicit and, because each step returns an update instead of mutating state, the runtime can checkpoint every step, which a raw
+        loop cannot do, giving you persistence, HITL, and recovery for free.</div></details>
+
+      <details><summary><span class="q">F3</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Walk through the execution model from START to END.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The runtime begins at <code class="inl">START</code>, follows the edge to the first node, runs it, merges its returned
+        update into state (via the field's reducer), checkpoints, then re-reads the edges to find the next node, repeating until an edge
+        leads to <code class="inl">END</code>. Conditional edges run a router over current state to pick the next node; cycles are allowed.</div></details>
+
+      <details><summary><span class="q">F4</span><span class="txt">What exactly does a node receive and return, and why not mutate state?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">It receives the current state and returns a dict of <b>only the fields it changes</b>. It must not mutate state in place
+        because the runtime needs to apply updates through reducers and snapshot each step; returning an immutable update is what makes
+        checkpointing, parallel merges, and time travel possible.</div></details>
+
+      <details><summary><span class="q">F5</span><span class="txt">Normal edge vs conditional edge, with the API.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Normal: <code class="inl">add_edge(A, B)</code>, an unconditional jump. Conditional:
+        <code class="inl">add_conditional_edges(A, router)</code>, where <code class="inl">router(state)</code> returns the name of the next
+        node (or <code class="inl">END</code>). Conditional edges express branching and loops.</div></details>
+
+      <details><summary><span class="q">F6</span><span class="txt">What does <code class="inl">.compile()</code> do?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Turns the builder description into a runnable graph: validates wiring and returns an object with
+        <code class="inl">invoke</code>/<code class="inl">stream</code>. It is also where you attach cross-cutting features like a
+        checkpointer and store.</div></details>
+    </section>
+
+    <section id="statemem">
+      <div class="sec-head"><span class="num">3</span><h2>State &amp; memory</h2></div>
+
+      <details><summary><span class="q">S1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">What is a reducer and why does parallelism require one?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A reducer merges a node's update into a field. Default is overwrite; <code class="inl">Annotated[list, add]</code> appends.
+        Parallel nodes writing the same field would conflict, the runtime cannot guess how to combine two writes, so a reducer is
+        <b>required</b> to merge them deterministically. It is also how accumulation (findings, messages) works.</div></details>
+
+      <details><summary><span class="q">S2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">How does an agent remember a conversation across calls?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Compile with a <b>checkpointer</b> (saves state after each step) and pass a <b>thread_id</b> in config on each call. Same
+        thread id loads the last checkpoint and continues; a new thread id starts blank. In production the checkpointer is backed by
+        SQLite or Postgres.</div></details>
+
+      <details><summary><span class="q">S3</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Short-term vs long-term memory.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Short-term = checkpointer, scoped to a <b>thread</b> (this conversation). Long-term = a <b>Store</b>, keyed by a namespace
+        like user id, holding facts that persist <b>across</b> threads (preferences, profile). "This chat" vs "this user, always".</div></details>
+
+      <details><summary><span class="q">S4</span><span class="txt">Why does attaching a checkpointer force you to pass a thread_id?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The checkpointer is shared storage for many conversations. The thread id selects <b>which</b> timeline to read and write;
+        without it the runtime cannot locate the right state and errors.</div></details>
+
+      <details><summary><span class="q">S5</span><span class="txt">Streaming modes and when to use each.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><code class="inl">"updates"</code> = each node's change (progress UI); <code class="inl">"values"</code> = full state
+        per step (debugging); <code class="inl">"messages"</code> = LLM tokens as they stream (typewriter chat UI). Stream when a run is
+        long enough that a blank wait feels broken.</div></details>
+
+      <details><summary><span class="q">S6</span><span class="txt">What is time travel and what enables it?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Because the checkpointer snapshots after every step, a thread is a full history. <code class="inl">get_state_history</code>
+        lists snapshots; you can inspect or resume from any past checkpoint (optionally edited). Same machinery underlies HITL and
+        conversation forking.</div></details>
+
+      <details><summary><span class="q">S7</span><span class="txt">When would you use separate input/output schemas?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">When the internal state carries scratch fields you do not want callers to see or send. You pass
+        <code class="inl">input_schema</code> and <code class="inl">output_schema</code> to keep the public contract clean while the graph
+        keeps private working fields.</div></details>
+    </section>
+
+    <section id="control">
+      <div class="sec-head"><span class="num">4</span><h2>Control flow &amp; human-in-the-loop</h2></div>
+
+      <details><summary><span class="q">C1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Explain human-in-the-loop end to end.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A node calls <code class="inl">interrupt(payload)</code>; the run durably pauses (state is already checkpointed) and the
+        payload surfaces to your app. You resume with <code class="inl">Command(resume=value)</code> on the same thread; the node re-runs
+        up to the interrupt and continues with the human's value. Needs a checkpointer and thread id. Flavours: approve/reject, edit
+        state, review a tool call, ask for input, all the same mechanism.</div></details>
+
+      <details><summary><span class="q">C2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Command vs conditional edge.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><code class="inl">Command</code> lets a node return an <code class="inl">update</code> and a <code class="inl">goto</code>
+        together, routing itself; a conditional edge keeps routing in a separate function. Use <code class="inl">Command</code> when the
+        decision and the work are intertwined, or to route plus hand off to another agent in one step.</div></details>
+
+      <details><summary><span class="q">C3</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Why must side effects come after <code class="inl">interrupt()</code>?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">On resume the node re-executes from the top to the interrupt, so code before it runs twice. Put sends, charges, and writes
+        <b>after</b> the interrupt so they fire exactly once.</div></details>
+
+      <details><summary><span class="q">C4</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">What is <code class="inl">Send</code> and how does map-reduce work here?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A node returns a list of <code class="inl">Send(node, input)</code>, one per item (the map); the runtime runs that node in
+        parallel for each, and a reducer on the result field merges all outputs (the reduce). The number of workers is decided at runtime.</div></details>
+
+      <details><summary><span class="q">C5</span><span class="txt">What is a subgraph and how do parent and child share state?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A compiled graph used as a node in a larger graph. They share data through <b>common state keys</b>; if schemas differ, wrap
+        the subgraph in a function node that translates state in and out.</div></details>
+
+      <details><summary><span class="q">C6</span><span class="txt">What makes execution durable, and why does it matter?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Every step is checkpointed (resume from last good step on crash) and nodes can carry a
+        <code class="inl">RetryPolicy</code> (auto-retry transient failures). It matters because real agents call flaky APIs and run long;
+        durability stops one hiccup from losing the whole task.</div></details>
+    </section>
+
+    <section id="multiagent">
+      <div class="sec-head"><span class="num">5</span><h2>Multi-agent &amp; production</h2></div>
+
+      <details><summary><span class="q">M1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">When do you reach for multiple agents instead of one?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">When one agent's toolset or responsibilities grow enough that prompt-following degrades, or sub-tasks need different
+        instructions, models, or independent testing. Otherwise prefer a single agent, multi-agent buys modularity at the cost of
+        coordination, latency, and tokens.</div></details>
+
+      <details><summary><span class="q">M2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Supervisor vs swarm vs agent-as-tool.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">All answer "who decides routing." Supervisor: a central agent routes to workers that report back. Swarm: peers hand off
+        directly (a <code class="inl">Command</code> with <code class="inl">graph=Command.PARENT</code>). Agent-as-tool: a sub-agent is
+        wrapped as a tool the caller invokes. All use the same <code class="inl">Command</code> routing and shared state.</div></details>
+
+      <details><summary><span class="q">M3</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">What is <code class="inl">create_react_agent</code> under the hood?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A prebuilt compiled graph running the ReAct loop (think → call tool → observe → think). Because it is a normal graph it
+        supports checkpointers, streaming, and interrupts, and drops into a larger graph as a node or subgraph.</div></details>
+
+      <details><summary><span class="q">M4</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">How do you debug a flaky agent in production?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Read the <b>LangSmith trace</b> for a failing run: each node, the exact prompt, every tool input/output, plus token and
+        latency per step, to pinpoint the bad node or tool call. Combine with checkpoint history (time travel) to inspect state at each step.</div></details>
+
+      <details><summary><span class="q">M5</span><span class="txt">What changes when you go to production?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">In-memory checkpointer becomes Postgres-backed (durable, shared memory); the graph runs as a service (LangGraph Platform,
+        self-hosted server, or embedded in your API) handling concurrency/scaling; add LangSmith tracing and Studio for visual debugging.</div></details>
+
+      <details><summary><span class="q">M6</span><span class="txt">How does a tool get described to the model?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A tool is a function; its name, typed signature, and <b>docstring</b> become the description the model reads to decide
+        when and how to call it. Clear docstrings and argument names directly improve tool-selection accuracy.</div></details>
+    </section>
+
+    <section id="design">
+      <div class="sec-head"><span class="num">6</span><h2>System-design scenarios</h2></div>
+      <p class="sub">Open-ended. Talk through the design out loud; the card is a strong reference answer, not the only one.</p>
+
+      <details class="scenario"><summary><span class="q">D1</span><span class="txt">Design a customer-support agent that can issue refunds, with a human approving any refund over $100.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">State holds the conversation (<code class="inl">MessagesState</code>) plus a proposed action. A ReAct agent handles chat and
+        calls tools (lookup order, draft refund). Route the proposed refund through a node: if amount &gt; $100, call
+        <code class="inl">interrupt()</code> to pause for human approval, otherwise proceed. Keep the actual refund side effect <b>after</b>
+        the interrupt. Compile with a Postgres checkpointer so the pause survives and each customer is a thread. Add LangSmith tracing.
+        Mention the re-run gotcha as why the side effect goes after the interrupt.</div></details>
+
+      <details class="scenario"><summary><span class="q">D2</span><span class="txt">Design a research agent that investigates N sub-topics in parallel and writes one report.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A planner node produces the list of sub-topics, then returns <code class="inl">Send("research_one", {topic})</code> for each,
+        fanning out in parallel. The <code class="inl">findings</code> field uses an <code class="inl">add</code> reducer so all parallel
+        results merge into one list. A synthesizer node reads merged findings and writes the report. Add a checkpointer for resumability
+        and stream <code class="inl">"updates"</code> so the user sees progress. This is textbook map-reduce with <code class="inl">Send</code> + reducer.</div></details>
+
+      <details class="scenario"><summary><span class="q">D3</span><span class="txt">Design a coding assistant: a supervisor delegating to a planner, a coder, and a reviewer.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Supervisor pattern. Each specialist is a node or subgraph (the coder may itself be a ReAct agent with file tools). The
+        supervisor routes with <code class="inl">Command(goto=...)</code> based on state (plan ready? code written? review passed?); workers
+        return <code class="inl">Command(update=..., goto="supervisor")</code>. Loop coder↔reviewer until the reviewer approves, then END.
+        Add a checkpointer and optionally an <code class="inl">interrupt()</code> before applying changes. Justify multi-agent: distinct
+        instructions/tools per role and independent testing.</div></details>
+
+      <details class="scenario"><summary><span class="q">D4</span><span class="txt">A long-running data-pipeline agent must survive server restarts and not redo finished work.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Lean on durable execution. Break the pipeline into nodes so each completed step is checkpointed; back the checkpointer with
+        Postgres. On restart, re-invoke on the same <code class="inl">thread_id</code> and the runtime resumes from the last good
+        checkpoint. Add <code class="inl">RetryPolicy</code> to flaky external-call nodes. Make node side effects idempotent where possible,
+        since a node can re-run. This is the "why LangGraph for long-running work" answer: persistence.</div></details>
+    </section>
+
+    <section id="traps">
+      <div class="sec-head"><span class="num">7</span><h2>Gotchas &amp; traps</h2></div>
+      <p class="sub">The questions that separate "read a tutorial" from "actually built one." Each is a real mistake people make.</p>
+
+      <details class="trap"><summary><span class="q">T1</span><span class="txt">"My node returns the full state and things break / get slow." Why?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A node should return <b>only the fields it changed</b>, not a full copy. Returning everything can clobber reducer-managed
+        fields (e.g. re-sending the whole <code class="inl">messages</code> list makes the append reducer duplicate). Return the minimal update.</div></details>
+
+      <details class="trap"><summary><span class="q">T2</span><span class="txt">"interrupt() throws or never pauses." What did I forget?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A checkpointer. <code class="inl">interrupt()</code> needs persisted state to pause and resume, so the graph must be
+        compiled with a checkpointer and invoked with a <code class="inl">thread_id</code>. No checkpointer, no durable pause.</div></details>
+
+      <details class="trap"><summary><span class="q">T3</span><span class="txt">"My email got sent twice after a human approval." Why?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The side effect was placed <b>before</b> <code class="inl">interrupt()</code> in the node. On resume the node re-runs from
+        the top to the interrupt, so the send executed twice. Move all side effects after the interrupt.</div></details>
+
+      <details class="trap"><summary><span class="q">T4</span><span class="txt">"Two parallel nodes write the same field and the run errors." Fix?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">That field has no reducer, so the runtime cannot merge concurrent writes. Annotate it with a reducer (e.g.
+        <code class="inl">Annotated[list, add]</code>) so the parallel updates combine deterministically.</div></details>
+
+      <details class="trap"><summary><span class="q">T5</span><span class="txt">"My agent forgets everything between turns even with MessagesState." Why?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><code class="inl">MessagesState</code> only appends within a single run. Cross-call memory needs a <b>checkpointer</b>
+        plus a consistent <code class="inl">thread_id</code>. Without them each <code class="inl">invoke</code> starts from the input you pass,
+        with no saved history.</div></details>
+
+      <details class="trap"><summary><span class="q">T6</span><span class="txt">"I jumped straight to a 5-agent system and it's a mess." What's the lesson?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Multi-agent is not free, it adds coordination, latency, tokens, and failure points. Start with one well-prompted agent
+        and split only when toolset size or distinct sub-tasks justify it. Interviewers respect "I'd start single and measure before
+        adding agents."</div></details>
+
+      <details class="trap"><summary><span class="q">T7</span><span class="txt">"My loop never terminates." What's the usual cause?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The conditional edge / router never returns <code class="inl">END</code>; the exit condition is never met (a counter not
+        incremented, a flag never set). Always have a clear termination branch, and consider a recursion/step limit as a safety net.</div></details>
+    </section>
+
+    <section id="close">
+      <div class="sec-head"><span class="num">8</span><h2>One last gut check</h2></div>
+      <p>Before you call yourself interview-ready, try this without notes: in two minutes, explain to an imaginary interviewer how you
+      would build a research assistant that holds a conversation, pauses for human approval before sending anything, researches several
+      topics in parallel, and runs reliably in production. If you can narrate Sahil's whole agent, state and reducers, checkpointer and
+      threads, interrupt and Send, supervisor and tracing, in one flowing answer, you have actually learned this, not just read it.</p>
+      <div class="note key"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">You are done when</span>
+        <p>You can answer every ★ question cold, narrate the two-minute design above, and explain at least three of the seven traps from
+        having understood <em>why</em>, not from memorising the card. That is the bar. Go get the offer.</p></div>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>LangGraph overview</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/persistence" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Persistence deep-dive</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/multi-agent" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Multi-agent patterns</a>
+        <a class="reflink" href="https://academy.langchain.com/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>LangChain Academy</a>
+      </div>
+      <div class="next">
+        <a href="/learn/langgraph/04-multi-agent-production.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 04: Multi-Agent &amp; Production</b></span></a>
+        <a href="/learn/langgraph/01-foundations.html"><small>Start over →</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01: Foundations</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">LangGraph learning track · Module 05 of 5 · the interview bank. Drill the ★
+      questions until they are reflex, then build one more agent from scratch with no reference. Built knowledge beats read knowledge.</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  const bar = document.getElementById('progress');
+  const onScroll = () => {const h=document.documentElement;const max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';};
+  document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove('active')); const a = map.get(e.target.id); if (a) a.classList.add('active'); } });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

@@ -184,6 +184,29 @@ const generateSitemap = (blogs) => {
   xml += `    <priority>0.8</priority>\n`;
   xml += `  </url>\n`;
 
+  // Static LangGraph course (5-module track)
+  xml += `  <url>\n`;
+  xml += `    <loc>${baseUrl}/learn/langgraph</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>monthly</changefreq>\n`;
+  xml += `    <priority>0.8</priority>\n`;
+  xml += `  </url>\n`;
+  const langgraphModules = [
+    '01-foundations',
+    '02-state-memory-persistence',
+    '03-control-flow-hitl',
+    '04-multi-agent-production',
+    '05-interview-gauntlet',
+  ];
+  langgraphModules.forEach((mod) => {
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/learn/langgraph/${mod}</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.6</priority>\n`;
+    xml += `  </url>\n`;
+  });
+
   // Blog pages
   blogs.forEach((blog) => {
     const blogUrl = `${baseUrl}/blog/${blog.slug}`;

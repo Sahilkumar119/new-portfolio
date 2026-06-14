@@ -50,7 +50,19 @@ export const COURSES = [
     fullColor: true,
   },
   {
-    slug: "kubernetes",
+    slug: "langgraph",
+    name: "LangGraph",
+    accent: "#00BFA5",
+    tint: "#e7f8f5",
+    text: "#07251f",
+    blurb:
+      "Build production agents with graphs — state, persistence, human-in-the-loop, multi-agent orchestration, and interview-grade system design patterns. Five practical modules.",
+    status: "live",
+    href: "/learn/langgraph",
+    logo: "/images/learn/langgraph.svg",
+  },
+  {
+    slug: "kubernetes", 
     name: "Kubernetes",
     accent: "#326CE5",
     tint: "#e9edfb",

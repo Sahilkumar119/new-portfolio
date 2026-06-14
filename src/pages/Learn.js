@@ -164,10 +164,10 @@ export const Learn = () => {
     >
       <Helmet>
         <html lang="en" />
-        <title>Learn — Docker, Kubernetes, Git &amp; System Design | {Resume.basics.name}</title>
+        <title>Learn — Docker, SQL, Linux, LangGraph &amp; More | {Resume.basics.name}</title>
         <meta
           name="description"
-          content="Hands-on engineering courses by Sahil Kumar — Docker from first principles, with Kubernetes, Git, and System Design on the way."
+          content="Hands-on engineering courses by Sahil Kumar — Docker, SQL, Linux, and LangGraph, with Kubernetes, Git, and System Design on the way."
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE}/learn`} />
@@ -177,7 +177,7 @@ export const Learn = () => {
         <meta property="og:title" content={`Learn | ${Resume.basics.name}`} />
         <meta
           property="og:description"
-          content="Hands-on engineering courses — Docker, Kubernetes, Git, System Design."
+          content="Hands-on engineering courses — Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
         />
         <meta property="og:image" content={`${SITE}/android-chrome-512x512.png`} />
 
@@ -185,7 +185,7 @@ export const Learn = () => {
         <meta property="twitter:title" content={`Learn | ${Resume.basics.name}`} />
         <meta
           property="twitter:description"
-          content="Hands-on engineering courses — Docker, Kubernetes, Git, System Design."
+          content="Hands-on engineering courses — Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
         />
         <meta property="twitter:image" content={`${SITE}/android-chrome-512x512.png`} />
 

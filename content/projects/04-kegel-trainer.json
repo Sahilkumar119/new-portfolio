@@ -1,0 +1,9 @@
+{
+  "id": 4,
+  "title": "Kegel Trainer: Performance-Focused Flutter Wellness App",
+  "description": "A ~7,900-line Flutter app across 7 screens with zero bundled image assets, where all art renders as inline SVG tinted from the active theme. Holds frame rate stable on low-end phones and ships a bring-your-own-key AI coach over nine LLM providers, with user keys sent directly to the provider and never stored off-device.",
+  "technologies": ["Flutter", "Dart", "Riverpod"],
+  "link": "#",
+  "github": "#",
+  "type": "top"
+}

@@ -1,8 +1,0 @@
-{
-  "title": "Portfolio Automation Tool",
-  "description": "A Node.js utility that synchronizes Markdown and JSON content with a React frontend.",
-  "technologies": ["Node.js", "JavaScript", "Markdown"],
-  "link": "https://github.com/Sahiljangra115",
-  "github": "#",
-  "type": "top"
-}

@@ -96,6 +96,40 @@ const useStyles = makeStyles(() => ({
         color: "var(--text-tertiary)",
         fontFamily: "'SF Mono', monospace",
     },
+    itemRight: {
+        display: "flex",
+        alignItems: "center",
+        gap: "1.25rem",
+        "@media (max-width: 600px)": {
+            width: "100%",
+            justifyContent: "space-between",
+        },
+    },
+    viewBtn: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.4rem",
+        fontSize: "0.8rem",
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+        color: "var(--accent-tertiary)",
+        padding: "0.45rem 0.9rem",
+        borderRadius: "999px",
+        border: "1px solid var(--glass-border)",
+        background: "rgba(255,255,255,0.04)",
+        transition: "all 220ms ease",
+        "& svg": {
+            transition: "transform 220ms ease",
+        },
+        "$item:hover &": {
+            color: "var(--text-primary)",
+            background: "var(--accent-tertiary)",
+            borderColor: "transparent",
+        },
+        "$item:hover & svg": {
+            transform: "translateX(3px)",
+        },
+    },
 }));
 
 export const Certifications = () => {
@@ -127,7 +161,17 @@ export const Certifications = () => {
                             <h3 className={classes.itemTitle}>{cert.title}</h3>
                             <span className={classes.itemIssuer}>{cert.issuer}</span>
                         </div>
-                        <span className={classes.itemDate}>{cert.date}</span>
+                        <div className={classes.itemRight}>
+                            <span className={classes.itemDate}>{cert.date}</span>
+                            {cert.link && (
+                                <span className={classes.viewBtn}>
+                                    View Certificate
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M7 17L17 7M17 7H8M17 7v9" />
+                                    </svg>
+                                </span>
+                            )}
+                        </div>
                     </a>
                 ))}
             </div>

@@ -1,0 +1,9 @@
+{
+  "id": 2,
+  "title": "NyxCore: On-Device TinyML Watchdog for ROS 2",
+  "description": "An independent ESP32-S3 watchdog that monitors a robot's DDS streams and keeps reporting even when the main compute node stalls or crashes. Runs anomaly inference in pure C with no ML runtime: a Mahalanobis distance scorer and a sub-400-byte autoencoder baked into firmware, shipped as a managed micro-ROS lifecycle node on FreeRTOS.",
+  "technologies": ["C", "ESP32-S3", "micro-ROS", "PyTorch", "FreeRTOS"],
+  "link": "https://github.com/Sahiljangra115/NyxCore",
+  "github": "https://github.com/Sahiljangra115/NyxCore",
+  "type": "top"
+}

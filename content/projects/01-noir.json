@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "title": "NOIR: Autonomous Multimodal Robot Assistant",
+  "description": "A mobile robot running three concurrent real-time loops (vision, voice, hardware control) in Python, with a fully local voice pipeline: openWakeWord hotword, Faster-Whisper STT on CUDA, Gemma via Ollama, and Piper TTS. ESP32 firmware on FreeRTOS drives an L298N H-bridge over TCP, with a Flutter app for live telemetry and manual control.",
+  "technologies": ["Python", "PyTorch", "Ollama", "ESP32", "FreeRTOS", "Flutter"],
+  "link": "https://github.com/Sahiljangra115/Noir",
+  "github": "https://github.com/Sahiljangra115/Noir",
+  "type": "top"
+}

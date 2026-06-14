@@ -1,0 +1,9 @@
+{
+  "id": 3,
+  "title": "Path Tracer: From-Scratch C++17 and CUDA Renderer",
+  "description": "A Monte Carlo path tracer written twice with zero external dependencies: a single-file C++17 CPU reference and a CUDA port mapping one pixel to one GPU thread. Implements Lambertian, metal, and dielectric materials from the math (Snell refraction, Schlick Fresnel), with reproducible seeded renders and a thin-lens depth-of-field camera.",
+  "technologies": ["C++17", "CUDA", "Make"],
+  "link": "https://github.com/Sahiljangra115/Path-tracer",
+  "github": "https://github.com/Sahiljangra115/Path-tracer",
+  "type": "top"
+}

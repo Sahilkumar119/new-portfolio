@@ -264,7 +264,8 @@ const syncCertifications = () => {
       certifications.push({
         title: rawCert.title,
         issuer: rawCert.issuer,
-        date: rawCert.date
+        date: rawCert.date,
+        link: rawCert.link || null
       });
     } catch (error) {
       console.error(`Error processing certification file ${file}:`, error.message);

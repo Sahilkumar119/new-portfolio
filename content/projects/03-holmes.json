@@ -1,0 +1,9 @@
+{
+  "id": 7,
+  "title": "Holmes: AI-Content Provenance Detector",
+  "description": "A misinformation and AI-content detector that fuses four independent signals (a DeBERTa-v3 text classifier, C2PA/EXIF metadata, SynthID, and image forensics) into one calibrated confidence with an uncertainty band, instead of a binary real-or-fake verdict. FastAPI plus ONNX, deployable to AWS Lambda.",
+  "technologies": ["Python", "PyTorch", "DeBERTa", "ONNX", "AWS Lambda"],
+  "link": "https://github.com/Sahiljangra115/Holmes",
+  "github": "https://github.com/Sahiljangra115/Holmes",
+  "type": "top"
+}

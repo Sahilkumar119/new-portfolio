@@ -1,0 +1,9 @@
+{
+  "id": 6,
+  "title": "image-N: Multimodal RAG From Scratch",
+  "description": "A multimodal Retrieval-Augmented Generation system built in pure Python with no framework glue and no API keys. FAISS vector search, CLIP image retrieval, and local Ollama LLMs behind a FastAPI service, with every stage (chunking, embedding, retrieval, generation) readable top to bottom.",
+  "technologies": ["Python", "FAISS", "CLIP", "Ollama", "FastAPI"],
+  "link": "https://github.com/Sahiljangra115/image-N",
+  "github": "https://github.com/Sahiljangra115/image-N",
+  "type": "top"
+}

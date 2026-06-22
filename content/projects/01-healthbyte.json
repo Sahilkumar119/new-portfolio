@@ -1,0 +1,9 @@
+{
+  "id": 5,
+  "title": "HealthByte: Honest Health & Nutrition Engine",
+  "description": "A personalized nutrition engine that classifies food with EfficientNet-B0 and reports calories as uncertainty bands, not false-precision numbers. Stores biometric time-series in SQLite, pulls activity via Google Fit OAuth, and surfaces only statistically honest correlations (Spearman with Benjamini-Hochberg FDR control). FastAPI service that picks honest over impressive.",
+  "technologies": ["Python", "PyTorch", "FastAPI", "ONNX", "SQLite"],
+  "link": "https://github.com/Sahiljangra115/HealthByte",
+  "github": "https://github.com/Sahiljangra115/HealthByte",
+  "type": "top"
+}

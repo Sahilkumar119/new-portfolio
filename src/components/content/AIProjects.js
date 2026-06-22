@@ -141,11 +141,11 @@ export const AIProjects = () => {
         >
             <div className={classes.header}>
                 <span className={classes.eyebrow}>Architecture & Algorithms</span>
-                <h2 className={classes.title}>Selected Systems</h2>
+                <h2 className={classes.title}>Selected Projects</h2>
             </div>
             
             <div className={classes.grid}>
-                {Array.isArray(topProjects) && topProjects.slice(0, 4).map((project, i) => (
+                {Array.isArray(topProjects) && topProjects.slice(0, 7).map((project, i) => (
                     <a 
                         key={i} 
                         href={project.link || "#"} 

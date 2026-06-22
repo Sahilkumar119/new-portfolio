@@ -233,7 +233,7 @@ const syncProjects = () => {
   const projectsDir = path.join(CONTENT_DIR, 'projects');
   if (!fs.existsSync(projectsDir)) return;
 
-  const files = fs.readdirSync(projectsDir).filter(f => f.endsWith('.json'));
+  const files = fs.readdirSync(projectsDir).filter(f => f.endsWith('.json')).sort();
   const topProjects = [];
   const stepProjects = [];
 

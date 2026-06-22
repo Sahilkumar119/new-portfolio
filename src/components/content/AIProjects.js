@@ -94,6 +94,7 @@ const useStyles = makeStyles(() => ({
         width: "100%",
         maxWidth: "1100px",
         margin: "0 auto",
+        alignItems: "start", // hovered card grows alone; siblings keep their height
     },
     card: {
         position: "relative",
@@ -129,6 +130,7 @@ const useStyles = makeStyles(() => ({
         },
         "&:hover $cardDesc": {
             WebkitLineClamp: "unset",
+            maxHeight: "16em", // near real content height so motion fills the full duration, not a quick snap
         },
     },
     cardHeader: {
@@ -154,7 +156,8 @@ const useStyles = makeStyles(() => ({
         WebkitLineClamp: 3,
         WebkitBoxOrient: "vertical",
         overflow: "hidden",
-        transition: "max-height 350ms ease",
+        maxHeight: "calc(1.55em * 3)", // ~3 lines collapsed
+        transition: "max-height 480ms cubic-bezier(0.22, 1, 0.36, 1)",
     },
     techRow: {
         display: "flex",

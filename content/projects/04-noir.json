@@ -5,5 +5,6 @@
   "technologies": ["Python", "PyTorch", "Ollama", "ESP32", "FreeRTOS", "Flutter"],
   "link": "https://github.com/Sahiljangra115/Noir",
   "github": "https://github.com/Sahiljangra115/Noir",
+  "category": "Robotics & Edge",
   "type": "top"
 }

@@ -5,5 +5,6 @@
   "technologies": ["Python", "PyTorch", "DeBERTa", "ONNX", "AWS Lambda"],
   "link": "https://github.com/Sahiljangra115/Holmes",
   "github": "https://github.com/Sahiljangra115/Holmes",
+  "category": "AI & ML",
   "type": "top"
 }

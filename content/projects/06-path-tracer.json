@@ -5,5 +5,6 @@
   "technologies": ["C++17", "CUDA", "Make"],
   "link": "https://github.com/Sahiljangra115/Path-tracer",
   "github": "https://github.com/Sahiljangra115/Path-tracer",
+  "category": "Graphics & Apps",
   "type": "top"
 }

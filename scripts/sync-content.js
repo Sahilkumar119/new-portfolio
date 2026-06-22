@@ -248,6 +248,7 @@ const syncProjects = () => {
         title: rawProject.title,
         description: rawProject.description,
         technologies: rawProject.technologies || [],
+        category: rawProject.category || 'Other',
         link: rawProject.link || '#',
         github: rawProject.github || '#',
       };

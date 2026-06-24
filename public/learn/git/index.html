@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G-200 / Version Control with Git: Field Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== S-100 industrial spec-sheet theme ===== */
+  :root{
+    --red:#ff4438;
+    --red-ink:#ff4438;
+    --amber:#c87f00;
+    --bg:#f4f3ef;
+    --paper:#faf9f6;
+    --ink:#16130f;
+    --ink-2:#3b372f;
+    --ink-3:#6f6a5e;
+    --line:rgba(20,17,12,.16);
+    --line-soft:rgba(20,17,12,.09);
+    --grid:rgba(20,17,12,.05);
+    --scan:rgba(20,17,12,.92);
+    --term-bg:#111110;
+    --term-fg:#eceae3;
+    --term-line:rgba(255,255,255,.10);
+    --display:"Archivo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --sans:"Archivo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  html[data-theme="dark"]{
+    --red:#ff5a47;
+    --red-ink:#ff6b59;
+    --amber:#ffb454;
+    --bg:#0b0b0c;
+    --paper:#111113;
+    --ink:#f0eee8;
+    --ink-2:#c9c6bd;
+    --ink-3:#8b877c;
+    --line:rgba(240,238,232,.18);
+    --line-soft:rgba(240,238,232,.10);
+    --grid:rgba(240,238,232,.05);
+    --scan:rgba(240,238,232,.92);
+    --term-bg:#050506;
+    --term-fg:#eceae3;
+    --term-line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:120px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
+    transition:background .35s var(--ease),color .35s var(--ease)}
+  /* faint engineering grid behind everything */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:34px 34px}
+  a{color:var(--red-ink);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:3px}
+  ::selection{background:var(--red);color:#fff}
+  :focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+  /* reading progress */
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:var(--red);transition:width .1s linear}
+
+  /* ===== top status strip ===== */
+  .topbar{position:sticky;top:0;z-index:200;background:color-mix(in srgb,var(--bg) 86%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:16px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .topbar b{color:var(--ink)}
+  .topbar .dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex:none}
+  .topbar .sp{flex:1}
+  .tstat{color:var(--red);font-weight:600}
+  .toggle{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:0;
+    padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:border-color .2s,background .2s}
+  .toggle:hover{border-color:var(--red);background:color-mix(in srgb,var(--red) 8%,transparent)}
+  .toggle .sw{width:8px;height:8px;background:var(--red);border-radius:50%}
+  @media(max-width:760px){.topbar .hideSm{display:none}}
+
+  /* ===== hero ===== */
+  .hero{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:30px 22px 8px}
+  .hero-rule{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--ink);
+    padding-bottom:8px}
+  .hero-rule .cr{width:8px;height:8px;border-radius:50%;background:var(--ink);flex:none}
+  .hero-rule .sp{flex:1}
+  .hero-top{display:grid;grid-template-columns:1.3fr .9fr;gap:30px;padding:26px 0 8px;align-items:start}
+  @media(max-width:820px){.hero-top{grid-template-columns:1fr;gap:18px}}
+  .htitle{font-family:var(--display);font-weight:800;line-height:.92;letter-spacing:-.02em;
+    font-size:clamp(42px,7.2vw,86px);margin:0}
+  .htitle .r{color:var(--red)}
+  .hspec{font-family:var(--mono);font-size:12.5px;line-height:1.9;color:var(--ink-2);
+    border-left:2px solid var(--line);padding-left:16px}
+  .hspec .k{color:var(--ink-3)}
+  .hspec .v{color:var(--ink)}
+  .hspec .alert{color:var(--red)}
+  .hspec .big247{font-family:var(--display);font-weight:900;font-size:clamp(40px,7vw,72px);
+    line-height:.85;letter-spacing:-.03em;color:var(--ink);margin-top:10px}
+  .hspec .big247 i{color:var(--red);font-style:normal}
+
+  /* giant scanline wordmark */
+  .bignum-wrap{position:relative;z-index:1;max-width:1180px;margin:6px auto 0;padding:0 22px;overflow:hidden}
+  .bignum{position:relative;font-family:var(--display);font-weight:900;letter-spacing:-.04em;
+    font-size:clamp(120px,30vw,360px);line-height:.78;text-align:center;user-select:none}
+  .bignum .layer{
+    background-image:repeating-linear-gradient(0deg,var(--scan) 0 2px,transparent 2px 5px);
+    -webkit-background-clip:text;background-clip:text;color:transparent;display:block}
+  .bignum .band{position:absolute;inset:0;
+    background-image:repeating-linear-gradient(0deg,var(--red) 0 2px,transparent 2px 5px);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    clip-path:inset(40% 0 38% 0)}
+
+  /* bottom hero strip */
+  .hero-foot{max-width:1180px;margin:0 auto;padding:8px 22px 0;display:flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+    border-top:1px solid var(--ink);padding-top:9px}
+  .hero-foot .cr{width:8px;height:8px;border-radius:50%;background:var(--ink)}
+  .hero-foot .sp{flex:1}
+  .hero-foot b{color:var(--ink)}
+  @media(max-width:760px){.hero-foot .hideSm{display:none}}
+
+  .lede0{max-width:1180px;margin:26px auto 0;padding:0 22px;position:relative;z-index:1}
+  .lede0 p{font-size:19px;line-height:1.6;color:var(--ink-2);max-width:70ch;margin:0}
+  .lede0 p b{color:var(--ink);font-weight:600}
+
+  /* ===== layout shell ===== */
+  .shell{position:relative;z-index:1;max-width:1180px;margin:34px auto 0;padding:0 22px;
+    display:grid;grid-template-columns:230px minmax(0,1fr);gap:46px;align-items:start}
+  @media(max-width:980px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:110px;align-self:start;max-height:calc(100vh - 120px);overflow-y:auto;padding:8px 0}
+  aside .alabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-3);padding:0 0 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  aside nav{display:flex;flex-direction:column}
+  aside nav a{display:flex;gap:11px;align-items:baseline;padding:9px 4px;color:var(--ink-3);
+    font-size:13.5px;font-weight:500;border-bottom:1px solid var(--line-soft);transition:color .18s,padding .18s}
+  aside nav a .ix{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+  aside nav a:hover{color:var(--ink);padding-left:8px;text-decoration:none}
+  aside nav a.active{color:var(--red)}
+  aside nav a.active .ix{color:var(--red)}
+  @media(max-width:980px){
+    aside{position:static;max-height:none;border-bottom:1px solid var(--line);margin-bottom:14px}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border:1px solid var(--line);padding:6px 11px;font-size:12px}
+    aside nav a:hover{padding-left:11px}
+    aside .alabel{display:none}
+  }
+
+  main{padding:0 0 120px;min-width:0;max-width:780px}
+
+  /* ===== section ===== */
+  section{scroll-margin-top:120px;margin:0 0 8px}
+  .sec-head{margin:46px 0 18px;padding-top:18px;border-top:2px solid var(--ink)}
+  .sec-tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--red);display:flex;gap:12px;align-items:center;margin-bottom:8px}
+  .sec-tag .l{color:var(--ink-3)}
+  .sec-head h2{font-family:var(--display);font-weight:800;font-size:clamp(26px,4vw,38px);
+    line-height:1.04;letter-spacing:-.02em;margin:0}
+  main h3.sub{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em;
+    margin:34px 0 10px;padding-left:14px;border-left:3px solid var(--red)}
+  main p{margin:0 0 16px;max-width:70ch}
+  main p.lede{font-size:18px;color:var(--ink-2);max-width:68ch}
+  main strong,main b{color:var(--ink);font-weight:600}
+  main code{font-family:var(--mono);font-size:.88em;background:color-mix(in srgb,var(--ink) 8%,transparent);
+    border:1px solid var(--line-soft);padding:1px 6px;border-radius:0;color:var(--ink)}
+
+  /* command reference table */
+  .cmds{border:1px solid var(--line);margin:18px 0 22px;background:var(--paper)}
+  .cmds .cmd{display:grid;grid-template-columns:minmax(160px,260px) 1fr;gap:0;
+    border-bottom:1px solid var(--line-soft)}
+  .cmds .cmd:last-child{border-bottom:none}
+  .cmds .cmd code{font-family:var(--mono);font-size:13px;color:var(--red-ink);background:none;border:none;
+    padding:12px 14px;border-right:1px solid var(--line-soft);display:block;word-break:break-word;font-weight:500}
+  .cmds .cmd span{padding:12px 14px;color:var(--ink-2);font-size:14.5px;line-height:1.55}
+  @media(max-width:600px){.cmds .cmd{grid-template-columns:1fr}.cmds .cmd code{border-right:none;border-bottom:1px solid var(--line-soft)}}
+
+  /* terminal block */
+  .term{background:var(--term-bg);border:1px solid var(--term-line);margin:18px 0 22px;position:relative;overflow:hidden}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:9px 13px;border-bottom:1px solid var(--term-line)}
+  .term-bar i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.25);display:block}
+  .term-bar i:first-child{background:var(--red)}
+  .term-bar em{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(236,234,227,.55);font-style:normal;margin-left:6px}
+  .term pre{margin:0;padding:15px 16px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;
+    color:var(--term-fg);white-space:pre}
+  .term .copy{position:absolute;top:7px;right:9px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:rgba(236,234,227,.6);background:transparent;border:1px solid var(--term-line);
+    padding:4px 9px;cursor:pointer;transition:color .2s,border-color .2s}
+  .term .copy:hover{color:#fff;border-color:var(--red)}
+
+  /* callouts */
+  .note{border:1px solid var(--line);border-left-width:3px;padding:14px 16px;margin:18px 0 22px;background:var(--paper)}
+  .note b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+    margin-bottom:6px}
+  .note p{margin:0;color:var(--ink-2);font-size:14.5px;line-height:1.6}
+  .note--tip{border-left-color:var(--ink-3)}
+  .note--tip b{color:var(--ink)}
+  .note--warn{border-left-color:var(--amber)}
+  .note--warn b{color:var(--amber)}
+  .note--danger{border-left-color:var(--red);background:color-mix(in srgb,var(--red) 7%,var(--paper))}
+  .note--danger b{color:var(--red)}
+
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:18px 0 22px}
+  ol.steps li{position:relative;padding:0 0 16px 44px;margin:0;color:var(--ink-2);line-height:1.6}
+  ol.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-size:12px;font-weight:600;color:var(--red);
+    border:1px solid var(--line);width:30px;height:30px;display:grid;place-items:center}
+  ol.steps li b{color:var(--ink)}
+
+  footer{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 22px 60px;
+    border-top:1px solid var(--ink);font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-3);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  footer .sp{flex:1}
+  footer b{color:var(--ink)}
+
+  /* terminal syntax colors (editor-style) */
+  .term .c-com{color:#6a9955;font-style:italic}
+  .term .c-prompt{color:#ff6b59;font-weight:600}
+  .term .c-cmd{color:#569cd6}
+  .term .c-sub{color:#dcdcaa}
+  .term .c-flag{color:#c586c0}
+  .term .c-str{color:#ce9178}
+  .term .c-path{color:#9cdcfe}
+  .term .c-num{color:#b5cea8}
+  .term .c-add{color:#6a9955}
+  .term .c-del{color:#f14c4c}
+  .term .c-conf{color:#d7ba7d;font-weight:600}
+  .term pre{color:#cfcabd}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <span class="dot"></span>
+    <span>G-200-VCS-0001</span>
+    <span class="hideSm">STATUS: <span class="tstat">FIELD ACTIVE</span></span>
+    <span class="sp"></span>
+    <span class="hideSm">AUTHORITY: SUPERVISED / VCS</span>
+    <button class="toggle" id="themeBtn" aria-label="Toggle color theme"><span class="sw"></span><span id="themeLabel">LIGHT</span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-rule">
+    <span class="cr"></span>
+    <span>G-200-VCS-0001</span>
+    <span class="sp"></span>
+    <span class="hideSm">FIELD MANUAL / VERSION CONTROL</span>
+  </div>
+  <div class="hero-top">
+    <h1 class="htitle">Version<br>Control with<br><span class="r">Git.</span></h1>
+    <div class="hspec">
+      <div><span class="k">DOCUMENT ID:</span> <span class="v">G200-GIT-SPEC-01.0</span></div>
+      <div><span class="k">CLASS:</span> <span class="v">DISTRIBUTED VERSION CONTROL</span></div>
+      <div><span class="k">SCOPE:</span> <span class="v">CLI / BRANCH / MERGE / PR</span></div>
+      <div><span class="alert">STATUS: FIELD MANUAL READY</span></div>
+      <div class="big247">CMD<i>/7</i></div>
+    </div>
+  </div>
+</section>
+
+<div class="bignum-wrap" aria-hidden="true">
+  <div class="bignum"><span class="layer">GIT</span><span class="band">GIT</span></div>
+</div>
+
+<div class="hero-foot">
+  <span class="cr"></span>
+  <span>SECTIONS: 07</span>
+  <span class="sp"></span>
+  <span class="hideSm">UNIT ID: G-200-CLI-9001</span>
+  <span class="hideSm">BUILD: <b>COMMAND LINE PROFICIENCY</b></span>
+</div>
+
+<div class="lede0">
+  <p>This is a field manual, not a cheat sheet. We follow <b>Sahil</b>, a developer getting back into code after a year away, as he rebuilds his Git instincts one real problem at a time. By the end you will know the everyday commands, how branches and merges actually work under the hood, how to dig yourself out of a broken merge, what a pull request really is, and the habits that keep a project's history readable a year later.</p>
+</div>
+
+<div class="shell">
+  <aside>
+    <div class="alabel">Index / 07 Sections</div>
+    <nav id="toc">
+      <a href="#basics"><span class="ix">01</span><span>Basics: everyday commands</span></a>
+      <a href="#branch"><span class="ix">02</span><span>Branching: parallel work</span></a>
+      <a href="#merge"><span class="ix">03</span><span>Merging: joining work</span></a>
+      <a href="#conflicts"><span class="ix">04</span><span>Conflicts &amp; undoing</span></a>
+      <a href="#remotes"><span class="ix">05</span><span>Working with remotes</span></a>
+      <a href="#pr"><span class="ix">06</span><span>Pull Requests</span></a>
+      <a href="#best"><span class="ix">07</span><span>Best practices</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <section id="basics">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 01</span><span class="l">/ FOUNDATION</span></div>
+        <h2>Basics: the everyday commands</h2>
+      </div>
+<p class="lede">Before you can do anything fancy with Git, you need the handful of commands you will run dozens of times a day.</p>
+
+<p>Sahil is starting a small web app called <em>taskboard</em>, a simple board where people add and tick off tasks. He has not touched Git in about a year, so the muscle memory is gone. Rather than memorising a wall of commands, he is going to learn the daily loop: set things up once, save snapshots of his work, and look back when something breaks. Everything in this section happens on his own machine. Sharing work with teammates lives in a separate "Working with remotes" section later, so we will not touch that here.</p>
+
+<h3 class="sub">1. First-time setup (you do this once per machine)</h3>
+
+<p>When Sahil makes a commit, Git stamps it with a name and email so the history shows who did what. If he never sets these, Git either complains or guesses badly. So the very first thing he does on a fresh machine is tell Git who he is. The <code>--global</code> flag means "remember this for every project on this computer," and Git stores it in a file in his home directory (<code>~/.gitconfig</code>).</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git config --global user.name "Sahil"
+$ git config --global user.email "sahil@example.com"
+
+# Make new repos start on a branch called "main" instead of "master"
+$ git config --global init.defaultBranch main
+
+# Check what Git thinks is true right now
+$ git config --global --list
+user.name=Sahil
+user.email=sahil@example.com
+init.defaultBranch=main</pre></div>
+
+<p>There are two levels of config, and the distinction matters. <strong>Global</strong> config (<code>--global</code>) applies to every repository for this user. <strong>Local</strong> config (no flag, run inside a repo) applies only to that one project and lives in its <code>.git/config</code> file. Local always wins over global. This is useful when Sahil wants to use a different email for a particular project (for example, a work email on a work repo) without changing his default everywhere.</p>
+
+<div class="note note--tip"><b>Tip</b><p>Run <code>git config --list --show-origin</code> when something looks wrong. It prints every setting and the exact file it came from, so you can see whether a value is coming from your global file or a local repo override.</p></div>
+
+<h3 class="sub">2. Starting a repository: init versus clone</h3>
+
+<p>Sahil already has a <code>taskboard</code> folder with a few files in it, so he is not copying anyone else's project. He wants to turn his existing folder into a tracked repository. That is what <code>git init</code> does. If instead he wanted to grab an existing project that already lives somewhere else, he would use <code>git clone</code> to make a full local copy. He does not need clone here, so init is the right tool.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ cd taskboard
+$ git init
+Initialized empty Git repository in /home/sahil/taskboard/.git/
+
+$ ls -a
+.  ..  .git  index.html  app.js  style.css</pre></div>
+
+<p>Notice the new <code>.git</code> folder. That hidden folder <em>is</em> the repository. It holds every commit, every branch, all the history, and the config for this project. Your actual files (<code>index.html</code>, <code>app.js</code>) sit next to it in plain view, but the entire memory of the project lives inside <code>.git</code>.</p>
+
+<div class="note note--warn"><b>Watch out</b><p>If you delete the <code>.git</code> folder, you delete the whole history. The working files remain, but every commit, branch, and saved snapshot is gone permanently. Treat <code>.git</code> as the heart of the repo and do not remove it unless you genuinely mean to un-track the project.</p></div>
+
+<h3 class="sub">3. The three areas (the mental model that makes Git click)</h3>
+
+<p>This is the single most important idea in this section, so let us tell it as a story. Sahil edits three files in one afternoon: he finishes a new "add task" button in <code>app.js</code>, he fixes a typo in <code>index.html</code>, and he starts some half-broken experimental styling in <code>style.css</code> that does not work yet. He wants to save the button and the typo fix together as one clean snapshot, but he absolutely does not want the broken styling in that snapshot. How does Git let him pick and choose? Through three areas.</p>
+
+<p>The <strong>working tree</strong> is your folder as it exists right now, with all your latest edits, finished or not. The <strong>staging area</strong> (also called the <strong>index</strong>) is a holding pen where you place exactly the changes you want in your next commit. The <strong>repository</strong> is the permanent history of committed snapshots, stored inside <code>.git</code>. The flow always goes in one direction: working tree, then staging area, then repository.</p>
+
+<p>The staging area is what trips most people up, so here is why it exists. It lets Sahil build a commit deliberately instead of dumping everything at once. He stages <code>app.js</code> and <code>index.html</code>, leaves the broken <code>style.css</code> alone, and commits. The result is one focused commit that says "add task button and fix heading typo," with the messy styling left out entirely. Good staging is the difference between a history you can read later and a pile of "fixed stuff" commits you will hate.</p>
+
+<h3 class="sub">4. git status (the command you run most)</h3>
+
+<p>Before doing anything, Sahil checks where things stand. <code>git status</code> is the command he runs more than any other. It shows which files are changed, which are staged for the next commit, and which Git is not tracking at all. Run it constantly. It is read-only and never changes anything, so there is no risk in checking.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git status
+On branch main
+
+No commits yet
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+        modified:   app.js
+        modified:   index.html
+        modified:   style.css
+
+nothing added to commit but untracked files present</pre></div>
+
+<h3 class="sub">5. git add (choosing what goes into the snapshot)</h3>
+
+<p>Now Sahil stages exactly what belongs in this commit. He adds the two finished files by name and deliberately leaves the broken <code>style.css</code> in the working tree. There are a few ways to add, and each has a purpose.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git add app.js</code><span>Stage one specific file.</span></div>
+  <div class="cmd"><code>git add app.js index.html</code><span>Stage several named files at once.</span></div>
+  <div class="cmd"><code>git add -A</code><span>Stage everything (new, modified, and deleted). Convenient, but it is easy to sweep in files you did not mean to.</span></div>
+  <div class="cmd"><code>git add -p</code><span>Step through your changes hunk by hunk and choose yes or no for each piece, even within a single file.</span></div>
+</div>
+
+<p>The <code>-p</code> (patch) mode is the power tool. If Sahil accidentally made two unrelated changes inside <code>app.js</code>, <code>git add -p</code> lets him stage only the part that belongs in this commit and leave the rest for later. It is how you keep commits clean even when your editing was messy.</p>
+
+<div class="note note--warn"><b>Watch out</b><p>The staging area is a snapshot of the file <em>at the moment you ran <code>git add</code></em>, not a live link to it. If you stage <code>app.js</code>, then edit <code>app.js</code> again, those newer edits are <strong>not</strong> staged. You must run <code>git add app.js</code> a second time to include them. Running <code>git status</code> will show the same file as both "staged" and "not staged" when this happens, which is your clue.</p></div>
+
+<h3 class="sub">6. git commit (saving the snapshot)</h3>
+
+<p>With the right files staged, Sahil records the snapshot into the repository. A commit needs a message describing what changed and why. The <code>-m</code> flag lets him write that message inline.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git add app.js index.html
+$ git commit -m "Add task button and fix heading typo"
+[main (root-commit) 9f2c1ab] Add task button and fix heading typo
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+# style.css is still sitting in the working tree, uncommitted, exactly as planned
+$ git status
+On branch main
+Changes not staged for commit:
+        modified:   style.css</pre></div>
+
+<div class="cmds">
+  <div class="cmd"><code>git commit -m "message"</code><span>Commit whatever is currently staged, with an inline message.</span></div>
+  <div class="cmd"><code>git commit -am "message"</code><span>Stage and commit all <em>already-tracked</em> modified files in one step. It skips <code>git add</code>, but it does NOT include brand-new untracked files.</span></div>
+  <div class="cmd"><code>git commit --amend</code><span>Replace the most recent commit with a new one (to fix the message or add a forgotten file).</span></div>
+</div>
+
+<p>The <code>-am</code> shortcut is handy once a file is already tracked, but remember its blind spot: a new file Git has never seen is untracked, and <code>-am</code> will silently ignore it. For new files you still need an explicit <code>git add</code> first.</p>
+
+<div class="note note--danger"><b>Destructive</b><p><code>git commit --amend</code> does not edit the last commit, it <strong>replaces</strong> it with a brand-new commit that has a different identity (a different hash). The old commit is discarded. This is perfectly safe for fixing a commit you have only made locally, which is exactly Sahil's situation here. It becomes genuinely dangerous once a commit has been shared with others, because you are rewriting history they already have. The rule of thumb: amend freely on commits that have never left your machine, and treat amend as off-limits for anything already shared.</p></div>
+
+<h3 class="sub">7. Looking back: log, show, and diff</h3>
+
+<p>A week later something is off, and Sahil wants to retrace his steps. Three commands cover almost all of this. <code>git log</code> shows the history of commits, <code>git show</code> zooms into one specific commit, and <code>git diff</code> shows changes that have not been committed yet. All three are read-only, so explore freely.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git log</code><span>Full commit history, newest first.</span></div>
+  <div class="cmd"><code>git log --oneline</code><span>One compact line per commit. The view you will use most.</span></div>
+  <div class="cmd"><code>git log --oneline --graph --all</code><span>Compact history drawn as an ASCII graph, across all branches. Great for seeing how branches relate.</span></div>
+  <div class="cmd"><code>git show &lt;commit&gt;</code><span>Show the message and the exact line changes for one commit.</span></div>
+  <div class="cmd"><code>git diff</code><span>Changes in the working tree that are NOT yet staged.</span></div>
+  <div class="cmd"><code>git diff --staged</code><span>Changes that ARE staged, the exact diff your next commit will record.</span></div>
+  <div class="cmd"><code>git diff HEAD</code><span>Everything different from the last commit, staged and unstaged together.</span></div>
+</div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git log --oneline --graph
+* 9f2c1ab Add task button and fix heading typo
+
+# What is different right now versus what I have staged?
+$ git diff
+diff --git a/style.css b/style.css
+@@ -4,3 +4,5 @@
+   color: #333;
++.task--done { opacity: 0.5; }   /* still experimenting */
+
+# And what would actually go into my next commit if I committed now?
+$ git diff --staged
+(no output: nothing is staged yet)</pre></div>
+
+<p>The key distinction: plain <code>git diff</code> answers "what have I changed but not yet staged?" while <code>git diff --staged</code> answers "what exactly am I about to commit?" Getting comfortable reading both is what lets you commit with confidence instead of hope.</p>
+
+<h3 class="sub">8. .gitignore (telling Git what to ignore)</h3>
+
+<p>Sahil's project soon grows a <code>node_modules</code> folder and some local log files. He never wants those in his history, and he is tired of seeing them clutter <code>git status</code>. A <code>.gitignore</code> file solves this. It is a plain text file, usually at the project root, listing patterns of files Git should pretend it does not see.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># .gitignore at the root of taskboard
+
+# Dependencies
+node_modules/
+
+# Logs and local files
+*.log
+.env
+
+# OS junk
+.DS_Store</pre></div>
+
+<p>There is one rule that bites people constantly, so be clear on it: <strong><code>.gitignore</code> only affects untracked files.</strong> If a file is already tracked (you committed it once before adding it to <code>.gitignore</code>), Git keeps tracking it and the ignore rule does nothing. To stop tracking something you already committed, you have to remove it from Git's tracking explicitly with <code>git rm --cached &lt;file&gt;</code>, and then commit that removal. The ignore rule alone is not enough.</p>
+
+<div class="note note--tip"><b>Tip</b><p>Add your <code>.gitignore</code> early, ideally right after <code>git init</code> and before your first commit. That way junk like <code>node_modules</code> never gets tracked in the first place, and you avoid the "already tracked" headache entirely.</p></div>
+
+<p>That is the complete local loop: configure once, init the repo, then edit, <code>status</code>, <code>add</code>, <code>commit</code>, and lean on <code>log</code> and <code>diff</code> to look back. Master this rhythm on your own machine first. Once it feels natural, the next section shows how branches let you work on several things at once without them colliding.</p>
+    </section>
+
+    <section id="branch">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 02</span><span class="l">/ BRANCHING</span></div>
+        <h2>Branching: parallel lines of work</h2>
+      </div>
+<p class="lede">Sahil's app works. Now he wants to add a login feature, and he is terrified of breaking the working code while he experiments.</p>
+
+<p>Here is the situation. Sahil has a project on the <code>main</code> branch that runs fine. He needs to build a new login feature, but that work will take days and involve half-broken code along the way. If he commits all of that directly onto <code>main</code>, anyone who pulls his code gets a broken app. He needs a parallel line of work that he can mess up freely, then merge in only when it is finished. That parallel line is a branch.</p>
+
+<p>The key thing to understand, and the thing that confuses most people, is what a branch actually <em>is</em>. A branch is not a copy of your files. It is not a folder. A branch is simply a movable pointer to a single commit. That is the whole definition. When Sahil makes a new commit on a branch, Git moves the branch pointer forward to that new commit. Because a branch is just a tiny file containing one commit ID (40 hexadecimal characters), creating a branch is instant and nearly free. You are not copying the project, you are writing down one address.</p>
+
+<h3 class="sub">Creating and listing branches</h3>
+
+<p>Sahil starts by seeing where he is and then creating a branch for his feature.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git branch</code><span>List local branches. The current one is marked with an asterisk.</span></div>
+  <div class="cmd"><code>git branch feature/login</code><span>Create a new branch pointing at the current commit. Does NOT switch to it.</span></div>
+  <div class="cmd"><code>git branch -a</code><span>List all branches, including remote-tracking ones.</span></div>
+  <div class="cmd"><code>git branch -d feature/login</code><span>Delete a branch, but only if it has been merged. Safe.</span></div>
+  <div class="cmd"><code>git branch -D feature/login</code><span>Force-delete a branch even if unmerged. Destructive.</span></div>
+  <div class="cmd"><code>git branch -m old-name new-name</code><span>Rename a branch.</span></div>
+</div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git branch
+* main
+$ git branch feature/login
+$ git branch
+  feature/login
+* main</pre></div>
+
+<p>Notice that after <code>git branch feature/login</code>, the asterisk is still on <code>main</code>. Creating a branch did not move Sahil onto it. Both branches now point at the exact same commit. Think of it as putting a second bookmark on the same page. Nothing has diverged yet.</p>
+
+<h3 class="sub">Switching: git switch and git checkout</h3>
+
+<p>To actually start working on the feature, Sahil has to move onto the branch. There are two commands that can do this, and there is a history worth knowing.</p>
+
+<p>For years, the one command <code>git checkout</code> did far too many different jobs. It switched branches, it restored individual files, it created detached states, and more. Overloading one verb with that many unrelated behaviors made it easy to do something you did not mean to do. So in Git 2.23 (2019) the maintainers split that behavior into two clearer commands: <code>git switch</code> for moving between branches, and <code>git restore</code> for throwing away changes to files. <code>git checkout</code> still works and is not deprecated, but for new learners <code>git switch</code> is the clearer mental model: it does one thing, it switches branches.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git switch feature/login</code><span>Move onto an existing branch.</span></div>
+  <div class="cmd"><code>git switch -c feature/login</code><span>Create a new branch AND switch to it in one step.</span></div>
+  <div class="cmd"><code>git switch -</code><span>Switch back to the previous branch you were on.</span></div>
+  <div class="cmd"><code>git checkout feature/login</code><span>Older equivalent of git switch (still works).</span></div>
+  <div class="cmd"><code>git checkout -b feature/login</code><span>Older equivalent of git switch -c.</span></div>
+</div>
+
+<p>The <code>-c</code> flag on <code>switch</code> (and the equivalent <code>-b</code> on <code>checkout</code>) is the one Sahil will use most. It collapses "create the branch" and "move onto it" into a single command, which is almost always what you want.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git switch -c feature/login
+Switched to a new branch 'feature/login'
+$ git branch
+* feature/login
+  main</pre></div>
+
+<p>Now the asterisk is on <code>feature/login</code>. Any commit Sahil makes lands here, and <code>main</code> stays frozen at the last good state. He can break things freely.</p>
+
+<h3 class="sub">HEAD and the detached HEAD state</h3>
+
+<p>There is one more pointer to understand, because it explains an error message that scares everyone the first time they see it. That pointer is called <code>HEAD</code>. Normally <code>HEAD</code> points at a branch (for example, it points at <code>feature/login</code>), and that branch points at a commit. This is how Git knows "where you are" and which branch to move forward when you commit.</p>
+
+<p>Sahil gets into trouble when he wants to inspect an old commit. Say he checks out a specific commit by its ID to see what the code looked like three commits ago.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git switch --detach 9f3c1a2
+HEAD is now at 9f3c1a2 Add password hashing
+$ git status
+HEAD detached at 9f3c1a2</pre></div>
+
+<p>Now <code>HEAD</code> points directly at a commit instead of at a branch. This is "detached HEAD". It is not an error and nothing is broken. But it is a warning worth taking seriously, because any commits Sahil makes here are not attached to any branch. They float. If he then switches away to another branch, those floating commits have no name pointing to them, and Git will eventually garbage-collect them. The work is effectively lost unless he wrote down the commit ID.</p>
+
+<div class="note note--warn"><b>Watch out</b><p>Commits made in detached HEAD belong to no branch. If you switch away without creating a branch first, those commits become unreachable and can be permanently deleted by Git's cleanup. To keep work made in this state, run <code>git switch -c some-new-branch</code> before leaving.</p></div>
+
+<p>Getting out is simple. To discard the detour and go back to normal work, Sahil just switches to a real branch. To keep what he did, he creates a branch from where he is standing first.</p>
+
+<ol class="steps">
+  <li>If you want to <strong>keep</strong> the work: run <code>git switch -c feature/experiment</code> to anchor these commits to a real branch.</li>
+  <li>If you want to <strong>abandon</strong> the detour: run <code>git switch main</code> (or any branch name) to reattach HEAD and return to normal.</li>
+</ol>
+
+<h3 class="sub">Tracking branches and upstream</h3>
+
+<p>So far everything Sahil did is local. To share the feature, he pushes it to a remote (for example, GitHub). The first time he pushes a new branch, he should set its "upstream", which links his local <code>feature/login</code> to the matching branch on the remote. Once that link exists, plain <code>git push</code> and <code>git pull</code> know where to go without him spelling out the remote and branch every time.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git push -u origin feature/login</code><span>Push the branch and set origin/feature/login as its upstream.</span></div>
+  <div class="cmd"><code>git branch -vv</code><span>List branches showing their upstream and how far ahead/behind they are.</span></div>
+  <div class="cmd"><code>git branch --set-upstream-to=origin/feature/login</code><span>Set the upstream for the current branch without pushing.</span></div>
+</div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git push -u origin feature/login
+ * [new branch]      feature/login -> feature/login
+branch 'feature/login' set up to track 'origin/feature/login'.
+$ git branch -vv
+* feature/login 4a1f9c0 [origin/feature/login] Add login form
+  main          7b2e8d1 [origin/main] Initial setup</pre></div>
+
+<p>The <code>-u</code> in <code>git push -u</code> is shorthand for <code>--set-upstream</code>. After running it once, Sahil can just type <code>git push</code> from this branch and Git knows it means <code>origin/feature/login</code>. The <code>[origin/feature/login]</code> shown by <code>git branch -vv</code> is the proof that the tracking link is set.</p>
+
+<h3 class="sub">Renaming a branch</h3>
+
+<p>Sahil realizes he named the branch poorly. Maybe he typed <code>feature/logn</code> with a typo. He renames it with <code>-m</code> (for "move").</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git branch -m feature/logn feature/login
+# rename the branch you are currently on (omit the old name):
+$ git branch -m feature/login</pre></div>
+
+<p>Renaming a local branch is purely local. If the old name was already pushed to the remote, renaming locally does not rename it on the remote. Sahil would have to push the new name and delete the old remote branch separately.</p>
+
+<h3 class="sub">Branch naming conventions</h3>
+
+<p>Branch names are just strings, so Git does not force any structure. But teams adopt prefixes so that a glance at the branch list tells you what each branch is for. The slash in names like <code>feature/login</code> is not a folder, it is just a convention that many Git tools display as a grouping.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>feature/login</code><span>A new feature. Use feature/ for additive work.</span></div>
+  <div class="cmd"><code>fix/null-pointer-on-logout</code><span>A bug fix. Use fix/ (or bugfix/) for corrections.</span></div>
+  <div class="cmd"><code>hotfix/payment-down</code><span>An urgent fix going straight to production.</span></div>
+  <div class="cmd"><code>chore/update-deps</code><span>Maintenance with no user-facing change.</span></div>
+</div>
+
+<p>Good names are lowercase, hyphen-separated, and short but descriptive. <code>feature/user-profile-avatar</code> tells the team exactly what is happening. <code>feature/stuff</code> tells them nothing.</p>
+
+<h3 class="sub">Branch issues and gotchas</h3>
+
+<p>This is where beginners get burned, so read it carefully.</p>
+
+<p><strong>Switching with uncommitted changes.</strong> Suppose Sahil edited a file on <code>feature/login</code> but has not committed it, then tries to switch to <code>main</code>. Git's behavior depends on whether the change conflicts. If the file he edited differs between the two branches, Git refuses to switch and warns him, so he does not silently lose work. If the change does not conflict, Git carries the uncommitted edit along with him to the other branch, which can be surprising. The clean habit is to commit or stash before switching, so switching is always predictable.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git switch main
+error: Your local changes to the following files would be overwritten by checkout:
+        src/auth.js
+Please commit your changes or stash them before you switch branches.
+Aborting</pre></div>
+
+<p><strong>Deleting a local branch versus a remote branch.</strong> These are two completely separate actions. <code>git branch -d feature/login</code> deletes only Sahil's local copy of the branch. The branch still exists on the remote and on every teammate's machine. To delete it on the remote, he needs a different command entirely.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git branch -d feature/login</code><span>Delete the LOCAL branch (if merged).</span></div>
+  <div class="cmd"><code>git push origin --delete feature/login</code><span>Delete the branch on the REMOTE.</span></div>
+  <div class="cmd"><code>git fetch --prune</code><span>Remove local references to remote branches that no longer exist.</span></div>
+</div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git push origin --delete feature/login
+ - [deleted]         feature/login</pre></div>
+
+<div class="note note--danger"><b>Destructive</b><p><code>git push origin --delete feature/login</code> removes the branch from the shared remote for everyone. If that branch held work that was never merged and never copied elsewhere, it is gone. Confirm the branch is merged (or no longer needed) before deleting it on the remote.</p></div>
+
+<p><strong>Stale branches.</strong> Over time, branches pile up. After a feature is merged and the remote branch is deleted, Sahil's machine still remembers the old remote-tracking reference (<code>origin/feature/login</code>) until he prunes it. Running <code>git fetch --prune</code> (or <code>git remote prune origin</code>) cleans out references to remote branches that no longer exist, so <code>git branch -a</code> stops showing ghosts. Deleting merged local branches regularly, and pruning, keeps the branch list honest and readable, which matters more than it sounds when a project has been running for months.</p>
+    </section>
+
+    <section id="merge">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 03</span><span class="l">/ MERGING</span></div>
+        <h2>Merging: bringing work back together</h2>
+      </div>
+I'll write this section directly. The task is teaching content with strict HTML output, so I'll produce the inner HTML now.
+
+<p class="lede">Sahil's <code>add-search</code> branch is finished and tested. Now he needs that work to live in <code>main</code> where everyone else can see it.</p>
+
+<p>Merging is the act of taking the commits from one branch and weaving them into another. Sahil has been committing happily on his feature branch while <code>main</code> kept moving (or maybe it sat still). His job now is to combine the two histories into one. Git gives him a few ways to do this, and the difference between them is not cosmetic. It changes the actual shape of your project's history, which is the thing you will stare at for years when you run <code>git log</code> trying to understand why something broke.</p>
+
+<p>The mental model to hold onto: a branch is just a movable label pointing at one commit. <code>main</code> points at a commit, <code>add-search</code> points at another. Merging asks Git to reconcile those two pointers.</p>
+
+<h3 class="sub">Fast-forward: when main never moved</h3>
+
+<p>Suppose Sahil branched off <code>main</code>, did his work, and nobody else touched <code>main</code> in the meantime. The history is a straight line. <code>main</code> is sitting at commit C, and <code>add-search</code> has carried on to E. There is no divergence, no competing work. In this case Git does the simplest possible thing: it slides the <code>main</code> label forward to point at E. That is a fast-forward. No new commit is created, because none is needed. The line was already straight.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>before fast-forward:
+
+A---B---C          (main)
+         \
+          D---E    (add-search)
+
+$ git switch main
+$ git merge add-search
+Updating c3d4e5f..e5f6a7b
+Fast-forward
+ src/search.js | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+after fast-forward:
+
+A---B---C---D---E  (main, add-search)</pre></div>
+
+<p>Notice that after the fast-forward, both labels point at the same commit and the history shows no trace that a branch ever existed. That is fine for tiny changes, but it can erase the story of "these five commits were one feature." Sometimes you want that story preserved, which is where <code>--no-ff</code> comes in.</p>
+
+<h3 class="sub">A true merge commit: when both branches moved</h3>
+
+<p>Now the realistic case. While Sahil was building search, a teammate merged a bugfix into <code>main</code>. The histories have diverged: <code>main</code> has a commit Sahil's branch does not have, and Sahil's branch has commits <code>main</code> does not have. There is no straight line to slide along anymore. Git cannot fast-forward. Instead it creates a brand new commit, called a merge commit, that has two parents: the tip of <code>main</code> and the tip of <code>add-search</code>. This commit is the knot that ties the two histories together.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>before merge (diverged):
+
+A---B---C---F        (main)   &lt;- teammate's bugfix F
+         \
+          D---E      (add-search)
+
+$ git switch main
+$ git merge add-search
+Merge made by the 'recursive' strategy.
+ src/search.js | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+after merge (M has two parents, F and E):
+
+A---B---C---F---M    (main)
+         \     /
+          D---E      (add-search)</pre></div>
+
+<p>If the same lines were edited on both sides, Git stops and reports a merge conflict instead of finishing. It cannot guess whose version wins, so it hands the decision to you. You edit the conflicted files, run <code>git add</code> on them, and then <code>git commit</code> to complete the merge. Conflicts are normal, not a sign you did something wrong.</p>
+
+<h3 class="sub">Forcing a merge commit with --no-ff</h3>
+
+<p>Recall the fast-forward case erased the fact that a feature existed as a group of commits. Many teams dislike that, because it makes it hard to see and to revert a feature as a unit. The flag <code>--no-ff</code> tells Git: even if you could fast-forward, do not. Create a merge commit anyway. The result is a visible bubble in the graph that says "this clump of commits was one feature, merged on this date." It also gives you a single commit to revert if the whole feature turns out to be a mistake.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git switch main
+$ git merge --no-ff add-search
+Merge made by the 'recursive' strategy.
+
+A---B---C-------M    (main)
+         \     /
+          D---E      (add-search)</pre></div>
+
+<p>Use <code>--no-ff</code> when you care about traceability of features, which is most of the time on a team. Use a plain fast-forward when the change is trivial and you do not want noise in the graph.</p>
+
+<h3 class="sub">Rebase: the other way to bring work together</h3>
+
+<p>Merging preserves exactly what happened, including the fact that two branches existed in parallel. Rebasing tells a different story. Instead of tying histories together with a merge commit, <code>git rebase</code> picks up Sahil's commits, sets them aside, moves his branch's starting point to the current tip of <code>main</code>, and then replays his commits one by one on top. The result is a straight line again, as if Sahil had started his work from the latest <code>main</code> all along.</p>
+
+<p>The key word is replays. Rebase does not move your original commits. It creates new commits with the same changes but different parents, which means they get new commit hashes. Your old commits are abandoned (Git keeps them in the reflog for a while, but they are no longer on your branch). This is exactly why rebasing rewrites history.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>before rebase (diverged):
+
+A---B---C---F        (main)
+         \
+          D---E      (add-search)
+
+$ git switch add-search
+$ git rebase main
+Successfully rebased and updated refs/heads/add-search.
+
+after rebase (D and E replayed as D' and E' on top of F):
+
+A---B---C---F---D'---E'   (add-search)
+            ^
+            (main still at F until you merge)</pre></div>
+
+<p>The typical workflow Sahil would use: from his feature branch, run <code>git rebase main</code> to replant his work on top of the latest <code>main</code>, resolve any conflicts as the commits replay, then switch to <code>main</code> and do a fast-forward merge. The end result is a perfectly linear history with no merge bubbles, which many people find far easier to read.</p>
+
+<div class="note note--warn"><b>Watch out</b><p>The golden rule of rebasing: never rebase commits that you have already pushed and that other people may have pulled. Because rebase replaces commits with new ones (new hashes), anyone who based work on the old commits now has a diverging history. Their next pull turns into a tangle, and someone usually "fixes" it with a force push that destroys a teammate's work. Rebase freely on your own local, unpushed branch. Once it is shared, merge instead.</p></div>
+
+<h3 class="sub">Merge versus rebase: the honest trade-off</h3>
+
+<p>This is a genuine trade-off, not a case where one is simply correct. Merge keeps history truthful and non-destructive: it records exactly what happened, parallel branches and all, and it never alters existing commits. The cost is a messier graph full of merge commits that can be noisy on a busy project. Rebase gives you a clean, linear, easy-to-read history that is pleasant to bisect through later. The cost is that it rewrites commits, so it is dangerous on shared branches, and the linear history is a slight fiction (it pretends work happened sequentially when it did not). A common team compromise: rebase your own feature branch to keep it current and tidy, then merge it into <code>main</code> with <code>--no-ff</code> so the feature stays visible as a unit.</p>
+
+<h3 class="sub">Cherry-pick: grabbing a single commit</h3>
+
+<p>Sometimes Sahil does not want a whole branch. Maybe one commit on <code>add-search</code> fixes a typo that is also broken on <code>main</code> right now, and he cannot wait for the whole feature to merge. <code>git cherry-pick</code> copies the changes from one specific commit and applies them as a new commit on his current branch. Like rebase, it creates a new commit with a new hash, because it is the same change applied in a different place, not the same commit moved.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git switch main
+$ git log --oneline add-search
+e5f6a7b add search keyboard shortcut
+d4c3b2a fix typo in error message   &lt;- want just this one
+a1b2c3d add search input component
+
+$ git cherry-pick d4c3b2a
+[main 9f8e7d6] fix typo in error message
+ 1 file changed, 1 insertion(+), 1 deletion(-)</pre></div>
+
+<p>Use cherry-pick sparingly. If you cherry-pick a commit now and later merge the whole branch, the same change can show up twice, which sometimes causes conflicts. It is a precision tool for "I need exactly this one fix over here," not a general way to move work around.</p>
+
+<div class="cmds">
+  <div class="cmd"><code>git merge &lt;branch&gt;</code><span>Combine the named branch into your current branch. Fast-forwards if possible, otherwise creates a merge commit.</span></div>
+  <div class="cmd"><code>git merge --no-ff &lt;branch&gt;</code><span>Force a merge commit even when a fast-forward was possible, keeping the feature visible as a unit.</span></div>
+  <div class="cmd"><code>git rebase main</code><span>From your feature branch, replay your commits on top of the latest <code>main</code>. Rewrites your commits (new hashes).</span></div>
+  <div class="cmd"><code>git rebase --abort</code><span>Bail out of an in-progress rebase and return your branch to how it was before you started.</span></div>
+  <div class="cmd"><code>git rebase --continue</code><span>After resolving a conflict during a rebase and staging the fix, resume replaying the remaining commits.</span></div>
+  <div class="cmd"><code>git cherry-pick &lt;hash&gt;</code><span>Apply the changes from one specific commit as a new commit on your current branch.</span></div>
+  <div class="cmd"><code>git merge --abort</code><span>Cancel an in-progress merge that hit conflicts and restore the pre-merge state.</span></div>
+</div>
+
+<div class="note note--tip"><b>Tip</b><p>When you are unsure what a merge or rebase will do to your history, look first with <code>git log --oneline --graph --all</code>. It draws the commit graph in your terminal so you can see the branches and where they point before you change anything.</p></div>
+    </section>
+
+    <section id="conflicts">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 04</span><span class="l">/ RECOVERY</span></div>
+        <h2>Fixing conflicts &amp; undoing mistakes</h2>
+      </div>
+I'll write this teaching section. Since the global instructions exempt teaching content from caveman mode and require clear full prose, I'll write accordingly.
+
+<p class="lede">Sahil runs a merge, and instead of a clean "all done," Git stops cold and says <code>CONFLICT</code>. This is the moment most people panic. It is also the moment Git is actually being honest with you.</p>
+
+<p>Sahil has been working on a branch called <code>feature-login</code>. While he was busy, a teammate changed the same file on <code>main</code>. Now Sahil tries to merge <code>main</code> into his branch, and Git hits a wall. Here is the thing to understand first: a merge conflict is not Git breaking. It is Git refusing to guess. When two branches change the same lines of the same file in different ways, Git has no way to know which version you actually want, so it stops and hands the decision back to you. That is the correct behavior. The alternative (silently picking one) would quietly destroy work.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git merge main
+Auto-merging src/auth.js
+CONFLICT (content): Merge conflict in src/auth.js
+Automatic merge failed; fix conflicts and then commit the result.
+
+$ git status
+On branch feature-login
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add &lt;file&gt;..." to mark resolution)
+        both modified:   src/auth.js</pre></div>
+
+<p>Notice that Git tells you exactly what to do next, right there in the output. Read it. Git is not cryptic here. It says which files conflicted, and it reminds you of both ways out: resolve and commit, or abort entirely.</p>
+
+<h3 class="sub">Reading the conflict markers</h3>
+
+<p>When Sahil opens <code>src/auth.js</code>, he finds his code has been rewritten with strange lines of angle brackets and equals signs. These are conflict markers. Git did not corrupt the file. It inserted both versions side by side and asked Sahil to choose. Here is what he sees:</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>src/auth.js</em></div><pre>function login(user) {
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+  return checkPassword(user, "sha256");
+=======
+  return checkPassword(user, "bcrypt");
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main
+}</pre></div>
+
+<p>Read these markers carefully, because they have a precise meaning. Everything between <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> and <code>=======</code> is the version on your current branch (HEAD, which is Sahil's <code>feature-login</code>). Everything between <code>=======</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code> is the version coming in from the branch you are merging (<code>main</code>). The <code>=======</code> line is just the divider between the two sides. It is not part of your code.</p>
+
+<p>To resolve the conflict, Sahil decides what the final code should actually be. Maybe he wants his version, maybe theirs, maybe a blend of both. Then he deletes all three marker lines and leaves only the real code he wants to keep. The markers must be gone completely. If even one <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> survives, you have a broken file and probably a broken build.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>src/auth.js (resolved)</em></div><pre>function login(user) {
+  return checkPassword(user, "bcrypt");
+}</pre></div>
+
+<h3 class="sub">The resolve loop</h3>
+
+<p>Resolving a conflict is always the same rhythm, no matter how many files are involved. Sahil edits each conflicted file by hand, then tells Git "this one is settled" with <code>git add</code>, and once every file is settled he finishes the merge with a commit. The <code>git add</code> step is what marks a file as resolved. Until you add it, Git still considers the conflict open.</p>
+
+<ol class="steps">
+<li>Open each conflicted file and edit it so it contains exactly the code you want, with all conflict markers removed.</li>
+<li>Run <code>git add &lt;file&gt;</code> on each file you have fixed. This marks the conflict as resolved.</li>
+<li>Check <code>git status</code> until no unmerged paths remain.</li>
+<li>Finish with <code>git commit</code> (or <code>git merge --continue</code>, which does the same thing for a merge and pre-fills the message).</li>
+</ol>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># after editing src/auth.js to remove markers
+$ git add src/auth.js
+$ git status
+On branch feature-login
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+$ git commit
+[feature-login 3f9a2c1] Merge branch 'main' into feature-login</pre></div>
+
+<h3 class="sub">Seeing the conflict with git diff</h3>
+
+<p>While a merge is in progress, <code>git diff</code> behaves differently than usual. Instead of comparing two simple snapshots, it shows you a combined diff of the conflicted regions, which side each change came from, and what is still unresolved. This is useful when a file has many conflicts and Sahil wants a quick map of what still needs his attention before he commits.</p>
+
+<h3 class="sub">Bailing out safely</h3>
+
+<p>Sometimes Sahil looks at the conflict, realizes he is not ready to deal with it, or started the merge from the wrong branch entirely. He does not have to push through. He can abandon the whole operation and return to exactly where he was before he started.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># bail out of a merge that hit conflicts
+$ git merge --abort
+
+# bail out of a rebase that hit conflicts
+$ git rebase --abort</pre></div>
+
+<p>Both of these are safe and put your branch back to the state it was in before the merge or rebase began. They are the correct escape hatch when you are mid-conflict and want to step away cleanly. Note that they only work while the operation is still in progress. Once you have committed the merge, you need the undo tools below instead.</p>
+
+<div class="note note--tip"><b>Tip</b><p>If you almost always want one side of a conflict for a specific file, you can take it wholesale: <code>git checkout --ours path/to/file</code> keeps your current branch's version, and <code>git checkout --theirs path/to/file</code> takes the incoming branch's version. Then <code>git add</code> the file as usual. "Ours" means HEAD (the branch you are on), "theirs" means the branch being merged in. Be careful: this replaces the entire file, not just the conflicting lines.</p></div>
+
+<h3 class="sub">Undo and recover</h3>
+
+<p>Conflicts are one kind of mess. The other kind is "I did something and now I want it gone." Git has a recovery tool for almost every situation, but they are not interchangeable, and a few of them throw work away permanently. The single most important skill here is knowing how dangerous each command is before you run it. Let us go from gentlest to most destructive.</p>
+
+<p><b>Discard changes you have not committed.</b> Sahil edited a file, hated the result, and wants the file back the way it was at the last commit. <code>git restore &lt;file&gt;</code> throws away the uncommitted edits in that file. This is mildly destructive: the edits are gone, because uncommitted work is the one thing Git cannot recover for you. There is no version of it stored anywhere.</p>
+
+<p><b>Unstage something you added too early.</b> Sahil ran <code>git add</code> on a file he did not mean to include yet. <code>git restore --staged &lt;file&gt;</code> moves it back out of the staging area without touching the file's contents. This is completely safe. Your edits are untouched; you have only changed what is queued for the next commit.</p>
+
+<p><b>Move the branch backward with reset.</b> When Sahil wants to undo one or more commits, he uses <code>git reset</code>, and the mode he picks decides what happens to his work. This is where people lose files, so read these three carefully.</p>
+
+<div class="cmds">
+<div class="cmd"><code>git reset --soft HEAD~1</code><span>Undo the last commit but keep all its changes staged, ready to recommit. Safe. Nothing is lost.</span></div>
+<div class="cmd"><code>git reset --mixed HEAD~1</code><span>Undo the last commit and unstage its changes, but keep them in your working files. This is the default. Safe.</span></div>
+<div class="cmd"><code>git reset --hard HEAD~1</code><span>Undo the last commit AND delete its changes from your working files entirely. Destructive.</span></div>
+</div>
+
+<div class="note note--danger"><b>Destructive</b><p><code>git reset --hard</code> permanently discards your uncommitted changes and throws away the commits you reset past. If those changes were never committed, they are gone for good and even <code>git reflog</code> cannot bring them back. Only run <code>--hard</code> when you are certain you want to lose that work. When in doubt, use <code>--soft</code> or <code>--mixed</code> instead, which keep your changes around.</p></div>
+
+<p><b>Undo a commit that other people already have.</b> Reset rewrites history by moving the branch pointer, which is fine on your own private branch but dangerous on a shared branch, because everyone else's history will no longer match yours. The safe public undo is <code>git revert</code>. Instead of erasing a commit, it creates a brand new commit that applies the exact opposite changes. History stays intact, nothing is rewritten, and your teammates can pull normally.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># a08fe21 is the bad commit you want to undo on a shared branch
+$ git revert a08fe21
+[main 7c1d04e] Revert "Add broken password check"</pre></div>
+
+<p><b>Fix the commit you just made.</b> Sahil committed, then immediately noticed a typo in the message or a file he forgot to include. <code>git commit --amend</code> replaces the most recent commit with a new one. Stage anything you forgot, run the amend, and the last commit is rebuilt. Be aware that amend rewrites that commit, so if you already pushed it, you have the same shared-history problem as reset. Amend freely on commits you have not pushed.</p>
+
+<p><b>Save your work to switch context mid-change.</b> Sahil is halfway through editing when an urgent bug comes in on another branch. He is not ready to commit a half-finished change, but he cannot switch branches with a dirty working tree cleanly. <code>git stash</code> tucks all his uncommitted changes away on a shelf and gives him a clean working tree. He fixes the bug, switches back, and runs <code>git stash pop</code> to bring his half-done work back exactly as it was.</p>
+
+<div class="cmds">
+<div class="cmd"><code>git stash</code><span>Save all uncommitted changes aside and revert your working tree to clean.</span></div>
+<div class="cmd"><code>git stash list</code><span>Show all the stashes you have saved.</span></div>
+<div class="cmd"><code>git stash pop</code><span>Reapply the most recent stash and remove it from the stash list.</span></div>
+</div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git stash
+Saved working directory and index state WIP on feature-login: 3f9a2c1
+$ git switch main
+# ... fix the urgent bug, commit it ...
+$ git switch feature-login
+$ git stash pop
+# your half-finished changes are back</pre></div>
+
+<h3 class="sub">The safety net: git reflog</h3>
+
+<p>Here is the command that turns most "I destroyed my work" panics into "oh, it's fine." Git keeps a private log of every place HEAD has pointed, including commits you reset past, rebased away, or otherwise "lost." That log is the reflog. As long as a change was committed at some point, the reflog almost certainly still has a reference to it, even after a hard reset.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git reflog
+3f9a2c1 HEAD@{0}: reset: moving to HEAD~1
+a08fe21 HEAD@{1}: commit: Add broken password check
+7c1d04e HEAD@{2}: commit: Add login form
+
+# Sahil sees the commit he thought he lost is a08fe21
+$ git reset --hard a08fe21
+# or, to inspect it safely first:
+$ git checkout a08fe21</pre></div>
+
+<p>So if Sahil ever runs a reset and his heart sinks, his first move is <code>git reflog</code>, not despair. He finds the commit hash from before the mistake and resets or checks it back out. The one thing reflog cannot save is work that was never committed at all, which is exactly why committing often is itself a recovery strategy.</p>
+
+<div class="note note--danger"><b>Destructive</b><p><code>git push --force</code> overwrites the branch on the remote with your local version, deleting any commits on the remote that you do not have. On a shared branch this can erase a teammate's work permanently and there is no reflog on their machine to save you from your decision. If you genuinely must force push after an amend or rebase, use <code>git push --force-with-lease</code> instead. It refuses to overwrite if someone else has pushed since you last fetched, which is the guardrail that keeps a force push from silently destroying work you did not know about.</p></div>
+    </section>
+
+    <section id="remotes">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 05</span><span class="l">/ DISTRIBUTED</span></div>
+        <h2>Working with remotes: going distributed</h2>
+      </div>
+<p class="lede">Sahil's taskboard works on his laptop, but a project that lives in one place is one spilled coffee away from gone. Time to share it.</p>
+
+<p>So far Sahil has been committing happily on his own machine. The history is real, the branches work, everything is fine. But his repository exists in exactly one location: a folder on his laptop. If the disk dies, the project dies with it. And his teammate Priya cannot see a single line of it. Both problems have the same answer, which is to put a copy of the repository somewhere they can both reach, like GitHub.</p>
+
+<h3 class="sub">The core idea: Git is distributed</h3>
+
+<p>Here is the part that trips up people coming from older tools. In Git there is no single "master" copy that everyone connects to. Sahil's local repository is complete and self-sufficient. It has the entire history, every branch, every commit, all stored right there in the <code>.git</code> folder. He can commit, branch, and look at history with the network unplugged.</p>
+
+<p>A "remote" is simply another full copy of that same repository living somewhere else, usually on a server like GitHub or GitLab. By strong convention, the first remote you add is named <code>origin</code>. The name is just a label, a nickname for a URL, so Sahil types <code>origin</code> instead of pasting a long address every time.</p>
+
+<p>Now, the subtle bit. When Sahil connects to <code>origin</code>, Git keeps two kinds of branches in his local repo. There are his <b>local branches</b> (like <code>main</code>), which are the ones he actually commits to and moves around. And there are <b>remote-tracking branches</b> (like <code>origin/main</code>), which are Git's read-only memory of where that branch was on the server the last time he talked to it. Think of <code>origin/main</code> as a bookmark, a snapshot saying "this is where the server's main branch stood when I last checked." It does not update on its own. It only moves when Sahil explicitly fetches or pushes. Keeping these two ideas separate is the single most useful mental model for everything that follows.</p>
+
+<h3 class="sub">git remote: introducing Sahil's repo to the server</h3>
+
+<p>Sahil created his repo with <code>git init</code>, which sets up a local repository but does not know about any server. (If he had instead run <code>git clone</code> on an existing project, Git would have set up <code>origin</code> for him automatically. That is the main practical difference between the two.) So he goes to GitHub, creates an empty repository called <code>taskboard</code>, and tells his local repo where it lives.</p>
+
+<div class="cmds"><div class="cmd"><code>git remote add origin &lt;url&gt;</code><span>Register a remote named "origin" pointing at the given URL.</span></div><div class="cmd"><code>git remote -v</code><span>List remotes with their fetch and push URLs (verbose).</span></div><div class="cmd"><code>git remote rename origin upstream</code><span>Rename a remote.</span></div><div class="cmd"><code>git remote remove origin</code><span>Forget a remote. This does not touch your commits, only the bookmark to the server.</span></div></div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git remote add origin https://github.com/sahil/taskboard.git
+$ git remote -v
+origin  https://github.com/sahil/taskboard.git (fetch)
+origin  https://github.com/sahil/taskboard.git (push)</pre></div>
+
+<p>Nothing has been uploaded yet. All Sahil did was write down an address. The commits are still only on his laptop.</p>
+
+<h3 class="sub">git push: sending commits up, and linking the branches</h3>
+
+<p>Now Sahil actually sends his work to the server. The first push is slightly special. He uses <code>-u</code> (the short form of <code>--set-upstream</code>) to do two things at once: upload his <code>main</code> branch, and permanently link his local <code>main</code> to <code>origin/main</code>.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># First push: upload main AND set up tracking
+$ git push -u origin main
+Enumerating objects: 12, done.
+To https://github.com/sahil/taskboard.git
+ * [new branch]      main -&gt; main
+branch 'main' set up to track 'origin/main'.
+
+# Every push after this can be just:
+$ git push</pre></div>
+
+<p>That tracking link is what "upstream" means, and it is pure convenience. Once <code>main</code> tracks <code>origin/main</code>, Sahil can type a bare <code>git push</code> and Git knows where to send it. He also gets handy status lines like "Your branch is ahead of origin/main by 2 commits" when he runs <code>git status</code>, because Git can now compare his local branch against its remote-tracking bookmark. Without <code>-u</code>, he would have to spell out <code>git push origin main</code> every single time.</p>
+
+<div class="cmds"><div class="cmd"><code>git push -u origin main</code><span>First push of a branch: upload it and set upstream tracking.</span></div><div class="cmd"><code>git push</code><span>Push the current branch to its tracked upstream (after -u is set once).</span></div><div class="cmd"><code>git push origin main</code><span>Explicitly push a named branch to a named remote.</span></div></div>
+
+<h3 class="sub">git fetch vs git pull: the difference that bites beginners</h3>
+
+<p>A few days later Priya has pushed her own commits to <code>origin</code>. Sahil wants them. There are two commands here, and confusing them is one of the most common sources of beginner panic, so be precise about what each one does.</p>
+
+<p><code>git fetch</code> downloads new commits from the server and updates Sahil's remote-tracking branches (<code>origin/main</code> moves forward). It does <b>not</b> touch his working files and does <b>not</b> move his local <code>main</code>. It is completely safe: nothing he is editing changes, no merge happens, no conflict can occur. After a fetch, Sahil can inspect what arrived before deciding what to do with it.</p>
+
+<p><code>git pull</code> is two commands glued together: it runs <code>git fetch</code> and then immediately <code>git merge</code> to integrate those new commits into his current branch. This does change his working files, and if Priya edited the same lines he did, this is the moment a merge conflict appears. With <code>--rebase</code>, the second step becomes <code>git rebase</code> instead of <code>git merge</code>, which replays his local commits on top of Priya's for a cleaner, straight-line history.</p>
+
+<div class="cmds"><div class="cmd"><code>git fetch origin</code><span>Download new commits and update origin/* pointers. Working files untouched.</span></div><div class="cmd"><code>git pull</code><span>fetch + merge into the current branch. Changes your files.</span></div><div class="cmd"><code>git pull --rebase</code><span>fetch + rebase your local commits on top. Keeps history linear.</span></div><div class="cmd"><code>git log --oneline origin/main</code><span>Inspect what you fetched before integrating it.</span></div></div>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># SAFE: see what's new without changing anything
+$ git fetch origin
+From https://github.com/sahil/taskboard
+   a1b2c3d..e4f5g6h  main -&gt; origin/main
+
+$ git status
+Your branch is behind 'origin/main' by 1 commit, and can be fast-forwarded.
+
+# Now look at exactly what Priya did before touching your files
+$ git log --oneline main..origin/main
+e4f5g6h Add filter buttons to task list
+
+# Happy with it? THEN integrate. This is what pull would have done in one step.
+$ git merge origin/main
+Updating a1b2c3d..e4f5g6h
+Fast-forward</pre></div>
+
+<div class="note note--tip"><b>Tip</b><p>When in doubt, fetch first. <code>git fetch</code> can never lose or scramble your work, because it only updates the read-only <code>origin/*</code> bookmarks and leaves your files and local branches exactly as they were. <code>git pull</code> is just fetch with an automatic integration step bolted on. Splitting them lets you look before you leap.</p></div>
+
+<h3 class="sub">The "rejected, non-fast-forward" error</h3>
+
+<p>Here is the scenario that will eventually happen to Sahil. He made a commit locally. Meanwhile, Priya pushed a commit to <code>origin/main</code> that he does not have yet. Sahil runs <code>git push</code> and Git refuses:</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git push
+To https://github.com/sahil/taskboard.git
+ ! [rejected]        main -&gt; main (non-fast-forward)
+error: failed to push some refs to 'https://github.com/sahil/taskboard.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. Integrate the remote changes (e.g. 'git pull ...')
+hint: before pushing again.</pre></div>
+
+<p>This is not a bug, it is Git protecting shared work. The server's <code>main</code> has moved ahead of where Sahil thinks it is, so accepting his push would mean throwing away Priya's commit. Git will not silently do that. The fix is exactly what the hint says: bring her work into your branch first, then push.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># Integrate Priya's commit, replaying yours on top for a clean line
+$ git pull --rebase
+From https://github.com/sahil/taskboard
+   a1b2c3d..e4f5g6h  main -&gt; origin/main
+Successfully rebased and updated refs/heads/main.
+
+# Now your branch builds ON TOP of hers, so the push is a fast-forward
+$ git push
+To https://github.com/sahil/taskboard.git
+   e4f5g6h..9z8y7x6  main -&gt; main</pre></div>
+
+<p>If the rebase or merge surfaces a conflict because you both edited the same lines, Git pauses and asks you to resolve it. That is normal collaboration, not an error, and the conflicts section covers resolving them in detail.</p>
+
+<div class="note note--danger"><b>Destructive</b><p>You may be tempted to "fix" a rejected push with <code>git push --force</code>. On a shared branch this is genuinely dangerous: it overwrites whatever is on the server with your version, permanently deleting any commits (like Priya's) that you do not have locally. Her work is simply gone from the server, and she will get errors on her next pull. Never force-push a branch other people use. If you absolutely must rewrite a branch only you own, use <code>git push --force-with-lease</code> instead. It refuses to overwrite if the remote has moved since you last fetched, so it cannot silently clobber commits you have not seen.</p></div>
+
+<h3 class="sub">A typical day in the loop</h3>
+
+<p>Once the model clicks, Sahil's daily rhythm with the server settles into a small, predictable loop. Pull first so he is building on the latest shared work, then do his actual changes, commit them locally, and push them up for Priya to see.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre># 1. Start the day on top of everyone else's work
+$ git pull --rebase
+
+# 2. Do the work, then stage and commit it locally
+$ git add .
+$ git commit -m "Add due-date field to tasks"
+
+# 3. Share it
+$ git push</pre></div>
+
+<p>That is the whole heartbeat of distributed work: integrate, build, record, share. Master this loop and remotes stop feeling mysterious. They are just other copies of your repository that you periodically sync with, on your terms, with commands whose effects you can now predict.</p>
+    </section>
+
+    <section id="pr">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 06</span><span class="l">/ COLLABORATION</span></div>
+        <h2>Pull Requests: review &amp; merge</h2>
+      </div>
+Here is the inner HTML for the section body.
+
+<p class="lede">A Pull Request is not a Git command. It is a conversation built on top of a push.</p>
+
+<p>Sahil has finished his work on a branch called <code>feature/login-form</code>. The commits are good, the branch is pushed to the remote, and the code works on his machine. In a solo project he would just merge it into <code>main</code> and move on. But Sahil is on a team now, and the team has a rule: nothing reaches <code>main</code> without another person looking at it first. This is where a Pull Request comes in.</p>
+
+<p>A Pull Request (called a Merge Request on GitLab, the same idea under a different name) is a formal request to merge one branch into another, usually your feature branch into <code>main</code>. The important thing to understand is that the PR itself is a feature of the hosting platform, GitHub, GitLab, or Bitbucket, and not part of Git itself. Git knows about commits, branches, and remotes. It has no concept of a "review" or an "approval." The platform wraps a branch comparison in a web page that adds discussion, line-by-line comments, automated checks, and an approval workflow. When you click the merge button, the platform runs an ordinary <code>git merge</code> on the server for you.</p>
+
+<h3 class="sub">Fork model versus branch model</h3>
+
+<p>There are two ways to get your code into a position where a PR can be opened, and which one you use depends on whether you can write to the repository directly. In the branch model, Sahil has push access to the team's repository, so he pushes a branch straight to it and opens the PR from that branch. This is normal for company teams and private projects. In the fork model, Sahil does not have write access (this is the usual situation when contributing to someone else's open-source project), so he first creates a fork, which is his own server-side copy of the repository, pushes his branch to the fork, and opens the PR from his fork into the original repository. The review and merge experience is identical. The only difference is where the branch physically lives.</p>
+
+<h3 class="sub">The lifecycle, step by step</h3>
+
+<p>Here is the full journey Sahil's change takes, from finished commits to merged code. Each step has a clear purpose, so it helps to know why it exists and not just the order.</p>
+
+<ol class="steps">
+<li>Sahil pushes his branch to the remote with <code>git push -u origin feature/login-form</code>. Nothing is reviewed yet. He has only made his commits visible to others.</li>
+<li>He opens a Pull Request on the platform, choosing his branch as the source and <code>main</code> as the target. He writes a title and a description explaining what changed and why.</li>
+<li>Continuous Integration (CI) checks fire automatically. These are scripts the team configured to run tests, linters, and builds against the PR. If they fail, the PR is marked with a red status and usually cannot be merged until they pass.</li>
+<li>A teammate reviews the diff and leaves comments. These can be general remarks or comments pinned to specific lines of code.</li>
+<li>If the reviewer wants changes, they formally "request changes," which blocks the merge until resolved. Sahil does not open a new PR. He simply makes more commits on the same branch and pushes again.</li>
+<li>Because the PR tracks the branch, the new commits appear in the same PR automatically and CI re-runs. The review continues on the updated code.</li>
+<li>Once satisfied, the reviewer approves the PR. With approvals in place and CI green, the merge button unlocks.</li>
+<li>The PR is merged into <code>main</code> using one of the three merge strategies below, and the feature branch can then be deleted.</li>
+</ol>
+
+<h3 class="sub">The three merge strategies</h3>
+
+<p>When the merge button is finally pressed, the platform offers up to three ways to fold the branch into <code>main</code>. They produce genuinely different history, so the choice matters.</p>
+
+<p>A <b>merge commit</b> keeps every commit from the branch exactly as it was and adds one extra commit that ties the two histories together. This preserves the true sequence of what happened, but if Sahil made ten messy "fix typo" commits, all ten land in <code>main</code> and clutter the log. A <b>squash merge</b> collapses every commit on the branch into a single new commit on <code>main</code>. The history stays clean and each PR becomes one tidy entry, but the granular step-by-step commits are lost. A <b>rebase merge</b> replays each branch commit one by one directly onto the tip of <code>main</code> with no merge commit, producing a perfectly linear history, but it rewrites the commit hashes and loses the record that these commits ever lived on a separate branch.</p>
+
+<div class="note note--warn"><b>Watch out</b><p>Squash and rebase merges rewrite history. The commits that end up on <code>main</code> are brand new objects with different hashes than the ones on Sahil's branch. After the merge he should delete his local feature branch and pull <code>main</code> fresh rather than trying to reuse or re-merge the old branch, because Git no longer sees those commits as the same.</p></div>
+
+<h3 class="sub">Doing it from the terminal with the gh CLI</h3>
+
+<p>Sahil does not have to leave the command line to open or check out a PR. GitHub ships a tool called <code>gh</code> that talks to the platform's API. With it he can create a PR straight after pushing, and a teammate can pull down Sahil's PR branch by its number to test it locally without manually figuring out the remote and branch names.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git push -u origin feature/login-form
+# branch pushed and tracking set up
+
+$ gh pr create --base main --head feature/login-form --title "Add login form" --body "Implements the sign-in screen"
+# opens the PR and prints its URL
+https://github.com/acme/webapp/pull/42
+
+# a teammate checks out the PR locally to test it
+$ gh pr checkout 42
+Switched to branch 'feature/login-form'
+
+$ gh pr status
+# shows the PR's checks, reviews, and merge state</pre></div>
+
+<div class="cmds">
+<div class="cmd"><code>git push -u origin &lt;branch&gt;</code><span>Push your branch to the remote and set it to track, the prerequisite for opening a PR.</span></div>
+<div class="cmd"><code>gh pr create</code><span>Open a Pull Request from the current (or specified) branch into a target branch.</span></div>
+<div class="cmd"><code>gh pr checkout &lt;number&gt;</code><span>Check out someone else's PR branch locally by its PR number to test it.</span></div>
+<div class="cmd"><code>gh pr status</code><span>Show the state of the PR: CI checks, reviews, and whether it can merge.</span></div>
+<div class="cmd"><code>git fetch &amp;&amp; git pull origin main</code><span>After the PR merges, refresh your local <code>main</code> so it includes the merged work.</span></div>
+<div class="cmd"><code>git branch -d &lt;branch&gt;</code><span>Delete the now-merged local feature branch to keep things tidy.</span></div>
+</div>
+
+<div class="note note--tip"><b>Tip</b><p>Open the PR early, even before the work is finished, as a Draft Pull Request. It lets CI run on every push and gives teammates a place to comment on direction before Sahil has poured hours into the wrong approach. You mark it ready for review only once it is actually done.</p></div>
+    </section>
+
+    <section id="best">
+      <div class="sec-head">
+        <div class="sec-tag"><span>SEC 07</span><span class="l">/ DISCIPLINE</span></div>
+        <h2>Best practices: keeping history sane</h2>
+      </div>
+I'll write this section following the teaching style rules. Let me produce the inner HTML directly.
+
+<p class="lede">A year from now, Sahil will open this repo and read its history like a story. Whether that story makes sense is decided today, one habit at a time.</p>
+
+<p>When Sahil's team started their app, history was a junk drawer. Commits like "stuff", "fix", and "wip again" piled up. Six months later nobody could answer a simple question: when did the login bug get introduced, and why? The fix was not a tool. It was a set of conventions everyone agreed to follow. None of these are enforced by Git itself, which is exactly why they matter. Git happily lets you do the wrong thing forever.</p>
+
+<h3 class="sub">Atomic commits: one logical change each</h3>
+
+<p>An atomic commit captures exactly one logical change and nothing else. When Sahil renames a function and also fixes an unrelated typo in the footer, those belong in two separate commits. The reason is not tidiness for its own sake. It is that <code>git revert</code>, <code>git cherry-pick</code>, and <code>git bisect</code> all operate on whole commits. If the rename and the typo fix are glued together, Sahil cannot undo one without dragging the other along. Use <code>git add -p</code> to stage selected hunks when you accidentally mixed two changes in your working tree, so each commit stays focused.</p>
+
+<div class="note note--tip"><b>Tip</b><p>A good test: can you describe the commit in one sentence without using the word "and"? If you need "and", it is probably two commits.</p></div>
+
+<h3 class="sub">Commit messages that still make sense later</h3>
+
+<p>A commit message is a note to a future stranger, and that stranger is usually you. The convention most teams follow is the 50/72 rule. The subject line stays at or under 50 characters, written in the imperative mood, as if completing the sentence "If applied, this commit will...". So Sahil writes "Add password reset endpoint", not "Added password reset" and not "Adding password reset". This matches the voice Git itself uses for its automated messages like "Merge branch".</p>
+
+<p>If the change needs explanation, leave a blank line after the subject, then write a body wrapped at around 72 characters. The body is where the <em>why</em> lives. The diff already shows what changed. What it cannot show is why Sahil chose this approach, what he ruled out, or which bug report drove it. That context is what saves an hour of archaeology next year.</p>
+
+<p>Many teams formalize this with Conventional Commits, where the subject starts with a type, such as <code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>, or <code>chore:</code>. This is not just decoration. Tooling can read those prefixes to generate changelogs and bump version numbers automatically, so a <code>feat:</code> bumps a minor version and a <code>fix:</code> bumps a patch.</p>
+
+<div class="term"><div class="term-bar"><i></i><i></i><i></i><em>terminal</em></div><pre>$ git commit
+# Editor opens. Sahil writes:
+
+feat: add rate limiting to login endpoint
+
+Brute-force attempts were not throttled, so an attacker could
+guess passwords as fast as the network allowed. This caps each
+IP at 5 attempts per minute using the existing Redis store.
+
+Closes #142</pre></div>
+
+<h3 class="sub">Commit early and often, but clean the noise before sharing</h3>
+
+<p>These two ideas seem to contradict each other, but they do not. While Sahil is working locally, he should commit constantly, even messy "checkpoint" commits, because a commit is a save point he can return to. The freedom to experiment safely comes from committing often. The catch is that this messy local history should not become everyone else's problem. Before he pushes a branch for review, Sahil tidies it with an interactive rebase, squashing five "wip" commits into one or two clean, atomic ones.</p>
+
+<div class="note note--danger"><b>Destructive</b><p>Rebasing and squashing rewrite history by creating new commits with new hashes and discarding the old ones. Only ever rewrite commits that live solely on your own un-shared branch. Rewriting commits others have already pulled forces them into a painful manual recovery, and on a shared branch a <code>git push --force</code> can silently erase a teammate's work. Use <code>git push --force-with-lease</code> instead, which refuses to push if someone else has updated the branch since you last fetched.</p></div>
+
+<h3 class="sub">Never commit secrets or large binaries</h3>
+
+<p>This is the rule with the longest blast radius. The moment Sahil commits an API key or a database password, it is in the history permanently. Deleting it in a later commit does nothing, because the secret still sits in every clone of the repo, recoverable from the old commit. The only real fix is to rotate the leaked credential (assume it is now public) and then rewrite history with a tool like <code>git filter-repo</code>, which is slow and disruptive for everyone. Prevention is enormously cheaper than the cure.</p>
+
+<p>Prevention has two layers. First, a <code>.gitignore</code> file that lists things Git should never track, such as <code>.env</code> files, <code>node_modules/</code>, build output, and large media. Second, a guard like the git-secrets tool, which installs a pre-commit hook that scans staged changes for patterns that look like keys and blocks the commit before the mistake can happen. Large binaries deserve their own warning: Git stores a full new copy of a binary on every change (it cannot diff them efficiently), so committing big files bloats the repo permanently for everyone who clones it. Reach for Git LFS if you genuinely need to version large assets.</p>
+
+<div class="note note--warn"><b>Watch out</b><p>Adding a secret to <code>.gitignore</code> after you have already committed it does nothing. The file is already tracked, so Git keeps watching it. You must untrack it with <code>git rm --cached &lt;file&gt;</code>, and you must still rotate the leaked secret because it remains in history.</p></div>
+
+<h3 class="sub">Pull with rebase to avoid noisy merge bubbles</h3>
+
+<p>When Sahil runs a plain <code>git pull</code> and his local branch has diverged from the remote, Git creates an extra "merge commit" just to stitch the two together. Do that a few dozen times and the history fills with meaningless "Merge branch main into main" bubbles that drown out the real work. Pulling with rebase instead replays Sahil's local commits on top of the freshly fetched ones, producing a clean, linear history with no junk merge commit. He can set this as the default so he never has to remember.</p>
+
+<h3 class="sub">Short-lived branches and a deployable main</h3>
+
+<p>The longer a branch lives, the further it drifts from <code>main</code>, and the more painful the eventual merge becomes. Sahil's team keeps feature branches small and short-lived, ideally merged within a day or two, so conflicts stay tiny. The companion rule is that <code>main</code> is always deployable. Nobody pushes half-finished work directly to <code>main</code>; broken or experimental code stays on a branch. This way, if production catches fire, the team can ship from <code>main</code> at any moment with confidence.</p>
+
+<h3 class="sub">Review before merge, and tag your releases</h3>
+
+<p>Every change reaching <code>main</code> goes through review via a pull request. Review is not about distrust. It is a second pair of eyes that catches bugs early and spreads knowledge of the codebase so no single person becomes a bottleneck. Finally, when the team ships a real release, they mark it with an annotated tag. An annotated tag (created with <code>-a</code>) is a full object that stores a message, the tagger, and a date, unlike a lightweight tag which is just a bare pointer. That metadata is what lets Sahil answer "what exactly did we ship as v1.2.0 last quarter?" without guessing.</p>
+
+<div class="cmds">
+<div class="cmd"><code>git config --global pull.rebase true</code><span>Make every pull rebase instead of creating merge commits.</span></div>
+<div class="cmd"><code>git config --global commit.verbose true</code><span>Show the full diff in the commit message editor so you write better messages.</span></div>
+<div class="cmd"><code>git push --force-with-lease</code><span>Safely overwrite a rewritten branch; aborts if a teammate pushed first.</span></div>
+<div class="cmd"><code>git rm --cached &lt;file&gt;</code><span>Stop tracking a file (such as a leaked secret) without deleting it locally.</span></div>
+<div class="cmd"><code>git tag -a v1.2.0 -m "Release 1.2.0"</code><span>Create an annotated, message-bearing release tag on the current commit.</span></div>
+<div class="cmd"><code>git push origin v1.2.0</code><span>Push a single tag to the remote (tags are not pushed by default).</span></div>
+<div class="cmd"><code>git tag</code><span>List all tags in the repository.</span></div>
+</div>
+
+<div class="note note--tip"><b>Tip</b><p>Tag names like <code>v1.2.0</code> follow semantic versioning: bump the first number for breaking changes, the second for new features, the third for bug fixes. Pair this with Conventional Commits and the version bump can be derived from your commit history automatically.</p></div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span>CLASS 4 / FIELD MANUAL</span>
+  <span class="sp"></span>
+  <span>UNIT ID: G-200-CLI-9001</span>
+  <span>BUILD: COMMAND LINE PROFICIENCY</span>
+</footer>
+
+<script>
+  // reading progress
+  var prog=document.getElementById('progress');
+  function onScroll(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    prog.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  // active TOC via IntersectionObserver
+  var links=[].slice.call(document.querySelectorAll('#toc a'));
+  var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){l.classList.remove('active');});
+        var a=map[e.target.id];if(a)a.classList.add('active');
+      }
+    });
+  },{rootMargin:'-110px 0px -65% 0px'});
+  document.querySelectorAll('main section').forEach(function(s){io.observe(s);});
+
+  // theme toggle (persisted, respects OS on first visit)
+  var root=document.documentElement,btn=document.getElementById('themeBtn'),lbl=document.getElementById('themeLabel');
+  var saved=localStorage.getItem('git-theme');
+  if(saved){root.setAttribute('data-theme',saved);}
+  else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){root.setAttribute('data-theme','dark');}
+  function syncLabel(){lbl.textContent=root.getAttribute('data-theme')==='dark'?'DARK':'LIGHT';}
+  syncLabel();
+  btn.addEventListener('click',function(){
+    var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);localStorage.setItem('git-theme',next);syncLabel();
+  });
+
+
+  // editor-style highlighting for terminal blocks
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function hlCmd(cmd){
+    var parts=cmd.match(/("[^"]*"|'[^']*'|\s+|[^\s]+)/g)||[cmd];
+    var wi=0,out='';
+    parts.forEach(function(tok){
+      if(/^\s+$/.test(tok)){out+=tok;return;}
+      var cls='';
+      if(/^["']/.test(tok))cls='c-str';
+      else if(/^-/.test(tok))cls='c-flag';
+      else if(wi===0&&/^(git|cd|ls|cat|echo|rm|mv|cp|mkdir|vim|nano|code)$/.test(tok))cls='c-cmd';
+      else if(wi===1)cls='c-sub';
+      else if(/[\/.]/.test(tok)&&!/^\.{1,2}$/.test(tok))cls='c-path';
+      else if(/^[0-9a-f]{6,40}$/.test(tok))cls='c-num';
+      out+=cls?('<span class="'+cls+'">'+esc(tok)+'</span>'):esc(tok);
+      wi++;
+    });
+    return out;
+  }
+  function hlLine(line){
+    var lead=(line.match(/^\s*/)||[''])[0];
+    var rest=line.slice(lead.length);
+    if(rest.indexOf('#')===0) return '<span class="c-com">'+esc(line)+'</span>';
+    if(rest.indexOf('$ ')===0) return esc(lead)+'<span class="c-prompt">$</span> '+hlCmd(rest.slice(2));
+    if(/^[<>=]{7}/.test(rest)) return '<span class="c-conf">'+esc(line)+'</span>';
+    if(rest.indexOf('+')===0) return '<span class="c-add">'+esc(line)+'</span>';
+    if(rest.indexOf('-')===0&&rest.indexOf('--')!==0) return '<span class="c-del">'+esc(line)+'</span>';
+    return esc(line);
+  }
+  document.querySelectorAll('.term pre').forEach(function(pre){
+    pre.dataset.raw=pre.innerText;
+    pre.innerHTML=pre.textContent.split('\n').map(hlLine).join('\n');
+  });
+
+  // copy buttons on terminals
+  document.querySelectorAll('.term').forEach(function(t){
+    var pre=t.querySelector('pre');if(!pre)return;
+    var b=document.createElement('button');b.className='copy';b.textContent='COPY';
+    b.addEventListener('click',function(){
+      var txt=(pre.dataset.raw||pre.innerText).split('\n').filter(function(l){return l.indexOf('$ ')===0;}).map(function(l){return l.slice(2);}).join('\n')||pre.innerText;
+      navigator.clipboard.writeText(txt).then(function(){b.textContent='COPIED';setTimeout(function(){b.textContent='COPY';},1400);});
+    });
+    t.appendChild(b);
+  });
+</script>
+</body>
+</html>

@@ -79,8 +79,9 @@ export const COURSES = [
     tint: "#fbeee9",
     text: "#2a1206",
     blurb:
-      "Version control that finally clicks — branches, merges, rebases, and history surgery.",
-    status: "soon",
+      "Version control that finally clicks. The everyday commands, branching, merging and rebasing, fixing conflicts and undoing mistakes, working with remotes, and pull requests. One field manual, seven sections, dark and light.",
+    status: "live",
+    href: "/learn/git",
     logo: "/images/learn/git.svg",
   },
   {

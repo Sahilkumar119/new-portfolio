@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Hidden } from "@material-ui/core";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
@@ -6,7 +6,6 @@ import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { FooterText } from "../components/footer/FooterText";
 import { SocialIcons } from "../components/content/SocialIcons";
 import { NavigationButtons } from "../components/navigation/NavigationButtons";
-import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
 import { blogPosts } from "../data/blogPosts";
 import Resume from "../settings/resume.json";
@@ -257,6 +256,16 @@ export const BlogPost = () => {
         window.scrollTo(0, 0);
     }, [slug]);
 
+    // three.js split out of main bundle: load decorative sphere after mount.
+    const [Sphere, setSphere] = useState(null);
+    useEffect(() => {
+        let alive = true;
+        import("../components/background/DisplacementSphere").then((m) => {
+            if (alive) setSphere(() => m.default);
+        });
+        return () => { alive = false; };
+    }, []);
+
     const renderContent = () => {
         if (!post?.content) return null;
         // Parse markdown to HTML and sanitize
@@ -268,7 +277,7 @@ export const BlogPost = () => {
 
     const chrome = (
         <>
-            <DisplacementSphere />
+            {Sphere && <Sphere />}
             <Hidden smDown><NavigationButtons /></Hidden>
             <ThemeToggle />
             <Hidden smDown><SocialIcons /></Hidden>

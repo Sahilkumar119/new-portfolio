@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Content } from '../components/content/Content';
 import { Hidden } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import DisplacementSphere from '../components/background/DisplacementSphere';
 import { ThemeToggle } from '../components/theme/ThemeToggle';
 import { FooterText } from '../components/footer/FooterText';
 import { SocialIcons } from '../components/content/SocialIcons';
@@ -65,6 +64,20 @@ const useStyles = makeStyles(() => ({
 
 export const Home = () => {
     const classes = useStyles();
+
+    // three.js (~600K) split out of the main bundle: load the decorative
+    // background sphere only after the client mounts, so it never sits in the
+    // FCP critical path. Functional setState form stores the component instead
+    // of React calling it as an updater.
+    const [Sphere, setSphere] = useState(null);
+    useEffect(() => {
+        let alive = true;
+        import('../components/background/DisplacementSphere').then((m) => {
+            if (alive) setSphere(() => m.default);
+        });
+        return () => { alive = false; };
+    }, []);
+
     return (
         <div className={classes.root}>
             <div className={classes.glowBlue}  aria-hidden="true" />
@@ -78,7 +91,7 @@ export const Home = () => {
             
             {/* Scrollable Content */}
             <div className={classes.heroWrapper}>
-                <DisplacementSphere /> {/* Hero background */}
+                {Sphere && <Sphere />} {/* Hero background, lazy-loaded */}
                 <Content /> {/* Hero content */}
             </div>
             

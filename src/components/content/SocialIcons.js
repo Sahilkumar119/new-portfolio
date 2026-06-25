@@ -2,7 +2,8 @@ import React from 'react';
 import { Link, Tooltip, Zoom } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Resume from '../../settings/resume.json';
-import { MorphPanel } from '../ui/ai-input';
+// Ask AI button disabled — rail re-centers on its own when MorphPanel is gone.
+// import { MorphPanel } from '../ui/ai-input';
 
 const useStyles = makeStyles(() => ({
     rail: {
@@ -76,17 +77,12 @@ const useStyles = makeStyles(() => ({
 export const SocialIcons = () => {
     const classes = useStyles();
     const profiles = Resume.basics.profiles || [];
-    const insertAt = Math.ceil(profiles.length / 2);
 
     return (
         <div className={classes.rail}>
-            {profiles.map((item, index) => (
+            {profiles.map((item) => (
                 <React.Fragment key={item.network}>
-                    {index === insertAt && (
-                        <div className={classes.aiWrap}>
-                            <MorphPanel />
-                        </div>
-                    )}
+                    {/* Ask AI button removed; icons close the gap and stay centered. */}
                     <Tooltip title={item.network} placement="top" TransitionComponent={Zoom} arrow>
                         <Link
                             href={item.url}

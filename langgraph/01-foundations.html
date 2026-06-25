@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LangGraph Module 01: Foundations (The Graph Mental Model)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+    --bg:#000000;
+    --surface:#0a0a0a;
+    --surface-2:#111111;
+    --muted:#171717;
+    --line:#262626;
+    --line-soft:#1f1f1f;
+    --fg:#f5f5f5;
+    --fg-dim:#b3b3b3;
+    --fg-faint:#7a7a7a;
+    --primary:#f0f0f0;
+    --accent:#e5e5e5;
+    --accent-dim:#a3a3a3;
+    --node:#d4d4d4;
+    --blue:#cfcfcf;
+    --violet:#c7c7c7;
+    --cyan:#bdbdbd;
+    --amber:#d0d0d0;
+    --red:#bcbcbc;
+    --code:#0b0f14;
+    --radius:14px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 2px rgba(0,0,0,.45);
+    --shadow-2:0 8px 30px rgba(0,0,0,.4);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
+    font-feature-settings:"cv05","ss01";}
+  a{color:var(--accent);text-decoration:none;transition:color .18s var(--ease)}
+  a:hover{color:#f5f5f5}
+  ::selection{background:rgba(255,255,255,.28)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;
+    background:linear-gradient(90deg,var(--node),var(--accent),var(--cyan));transition:width .1s linear}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(0,0,0,.82);
+    backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#262626,#d4d4d4);color:#111111}
+  .brand .crumb{color:var(--fg-faint);font-weight:400}
+  .brand .crumb b{color:var(--fg-dim);font-weight:500}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .pill b{color:var(--accent)}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+
+  .shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;
+    grid-template-columns:248px minmax(0,1fr);gap:48px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+
+  aside{position:sticky;top:72px;align-self:start;padding:32px 0;max-height:calc(100vh - 72px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--fg-faint);padding:0 12px;margin-bottom:10px}
+  aside nav{display:flex;flex-direction:column;gap:1px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;
+    color:var(--fg-faint);font-size:13.5px;font-weight:500;line-height:1.3;
+    border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:16px;height:16px;flex:none;opacity:.7}
+  aside nav a:hover{background:var(--surface);color:var(--fg-dim)}
+  aside nav a.active{color:var(--fg);background:var(--surface);border-left-color:var(--accent)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:18px 12px 0;font-size:12px;color:var(--fg-faint);line-height:1.5}
+  @media(max-width:1000px){
+    aside{position:static;max-height:none;padding:14px 0 4px;border-bottom:1px solid var(--line-soft)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px}
+    aside nav a.active{border-color:var(--accent)}
+    aside .scrollmsg,aside .label{display:none}
+  }
+
+  /* LangSmith-like TOC panel */
+  aside{background:#0a0a0a;border:1px solid #262626;border-radius:12px;padding:18px 10px}
+  aside .label{color:#7a7a7a;font-size:12px;letter-spacing:.08em;padding:0 12px;margin-bottom:8px}
+  aside nav a{color:#a3a3a3;font-weight:500;border-left:2px solid transparent;border-radius:0;padding:6px 12px;background:transparent}
+  aside nav a .ti{display:none}
+  aside nav a:hover{background:transparent;color:#d4d4d4}
+  aside nav a.active{color:#f5f5f5;background:transparent;border-left-color:#f5f5f5;padding-left:10px}
+  aside .scrollmsg{color:#7a7a7a}
+  @media(max-width:1000px){
+    aside{background:transparent;border:none;border-radius:0;padding:14px 0 4px}
+    aside nav a{border-radius:999px;border:1px solid var(--line);padding:7px 12px}
+    aside nav a.active{border-color:var(--accent);padding:7px 12px}
+  }
+
+  main{padding:36px 0 120px;min-width:0;max-width:760px}
+
+  .hero{padding:8px 0 30px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);padding:6px 13px;border-radius:999px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+  h1{font-size:clamp(30px,4.4vw,44px);line-height:1.12;margin:20px 0 14px;letter-spacing:-.025em;font-weight:700}
+  h1 .grad{background:linear-gradient(95deg,#f5f5f5,#d4d4d4 55%,#a1a1a1);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--fg-dim);font-size:18px;max-width:62ch;margin:0}
+  .lede em{color:var(--fg);font-style:normal;font-weight:500}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
+  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
+  .chip b{color:var(--accent);font-family:var(--mono)}
+
+  section{margin:0 0 12px;scroll-margin-top:88px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:52px 0 4px}
+  .sec-head .num{font-family:var(--mono);font-size:14px;color:#111111;font-weight:700;
+    width:36px;height:36px;display:grid;place-items:center;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,#f5f5f5,#d4d4d4);box-shadow:var(--shadow-1)}
+  h2{font-size:25px;margin:0;letter-spacing:-.015em;font-weight:650;line-height:1.25}
+  h3{font-size:18px;margin:30px 0 4px;color:var(--primary);font-weight:600}
+  p{margin:13px 0;max-width:68ch}
+  .sub{color:var(--fg-dim);font-size:14.5px}
+  strong{color:var(--fg)}
+
+  /* callouts */
+  .note{position:relative;border:1px solid var(--line);background:var(--surface);
+    padding:15px 18px 15px 48px;border-radius:12px;margin:20px 0}
+  .note .ic{position:absolute;left:16px;top:16px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--fg-faint);display:block;margin-bottom:4px}
+  .note p{margin:0}
+  .note.key{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.key .ic,.note.key .tag{color:var(--violet)}
+  .note.warn{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.warn .ic,.note.warn .tag{color:var(--amber)}
+  .note.danger{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.danger .ic,.note.danger .tag{color:var(--red)}
+  .note.info .ic,.note.info .tag{color:var(--blue)}
+  .note.info{border-color:rgba(255,255,255,.35)}
+  .note.story{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.story .ic,.note.story .tag{color:var(--accent)}
+  .note b{color:var(--fg)}
+
+  /* code */
+  .codeblock{background:var(--code);border:1px solid var(--line);border-radius:13px;margin:20px 0;
+    overflow:hidden;box-shadow:var(--shadow-2)}
+  .codeblock .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;
+    border-bottom:1px solid #1f2937;background:#0f1720}
+  .codeblock .bar .lights{display:flex;gap:6px}
+  .codeblock .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .codeblock .bar .r{background:#ff5f56}.codeblock .bar .y{background:#ffbd2e}.codeblock .bar .g{background:#27c93f}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11.5px;color:var(--fg-faint);margin-left:6px}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+    color:var(--fg-dim);background:transparent;border:1px solid var(--line);border-radius:7px;
+    padding:4px 9px;cursor:pointer;transition:all .18s var(--ease)}
+  .copybtn:hover{border-color:var(--accent);color:var(--accent)}
+  .copybtn svg{width:13px;height:13px}
+  .copybtn.done{color:var(--accent);border-color:var(--accent)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;
+    line-height:1.8;color:#dbeafe;overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.86em;background:#111827;border:1px solid #334155;padding:1.5px 6px;border-radius:6px;color:#c4b5fd;white-space:nowrap}
+  .cmt{color:#64748b}.kw{color:#facc15}.fn{color:#60a5fa}.str{color:#86efac}.num{color:#f59e0b}.cls{color:#22d3ee}.dec{color:#f472b6}.op{color:#c084fc}.prop{color:#a78bfa}
+
+  /* tables */
+  .tablewrap{margin:20px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow-1)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{background:var(--surface-2);color:var(--primary);font-size:11.5px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:#93c5fd}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--surface)}
+
+  /* concept cards */
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;
+    transition:transform .2s var(--ease),border-color .2s var(--ease)}
+  .card:hover{transform:translateY(-2px);border-color:var(--accent-dim)}
+  .card .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:11px;background:var(--muted)}
+  .card .ico svg{width:18px;height:18px}
+  .card h4{margin:0 0 5px;font-size:15px;font-weight:600;color:var(--fg)}
+  .card p{margin:0;font-size:13.5px;color:var(--fg-dim);max-width:none}
+  .ico.violet svg{color:var(--violet)} .ico.blue svg{color:var(--blue)} .ico.green svg{color:var(--node)}
+  .ico.amber svg{color:var(--amber)} .ico.cyan svg{color:var(--cyan)} .ico.teal svg{color:var(--accent)}
+
+  /* graph diagram */
+  .graph{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px 20px;
+    margin:22px 0;box-shadow:var(--shadow-1)}
+  .graph .flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px}
+  .graph .flow+.flow{margin-top:18px}
+  .gnode{font-family:var(--mono);font-size:12.5px;padding:11px 16px;border-radius:11px;border:1.5px solid;
+    background:#0f172a;font-weight:700;text-align:center;min-width:92px;line-height:1.3;transition:transform .2s var(--ease)}
+  .gnode:hover{transform:scale(1.04)}
+  .n-start{border-color:#64748b;color:#e2e8f0}
+  .n-node{border-color:#60a5fa;color:#f8fafc;box-shadow:0 0 0 3px rgba(96,165,250,.18)}
+  .n-cond{border-color:#a78bfa;color:#f8fafc}
+  .n-state{border-color:#22d3ee;color:#e2e8f0}
+  .n-end{border-color:#f59e0b;color:#fef3c7}
+  .edge{display:flex;flex-direction:column;align-items:center;line-height:1.15;padding:0 2px;flex:none}
+  .edge svg{width:22px;height:22px;color:#e5e7eb;stroke-width:1.8}
+  .edge b{font-family:var(--mono);color:#e5e7eb;font-size:11px;font-weight:600;margin-top:2px}
+  .edge.dash svg{color:#a78bfa;stroke-dasharray:3 3}
+  .edge.dash b{color:#c4b5fd}
+
+  /* anatomy */
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code);border:1px solid var(--line);
+    border-radius:13px;padding:24px 18px;margin:20px 0;text-align:center;line-height:2.6;box-shadow:var(--shadow-1)}
+  .anat .tok{padding:5px 10px;border-radius:8px;position:relative;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(125,211,252,.14);color:#d1d1d1}
+  .t2{background:rgba(255,255,255,.16);color:#f8fafc}
+  .t3{background:rgba(255,255,255,.15);color:#f8fafc}
+  .t4{background:rgba(255,255,255,.14);color:#d4d4d4}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:var(--fg-faint);margin-top:6px;letter-spacing:.03em}
+
+  /* challenge box */
+  .task{border:1px dashed rgba(255,255,255,.5);background:rgba(255,255,255,.04);border-radius:13px;
+    padding:16px 18px 16px 48px;margin:20px 0;position:relative}
+  .task .ic{position:absolute;left:15px;top:16px;width:20px;height:20px;color:var(--accent)}
+  .task .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:4px}
+  .task p{margin:0;font-size:14.5px;color:var(--fg-dim)}
+  .task b{color:var(--fg)}
+
+  /* Q&A accordion */
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:11px 0;overflow:hidden;transition:border-color .2s var(--ease)}
+  details[open]{border-color:rgba(255,255,255,.4)}
+  details:hover{border-color:var(--accent-dim)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11.5px;color:#111111;background:var(--accent);border-radius:6px;padding:3px 8px;flex:none;font-weight:600}
+  summary .star{color:var(--amber);flex:none;display:inline-flex}
+  summary .star svg{width:15px;height:15px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--fg-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--fg-dim);font-size:14.5px;border-top:1px solid var(--line-soft);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--fg)}
+
+  /* checklist */
+  .check{list-style:none;padding:0;margin:16px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .check li{padding:13px 16px 13px 48px;position:relative;border-bottom:1px solid var(--line-soft);font-size:14.5px}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:16px;top:14px;width:20px;height:20px;color:var(--node)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding-top:30px;color:var(--fg-dim);font-size:14.5px}
+  footer h3{margin:0 0 14px}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);
+    background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
+  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
+  .reflink:hover svg{color:var(--accent)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .next a{flex:1;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:13px;
+    padding:16px 18px;display:flex;flex-direction:column;gap:3px;transition:all .2s var(--ease)}
+  .next a:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .next small{color:var(--fg-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  .next b{font-size:15.5px;color:var(--fg);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:7px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+
+  .eyebrow{display:none !important}
+  .meta{display:none !important}
+  .note .tag{display:none !important}
+  aside .scrollmsg{display:none !important}
+  .pill{display:none !important}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .card:hover,.gnode:hover,.next a:hover,.reflink:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ░░ icon sprite (Lucide-style, no emoji) ░░ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M16.8 7.6 13.4 16M7.4 6h9.2"/></symbol>
+  <symbol id="i-node" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+  <symbol id="i-state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.58 16.5h12.85"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-arrows" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m17 2 4 4-4 4"/><path d="M3 6h18"/><path d="m7 22-4-4 4-4"/><path d="M21 18H3"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+  <symbol id="i-loop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M9 4v13M15 7v13"/></symbol>
+</svg>
+
+<!-- ░░ top bar ░░ -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-graph"/></svg></span>
+      <span class="crumb"><b>LangGraph Track</b> &nbsp;/&nbsp; Module 01 &nbsp;/&nbsp; Foundations</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Module 1 of 5</span>
+    <span class="pill"><b>~1.5h</b> · build along</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ░░ sidebar TOC ░░ -->
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#why"><svg class="ti"><use href="#i-help"/></svg>Why LangGraph exists</a>
+      <a href="#story"><svg class="ti"><use href="#i-bot"/></svg>Meet Sahil's agent</a>
+      <a href="#mental"><svg class="ti"><use href="#i-graph"/></svg>The graph mental model</a>
+      <a href="#state"><svg class="ti"><use href="#i-state"/></svg>State, the shared whiteboard</a>
+      <a href="#nodes"><svg class="ti"><use href="#i-node"/></svg>Nodes &amp; edges</a>
+      <a href="#build"><svg class="ti"><use href="#i-route"/></svg>Build your first graph</a>
+      <a href="#cond"><svg class="ti"><use href="#i-branch"/></svg>Conditional edges &amp; loops</a>
+      <a href="#messages"><svg class="ti"><use href="#i-bot"/></svg>MessagesState</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#questions"><svg class="ti"><use href="#i-help"/></svg>Interview check</a>
+    </nav>
+    <p class="scrollmsg">Type every skeleton yourself. The API sticks when your fingers learn it, not when your eyes skim it.</p>
+  </aside>
+
+  <!-- ░░ content ░░ -->
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>LangGraph · Module 01 · Foundations</span>
+      <h1>The <span class="grad">Graph Mental Model</span><br>state that flows through nodes</h1>
+      <p class="lede">This is the fast fresher on the basics. By the end you can picture <em>any</em> agent as a graph,
+      explain what state, nodes, and edges actually are, and build a tiny working graph from scratch. We move quick,
+      because the real climb starts in Module 02. <em>Build along, do not just read.</em></p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · build-along</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>no prior LangGraph needed</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>graph · state · nodes · edges</span>
+        <span class="chip"><svg><use href="#i-graph"/></svg>LangGraph 1.x · Python</span>
+      </div>
+    </div>
+
+    <!-- WHY -->
+    <section id="why">
+      <div class="sec-head"><span class="num">0</span><h2>Why this thing exists at all</h2></div>
+      <p>Imagine you wired up an LLM the obvious way: one function takes a question, calls the model, returns the answer.
+      That works until the moment the task needs more than one step. The model wants to search the web, read the result,
+      decide it needs to search again, and only then answer. Suddenly your one straight line of code has to loop, branch,
+      remember what it already found, and sometimes pause for a human to approve something. Stuff a few <code class="inl">if</code>
+      statements and <code class="inl">while</code> loops around the model call and within a week you have a tangle nobody can follow.</p>
+      <p>LangGraph exists to give that tangle a <strong>shape</strong>. Instead of control flow buried inside one giant function,
+      you describe your agent as a <strong>graph</strong>: small steps (nodes) connected by arrows (edges), all reading and writing
+      to one shared piece of data (state). The framework then runs the graph for you, step by step, and it can save progress,
+      resume after a crash, stream partial output, and stop to ask a human, all because the work is broken into named, inspectable pieces.</p>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">One sentence to remember</span>
+        <p>LangGraph is a way to model an agent as a <b>graph of steps over shared state</b>, so that control flow becomes
+        something you can see, persist, and control, instead of something hidden inside a wall of conditionals.</p></div>
+      <p>If you have used LangChain before, here is the honest framing: LangChain gives you the building blocks (models, tools,
+      prompts). LangGraph gives you the <strong>orchestration</strong>, the part that decides what runs next and carries state between steps.
+      You can use LangGraph completely on its own; it does not require the rest of LangChain.</p>
+    </section>
+
+    <!-- STORY -->
+    <section id="story">
+      <div class="sec-head"><span class="num">1</span><h2>Meet Sahil's research agent</h2></div>
+      <p>One character, one project, carried through all four modules. Sahil wants to build a <strong>research assistant</strong>:
+      you give it a question, it thinks, it looks things up, and it writes you a short answer. By Module 04 this becomes a small
+      team of cooperating agents. Right now, in Module 01, it is the simplest possible version: a question goes in, the model answers, done.</p>
+      <p>Sahil's first instinct is a single function. It is worth writing the naive version once, because seeing its limits is
+      the whole reason the graph idea will feel necessary rather than ceremonial.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">naive_agent.py · the version we will outgrow</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># Sahil's first attempt. Fine for one shot, painful the moment it needs to loop.</span>
+<span class="kw">def</span> <span class="fn">answer</span>(question):
+    reply = llm.invoke(question)     <span class="cmt"># one model call</span>
+    <span class="kw">return</span> reply.content
+
+<span class="cmt"># Now try to add: "if the model asks to search, search, then call it again".</span>
+<span class="cmt"># You start nesting if/while around the call. State lives in scattered local</span>
+<span class="cmt"># variables. There is no way to pause, save, or replay. This is the wall.</span></code></pre>
+      </div>
+      <div class="note story"><svg class="ic"><use href="#i-bot"/></svg><span class="tag">Sahil's problem</span>
+        <p>The instant the agent needs to <b>decide and loop</b>, a single function stops scaling. Sahil needs steps he can
+        name, a place to keep findings between steps, and someone to drive the loop. That someone is the LangGraph runtime.</p></div>
+    </section>
+
+    <!-- MENTAL MODEL -->
+    <section id="mental">
+      <div class="sec-head"><span class="num">2</span><h2>The graph mental model</h2></div>
+      <p>Hold one picture in your head and most of LangGraph follows from it. An agent is a <strong>graph</strong> made of three things:</p>
+      <div class="grid three">
+        <div class="card"><div class="ico blue"><svg><use href="#i-state"/></svg></div>
+          <h4>State</h4>
+          <p>One shared object every step can read and write. The agent's memory <b>for this run</b>. Think of a whiteboard in a room everyone walks through.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-node"/></svg></div>
+          <h4>Nodes</h4>
+          <p>The steps. Each node is just a function: it receives the current state and returns an update to it. Where the actual work happens.</p></div>
+        <div class="card"><div class="ico teal"><svg><use href="#i-route"/></svg></div>
+          <h4>Edges</h4>
+          <p>The arrows. They decide which node runs next. Some are fixed (always go A then B), some are conditional (look at state, then choose).</p></div>
+      </div>
+      <p>The runtime walks the graph: it starts at a special <code class="inl">START</code> marker, runs whatever node the edges
+      point to, applies that node's update to the state, looks at the edges again to find the next node, and repeats until it
+      reaches the special <code class="inl">END</code> marker. That walk is the entire execution model. Everything else in this
+      whole track is a richer version of these three pieces.</p>
+
+      <div class="graph">
+        <div class="flow">
+          <div class="gnode n-start">START</div>
+          <div class="edge"><svg><use href="#i-arrow"/></svg><b>edge</b></div>
+          <div class="gnode n-node">node A</div>
+          <div class="edge"><svg><use href="#i-arrow"/></svg><b>edge</b></div>
+          <div class="gnode n-node">node B</div>
+          <div class="edge"><svg><use href="#i-arrow"/></svg><b>edge</b></div>
+          <div class="gnode n-end">END</div>
+        </div>
+        <p class="sub" style="text-align:center;margin-top:14px">Every node reads the same <b style="color:var(--blue)">state</b> whiteboard, writes its change, and passes control along the edge.</p>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The mental flip</span>
+        <p>You do not write a script that calls steps in order. You <b>declare</b> the steps and the wiring, then hand the
+        whole graph to the runtime and let it drive. Your job is to describe the map; the runtime does the walking.</p></div>
+    </section>
+
+    <!-- STATE -->
+    <section id="state">
+      <div class="sec-head"><span class="num">3</span><h2>State, the shared whiteboard</h2></div>
+      <p>Before you can build a graph you have to answer one question: <strong>what does this agent need to remember while it runs?</strong>
+      That answer is your state schema. In Python you usually declare it as a <code class="inl">TypedDict</code>, which is just a
+      dictionary with named, typed fields. It is a contract: these are the slots on the whiteboard.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">state.py · describe the whiteboard, do not fill it</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> typing_extensions <span class="kw">import</span> TypedDict
+
+<span class="cmt"># The schema is just "what fields exist and what type each is".</span>
+<span class="kw">class</span> <span class="cls">ResearchState</span>(TypedDict):
+    question: str          <span class="cmt"># what the user asked</span>
+    answer: str            <span class="cmt"># what we will fill in</span>
+    <span class="cmt"># Module 02 will add findings, message history, and more.</span></code></pre>
+      </div>
+      <p>When the graph runs, the state starts as whatever you pass in, and each node returns a small dictionary saying which
+      fields to change. You never mutate the state object directly. You <strong>return an update</strong>, and the runtime merges it.
+      That return-an-update rule is what lets LangGraph snapshot every step later, which is the entire basis of persistence and time travel in Module 02.</p>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Common beginner trip</span>
+        <p>A node returns <b>only the keys it wants to change</b>, not the whole state. Return <code class="inl">{"answer": text}</code>,
+        not a full copy of every field. By default the runtime overwrites just those keys. (How updates merge, and how to make
+        them <em>append</em> instead of overwrite, is the reducers topic in Module 02.)</p></div>
+    </section>
+
+    <!-- NODES & EDGES -->
+    <section id="nodes">
+      <div class="sec-head"><span class="num">4</span><h2>Nodes and edges, made concrete</h2></div>
+      <p>A node is the least mysterious thing in the framework: it is a plain function. It takes the current state and returns a
+      dict of updates. That is the whole interface. If you can write a function that reads a value and returns a new one, you can write a node.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">nodes.py · a node is a function: state in, update out</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">def</span> <span class="fn">research_node</span>(state: ResearchState) -> dict:
+    <span class="cmt"># read from state ...</span>
+    q = state[<span class="str">"question"</span>]
+    reply = llm.invoke(q)            <span class="cmt"># ... do the work ...</span>
+    <span class="kw">return</span> {<span class="str">"answer"</span>: reply.content}  <span class="cmt"># ... return ONLY what changed</span></code></pre>
+      </div>
+      <p>Edges are the wiring between nodes. There are two kinds, and the difference matters for the rest of the track:</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Edge type</th><th>What it does</th><th>You declare it with</th></tr></thead>
+        <tbody>
+          <tr><td><b style="color:var(--accent)">Normal edge</b></td><td>Always go from node A to node B. No decision.</td><td><code>add_edge(A, B)</code></td></tr>
+          <tr><td><b style="color:var(--violet)">Conditional edge</b></td><td>Run a small router function that looks at state and returns the name of the next node.</td><td><code>add_conditional_edges(A, router)</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>Two special markers bookend every graph. <code class="inl">START</code> is where execution begins; you draw an edge from
+      it to your first node. <code class="inl">END</code> is the exit; when an edge leads there, the run finishes and you get the final state back.</p>
+    </section>
+
+    <!-- BUILD -->
+    <section id="build">
+      <div class="sec-head"><span class="num">5</span><h2>Build your first graph</h2></div>
+      <p>Now the four moves you will repeat for the rest of your LangGraph life. Read them as a recipe: create the builder,
+      add nodes, add edges, compile. Sahil's one-node agent is the smallest thing that exercises all four.</p>
+      <div class="anat">
+        <span class="tok t1">StateGraph(ResearchState)</span><span class="lbl">1 · create a builder around your state schema</span>
+        <span class="tok t3">.add_node(...)</span><span class="lbl">2 · register each step function</span>
+        <span class="tok t2">.add_edge(...)</span><span class="lbl">3 · wire START → nodes → END</span>
+        <span class="tok t4">.compile()</span><span class="lbl">4 · freeze it into a runnable graph</span>
+      </div>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">graph.py · the four moves (skeleton, you fill the body)</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, END
+
+builder = StateGraph(ResearchState)        <span class="cmt"># 1 · builder over the schema</span>
+
+builder.add_node(<span class="str">"research"</span>, research_node)  <span class="cmt"># 2 · register the step</span>
+
+builder.add_edge(START, <span class="str">"research"</span>)         <span class="cmt"># 3 · where to begin</span>
+builder.add_edge(<span class="str">"research"</span>, END)           <span class="cmt">#     where to stop</span>
+
+graph = builder.compile()                  <span class="cmt"># 4 · freeze into a runnable</span>
+
+<span class="cmt"># Run it: pass the initial state, get the final state back.</span>
+final = graph.invoke({<span class="str">"question"</span>: <span class="str">"What is LangGraph?"</span>})
+<span class="fn">print</span>(final[<span class="str">"answer"</span>])</code></pre>
+      </div>
+      <p>That is a complete, working LangGraph application. One node, two edges. It is intentionally trivial, because the point of
+      Module 01 is the <em>shape</em>, not the size. Notice the symmetry of <code class="inl">invoke</code>: you hand the graph an
+      initial state dict and it hands you the final state dict. Same in, same out.</p>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why compile?</span>
+        <p><code class="inl">.compile()</code> is the line between "describing the graph" and "having a thing you can run".
+        Compiling validates the wiring (every node reachable, edges point somewhere real) and returns an object with
+        <code class="inl">invoke</code>, <code class="inl">stream</code>, and more. It is also where you will later attach a
+        checkpointer for memory (Module 02).</p></div>
+      <div class="task"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Your turn</span>
+        <p>Add a second node called <b>format</b> that takes the raw answer and wraps it as <code class="inl">"Answer: ..."</code>.
+        Wire it as <code class="inl">research → format → END</code>. You should only need to add one node and rewire one edge.
+        If you can do this without copying, the four moves have landed.</p></div>
+    </section>
+
+    <!-- CONDITIONAL -->
+    <section id="cond">
+      <div class="sec-head"><span class="num">6</span><h2>Conditional edges and the loop</h2></div>
+      <p>A straight line of nodes is just a pipeline. What makes something feel like an <em>agent</em> is the ability to look at
+      the current state and <strong>decide</strong> what to do next, including doing the same step again. That decision lives in a
+      conditional edge: you give it a small router function that reads state and returns the name of the next node.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">routing.py · a router returns the NAME of the next node</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">def</span> <span class="fn">should_continue</span>(state) -> str:
+    <span class="cmt"># Look at state, decide. Return a node name or END.</span>
+    <span class="kw">if</span> state[<span class="str">"needs_more_research"</span>]:
+        <span class="kw">return</span> <span class="str">"research"</span>   <span class="cmt"># loop back, run research again</span>
+    <span class="kw">return</span> END               <span class="cmt"># good enough, finish</span>
+
+builder.add_conditional_edges(<span class="str">"research"</span>, should_continue, [<span class="str">"research"</span>, END])
+<span class="cmt"># the list is just the set of possible destinations, for validation</span></code></pre>
+      </div>
+      <p>Read what that buys you: the <code class="inl">research</code> node can now point <em>back at itself</em>. The runtime keeps
+      walking the loop until the router returns <code class="inl">END</code>. This is exactly how the classic agent loop works,
+      think, act, look at the result, think again, and you built it from nothing but a function that returns a string.</p>
+      <div class="graph">
+        <div class="flow">
+          <div class="gnode n-start">START</div>
+          <div class="edge"><svg><use href="#i-arrow"/></svg></div>
+          <div class="gnode n-node">research</div>
+          <div class="edge dash"><svg><use href="#i-branch"/></svg><b>router</b></div>
+          <div class="gnode n-cond">decide</div>
+        </div>
+        <div class="flow">
+          <div class="gnode n-cond">decide</div>
+          <div class="edge dash"><svg><use href="#i-loop"/></svg><b>more?</b></div>
+          <div class="gnode n-node">research</div>
+          <div class="edge"><svg><use href="#i-arrow"/></svg><b>done</b></div>
+          <div class="gnode n-end">END</div>
+        </div>
+        <p class="sub" style="text-align:center;margin-top:14px">The dashed edge is the decision. Loop back, or exit. That branch is the whole difference between a pipeline and an agent.</p>
+      </div>
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Interview gold</span>
+        <p>"What is the difference between a normal edge and a conditional edge?" A normal edge is an unconditional jump (always A
+        to B). A conditional edge runs a <b>router function over the current state</b> and that function returns which node comes next,
+        which is how LangGraph expresses branching and loops. Cycles are allowed and expected; that is what "graph" buys you over a plain chain.</p></div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section id="messages">
+      <div class="sec-head"><span class="num">7</span><h2>MessagesState, the shortcut you will use constantly</h2></div>
+      <p>Almost every agent's state needs to hold a growing list of chat messages: the human's turn, the model's reply, tool
+      results, and so on. This is so common that LangGraph ships a ready-made state schema for it called
+      <code class="inl">MessagesState</code>. It has a single field, <code class="inl">messages</code>, and that field is special:
+      when a node returns new messages, they are <strong>appended</strong> to the list rather than replacing it.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">messages.py · the append-by-default chat state</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, MessagesState
+
+<span class="kw">def</span> <span class="fn">chat_node</span>(state: MessagesState) -> dict:
+    reply = llm.invoke(state[<span class="str">"messages"</span>])   <span class="cmt"># model sees full history</span>
+    <span class="kw">return</span> {<span class="str">"messages"</span>: [reply]}            <span class="cmt"># appended, not overwritten</span>
+
+builder = StateGraph(MessagesState)
+builder.add_node(<span class="str">"chat"</span>, chat_node)
+builder.add_edge(START, <span class="str">"chat"</span>)
+graph = builder.compile()
+
+graph.invoke({<span class="str">"messages"</span>: [{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"hi"</span>}]})</code></pre>
+      </div>
+      <p>That append behaviour is not magic; it comes from a <strong>reducer</strong> attached to the <code class="inl">messages</code>
+      field. A reducer is a small rule that says "when a node returns a value for this field, combine it with the old value like
+      <em>this</em>". For messages the rule is "add to the list". You will define your own reducers in Module 02; for now just
+      know that <code class="inl">MessagesState</code> is the batteries-included version, and reaching for it saves you boilerplate in most agents.</p>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Where this is going</span>
+        <p>You now have every primitive an agent needs: a place to keep history (state), steps that act (nodes), and a way to
+        decide what runs next (edges, including loops). In Module 02 the agent stops forgetting between runs. In Module 03 it learns
+        to pause for you. In Module 04 it becomes a team.</p></div>
+    </section>
+
+    <!-- HANDS ON -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: prove it to yourself</h2></div>
+      <p>Do not move to Module 02 until you have actually run a graph. Set up a fresh environment, install the package, and build
+      the loop with your own fingers. The skeleton below is deliberately incomplete in the places that matter, so you have to think.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">setup · terminal</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># a clean venv keeps your machine sane</span>
+python -m venv .venv && <span class="kw">source</span> .venv/bin/activate
+pip install langgraph langchain                <span class="cmt"># core + model helpers</span>
+<span class="cmt"># pick ONE model provider you have a key for, e.g. langchain-openai or langchain-anthropic</span></code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">exercise.py · fill the three TODOs</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, END
+<span class="kw">from</span> typing_extensions <span class="kw">import</span> TypedDict
+
+<span class="kw">class</span> <span class="cls">State</span>(TypedDict):
+    topic: str
+    joke: str
+    rounds: int
+
+<span class="kw">def</span> <span class="fn">tell_joke</span>(state):
+    <span class="cmt"># TODO 1: call your llm with state["topic"], return {"joke": ...,</span>
+    <span class="cmt">#         "rounds": state.get("rounds", 0) + 1}</span>
+    ...
+
+<span class="kw">def</span> <span class="fn">good_enough</span>(state):
+    <span class="cmt"># TODO 2: return END if rounds >= 3, else "tell_joke" (loop)</span>
+    ...
+
+builder = StateGraph(State)
+builder.add_node(<span class="str">"tell_joke"</span>, tell_joke)
+builder.add_edge(START, <span class="str">"tell_joke"</span>)
+<span class="cmt"># TODO 3: add a conditional edge from "tell_joke" using good_enough</span>
+
+graph = builder.compile()
+<span class="fn">print</span>(graph.invoke({<span class="str">"topic"</span>: <span class="str">"databases"</span>, <span class="str">"joke"</span>: <span class="str">""</span>, <span class="str">"rounds"</span>: 0}))</code></pre>
+      </div>
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You created a <code class="inl">StateGraph</code> over a TypedDict and compiled it without errors.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You ran <code class="inl">graph.invoke(...)</code> and got a final state dict back.</li>
+        <li><svg><use href="#i-checkbox"/></svg>Your conditional edge made the graph <b>loop</b> and then <b>stop</b> on its own.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can explain, out loud, what state / node / edge each mean in your own words.</li>
+      </ul>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions">
+      <div class="sec-head"><span class="num">9</span><h2>Interview check</h2></div>
+      <p class="sub">A small taste here; the full bank lives in Module 05. Cover the answer, say yours out loud, then expand.
+      <svg style="width:14px;height:14px;fill:var(--amber);vertical-align:-2px"><use href="#i-star"/></svg> = must-know cold.</p>
+
+      <details><summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">In one breath, what are the three core pieces of a LangGraph graph?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><b>State</b> (one shared, typed object every step reads and writes), <b>nodes</b> (functions that take state and
+        return an update), and <b>edges</b> (the wiring that decides which node runs next, fixed or conditional). The runtime walks
+        from <code class="inl">START</code> to <code class="inl">END</code>, applying each node's update to state.</div></details>
+
+      <details><summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Why a graph instead of just a chain or a loop in plain Python?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A graph makes control flow <b>explicit and inspectable</b>: branches and cycles become named edges instead of buried
+        conditionals. Because each step returns an update rather than mutating shared state, the runtime can snapshot every step,
+        which unlocks persistence, resuming after a crash, streaming, and human-in-the-loop. Plain loops give you none of that for free.</div></details>
+
+      <details><summary><span class="q">Q3</span><span class="txt">What does a node receive and what must it return?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">It receives the <b>current state</b> and returns a <b>dict of only the fields it wants to change</b>. The runtime merges
+        that update into state (overwrite by default, or via a reducer for fields like <code class="inl">messages</code>). A node never
+        mutates state in place.</div></details>
+
+      <details><summary><span class="q">Q4</span><span class="txt">What is the difference between a normal edge and a conditional edge?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A normal edge (<code class="inl">add_edge(A, B)</code>) always goes A to B. A conditional edge
+        (<code class="inl">add_conditional_edges(A, router)</code>) runs a router function over the current state, and that function
+        returns the name of the next node, which is how you express branching and loops.</div></details>
+
+      <details><summary><span class="q">Q5</span><span class="txt">What is <code class="inl">MessagesState</code> and why is its <code class="inl">messages</code> field special?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A built-in state schema with a single <code class="inl">messages</code> list, pre-wired with a reducer that <b>appends</b>
+        new messages instead of overwriting. It saves you from rebuilding chat-history plumbing in every agent.</div></details>
+
+      <details><summary><span class="q">Q6</span><span class="txt">What does <code class="inl">.compile()</code> actually do?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">It turns the builder (a description) into a runnable graph: it validates the wiring and returns an object exposing
+        <code class="inl">invoke</code>, <code class="inl">stream</code>, etc. It is also where you attach cross-cutting features like a
+        checkpointer (Module 02) for persistence.</div></details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/quickstart" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>LangGraph quickstart</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/use-graph-api" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Graph API (nodes &amp; edges)</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Thinking in LangGraph</a>
+        <a class="reflink" href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>LangGraph docs home</a>
+      </div>
+
+      <div class="next">
+        <a href="../linux/linux.html"><small>← Other tracks</small><span class="nx"><svg><use href="#i-back"/></svg><b>Back to your modules</b></span></a>
+        <a href="./02-state-memory-persistence.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 02: State, Memory &amp; Persistence</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">LangGraph learning track · Module 01 of 5 · built for visual, build-along learning.
+      Once you can answer Q1–Q4 cold and your hands-on loop runs on its own, move to Module 02 and give Sahil's agent a memory.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  const bar = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

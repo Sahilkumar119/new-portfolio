@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LangGraph Module 02: State, Memory &amp; Persistence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+    --bg:#000000;
+    --surface:#0a0a0a;
+    --surface-2:#111111;
+    --muted:#171717;
+    --line:#262626;
+    --line-soft:#1f1f1f;
+    --fg:#f5f5f5;
+    --fg-dim:#b3b3b3;
+    --fg-faint:#7a7a7a;
+    --primary:#f0f0f0;
+    --accent:#e5e5e5;
+    --accent-dim:#a3a3a3;
+    --node:#d4d4d4;
+    --blue:#cfcfcf;
+    --violet:#c7c7c7;
+    --cyan:#bdbdbd;
+    --amber:#d0d0d0;
+    --red:#bcbcbc;
+    --code:#0b0f14;
+    --radius:14px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --shadow-1:0 1px 2px rgba(0,0,0,.45);
+    --shadow-2:0 8px 30px rgba(0,0,0,.4);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:88px;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.7;
+    -webkit-font-smoothing:antialiased;font-feature-settings:"cv05","ss01";}
+  a{color:var(--accent);text-decoration:none;transition:color .18s var(--ease)}
+  a:hover{color:#f5f5f5}
+  ::selection{background:rgba(255,255,255,.28)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;background:linear-gradient(90deg,var(--node),var(--accent),var(--cyan));transition:width .1s linear}
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(0,0,0,.82);backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;color:var(--fg)}
+  .brand .logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,#262626,#d4d4d4);color:#111111}
+  .brand .crumb{color:var(--fg-faint);font-weight:400}
+  .brand .crumb b{color:var(--fg-dim);font-weight:500}
+  .topbar .spacer{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .pill b{color:var(--accent)}
+  @media(max-width:680px){.pill.hideSm{display:none}}
+  .shell{max-width:1240px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:248px minmax(0,1fr);gap:48px;align-items:start}
+  @media(max-width:1000px){.shell{grid-template-columns:1fr;gap:0}}
+  aside{position:sticky;top:72px;align-self:start;padding:32px 0;max-height:calc(100vh - 72px);overflow-y:auto}
+  aside .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-faint);padding:0 12px;margin-bottom:10px}
+  aside nav{display:flex;flex-direction:column;gap:1px}
+  aside nav a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;color:var(--fg-faint);font-size:13.5px;font-weight:500;line-height:1.3;border-left:2px solid transparent;transition:all .18s var(--ease)}
+  aside nav a .ti{width:16px;height:16px;flex:none;opacity:.7}
+  aside nav a:hover{background:var(--surface);color:var(--fg-dim)}
+  aside nav a.active{color:var(--fg);background:var(--surface);border-left-color:var(--accent)}
+  aside nav a.active .ti{opacity:1;color:var(--accent)}
+  aside .scrollmsg{margin:18px 12px 0;font-size:12px;color:var(--fg-faint);line-height:1.5}
+  @media(max-width:1000px){aside{position:static;max-height:none;padding:14px 0 4px;border-bottom:1px solid var(--line-soft)}
+    aside nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+    aside nav a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px}
+    aside nav a.active{border-color:var(--accent)}
+    aside .scrollmsg,aside .label{display:none}}
+  /* LangSmith-like TOC panel */
+  aside{background:#0a0a0a;border:1px solid #262626;border-radius:12px;padding:18px 10px}
+  aside .label{color:#7a7a7a;font-size:12px;letter-spacing:.08em;padding:0 12px;margin-bottom:8px}
+  aside nav a{color:#a3a3a3;font-weight:500;border-left:2px solid transparent;border-radius:0;padding:6px 12px;background:transparent}
+  aside nav a .ti{display:none}
+  aside nav a:hover{background:transparent;color:#d4d4d4}
+  aside nav a.active{color:#f5f5f5;background:transparent;border-left-color:#f5f5f5;padding-left:10px}
+  aside .scrollmsg{color:#7a7a7a}
+  @media(max-width:1000px){
+    aside{background:transparent;border:none;border-radius:0;padding:14px 0 4px}
+    aside nav a{border-radius:999px;border:1px solid var(--line);padding:7px 12px}
+    aside nav a.active{border-color:var(--accent);padding:7px 12px}
+  }
+
+  main{padding:36px 0 120px;min-width:0;max-width:760px}
+  .hero{padding:8px 0 30px;border-bottom:1px solid var(--line-soft);margin-bottom:14px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);padding:6px 13px;border-radius:999px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+  h1{font-size:clamp(30px,4.4vw,44px);line-height:1.12;margin:20px 0 14px;letter-spacing:-.025em;font-weight:700}
+  h1 .grad{background:linear-gradient(95deg,#f5f5f5,#d4d4d4 55%,#a1a1a1);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--fg-dim);font-size:18px;max-width:62ch;margin:0}
+  .lede em{color:var(--fg);font-style:normal;font-weight:500}
+  .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:10px}
+  .chip svg{width:15px;height:15px;color:var(--fg-faint)}
+  .chip b{color:var(--accent);font-family:var(--mono)}
+  section{margin:0 0 12px;scroll-margin-top:88px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin:52px 0 4px}
+  .sec-head .num{font-family:var(--mono);font-size:14px;color:#111111;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;flex:none;background:linear-gradient(135deg,#f5f5f5,#d4d4d4);box-shadow:var(--shadow-1)}
+  h2{font-size:25px;margin:0;letter-spacing:-.015em;font-weight:650;line-height:1.25}
+  h3{font-size:18px;margin:30px 0 4px;color:var(--primary);font-weight:600}
+  p{margin:13px 0;max-width:68ch}
+  .sub{color:var(--fg-dim);font-size:14.5px}
+  strong{color:var(--fg)}
+  .note{position:relative;border:1px solid var(--line);background:var(--surface);padding:15px 18px 15px 48px;border-radius:12px;margin:20px 0}
+  .note .ic{position:absolute;left:16px;top:16px;width:20px;height:20px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-faint);display:block;margin-bottom:4px}
+  .note p{margin:0}
+  .note.key{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.key .ic,.note.key .tag{color:var(--violet)}
+  .note.warn{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.warn .ic,.note.warn .tag{color:var(--amber)}
+  .note.danger{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.danger .ic,.note.danger .tag{color:var(--red)}
+  .note.info .ic,.note.info .tag{color:var(--blue)}
+  .note.info{border-color:rgba(255,255,255,.35)}
+  .note.story{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg,rgba(255,255,255,.07),transparent)}
+  .note.story .ic,.note.story .tag{color:var(--accent)}
+  .note b{color:var(--fg)}
+  .codeblock{background:var(--code);border:1px solid var(--line);border-radius:13px;margin:20px 0;overflow:hidden;box-shadow:var(--shadow-2)}
+  .codeblock .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--line);background:#111827}
+  .codeblock .bar .lights{display:flex;gap:6px}
+  .codeblock .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .codeblock .bar .r{background:#ff5f56}.codeblock .bar .y{background:#ffbd2e}.codeblock .bar .g{background:#27c93f}
+  .codeblock .bar .title{font-family:var(--mono);font-size:11.5px;color:var(--fg-faint);margin-left:6px}
+  .codeblock .bar .spacer{flex:1}
+  .copybtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--fg-dim);background:transparent;border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:all .18s var(--ease)}
+  .copybtn:hover{border-color:var(--accent);color:var(--accent)}
+  .copybtn svg{width:13px;height:13px}
+  .copybtn.done{color:var(--accent);border-color:var(--accent)}
+  .codeblock pre{margin:0;background:none;border:none}
+  .codeblock code{display:block;padding:16px 18px;font-family:var(--mono);font-size:13.5px;line-height:1.8;color:#dbeafe;overflow-x:auto;white-space:pre;-moz-tab-size:2;tab-size:2}
+  code.inl{font-family:var(--mono);font-size:.86em;background:#111827;border:1px solid #334155;padding:1.5px 6px;border-radius:6px;color:#c4b5fd;white-space:nowrap}
+  .cmt{color:#64748b}.kw{color:#facc15}.fn{color:#60a5fa}.str{color:#86efac}.num{color:#f59e0b}.cls{color:#22d3ee}.dec{color:#f472b6}.op{color:#c084fc}.prop{color:#a78bfa}
+  .tablewrap{margin:20px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow-1)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{background:var(--surface-2);color:var(--primary);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:var(--mono);font-size:.85em;color:#93c5fd}
+  tbody tr{transition:background .15s var(--ease)}
+  tbody tr:hover{background:var(--surface)}
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px;transition:transform .2s var(--ease),border-color .2s var(--ease)}
+  .card:hover{transform:translateY(-2px);border-color:var(--accent-dim)}
+  .card .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:11px;background:var(--muted)}
+  .card .ico svg{width:18px;height:18px}
+  .card h4{margin:0 0 5px;font-size:15px;font-weight:600;color:var(--fg)}
+  .card p{margin:0;font-size:13.5px;color:var(--fg-dim);max-width:none}
+  .ico.violet svg{color:var(--violet)} .ico.blue svg{color:var(--blue)} .ico.green svg{color:var(--node)}
+  .ico.amber svg{color:var(--amber)} .ico.cyan svg{color:var(--cyan)} .ico.teal svg{color:var(--accent)}
+  .anat{font-family:var(--mono);font-size:14.5px;background:var(--code);border:1px solid var(--line);border-radius:13px;padding:24px 18px;margin:20px 0;text-align:center;line-height:2.6;box-shadow:var(--shadow-1)}
+  .anat .tok{padding:5px 10px;border-radius:8px;position:relative;white-space:nowrap;display:inline-block}
+  .t1{background:rgba(125,211,252,.14);color:#d1d1d1}.t2{background:rgba(255,255,255,.16);color:#f8fafc}.t3{background:rgba(255,255,255,.15);color:#f8fafc}.t4{background:rgba(255,255,255,.14);color:#d4d4d4}
+  .anat .lbl{display:block;font-family:var(--sans);font-size:10.5px;color:var(--fg-faint);margin-top:6px;letter-spacing:.03em}
+  .timeline{display:flex;flex-direction:column;gap:5px;margin:18px 0;font-family:var(--mono);font-size:13px}
+  .snap{padding:12px 16px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:flex;justify-content:space-between;align-items:center;gap:10px;transition:transform .18s var(--ease)}
+  .snap:hover{transform:translateX(3px);border-color:var(--accent-dim)}
+  .snap small{color:var(--fg-faint);font-size:11px;font-family:var(--sans)}
+  .snap .tg{color:var(--accent)}
+  .task{border:1px dashed rgba(255,255,255,.5);background:rgba(255,255,255,.04);border-radius:13px;padding:16px 18px 16px 48px;margin:20px 0;position:relative}
+  .task .ic{position:absolute;left:15px;top:16px;width:20px;height:20px;color:var(--accent)}
+  .task .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:4px}
+  .task p{margin:0;font-size:14.5px;color:var(--fg-dim)}
+  .task b{color:var(--fg)}
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:11px 0;overflow:hidden;transition:border-color .2s var(--ease)}
+  details[open]{border-color:rgba(255,255,255,.4)}
+  details:hover{border-color:var(--accent-dim)}
+  summary{cursor:pointer;padding:15px 18px;font-weight:550;list-style:none;display:flex;align-items:center;gap:11px;font-size:15px}
+  summary::-webkit-details-marker{display:none}
+  summary .q{font-family:var(--mono);font-size:11.5px;color:#111111;background:var(--accent);border-radius:6px;padding:3px 8px;flex:none;font-weight:600}
+  summary .star{color:var(--amber);flex:none;display:inline-flex}
+  summary .star svg{width:15px;height:15px;fill:currentColor}
+  summary .txt{flex:1}
+  summary .chev{width:18px;height:18px;color:var(--fg-faint);flex:none;transition:transform .25s var(--ease)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 18px 16px 18px;color:var(--fg-dim);font-size:14.5px;border-top:1px solid var(--line-soft);margin-top:0;padding-top:14px}
+  details .ans b{color:var(--fg)}
+  .check{list-style:none;padding:0;margin:16px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .check li{padding:13px 16px 13px 48px;position:relative;border-bottom:1px solid var(--line-soft);font-size:14.5px}
+  .check li:last-child{border-bottom:none}
+  .check li svg{position:absolute;left:16px;top:14px;width:20px;height:20px;color:var(--node)}
+  footer{border-top:1px solid var(--line-soft);margin-top:64px;padding-top:30px;color:var(--fg-dim);font-size:14.5px}
+  footer h3{margin:0 0 14px}
+  .refs{display:flex;flex-wrap:wrap;gap:8px}
+  .reflink{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-dim);background:var(--surface);border:1px solid var(--line);padding:8px 13px;border-radius:10px;transition:all .18s var(--ease)}
+  .reflink svg{width:14px;height:14px;color:var(--fg-faint);transition:color .18s var(--ease)}
+  .reflink:hover{border-color:var(--accent);color:var(--fg);transform:translateY(-1px)}
+  .reflink:hover svg{color:var(--accent)}
+  .next{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .next a{flex:1;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px 18px;display:flex;flex-direction:column;gap:3px;transition:all .2s var(--ease)}
+  .next a:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .next small{color:var(--fg-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  .next b{font-size:15.5px;color:var(--fg);font-weight:600}
+  .next .nx{display:flex;align-items:center;gap:7px}
+  .next .nx svg{width:15px;height:15px;color:var(--accent)}
+  .eyebrow{display:none !important}
+  .meta{display:none !important}
+  .note .tag{display:none !important}
+  aside .scrollmsg{display:none !important}
+  .pill{display:none !important}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .card:hover,.snap:hover,.next a:hover,.reflink:hover{transform:none}}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M16.8 7.6 13.4 16M7.4 6h9.2"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
+  <symbol id="i-thread" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-stream" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-6 4 12 2-6h6"/></symbol>
+  <symbol id="i-rewind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19 2 12l9-7v14ZM22 19l-9-7 9-7v14Z"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-checkbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.5 1.5 14 7l6 .5-4.5 4 1.4 6L11.5 14.5 6.1 17.5 7.5 11.5 3 7.5 9 7Z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+  <symbol id="i-merge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-graph"/></svg></span>
+      <span class="crumb"><b>LangGraph Track</b> &nbsp;/&nbsp; Module 02 &nbsp;/&nbsp; State &amp; Memory</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Module 2 of 5</span>
+    <span class="pill"><b>~2h</b> · build along</span>
+  </div>
+</header>
+
+<div class="shell">
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#recap"><svg class="ti"><use href="#i-bot"/></svg>Where Sahil is stuck</a>
+      <a href="#reducers"><svg class="ti"><use href="#i-merge"/></svg>Reducers: how updates merge</a>
+      <a href="#schemas"><svg class="ti"><use href="#i-graph"/></svg>Input &amp; output schemas</a>
+      <a href="#checkpoint"><svg class="ti"><use href="#i-save"/></svg>Checkpointers: real memory</a>
+      <a href="#threads"><svg class="ti"><use href="#i-thread"/></svg>Threads: many conversations</a>
+      <a href="#shortlong"><svg class="ti"><use href="#i-brain"/></svg>Short vs long-term memory</a>
+      <a href="#stream"><svg class="ti"><use href="#i-stream"/></svg>Streaming output</a>
+      <a href="#timetravel"><svg class="ti"><use href="#i-rewind"/></svg>Time travel</a>
+      <a href="#handson"><svg class="ti"><use href="#i-checkbox"/></svg>Hands-on</a>
+      <a href="#questions"><svg class="ti"><use href="#i-star"/></svg>Interview check</a>
+    </nav>
+    <p class="scrollmsg">A checkpointer is the single line that turns a toy into something that survives a restart. Earn the intuition.</p>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>LangGraph · Module 02 · Memory</span>
+      <h1>State, Memory &amp; <span class="grad">Persistence</span><br>so the agent stops forgetting</h1>
+      <p class="lede">Module 01's agent has amnesia: every <code class="inl">invoke</code> starts from nothing. Here you give it a
+      real memory. You will control exactly <em>how</em> state updates merge (reducers), <em>where</em> state is saved
+      (checkpointers), how to keep many conversations apart (threads), and how to watch a run unfold (streaming) or rewind it (time travel).</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · build-along</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 01</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>reducers · checkpointers · threads</span>
+        <span class="chip"><svg><use href="#i-save"/></svg>persistence &amp; streaming</span>
+      </div>
+    </div>
+
+    <section id="recap">
+      <div class="sec-head"><span class="num">0</span><h2>Where Sahil is stuck</h2></div>
+      <p>Sahil's research agent works for a single question. But he wants a conversation: ask something, get an answer, then ask a
+      follow-up that refers back to the first. He tries it, and the agent stares blankly, because the second
+      <code class="inl">invoke</code> knows nothing about the first. The state from run one was returned to him and then thrown away.</p>
+      <div class="note story"><svg class="ic"><use href="#i-bot"/></svg><span class="tag">Sahil's problem</span>
+        <p>State lives only for the duration of one <code class="inl">invoke</code>. Close the call and it is gone. To hold a
+        conversation, or to survive a server restart mid-task, the graph needs somewhere durable to write its state between steps.
+        That mechanism is a <b>checkpointer</b>, and getting there cleanly means first understanding how state updates even combine.</p></div>
+      <p>So this module climbs in a deliberate order: first <strong>how</strong> a node's return value merges into state (reducers),
+      then <strong>where</strong> that state is saved (checkpointers), then how to <strong>partition</strong> saved state per user (threads),
+      and finally the two payoffs that persistence unlocks: streaming and time travel.</p>
+    </section>
+
+    <section id="reducers">
+      <div class="sec-head"><span class="num">1</span><h2>Reducers: how updates merge</h2></div>
+      <p>Back in Module 01 a node returned <code class="inl">{"answer": text}</code> and that simply overwrote the old answer.
+      Overwrite is the <strong>default</strong> reducer: last write wins. But overwrite is wrong for anything that should accumulate.
+      If your <code class="inl">findings</code> field overwrote on every research step, the agent would only ever remember its
+      most recent lookup. You want each step to <em>add</em> to the list, not replace it.</p>
+      <p>A <strong>reducer</strong> is the rule that combines the old value of a field with the update a node returns. You attach one
+      to a field by annotating its type. The most common reducer is "append to a list", which the standard library gives you as
+      <code class="inl">operator.add</code> (or LangGraph's <code class="inl">add_messages</code> for chat).</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">reducers.py · annotate a field with how it should merge</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> typing <span class="kw">import</span> Annotated
+<span class="kw">from</span> operator <span class="kw">import</span> add
+<span class="kw">from</span> typing_extensions <span class="kw">import</span> TypedDict
+
+<span class="kw">class</span> <span class="cls">ResearchState</span>(TypedDict):
+    question: str
+    findings: Annotated[list, add]   <span class="cmt"># reducer = add → updates APPEND</span>
+    answer: str                      <span class="cmt"># no reducer → updates OVERWRITE</span>
+
+<span class="cmt"># A node returning {"findings": ["fact A"]} now ADDS to the list.</span>
+<span class="cmt"># Two parallel nodes can each contribute; their lists are merged, not lost.</span></code></pre>
+      </div>
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The intuition that sticks</span>
+        <p>Read <code class="inl">Annotated[list, add]</code> as "this field is a list, and when a node returns more of it, glue the
+        new on with <code class="inl">add</code>." No annotation means "just overwrite". This is also <b>why parallel nodes do not clobber
+        each other</b>: each returns its slice, and the reducer merges all slices. Without a reducer, two parallel writers to the same
+        field is an error, because the runtime would not know how to combine them.</p></div>
+      <p>This is exactly the machinery behind <code class="inl">MessagesState</code> from Module 01. Its single field is declared as
+      <code class="inl">Annotated[list, add_messages]</code>, and <code class="inl">add_messages</code> is a smarter append that also
+      handles updating a message by id. You were already using a reducer; now you can write your own.</p>
+    </section>
+
+    <section id="schemas">
+      <div class="sec-head"><span class="num">2</span><h2>Input and output schemas (optional polish)</h2></div>
+      <p>By default the state schema is also what callers pass in and what they get back. Often you want the <em>internal</em> state
+      to carry scratch fields that you do not want to expose. LangGraph lets you declare a separate input schema and output schema,
+      so the public surface stays clean while the graph keeps private working fields.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">schemas.py · separate the public shape from the internal one</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">class</span> <span class="cls">InputState</span>(TypedDict):    question: str
+<span class="kw">class</span> <span class="cls">OutputState</span>(TypedDict):   answer: str
+<span class="kw">class</span> <span class="cls">InternalState</span>(TypedDict): question: str; scratch: list; answer: str
+
+builder = StateGraph(InternalState, input_schema=InputState, output_schema=OutputState)
+<span class="cmt"># callers send only {question}; they receive only {answer}; scratch stays hidden</span></code></pre>
+      </div>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">When to bother</span>
+        <p>Skip this until a graph grows enough internal scratch state that you want a tidy public contract. It is a refinement,
+        not a requirement. Know that it exists so you recognise it in real codebases and interviews.</p></div>
+    </section>
+
+    <section id="checkpoint">
+      <div class="sec-head"><span class="num">3</span><h2>Checkpointers: where memory actually lives</h2></div>
+      <p>Here is the line that solves Sahil's amnesia. A <strong>checkpointer</strong> is a backend that saves a snapshot of the
+      graph's state <em>after every step</em>. Attach one at compile time and the graph automatically persists its progress. The
+      simplest is <code class="inl">InMemorySaver</code> (state held in RAM, good for learning and tests); for production you swap in
+      a database-backed saver such as the SQLite or Postgres checkpointers, with no change to your graph logic.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">memory.py · one argument turns on persistence</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> InMemorySaver
+
+checkpointer = InMemorySaver()                 <span class="cmt"># swap for SqliteSaver/PostgresSaver in prod</span>
+graph = builder.compile(checkpointer=checkpointer)   <span class="cmt"># ← the whole trick</span></code></pre>
+      </div>
+      <p>That single argument changes the agent's nature. Now, between steps, the runtime writes the current state to the
+      checkpointer. If the process dies after step three of a five-step task, restarting resumes from the saved snapshot instead of
+      starting over. This durability is the foundation that human-in-the-loop (Module 03) is built on: pausing for a human is just
+      "stop, the state is already saved, resume when they reply."</p>
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">The catch you must know</span>
+        <p>The moment you compile with a checkpointer, every call <b>must</b> include a thread id (next section). Without it the
+        runtime does not know <em>which</em> saved conversation to read and write, and it will error. Checkpointer and thread id always travel together.</p></div>
+    </section>
+
+    <section id="threads">
+      <div class="sec-head"><span class="num">4</span><h2>Threads: keeping conversations apart</h2></div>
+      <p>One agent serves many users. Sahil's research bot should not mix Priya's conversation into Ravi's. A <strong>thread</strong>
+      is a named, independent timeline of state. You pick a thread by passing a <code class="inl">thread_id</code> in the config on
+      every call. Same thread id, same continuing memory. New thread id, a fresh blank conversation.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">threads.py · the config carries which conversation you mean</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code>config = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="str">"priya-001"</span>}}
+
+graph.invoke({<span class="str">"messages"</span>: [user(<span class="str">"What is LangGraph?"</span>)]}, config)
+<span class="cmt"># ... later, SAME thread id → the agent remembers the first turn ...</span>
+graph.invoke({<span class="str">"messages"</span>: [user(<span class="str">"And how is it different from LangChain?"</span>)]}, config)
+<span class="cmt"># a DIFFERENT thread_id would start clean, with no memory of the above</span></code></pre>
+      </div>
+      <div class="anat">
+        <span class="tok t3">checkpointer</span><span class="lbl">where state is saved (the storage)</span>
+        <span class="tok t1">thread_id</span><span class="lbl">which timeline within that storage (the key)</span>
+        <span class="tok t2">checkpoint</span><span class="lbl">one saved snapshot, after one step</span>
+      </div>
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Interview gold</span>
+        <p>"How does a LangGraph agent remember a conversation?" Compile with a <b>checkpointer</b> (the storage), then pass a
+        <b>thread_id</b> in config (the conversation key). After each step the runtime saves a checkpoint under that thread; the next
+        call with the same thread id loads it and continues. Different users get different thread ids, so their histories never collide.</p></div>
+    </section>
+
+    <section id="shortlong">
+      <div class="sec-head"><span class="num">5</span><h2>Short-term vs long-term memory</h2></div>
+      <p>The checkpointer you just learned is <strong>short-term memory</strong>: it remembers <em>this</em> conversation, scoped to a
+      thread. But sometimes you want facts that outlive any single conversation: a user's name, their preferences, things learned in a
+      thread last week that should apply today. That is <strong>long-term memory</strong>, and LangGraph models it separately with a
+      <code class="inl">Store</code>, keyed by a namespace you choose (often the user id) rather than by thread.</p>
+      <div class="grid two">
+        <div class="card"><div class="ico teal"><svg><use href="#i-thread"/></svg></div>
+          <h4>Short-term (thread-scoped)</h4>
+          <p>The running conversation: message history, scratch findings. Lives in the <b>checkpointer</b>, keyed by <code class="inl">thread_id</code>. Ends when the thread does.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-db"/></svg></div>
+          <h4>Long-term (cross-thread)</h4>
+          <p>Durable facts about a user or the world: preferences, profile, prior learnings. Lives in a <b>Store</b>, keyed by a namespace. Survives across conversations.</p></div>
+      </div>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">longterm.py · a Store holds facts that outlive any thread</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> langgraph.store.memory <span class="kw">import</span> InMemoryStore
+
+store = InMemoryStore()
+graph = builder.compile(checkpointer=checkpointer, store=store)
+
+<span class="cmt"># inside a node you receive the store and read/write by (namespace, key):</span>
+<span class="kw">def</span> <span class="fn">remember</span>(state, *, store):
+    ns = (<span class="str">"user"</span>, <span class="str">"priya"</span>)               <span class="cmt"># namespace, not thread</span>
+    store.put(ns, <span class="str">"prefers"</span>, {<span class="str">"format"</span>: <span class="str">"bullets"</span>})
+    saved = store.get(ns, <span class="str">"prefers"</span>)      <span class="cmt"># available in ANY future thread</span>
+    ...</code></pre>
+      </div>
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The mental split</span>
+        <p>Checkpointer = "what happened in <em>this</em> chat". Store = "what I know about <em>this user</em>, always". Many real
+        agents use both: the thread remembers the current exchange, the store remembers the person. Interviewers love this distinction.</p></div>
+    </section>
+
+    <section id="stream">
+      <div class="sec-head"><span class="num">6</span><h2>Streaming: watch the run unfold</h2></div>
+      <p>Calling <code class="inl">invoke</code> waits for the whole graph to finish, then hands you one final result. For a
+      multi-step agent that can take many seconds, and a blank screen feels broken. <code class="inl">stream</code> instead yields
+      output <em>as it happens</em>, so you can show progress or token-by-token text. You choose what granularity you want with a stream mode.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Stream mode</th><th>What you get</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td><code>"updates"</code></td><td>The state change after <b>each node</b> runs.</td><td>Showing "now searching... now writing..." progress.</td></tr>
+          <tr><td><code>"values"</code></td><td>The <b>full state</b> after each step.</td><td>Debugging, or rendering the whole evolving state.</td></tr>
+          <tr><td><code>"messages"</code></td><td>LLM <b>tokens</b> as they generate, per node.</td><td>The typewriter effect in a chat UI.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">streaming.py · iterate instead of waiting</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">for</span> chunk <span class="kw">in</span> graph.stream(inputs, config, stream_mode=<span class="str">"updates"</span>):
+    <span class="cmt"># chunk = {node_name: {field: new_value}}, one per completed node</span>
+    <span class="fn">print</span>(chunk)
+<span class="cmt"># Same graph, same state, same memory, just a different way to consume output.</span></code></pre>
+      </div>
+      <div class="task"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">Your turn</span>
+        <p>Take your looping agent from Module 01, compile it with an <code class="inl">InMemorySaver</code>, and run it with
+        <code class="inl">stream</code> in <code class="inl">"updates"</code> mode. Watch each loop iteration print as its own chunk.
+        That visible heartbeat is what makes long-running agents feel alive instead of frozen.</p></div>
+    </section>
+
+    <section id="timetravel">
+      <div class="sec-head"><span class="num">7</span><h2>Time travel: rewind and replay</h2></div>
+      <p>Because the checkpointer saves a snapshot after every step, a thread is not just a "current state", it is a full
+      <strong>history</strong> of states. That history is a superpower. You can list every checkpoint, inspect what the state looked
+      like at step three, and even resume execution <em>from</em> an earlier checkpoint, optionally after editing it. This is how you
+      debug "why did the agent decide that?" and how you let a user undo a bad turn.</p>
+      <div class="timeline">
+        <div class="snap"><span><span class="tg">checkpoint 0</span> · initial input</span><small>step 0</small></div>
+        <div class="snap"><span><span class="tg">checkpoint 1</span> · after research node</span><small>step 1</small></div>
+        <div class="snap"><span><span class="tg">checkpoint 2</span> · after a bad decision</span><small>step 2 · rewind here</small></div>
+        <div class="snap"><span><span class="tg">checkpoint 3</span> · after answer node</span><small>step 3 (current)</small></div>
+      </div>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">timetravel.py · inspect history, resume from the past</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="cmt"># current snapshot for this thread</span>
+snap = graph.get_state(config)
+<span class="fn">print</span>(snap.values, snap.next)        <span class="cmt"># state + which node would run next</span>
+
+<span class="cmt"># every snapshot, newest first</span>
+<span class="kw">for</span> s <span class="kw">in</span> graph.get_state_history(config):
+    <span class="fn">print</span>(s.config[<span class="str">"configurable"</span>][<span class="str">"checkpoint_id"</span>])
+
+<span class="cmt"># resume from an OLD checkpoint: pass its config back into the graph</span>
+graph.invoke(None, an_old_checkpoint_config)   <span class="cmt"># re-runs forward from there</span></code></pre>
+      </div>
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why this matters</span>
+        <p>Persistence is not only about not losing work. It turns every run into an <b>auditable, editable timeline</b>. Time travel,
+        human-in-the-loop, and "fork the conversation and try a different branch" are all the same underlying feature: saved
+        checkpoints you can read, edit, and resume from. Hold that and Module 03 will feel inevitable rather than new.</p></div>
+    </section>
+
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: give Sahil's agent a memory</h2></div>
+      <p>Upgrade your Module 01 graph into something that holds a conversation. Do it for real, two turns on one thread, then a third
+      turn on a new thread to prove isolation.</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span><span class="title">exercise.py · fill the TODOs</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div>
+        <pre><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, MessagesState
+<span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> InMemorySaver
+
+<span class="kw">def</span> <span class="fn">chat</span>(state: MessagesState):
+    <span class="cmt"># TODO 1: call llm on state["messages"], return {"messages": [reply]}</span>
+    ...
+
+builder = StateGraph(MessagesState)
+builder.add_node(<span class="str">"chat"</span>, chat)
+builder.add_edge(START, <span class="str">"chat"</span>)
+
+<span class="cmt"># TODO 2: compile with an InMemorySaver()</span>
+graph = builder.compile(...)
+
+cfg = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="str">"t1"</span>}}
+graph.invoke({<span class="str">"messages"</span>: [user(<span class="str">"My name is Sahil."</span>)]}, cfg)
+out = graph.invoke({<span class="str">"messages"</span>: [user(<span class="str">"What is my name?"</span>)]}, cfg)
+<span class="cmt"># TODO 3: confirm it answers "Sahil". Then repeat with thread_id "t2"</span>
+<span class="cmt">#         and confirm it does NOT know the name.</span></code></pre>
+      </div>
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>Turn two on the same thread correctly recalled a fact from turn one.</li>
+        <li><svg><use href="#i-checkbox"/></svg>A new <code class="inl">thread_id</code> started blank, proving conversations are isolated.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You added a reducer (<code class="inl">Annotated[list, add]</code>) to a custom field and saw it accumulate.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You called <code class="inl">get_state_history</code> and saw more than one checkpoint for a thread.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can explain checkpointer vs Store (this-chat vs this-user) without peeking.</li>
+      </ul>
+    </section>
+
+    <section id="questions">
+      <div class="sec-head"><span class="num">9</span><h2>Interview check</h2></div>
+      <p class="sub">More in Module 05. <svg style="width:14px;height:14px;fill:var(--amber);vertical-align:-2px"><use href="#i-star"/></svg> = must-know cold.</p>
+
+      <details><summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">What is a reducer and why is it needed?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A reducer is the rule that merges a node's returned update into the existing state for a field. Default is overwrite;
+        <code class="inl">Annotated[list, add]</code> appends. It is needed so fields can <b>accumulate</b> (like findings or messages) and so
+        <b>parallel nodes</b> writing the same field can be combined instead of conflicting.</div></details>
+
+      <details><summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">How do you make a LangGraph agent remember across calls?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Compile the graph with a <b>checkpointer</b>, which snapshots state after every step, and pass a
+        <b>thread_id</b> in the config on each call. Same thread id continues the saved conversation; the runtime loads the last
+        checkpoint and resumes. In production you back the checkpointer with SQLite or Postgres instead of memory.</div></details>
+
+      <details><summary><span class="q">Q3</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Short-term vs long-term memory in LangGraph?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Short-term = the checkpointer, scoped to a <b>thread</b> (this conversation). Long-term = a <b>Store</b>, keyed by a
+        namespace like the user id, holding facts that persist <b>across</b> threads (preferences, profile). One is "this chat", the
+        other is "this user, always".</div></details>
+
+      <details><summary><span class="q">Q4</span><span class="txt">Why must you pass a <code class="inl">thread_id</code> once a checkpointer is attached?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The checkpointer is shared storage for many conversations. The thread id tells the runtime <b>which</b> saved timeline to
+        read and write. Without it the runtime cannot locate the right state, so it errors.</div></details>
+
+      <details><summary><span class="q">Q5</span><span class="txt">When would you stream instead of invoke, and what are the modes?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Stream when a run takes long enough that a user needs feedback, or for a typewriter UI. <code class="inl">"updates"</code>
+        yields each node's change, <code class="inl">"values"</code> yields the full state per step, <code class="inl">"messages"</code>
+        yields LLM tokens as they generate.</div></details>
+
+      <details><summary><span class="q">Q6</span><span class="txt">What is "time travel" and what makes it possible?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Because the checkpointer saves a snapshot after every step, a thread is a full history. You can inspect any past
+        checkpoint with <code class="inl">get_state_history</code> and resume from one (optionally edited). It is the same persistence
+        machinery that powers human-in-the-loop and conversation forking.</div></details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--blue);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/persistence" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Persistence &amp; checkpointers</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/use-graph-api" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>State, reducers &amp; schemas</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/streaming" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Streaming</a>
+        <a class="reflink" href="https://docs.langchain.com/oss/python/langgraph/memory" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Memory (short &amp; long term)</a>
+      </div>
+      <div class="next">
+        <a href="./01-foundations.html"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01: Foundations</b></span></a>
+        <a href="./03-control-flow-hitl.html"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03: Control Flow &amp; Human-in-the-Loop</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">LangGraph learning track · Module 02 of 5. Once your agent holds a two-turn
+      conversation on a thread and you can explain checkpointer vs Store cold, move to Module 03 and teach it to pause for a human.</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  const bar = document.getElementById('progress');
+  const onScroll = () => {const h=document.documentElement;const max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';};
+  document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.codeblock').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const orig = btn.innerHTML; btn.classList.add('done');
+        btn.innerHTML = '<svg><use href="#i-check"/></svg>Copied';
+        setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = orig; }, 1600);
+      });
+    });
+  });
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove('active')); const a = map.get(e.target.id); if (a) a.classList.add('active'); } });
+  }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+  document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

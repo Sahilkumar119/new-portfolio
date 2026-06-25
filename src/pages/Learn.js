@@ -164,7 +164,7 @@ export const Learn = () => {
     >
       <Helmet>
         <html lang="en" />
-        <title>Learn — Docker, SQL, Linux, LangGraph &amp; More | {Resume.basics.name}</title>
+        <title>Learn | {Resume.basics.name}</title>
         <meta
           name="description"
           content="Hands-on engineering courses by Sahil Kumar — Docker, SQL, Linux, and LangGraph, with Kubernetes, Git, and System Design on the way."

@@ -11,15 +11,15 @@ const HOME = `/home/${USER}`;
 const PROMPT_USER_HOST = `${USER}@${HOST}`;
 
 const ABOUT_TXT = [
-    "Linux Enthusiast | Developer | Lifelong Learner",
-    "I thrive in the terminal, optimizing workflows and building robust software.",
+    "AI/ML Engineer | Systems Builder | Linux Enthusiast",
+    "I build AI systems from scratch: RAG pipelines, TinyML, autonomous robots.",
     "Arch Linux is my daily driver because absolute control is beautiful.",
 ].join("\n");
 
 const SKILLS_TXT = [
-    "> Core      : C++, Python, JavaScript",
-    "> ML / AI   : TensorFlow, PyTorch",
-    "> Embedded  : Robotics control, IoT protocols",
+    "> Core      : Python, C/C++, CUDA, TypeScript",
+    "> ML / AI   : PyTorch, Transformers, LangChain, Ollama, ONNX",
+    "> Systems   : FastAPI, Docker, FAISS, Linux",
     "> OS        : Linux (Arch, Debian), Shell Scripting",
 ].join("\n");
 

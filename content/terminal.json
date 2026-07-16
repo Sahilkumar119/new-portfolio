@@ -4,11 +4,11 @@
   "commands": [
     {
       "input": "cat whoami.txt",
-      "output": "Linux Enthusiast | Developer | Lifelong Learner\nI thrive in the terminal, optimizing workflows and building robust software.\nArch Linux is my daily driver because absolute control is beautiful."
+      "output": "AI/ML Engineer | Systems Builder | Linux Enthusiast\nI build AI systems from scratch: RAG pipelines, TinyML, autonomous robots.\nArch Linux is my daily driver because absolute control is beautiful."
     },
     {
       "input": "neofetch --skills",
-      "output": "> Core: C++, Python, JavaScript\n> ML/AI: TensorFlow, PyTorch\n> Embedded: Robotics control, IoT protocols\n> OS: Linux (Arch, Debian), Shell Scripting"
+      "output": "> Core: Python, C/C++, CUDA, TypeScript\n> ML/AI: PyTorch, Transformers, LangChain, Ollama, ONNX\n> Systems: FastAPI, Docker, FAISS, Linux\n> OS: Linux (Arch, Debian), Shell Scripting"
     }
   ]
 }

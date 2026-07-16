@@ -63,3 +63,13 @@ learn-icon-check.png
 /graphify-out/
 /docker-course/
 /sql-course/
+
+# Auto-added by cleanup script
+.gemini/
+graphify-out/
+backend/graphify-out/
+.venv/
+venv/
+env/
+a.out
+*.log

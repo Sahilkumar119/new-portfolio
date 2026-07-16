@@ -1,15 +1,15 @@
 {
   "basics": {
     "name": "Sahil Kumar",
-    "label": "Developer & Linux Enthusiast",
+    "label": "AI/ML Engineer",
     "email": "sahil115jangid@gmail.com",
     "phone": "",
     "picture": "jl.png",
     "x_title": "Hey, I'm",
-    "job": "Developer & Linux Enthusiast",
-    "description": "Hey, I'm Sahil Kumar, a developer and Linux enthusiast based in India who loves exploring every bit of technology. Let's build something great together.",
+    "job": "AI/ML Engineer",
+    "description": "Hey, I'm Sahil Kumar, an AI/ML engineer based in India. I build AI systems from scratch: RAG pipelines, TinyML, and autonomous robots. Let's build something great together.",
     "summary": "based in India.",
-    "keywords": "personal,website,portfolio,Sahil,kumar,ece,student,india,engineering",
+    "keywords": "AI,ML,machine learning,AI engineer,ML engineer,RAG,TinyML,robotics,personal,website,portfolio,Sahil,kumar,india,engineering",
     "url": "https://sahilkumar.dev",
     "resume": "/resume.pdf",
     "location": {

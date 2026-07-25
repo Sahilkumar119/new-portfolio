@@ -13,10 +13,8 @@ const NAV_LINKS = [
     { label: "Certifications", to: "/#certifications" },
     { label: "Blog", to: "/#blogs" },
     { label: "Connect", to: "/#connect" },
-    // Real routes (not hash anchors) so react-snapshot crawls + prerenders them.
+    // Real route (not a hash anchor) so react-snapshot crawls + prerenders it.
     { label: "Learn", to: "/learn", route: true },
-    { label: "All Projects", to: "/projects", route: true },
-    { label: "All Posts", to: "/blog", route: true },
 ];
 
 // "/#terminal" -> "terminal". Route entries have no hash and return "".
@@ -30,7 +28,8 @@ const useStyles = makeStyles(() => ({
         right: "2.5rem",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        // Pills differ in width; flush their right edges to the rail.
+        alignItems: "flex-end",
         gap: "12px",
         zIndex: 9999,
         animation: "slideInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both",

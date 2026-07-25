@@ -1,0 +1,51 @@
+{
+  "education": [
+    {
+      "institution": "Deenbandhu Chhotu Ram University of Science and Technology",
+      "location": "Sonipat, Haryana",
+      "degree": "B.Tech, Electronics & Communication Engineering (AI/ML Specialization)",
+      "period": "Nov 2023 - Present"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Robotics Club Coordinator",
+      "org": "TH!NKBOTS, DCRUST Murthal",
+      "period": "Oct 2023 - Present",
+      "points": [
+        "Coordinate club activities and mentor junior members on robotics fundamentals: Arduino programming, sensor integration, and project development.",
+        "Built club projects including a PID-controlled line follower and a multi-terrain gripper bot."
+      ]
+    },
+    {
+      "role": "Team Leader, E-Yantra Robotics Competition",
+      "org": "IIT Bombay",
+      "period": "2024, 2025",
+      "points": [
+        "2024: Led autonomous warehouse drone development using ROS 2, OpenCV, and Gazebo simulation.",
+        "2025: Built a self-balancing lunar scout robot with PID/LQR control and Fusion 360 mechanical design."
+      ]
+    },
+    {
+      "role": "Team Leader and Organizer, Smart India Hackathon",
+      "org": "Ministry of Education, India",
+      "period": "2024, 2025",
+      "points": [
+        "2024: Team member on a water conservation cross-platform game built in Godot Engine.",
+        "2025: Team leader and campus event organizer, competing as a member alongside."
+      ]
+    }
+  ],
+  "achievements": [
+    {
+      "title": "IEEE YESIST12 2026 Finalist",
+      "detail": "Selected for the international final round in Indonesia with an AI-based cloud anomaly detection project.",
+      "year": "2026"
+    },
+    {
+      "title": "Hackathon Finalist: Jewellery E-Commerce Platform",
+      "detail": "Built a full-stack e-commerce site for a jewellery business and reached the finalist round.",
+      "year": "2025"
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import { NavigationButtons } from '../components/navigation/NavigationButtons';
 
 import { LinuxTerminal } from '../components/content/LinuxTerminal';
 import { AIProjects } from '../components/content/AIProjects';
+import { Experience } from '../components/content/Experience';
 import { Certifications } from '../components/content/Certifications';
 import { LatestBlogs } from '../components/content/LatestBlogs';
 import { Connect } from '../components/content/Connect';
@@ -97,6 +98,7 @@ export const Home = () => {
             
             <LinuxTerminal />
             <AIProjects />
+            <Experience />
             <Certifications />
             <section id="blogs"><LatestBlogs /></section>
             <Connect />

@@ -298,12 +298,20 @@ export const AIProjects = () => {
 
     const projects = Array.isArray(topProjects) ? topProjects : [];
 
-    const renderCard = (project, i, reveal = true) => (
-        <a
+    const renderCard = (project, i, reveal = true) => {
+        // Projects with no public repo (link "#") render as a plain card: an
+        // <a href="#"> would just jump the page to the top. The blurred peek
+        // grid is aria-hidden, so its cards must leave the tab order too.
+        const href = project.link && project.link !== "#" ? project.link : null;
+        const Tag = href ? "a" : "div";
+        const linkProps = href
+            ? { href, target: "_blank", rel: "noopener noreferrer", tabIndex: reveal ? undefined : -1 }
+            : {};
+
+        return (
+        <Tag
             key={project.id ?? i}
-            href={project.link || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
+            {...linkProps}
             className={`${classes.card}${reveal ? " reveal-child-scale" : ""}`}
             style={reveal ? { "--reveal-delay": i } : undefined}
         >
@@ -324,8 +332,9 @@ export const AIProjects = () => {
                         <span key={idx} className={classes.techToken}>{tech}</span>
                     ))}
             </div>
-        </a>
-    );
+        </Tag>
+        );
+    };
 
     // Ordered unique categories (preserves project file order)
     const categories = [];
@@ -349,23 +358,25 @@ export const AIProjects = () => {
                 <h2 className={classes.title}>Selected Projects</h2>
             </div>
 
-            <div className={classes.capsule} role="tablist" aria-label="Project view">
+            {/* Toggle buttons, not a tablist: there is no tabpanel to point at,
+                so aria-pressed describes the state honestly. */}
+            <div className={classes.capsule} role="group" aria-label="Project view">
                 <span
                     className={classes.capsuleIndicator}
                     style={{ left: view === "all" ? "4px" : "50%" }}
                     aria-hidden="true"
                 />
                 <button
-                    role="tab"
-                    aria-selected={view === "all"}
+                    type="button"
+                    aria-pressed={view === "all"}
                     className={`${classes.capsuleBtn}${view === "all" ? " " + classes.capsuleBtnActive : ""}`}
                     onClick={() => setView("all")}
                 >
                     All
                 </button>
                 <button
-                    role="tab"
-                    aria-selected={view === "category"}
+                    type="button"
+                    aria-pressed={view === "category"}
                     className={`${classes.capsuleBtn}${view === "category" ? " " + classes.capsuleBtnActive : ""}`}
                     onClick={() => setView("category")}
                 >

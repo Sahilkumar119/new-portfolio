@@ -1,0 +1,10 @@
+{
+  "id": 8,
+  "title": "StreamForge: Long-Form Audio to Searchable Structure",
+  "description": "A Go control plane (ffmpeg HLS segmenting, Redis work queue with worker leases, idempotent retries) dispatching to Python GPU workers, turning an hour of multi-speaker Hinglish cricket audio into structured, citable content in ~7 minutes on one consumer GPU. faster-whisper large-v3 plus WhisperX alignment and pyannote diarization; a lexicon bias pass cut entity WER from 31% to 12%. Hybrid BM25 + dense retrieval over Qdrant with cross-encoder rerank, every answer citing a word-level timestamp and abstaining below the evidence threshold. Shipped as FastAPI microservices on Kubernetes via GitLab CI, gated by a 40-clip golden set that fails the build on a >3% regression.",
+  "technologies": ["Go", "Python", "faster-whisper", "pyannote", "Qdrant", "FastAPI", "Kubernetes"],
+  "link": "https://github.com/Sahiljangra115/StreamForge",
+  "github": "https://github.com/Sahiljangra115/StreamForge",
+  "category": "AI & ML",
+  "type": "top"
+}

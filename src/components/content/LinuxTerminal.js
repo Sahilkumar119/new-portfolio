@@ -4,24 +4,17 @@ import { useScrollReveal } from "../../hooks/useScrollReveal";
 import { blogPosts } from "../../data/blogPosts";
 import { topProjects, stepProjects } from "../../data/projects";
 import { certifications } from "../../data/certifications";
+import { terminalData } from "../../data/terminal";
+import { education, experience, achievements } from "../../data/experience";
 
-const USER = "sahil";
-const HOST = "archlinux";
+// Single source of truth is content/terminal.json, transformed by npm run sync.
+const USER = terminalData.user;
+const HOST = terminalData.host;
 const HOME = `/home/${USER}`;
 const PROMPT_USER_HOST = `${USER}@${HOST}`;
 
-const ABOUT_TXT = [
-    "AI/ML Engineer | Systems Builder | Linux Enthusiast",
-    "I build AI systems from scratch: RAG pipelines, TinyML, autonomous robots.",
-    "Arch Linux is my daily driver because absolute control is beautiful.",
-].join("\n");
-
-const SKILLS_TXT = [
-    "> Core      : Python, C/C++, CUDA, TypeScript",
-    "> ML / AI   : PyTorch, Transformers, LangChain, Ollama, ONNX",
-    "> Systems   : FastAPI, Docker, FAISS, Linux",
-    "> OS        : Linux (Arch, Debian), Shell Scripting",
-].join("\n");
+const ABOUT_TXT = terminalData.about;
+const SKILLS_TXT = terminalData.skills.join("\n");
 
 function buildFs() {
     const blogsDir = {};
@@ -46,9 +39,18 @@ function buildFs() {
         .map((c) => `- ${c.title}  (${c.issuer}, ${c.date})`)
         .join("\n");
 
+    const experienceTxt = [
+        ...education.map((e) => `${e.degree}\n${e.institution}, ${e.location}  (${e.period})`),
+        "",
+        ...experience.map((e) => [`${e.role} - ${e.org}  (${e.period})`, ...e.points.map((p) => `  * ${p}`)].join("\n")),
+        "",
+        ...achievements.map((a) => `${a.title} (${a.year})\n  ${a.detail}`),
+    ].join("\n");
+
     return {
         "about.txt": ABOUT_TXT,
         "skills.txt": SKILLS_TXT,
+        "experience.txt": experienceTxt,
         "blogs": blogsDir,
         "projects": projectsDir,
         "certifications": { "all.txt": certsTxt },

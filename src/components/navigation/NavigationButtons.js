@@ -3,15 +3,24 @@ import { Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 
+// Hash targets are root-relative ("/#terminal") so they also work from
+// /learn, /blog and /projects: off the home page the anchor performs a real
+// navigation back to "/" and the browser scrolls to the section itself.
 const NAV_LINKS = [
-    { label: "Terminal", to: "#terminal" },
-    { label: "Projects", to: "#projects" },
-    { label: "Certifications", to: "#certifications" },
-    { label: "Blog", to: "#blogs" },
-    { label: "Connect", to: "#connect" },
-    // Real route (not a hash anchor) so react-snapshot crawls + prerenders it.
+    { label: "Terminal", to: "/#terminal" },
+    { label: "Projects", to: "/#projects" },
+    { label: "Experience", to: "/#experience" },
+    { label: "Certifications", to: "/#certifications" },
+    { label: "Blog", to: "/#blogs" },
+    { label: "Connect", to: "/#connect" },
+    // Real routes (not hash anchors) so react-snapshot crawls + prerenders them.
     { label: "Learn", to: "/learn", route: true },
+    { label: "All Projects", to: "/projects", route: true },
+    { label: "All Posts", to: "/blog", route: true },
 ];
+
+// "/#terminal" -> "terminal". Route entries have no hash and return "".
+const sectionId = (to) => (to.includes("#") ? to.split("#")[1] : "");
 
 const useStyles = makeStyles(() => ({
     nav: {
@@ -65,12 +74,12 @@ export const NavigationButtons = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            const sections = NAV_LINKS.map(l => l.to.replace("#", ""));
+            const sections = NAV_LINKS.map(l => sectionId(l.to)).filter(Boolean);
             let current = "";
             for (const section of sections) {
                 const element = document.getElementById(section);
                 if (element && window.scrollY >= element.offsetTop - 300) {
-                    current = "#" + section;
+                    current = "/#" + section;
                 }
             }
             setActiveHash(current);
@@ -93,8 +102,13 @@ export const NavigationButtons = () => {
                         <a
                             href={to}
                             onClick={(e) => {
+                                // Already on home: intercept for a smooth scroll.
+                                // Anywhere else: let the browser navigate to
+                                // "/" and land on the section natively.
+                                const target = document.getElementById(sectionId(to));
+                                if (!target) return;
                                 e.preventDefault();
-                                document.querySelector(to)?.scrollIntoView({ behavior: 'smooth' });
+                                target.scrollIntoView({ behavior: 'smooth' });
                                 window.history.pushState(null, '', to);
                             }}
                             className={`${classes.pill} ${activeHash === to ? classes.pillActive : ""}`}

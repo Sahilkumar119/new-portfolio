@@ -3,22 +3,15 @@
     "name": "Sahil Kumar",
     "label": "AI/ML Engineer",
     "email": "sahil115jangid@gmail.com",
-    "phone": "",
-    "picture": "jl.png",
     "x_title": "Hey, I'm",
     "job": "AI/ML Engineer",
-    "description": "Hey, I'm Sahil Kumar, an AI/ML engineer based in India. I build AI systems from scratch: RAG pipelines, TinyML, and autonomous robots. Let's build something great together.",
-    "summary": "based in India.",
-    "keywords": "AI,ML,machine learning,AI engineer,ML engineer,RAG,TinyML,robotics,personal,website,portfolio,Sahil,kumar,india,engineering",
+    "description": "Hey, I'm Sahil Kumar, an AI/ML engineer in India. I build AI systems from scratch: speech pipelines, RAG, TinyML, and autonomous robots.",
+    "keywords": "AI,ML,machine learning,AI engineer,ML engineer,RAG,speech,ASR,TinyML,robotics,PyTorch,Go,portfolio,Sahil Kumar,india",
     "url": "https://sahilkumar.dev",
     "resume": "/resume.pdf",
     "location": {
-      "address": "",
-      "postalCode": "",
-      "city": "",
       "country": "India",
-      "countryCode": "IND",
-      "region": ""
+      "countryCode": "IND"
     },
     "profiles": [
       {
@@ -29,13 +22,13 @@
       },
       {
         "network": "LinkedIn",
-        "username": "Sahil kumar",
+        "username": "Sahil Kumar",
         "url": "https://www.linkedin.com/in/sahilkumar119/",
         "x_icon": "fab fa-linkedin-in"
       },
       {
         "network": "GitHub",
-        "username": "Sahil kumar",
+        "username": "Sahiljangra115",
         "url": "https://github.com/Sahiljangra115",
         "x_icon": "fab fa-github"
       },
@@ -46,88 +39,5 @@
         "x_icon": "fab fa-dev"
       }
     ]
-  },
-  "work": [
-    {
-      "company": "Company",
-      "position": "President",
-      "website": "http://company.com",
-      "startDate": "2013-01-01",
-      "endDate": "2014-01-01",
-      "summary": "Description...",
-      "highlights": ["Started the company"]
-    }
-  ],
-  "volunteer": [
-    {
-      "organization": "Organization",
-      "position": "Volunteer",
-      "website": "http://organization.com/",
-      "startDate": "2012-01-01",
-      "endDate": "2013-01-01",
-      "summary": "Description...",
-      "highlights": ["Awarded 'Volunteer of the Month'"]
-    }
-  ],
-  "education": [
-    {
-      "institution": "University",
-      "area": "Software Development",
-      "studyType": "Bachelor",
-      "startDate": "2011-01-01",
-      "endDate": "2013-01-01",
-      "gpa": "4.0",
-      "courses": ["DB1101 - Basic SQL"]
-    }
-  ],
-  "awards": [
-    {
-      "title": "Award",
-      "date": "2014-11-01",
-      "awarder": "Company",
-      "summary": "There is no spoon."
-    }
-  ],
-  "publications": [
-    {
-      "name": "Publication",
-      "publisher": "Company",
-      "releaseDate": "2014-10-01",
-      "website": "http://publication.com",
-      "summary": "Description..."
-    }
-  ],
-  "skills": [
-    {
-      "name": "Web Development",
-      "level": "Master",
-      "keywords": ["HTML", "CSS", "Javascript"]
-    }
-  ],
-  "languages": [
-    {
-      "language": "German",
-      "fluency": "Native speaker"
-    },
-    {
-      "language": "English",
-      "fluency": "Fluent speaker"
-    },
-    {
-      "language": "French",
-      "fluency": "Good knowledge"
-    }
-  ],
-  "interests": [
-    {
-      "name": "Wildlife",
-      "keywords": ["Ferrets", "Unicorns"]
-    }
-  ],
-  "references": [
-    {
-      "name": "Jane Doe",
-      "reference": "Reference..."
-    }
-  ]
+  }
 }

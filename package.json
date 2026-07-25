@@ -2,8 +2,8 @@
   "name": "personal-website-react",
   "version": "1.0.1",
   "homepage": "https://sahilkumar.dev",
-  "description": "This is a clean customizable portfolio template for developers.",
-  "repository": "https://github.com/Sahiljangra115/new-portfolio",
+  "description": "Personal portfolio of Sahil Kumar, AI/ML engineer.",
+  "repository": "https://github.com/Sahilkumar119/new-portfolio",
   "author": "Sahil Kumar <sahil115jangid@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -22,16 +22,13 @@
     "ios-inner-height": "^1.1.1",
     "marked": "^18.0.2",
     "popmotion": "^8.7.3",
-    "prop-types": "^15.8.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-ga4": "^3.0.1",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.1",
     "react-snapshot": "^1.3.0",
     "react-transition-group": "^4.4.1",
-    "react-typical": "^0.1.3",
     "three": "^0.125.0",
     "use-dencrypt-effect": "1.0.1"
   },
@@ -43,9 +40,11 @@
     "eject": "react-scripts eject"
   },
   "reactSnapshot": {
-    "include": [],
+    "include": [
+      "/projects",
+      "/blog"
+    ],
     "exclude": [
-      "/resume",
       "/learn"
     ],
     "snapshotDelay": 1000

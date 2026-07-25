@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Hidden } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { LogoLink } from "../components/logo/LogoLink";
@@ -6,7 +6,6 @@ import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { FooterText } from "../components/footer/FooterText";
 import { SocialIcons } from "../components/content/SocialIcons";
 import { NavigationButtons } from "../components/navigation/NavigationButtons";
-import DisplacementSphere from "../components/background/DisplacementSphere";
 import { makeStyles } from "@material-ui/core/styles";
 import { TextDecrypt } from "../components/content/TextDecrypt";
 import { blogs } from "../data/blogs";
@@ -186,11 +185,24 @@ const useStyles = makeStyles(() => ({
 export const Blogs = () => {
     const classes = useStyles();
 
+    // three.js (~600K) split out of the main bundle: load the decorative
+    // background sphere only after the client mounts, so it never sits in the
+    // FCP critical path. Functional setState form stores the component instead
+    // of React calling it as an updater.
+    const [Sphere, setSphere] = useState(null);
+    useEffect(() => {
+        let alive = true;
+        import('../components/background/DisplacementSphere').then((m) => {
+            if (alive) setSphere(() => m.default);
+        });
+        return () => { alive = false; };
+    }, []);
+
     return (
         <div className={classes.root}>
             <div className={classes.glowBlue}  aria-hidden="true" />
             <div className={classes.glowPurple} aria-hidden="true" />
-            <DisplacementSphere />
+            {Sphere && <Sphere />} {/* Background, lazy-loaded */}
             <LogoLink />
             <Hidden smDown><NavigationButtons /></Hidden>
             <ThemeToggle />

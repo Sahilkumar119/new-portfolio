@@ -306,7 +306,7 @@ export const BlogPost = () => {
 
     const blogUrl = `${Resume.basics.url}/blog/${slug}`;
     const siteTitle = `${post.title} | ${Resume.basics.name}`;
-    const coverImage = post.coverImage || post.cover || post.image || "/android-chrome-512x512.png";
+    const coverImage = post.coverImage || post.cover || post.image || "/social-image.png";
     const absoluteCoverImage = /^https?:\/\//i.test(coverImage)
         ? coverImage
         : `${Resume.basics.url}${coverImage.startsWith("/") ? "" : "/"}${coverImage}`;

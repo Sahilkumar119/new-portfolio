@@ -32,13 +32,22 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
+// NavigationButtons is desktop-only (Hidden smDown), so without these entries
+// /projects, /blog and /learn are unreachable from a phone. Plain hrefs on
+// purpose: a full navigation is predictable and needs no router plumbing.
+const PAGES = [
+    { label: "All Projects", url: "/projects", icon: "fas fa-folder-open" },
+    { label: "All Posts", url: "/blog", icon: "fas fa-newspaper" },
+    { label: "Learn", url: "/learn", icon: "fas fa-graduation-cap" },
+];
+
 export const SpeedDials = () => {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
 
     return (
         <SpeedDial
-            ariaLabel="Social links"
+            ariaLabel="Menu"
             className={classes.speedDial}
             icon={<SpeedDialIcon />}
             onClose={() => setOpen(false)}
@@ -46,6 +55,15 @@ export const SpeedDials = () => {
             open={open}
             direction="down"
         >
+            {PAGES.map((page) => (
+                <SpeedDialAction
+                    key={page.url}
+                    icon={<i className={`${page.icon} ${classes.icon}`} aria-hidden="true" />}
+                    tooltipTitle={page.label}
+                    onClick={() => setOpen(false)}
+                    href={page.url}
+                />
+            ))}
             {Resume.basics.profiles.map((action) => (
                 <SpeedDialAction
                     key={action.network}

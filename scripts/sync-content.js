@@ -129,6 +129,16 @@ const generateSitemap = (blogs) => {
   xml += `    <priority>1.0</priority>\n`;
   xml += `  </url>\n`;
 
+  // Index routes
+  ['/projects', '/blog'].forEach((route) => {
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}${route}</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>weekly</changefreq>\n`;
+    xml += `    <priority>0.9</priority>\n`;
+    xml += `  </url>\n`;
+  });
+
   // Learn hub (React route) + static Docker course (served straight from public/)
   xml += `  <url>\n`;
   xml += `    <loc>${baseUrl}/learn</loc>\n`;
@@ -301,6 +311,45 @@ const syncCertifications = () => {
   console.log(`Successfully synced ${certifications.length} certifications.`);
 };
 /**
+ * Sync Experience (education, roles, achievements)
+ */
+const syncExperience = () => {
+  const file = path.join(CONTENT_DIR, 'experience.json');
+  if (!fs.existsSync(file)) return;
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(file, 'utf-8'));
+    const arr = (key) => (Array.isArray(raw[key]) ? raw[key] : []);
+    const data = {
+      education: arr('education').map((e) => ({
+        institution: e.institution,
+        location: e.location || '',
+        degree: e.degree || '',
+        period: e.period || '',
+      })),
+      experience: arr('experience').map((e) => ({
+        role: e.role,
+        org: e.org || '',
+        period: e.period || '',
+        points: Array.isArray(e.points) ? e.points : [],
+      })),
+      achievements: arr('achievements').map((a) => ({
+        title: a.title,
+        detail: a.detail || '',
+        year: a.year || '',
+      })),
+    };
+    fs.writeFileSync(
+      path.join(DATA_DIR, 'experience.js'),
+      `export const education = ${JSON.stringify(data.education, null, 2)};\n\nexport const experience = ${JSON.stringify(data.experience, null, 2)};\n\nexport const achievements = ${JSON.stringify(data.achievements, null, 2)};\n`
+    );
+    console.log(`Successfully synced ${data.experience.length} roles and ${data.achievements.length} achievements.`);
+  } catch (error) {
+    console.error('Error processing experience file:', error.message);
+  }
+};
+
+/**
  * Sync Terminal
  */
 const syncTerminal = () => {
@@ -312,7 +361,8 @@ const syncTerminal = () => {
     const terminal = {
       user: rawTerminal.user || 'sahil',
       host: rawTerminal.host || 'archlinux',
-      commands: Array.isArray(rawTerminal.commands) ? rawTerminal.commands : []
+      about: rawTerminal.about || '',
+      skills: Array.isArray(rawTerminal.skills) ? rawTerminal.skills : []
     };
     fs.writeFileSync(path.join(DATA_DIR, 'terminal.js'), `export const terminalData = ${JSON.stringify(terminal, null, 2)};\n`);
     console.log(`Successfully synced terminal data.`);
@@ -328,6 +378,7 @@ try {
   syncBlogs();
   syncProjects();
   syncCertifications();
+  syncExperience();
   syncTerminal();
   console.log('Content synchronization complete.');
 } catch (error) {

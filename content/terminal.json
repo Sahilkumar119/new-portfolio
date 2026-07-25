@@ -1,14 +1,14 @@
 {
   "user": "sahil",
   "host": "archlinux",
-  "commands": [
-    {
-      "input": "cat whoami.txt",
-      "output": "AI/ML Engineer | Systems Builder | Linux Enthusiast\nI build AI systems from scratch: RAG pipelines, TinyML, autonomous robots.\nArch Linux is my daily driver because absolute control is beautiful."
-    },
-    {
-      "input": "neofetch --skills",
-      "output": "> Core: Python, C/C++, CUDA, TypeScript\n> ML/AI: PyTorch, Transformers, LangChain, Ollama, ONNX\n> Systems: FastAPI, Docker, FAISS, Linux\n> OS: Linux (Arch, Debian), Shell Scripting"
-    }
+  "about": "AI/ML Engineer | Systems Builder | Linux Enthusiast\nI build AI systems from scratch: speech pipelines, RAG, TinyML, autonomous robots.\nArch Linux is my daily driver because absolute control is beautiful.",
+  "skills": [
+    "> Core      : Python, Go, C/C++, CUDA, TypeScript",
+    "> ML / AI   : PyTorch, Transformers, LangGraph, Ollama, ONNX Runtime",
+    "> Speech    : faster-whisper, WhisperX, pyannote, sentence-transformers",
+    "> Retrieval : FAISS, Qdrant, BM25 hybrid, cross-encoder rerank",
+    "> Systems   : FastAPI, Docker, Kubernetes, Redis, PostgreSQL, GitLab CI",
+    "> Embedded  : ESP-IDF, FreeRTOS, micro-ROS / ROS 2, ESP32-S3",
+    "> OS        : Linux (Arch, Debian), Shell Scripting"
   ]
 }

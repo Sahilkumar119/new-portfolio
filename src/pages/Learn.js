@@ -179,7 +179,7 @@ export const Learn = () => {
           property="og:description"
           content="Hands-on engineering courses — Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
         />
-        <meta property="og:image" content={`${SITE}/android-chrome-512x512.png`} />
+        <meta property="og:image" content={`${SITE}/social-image.png`} />
 
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:title" content={`Learn | ${Resume.basics.name}`} />
@@ -187,7 +187,7 @@ export const Learn = () => {
           property="twitter:description"
           content="Hands-on engineering courses — Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
         />
-        <meta property="twitter:image" content={`${SITE}/android-chrome-512x512.png`} />
+        <meta property="twitter:image" content={`${SITE}/social-image.png`} />
 
         {/* Inter — the bpowell-style display face for the names. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 05: Storage &amp; StatefulSets &middot; Kubernetes in Practice</title>
+<meta name="description" content="Persistent storage in Kubernetes: emptyDir versus PersistentVolumes, PVCs and StorageClasses, access modes, reclaim policies, and when a StatefulSet is the right answer.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-05">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Storage &nbsp;/&nbsp; Module 05</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 5</span>
+    <span class="pill"><b>~1.5h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#problem"><svg class="ti"><use href="#i-warn"/></svg>Pods forget everything</a>
+      <a href="#ephemeral"><svg class="ti"><use href="#i-box"/></svg>Ephemeral volumes</a>
+      <a href="#pvc"><svg class="ti"><use href="#i-db"/></svg>PV, PVC, StorageClass</a>
+      <a href="#modes"><svg class="ti"><use href="#i-lock"/></svg>Access modes &amp; reclaim</a>
+      <a href="#statefulset"><svg class="ti"><use href="#i-layers"/></svg>StatefulSets</a>
+      <a href="#should"><svg class="ti"><use href="#i-help"/></svg>Should this be in the cluster?</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">Storage is the part of Kubernetes that punishes guessing. Access modes and reclaim policies are worth memorising.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Storage &middot; Kubernetes &middot; Day 5</span>
+      <h1>Module 05: <span class="grad">Storage</span><br>&amp; StatefulSets</h1>
+      <p class="lede">Sahil's Postgres pod restarted overnight and came back empty. Nothing malfunctioned: a container
+      filesystem dies with its container, and that is by design. This module is how you keep the parts that must
+      survive, and how to give a workload a <em>stable identity</em> when interchangeable replicas are not enough.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · hands-on</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 02</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>data that outlives pods</span>
+        <span class="chip"><svg><use href="#i-db"/></svg>PVC + StatefulSet</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="problem">
+      <div class="sec-head"><span class="num">1</span><h2>Pods forget everything</h2></div>
+      <p>A container's writable layer is deleted when the container is. Restart a container and the layer is fresh.
+      Reschedule the pod to another node and even the node's disk is gone. Kubernetes never repairs a pod, so
+      <b>anything valuable must live outside the pod's lifecycle</b>.</p>
+
+      <div class="stack">
+        <div class="layer rw"><span>container writable layer</span><small>dies with the container</small></div>
+        <div class="layer ro"><span>emptyDir volume</span><small>dies with the <b>pod</b></small></div>
+        <div class="layer ro"><span>PersistentVolume</span><small>outlives the pod, and usually the cluster</small></div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Three lifetimes, and you must pick one deliberately</span>
+        <p>Scratch space that can vanish on restart: <b>emptyDir</b>. Data that must survive a reschedule to a
+        different node: <b>PersistentVolumeClaim</b>. Config and credentials: <b>ConfigMap and Secret</b> from Module 04,
+        which are also mounted as volumes. Everything else is a variation on these.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="ephemeral">
+      <div class="sec-head"><span class="num">2</span><h2>Ephemeral volumes</h2></div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Type</th><th>Lives as long as</th><th>Use for</th></tr></thead>
+        <tbody>
+          <tr><td><code>emptyDir</code></td><td>The pod</td><td>Scratch files, caches, and <b>sharing a directory between containers in one pod</b>.</td></tr>
+          <tr><td><code>emptyDir</code> with <code>medium: Memory</code></td><td>The pod</td><td>A tmpfs in RAM. Fast, and it counts against your memory limit.</td></tr>
+          <tr><td><code>hostPath</code></td><td>The node's disk</td><td>Node agents and DaemonSets only. <b>Avoid in application pods.</b></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">the classic emptyDir use: two containers, one directory</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">spec</span>:
+  <span class="yk">containers</span>:
+    - <span class="yk">name</span>: <span class="yv">app</span>
+      <span class="yk">image</span>: <span class="str">ghcr.io/acme/api:1.4.2</span>
+      <span class="yk">volumeMounts</span>:
+        - { <span class="yk">name</span>: <span class="yv">logs</span>, <span class="yk">mountPath</span>: <span class="str">/var/log/app</span> }
+    - <span class="yk">name</span>: <span class="yv">shipper</span>              <span class="cmt"># sidecar reads what the app writes</span>
+      <span class="yk">image</span>: <span class="str">fluent/fluent-bit:3.1</span>
+      <span class="yk">volumeMounts</span>:
+        - { <span class="yk">name</span>: <span class="yv">logs</span>, <span class="yk">mountPath</span>: <span class="str">/var/log/app</span>, <span class="yk">readOnly</span>: <span class="yv">true</span> }
+  <span class="yk">volumes</span>:
+    - <span class="yk">name</span>: <span class="yv">logs</span>
+      <span class="yk">emptyDir</span>: {}</code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">hostPath is a security hole and a scheduling trap</span>
+        <p>It mounts a path from the node into your pod. A hostPath of <code class="inl">/</code> or the container
+        runtime socket is a straightforward container escape, which is why Pod Security Admission blocks it in
+        restricted namespaces. It also silently pins your pod to whichever node happened to have the data, and the
+        next reschedule finds an empty directory. Legitimate uses are node-level agents. Application data is never
+        one of them.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="pvc">
+      <div class="sec-head"><span class="num">3</span><h2>PersistentVolume, PersistentVolumeClaim, StorageClass</h2></div>
+      <p>Three objects, and the split is the useful part: <b>you ask for storage without knowing what provides it</b>.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Object</th><th>Is</th><th>Written by</th></tr></thead>
+        <tbody>
+          <tr><td><b>PersistentVolume</b> (PV)</td><td>An actual piece of storage: an EBS volume, an NFS export, a local disk. Cluster-scoped.</td><td>The provisioner, automatically</td></tr>
+          <tr><td><b>PersistentVolumeClaim</b> (PVC)</td><td>A request: "10Gi, ReadWriteOnce, fast class". Namespaced.</td><td><b>You</b></td></tr>
+          <tr><td><b>StorageClass</b></td><td>A named kind of storage with its provisioner and parameters: <code>fast-ssd</code>, <code>standard</code>.</td><td>The cluster admin</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-created">PVC<br><small style="font-family:var(--sans);font-weight:400">you ask</small></div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>storageClass<br>provisioner</b></div>
+          <div class="state s-img">PV created<br><small style="font-family:var(--sans);font-weight:400">real disk</small></div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>bound</b></div>
+          <div class="state s-running">mounted<br>in your pod</div>
+        </div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">pvc.yaml + a Deployment that mounts it</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">PersistentVolumeClaim</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">data</span>
+<span class="yk">spec</span>:
+  <span class="yk">accessModes</span>: [<span class="yv">ReadWriteOnce</span>]
+  <span class="yk">storageClassName</span>: <span class="yv">standard</span>     <span class="cmt"># omit to use the cluster default</span>
+  <span class="yk">resources</span>:
+    <span class="yk">requests</span>:
+      <span class="yk">storage</span>: <span class="yv">10Gi</span>
+---
+<span class="cmt"># ...and in the pod spec</span>
+      <span class="yk">volumeMounts</span>:
+        - { <span class="yk">name</span>: <span class="yv">data</span>, <span class="yk">mountPath</span>: <span class="str">/var/lib/postgresql/data</span> }
+  <span class="yk">volumes</span>:
+    - <span class="yk">name</span>: <span class="yv">data</span>
+      <span class="yk">persistentVolumeClaim</span>:
+        <span class="yk">claimName</span>: <span class="yv">data</span></code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Dynamic provisioning is the normal path</span>
+        <p>You almost never write a PV. You write a PVC, the StorageClass's CSI driver creates the real disk, and a PV
+        appears bound to your claim. Check what your cluster offers with
+        <code class="inl">kubectl get storageclass</code>: the one marked <code class="inl">(default)</code> is used
+        when you omit <code class="inl">storageClassName</code>.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">A PVC stuck in Pending</span>
+        <p>Three usual causes, in order of likelihood: no default StorageClass exists and you did not name one; the
+        requested access mode is not supported by that class; or <code class="inl">volumeBindingMode:
+        WaitForFirstConsumer</code>, where the PVC deliberately stays Pending until a pod actually uses it, so the
+        volume is created in the right zone. The third is <b>correct behaviour</b>, not a fault.</p></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="modes">
+      <div class="sec-head"><span class="num">4</span><h2>Access modes and reclaim policies</h2></div>
+
+      <h3>Access modes: who can mount it, and how many</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Mode</th><th>Means</th><th>Reality</th></tr></thead>
+        <tbody>
+          <tr><td><code>ReadWriteOnce</code> (RWO)</td><td>Read-write by pods on <b>one node</b></td><td>What block storage gives you (EBS, GCE PD, most local). The default and the common case.</td></tr>
+          <tr><td><code>ReadWriteMany</code> (RWX)</td><td>Read-write from <b>many nodes</b></td><td>Needs a shared filesystem: NFS, EFS, CephFS, Azure Files. <b>Block storage cannot do this.</b></td></tr>
+          <tr><td><code>ReadOnlyMany</code> (ROX)</td><td>Read-only from many nodes</td><td>Shared static assets, reference data.</td></tr>
+          <tr><td><code>ReadWriteOncePod</code></td><td>Exactly <b>one pod</b>, cluster-wide</td><td>Strict single-writer guarantee. Stable since v1.29.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">The RWO scaling trap</span>
+        <p>Scale a Deployment with an RWO volume to <code class="inl">replicas: 3</code> and the extra pods hang in
+        <b>ContainerCreating</b> forever with a multi-attach error, because the volume can only attach to one node.
+        RWO is not "one pod": it is "one node", so replicas that land together may work while the rest never start,
+        which is worse than a clean failure. If several pods genuinely need the same data, you need RWX storage or a
+        StatefulSet giving each pod its own volume.</p></div>
+
+      <h3>Reclaim policy: what happens when the PVC is deleted</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Policy</th><th>On PVC deletion</th></tr></thead>
+        <tbody>
+          <tr><td><code>Delete</code></td><td>The PV <b>and the underlying disk</b> are destroyed. The default for most dynamic classes.</td></tr>
+          <tr><td><code>Retain</code></td><td>The PV survives in <code>Released</code> state; the data is kept and an admin must reclaim it manually.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Check this before your first production database</span>
+        <p>With the default <code class="inl">Delete</code> policy, <code class="inl">kubectl delete pvc</code> is
+        <b>irreversible data loss</b>, and it takes about a second. For anything you would miss, use a StorageClass
+        with <code class="inl">reclaimPolicy: Retain</code>, and take real backups: a Retain policy is a safety catch,
+        not a backup strategy.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="statefulset">
+      <div class="sec-head"><span class="num">5</span><h2>StatefulSets: when pods need identity</h2></div>
+      <p>A Deployment's pods are interchangeable and randomly named. Some workloads cannot work that way: a database
+      replica set needs to know that <code class="inl">db-0</code> is the primary, and each member needs its own disk
+      that follows it across restarts.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th></th><th>Deployment</th><th>StatefulSet</th></tr></thead>
+        <tbody>
+          <tr><td>Pod names</td><td>Random: <code>api-7d4f-x9k2</code></td><td>Ordinal and stable: <code>db-0</code>, <code>db-1</code></td></tr>
+          <tr><td>Start order</td><td>All at once</td><td>Sequential: <code>db-1</code> waits for <code>db-0</code> to be Ready</td></tr>
+          <tr><td>Storage</td><td>All pods share one PVC, if any</td><td><b>One PVC per pod</b>, created automatically, reattached by name</td></tr>
+          <tr><td>DNS</td><td>The Service name only</td><td>Per-pod: <code>db-0.db.ns.svc.cluster.local</code></td></tr>
+          <tr><td>Scale down</td><td>Any pod</td><td>Highest ordinal first, and <b>PVCs are kept</b></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">statefulset.yaml · note volumeClaimTemplates</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">Service</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">db</span> }
+<span class="yk">spec</span>:
+  <span class="yk">clusterIP</span>: <span class="yv">None</span>              <span class="cmt"># headless: gives each pod its own DNS name</span>
+  <span class="yk">selector</span>: { <span class="yk">app</span>: <span class="yv">db</span> }
+  <span class="yk">ports</span>: [{ <span class="yk">port</span>: <span class="yv">5432</span> }]
+---
+<span class="yk">apiVersion</span>: <span class="yv">apps/v1</span>
+<span class="yk">kind</span>: <span class="yv">StatefulSet</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">db</span> }
+<span class="yk">spec</span>:
+  <span class="yk">serviceName</span>: <span class="yv">db</span>               <span class="cmt"># must point at the headless Service</span>
+  <span class="yk">replicas</span>: <span class="yv">3</span>
+  <span class="yk">selector</span>:
+    <span class="yk">matchLabels</span>: { <span class="yk">app</span>: <span class="yv">db</span> }
+  <span class="yk">template</span>:
+    <span class="yk">metadata</span>:
+      <span class="yk">labels</span>: { <span class="yk">app</span>: <span class="yv">db</span> }
+    <span class="yk">spec</span>:
+      <span class="yk">containers</span>:
+        - <span class="yk">name</span>: <span class="yv">postgres</span>
+          <span class="yk">image</span>: <span class="str">postgres:17</span>
+          <span class="yk">volumeMounts</span>:
+            - { <span class="yk">name</span>: <span class="yv">data</span>, <span class="yk">mountPath</span>: <span class="str">/var/lib/postgresql/data</span> }
+  <span class="yk">volumeClaimTemplates</span>:            <span class="cmt"># one PVC per pod: data-db-0, data-db-1, ...</span>
+    - <span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">data</span> }
+      <span class="yk">spec</span>:
+        <span class="yk">accessModes</span>: [<span class="yv">ReadWriteOnce</span>]
+        <span class="yk">resources</span>: { <span class="yk">requests</span>: { <span class="yk">storage</span>: <span class="yv">10Gi</span> } }</code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Deleting a StatefulSet does not delete its data</span>
+        <p>The PVCs created by <code class="inl">volumeClaimTemplates</code> are deliberately left behind, so
+        recreating the StatefulSet reattaches every pod to its original volume by name. This is a feature and a
+        surprise: those volumes keep costing money until someone deletes them. Audit with
+        <code class="inl">kubectl get pvc</code> after tearing down any stateful workload.</p></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="should">
+      <div class="sec-head"><span class="num">6</span><h2>Should this even run in Kubernetes?</h2></div>
+      <p>You now know how to run a database in a cluster. The harder question is whether to.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico green"><svg><use href="#i-check"/></svg></div>
+          <h4>Reasonable in-cluster</h4><p>Caches you can rebuild, dev and test databases, queues with replication, anything whose loss is an inconvenience rather than an incident.</p></div>
+        <div class="card"><div class="ico red"><svg><use href="#i-warn"/></svg></div>
+          <h4>Think hard first</h4><p>The production database of record. Backups, point-in-time recovery, failover, version upgrades and storage performance are all now <b>your</b> job.</p></div>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">The honest default</span>
+        <p>For most teams, a managed database (RDS, Cloud SQL, Neon) reached from the cluster over an
+        <code class="inl">ExternalName</code> Service or plain DNS beats a self-run StatefulSet on every axis except
+        cost curiosity. Running Postgres yourself is genuinely doable with a mature operator like CloudNativePG, but
+        it is an ongoing commitment, not a one-off manifest. Choose it deliberately, not by momentum.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">7</span><h2>Hands-on: lose data, then keep it</h2></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: prove persistence, then prove identity</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. What storage does this cluster offer?</span>
+<span class="cmd">kubectl</span> get storageclass
+
+<span class="cmt"># 2. Claim some, and use it</span>
+<span class="cmd">cat</span> <span class="str">&lt;&lt;'EOF' | kubectl apply -f -</span>
+<span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">PersistentVolumeClaim</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">demo-data</span> }
+<span class="yk">spec</span>:
+  <span class="yk">accessModes</span>: [<span class="yv">ReadWriteOnce</span>]
+  <span class="yk">resources</span>: { <span class="yk">requests</span>: { <span class="yk">storage</span>: <span class="yv">1Gi</span> } }
+---
+<span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">Pod</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">writer</span> }
+<span class="yk">spec</span>:
+  <span class="yk">containers</span>:
+    - <span class="yk">name</span>: <span class="yv">app</span>
+      <span class="yk">image</span>: <span class="str">busybox:1.36</span>
+      <span class="yk">command</span>: [<span class="str">'sh'</span>,<span class="str">'-c'</span>,<span class="str">'sleep 3600'</span>]
+      <span class="yk">volumeMounts</span>: [{ <span class="yk">name</span>: <span class="yv">d</span>, <span class="yk">mountPath</span>: <span class="str">/data</span> }]
+  <span class="yk">volumes</span>:
+    - <span class="yk">name</span>: <span class="yv">d</span>
+      <span class="yk">persistentVolumeClaim</span>: { <span class="yk">claimName</span>: <span class="yv">demo-data</span> }
+<span class="str">EOF</span>
+
+<span class="cmd">kubectl</span> get pvc,pv
+
+<span class="cmt"># 3. Write to both places: the PVC and the container's own filesystem</span>
+<span class="cmd">kubectl</span> exec writer <span class="flag">--</span> sh <span class="flag">-c</span> <span class="str">'echo persisted > /data/file; echo ephemeral > /tmp/file'</span>
+
+<span class="cmt"># 4. Destroy the pod and recreate it against the SAME claim</span>
+<span class="cmd">kubectl</span> delete pod writer
+<span class="cmd">kubectl</span> apply <span class="flag">-f</span> - <span class="flag">&lt;&lt;'EOF'</span>
+<span class="cmt"># (same Pod manifest as above)</span>
+<span class="str">EOF</span>
+
+<span class="cmt"># 5. The verdict</span>
+<span class="cmd">kubectl</span> exec writer <span class="flag">--</span> sh <span class="flag">-c</span> <span class="str">'cat /data/file; cat /tmp/file 2>&amp;1'</span>
+<span class="out">persisted</span>
+<span class="out">cat: can't open '/tmp/file': No such file or directory</span>
+
+<span class="cmt"># 6. StatefulSet identity: note the names and the auto-created PVCs</span>
+<span class="cmd">kubectl</span> create service clusterip web <span class="flag">--tcp</span>=<span class="str">80:80</span> <span class="flag">--dry-run</span>=<span class="str">client</span> <span class="flag">-o</span> yaml \
+  | sed <span class="str">'s/clusterIP: .*/clusterIP: None/'</span> | <span class="cmd">kubectl</span> apply <span class="flag">-f</span> -
+<span class="cmt"># apply a StatefulSet using serviceName: web, then:</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-l</span> <span class="str">app=web</span>     <span class="cmt"># web-0, web-1 — ordered, stable</span>
+<span class="cmd">kubectl</span> get pvc                 <span class="cmt"># one per pod</span>
+
+<span class="cmt"># 7. Clean up (note: PVCs must be deleted explicitly)</span>
+<span class="cmd">kubectl</span> delete pod writer; <span class="cmd">kubectl</span> delete pvc demo-data</code></pre></div>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>A file on a PVC survived pod deletion; a file in the container did not.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can explain why RWO breaks a multi-replica Deployment.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You checked your cluster's reclaim policy before trusting it with data.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You saw StatefulSet pods get ordered names and one PVC each.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You know that deleting a StatefulSet leaves its PVCs behind.</li>
+      </ul>
+    </section>
+
+    <!-- 8 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">8</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">My PVC is stuck Pending. What now?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><code class="inl">kubectl describe pvc NAME</code> and read the events. In order: is there a
+        default StorageClass (<code class="inl">kubectl get sc</code>)? Does the class support the access mode you
+        asked for? Is <code class="inl">volumeBindingMode: WaitForFirstConsumer</code> set, in which case Pending is
+        normal until a pod schedules? Is the class out of quota?</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Can several pods share one PVC?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Only if the storage supports <code class="inl">ReadWriteMany</code>, which means a shared
+        filesystem (NFS, EFS, CephFS), not block storage. And even then, ask whether you want it: concurrent writers
+        to a shared filesystem need application-level coordination. Usually the right answer is one volume per pod
+        via a StatefulSet, or moving shared data to object storage.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="txt">How do I resize a volume?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">If the StorageClass has <code class="inl">allowVolumeExpansion: true</code>, edit the PVC's
+        <code class="inl">spec.resources.requests.storage</code> upward and apply. The filesystem grows, sometimes only
+        after the pod restarts. <b>Shrinking is not supported at all</b>: that path is backup, new smaller PVC,
+        restore.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">Why is my PVC stuck Terminating?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A finalizer is protecting it because a pod still uses it. Delete the pod first and the PVC
+        finishes. Force-removing the finalizer leaks the real cloud disk, which then bills you silently forever, so
+        find the pod instead: <code class="inl">kubectl get pods -o json | grep -l CLAIMNAME</code>.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">Deployment with a PVC, or StatefulSet?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">One replica that needs one volume: a Deployment with a PVC is simpler and fine, as long as
+        you set <code class="inl">strategy: Recreate</code> so the old pod releases the volume before the new one
+        wants it. Multiple replicas each needing their own volume, or any need for stable network identity:
+        StatefulSet. Do not use a StatefulSet just because the app happens to store something.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Persistent volumes</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/storage/storage-classes/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Storage classes</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>StatefulSets</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/storage/volumes/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Volume types</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes/module-04"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 04: Config &amp; Secrets</b></span></a>
+        <a href="/learn/kubernetes/module-06"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 06: Debugging &amp; Operations</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 05 &middot; the 80/20 field guide.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

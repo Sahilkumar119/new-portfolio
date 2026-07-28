@@ -68,8 +68,9 @@ export const COURSES = [
     tint: "#e9edfb",
     text: "#0a1430",
     blurb:
-      "Orchestrate containers at scale — pods, deployments, services, scaling, and self-healing.",
-    status: "soon",
+      "The 20% of Kubernetes that carries 80% of the work — pods, deployments and rollouts, services and ingress, config and secrets, storage, the debugging playbook, and production hardening. Eight hands-on modules.",
+    status: "live",
+    href: "/learn/kubernetes",
     logo: "/images/learn/kubernetes.svg",
   },
   {

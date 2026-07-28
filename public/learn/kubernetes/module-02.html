@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 02: Deployments &amp; Rollouts &middot; Kubernetes in Practice</title>
+<meta name="description" content="Deployments, ReplicaSets and rolling updates: strategy, rollback, the three probes, and resource requests and limits that decide whether your pod survives.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-02">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Workloads &nbsp;/&nbsp; Module 02</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 2</span>
+    <span class="pill"><b>~2h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#chain"><svg class="ti"><use href="#i-layers"/></svg>The ownership chain</a>
+      <a href="#manifest"><svg class="ti"><use href="#i-file"/></svg>The manifest</a>
+      <a href="#rollout"><svg class="ti"><use href="#i-cycle"/></svg>Rolling updates</a>
+      <a href="#control"><svg class="ti"><use href="#i-terminal"/></svg>Driving a rollout</a>
+      <a href="#probes"><svg class="ti"><use href="#i-heart"/></svg>The three probes</a>
+      <a href="#resources"><svg class="ti"><use href="#i-gauge"/></svg>Requests &amp; limits</a>
+      <a href="#others"><svg class="ti"><use href="#i-box"/></svg>The other controllers</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">Probes and resource limits are where most production incidents are actually born. Do not skim sections 4 and 5.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Workloads &middot; Kubernetes &middot; Day 2</span>
+      <h1>Module 02: <span class="grad">Deployments</span><br>&amp; Rollouts</h1>
+      <p class="lede">This is the object Sahil will actually write for the rest of his career. A Deployment turns
+      "three copies of this image, updated without downtime, revertible in one command" into fifteen lines of YAML.
+      Then two features decide whether it survives contact with production: <em>probes</em> and <em>resource
+      requests</em>. Most outages trace back to getting those two wrong.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · the core module</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 01</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>ship + roll back safely</span>
+        <span class="chip"><svg><use href="#i-helm"/></svg>apps/v1</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="chain">
+      <div class="sec-head"><span class="num">1</span><h2>The ownership chain</h2></div>
+      <p>Three objects, one direction of control. Understanding this chain explains every rollout behaviour you will
+      ever see, including the strange ones.</p>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-img">Deployment<br><small style="font-family:var(--sans);font-weight:400">you write this</small></div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>creates &amp;<br>versions</b></div>
+          <div class="state s-created">ReplicaSet<br><small style="font-family:var(--sans);font-weight:400">one per version</small></div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>maintains<br>count</b></div>
+          <div class="state s-running">Pods<br><small style="font-family:var(--sans);font-weight:400">the actual work</small></div>
+        </div>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Object</th><th>Its one job</th><th>You touch it?</th></tr></thead>
+        <tbody>
+          <tr><td><b>Deployment</b></td><td>Manage <i>versions</i>: create a new ReplicaSet on change, shift traffic between them, keep history for rollback.</td><td>Always</td></tr>
+          <tr><td><b>ReplicaSet</b></td><td>Manage <i>count</i>: keep exactly N pods matching its selector alive. That is the whole job.</td><td>Never directly</td></tr>
+          <tr><td><b>Pod</b></td><td>Run the containers.</td><td>Read only</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why you see old ReplicaSets with 0 pods</span>
+        <p>They are your <b>rollback history</b>. Each change to the pod template creates a new ReplicaSet and scales
+        the previous one to zero rather than deleting it. <code class="inl">kubectl rollout undo</code> works by scaling
+        an old one back up. Keep the count sane with <code class="inl">revisionHistoryLimit</code> (default 10).</p></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">A change to what, exactly?</span>
+        <p>A new ReplicaSet is created only when the <b>pod template</b> changes: image, env, resources, labels, volumes.
+        Changing <code class="inl">replicas</code> is not a template change, so scaling does not create a revision and
+        cannot be rolled back through rollout history. That distinction confuses people the first time they scale and
+        then try to <code class="inl">undo</code>.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="manifest">
+      <div class="sec-head"><span class="num">2</span><h2>The manifest, field by field</h2></div>
+      <p>The pod spec you learned in Module 01 reappears here verbatim, nested under
+      <code class="inl">spec.template</code>. Nothing new to learn about containers; only the wrapper is new.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">deployment.yaml · the shape you will write a thousand times</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">apps/v1</span>
+<span class="yk">kind</span>: <span class="yv">Deployment</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">api</span>
+<span class="yk">spec</span>:
+  <span class="yk">replicas</span>: <span class="yv">3</span>
+  <span class="yk">revisionHistoryLimit</span>: <span class="yv">5</span>
+  <span class="yk">selector</span>:                     <span class="cmt"># which pods this Deployment owns</span>
+    <span class="yk">matchLabels</span>:
+      <span class="yk">app</span>: <span class="yv">api</span>
+  <span class="yk">strategy</span>:
+    <span class="yk">type</span>: <span class="yv">RollingUpdate</span>
+    <span class="yk">rollingUpdate</span>:
+      <span class="yk">maxSurge</span>: <span class="yv">1</span>              <span class="cmt"># extra pods allowed above replicas</span>
+      <span class="yk">maxUnavailable</span>: <span class="yv">0</span>        <span class="cmt"># never dip below replicas → zero-downtime</span>
+  <span class="yk">template</span>:                     <span class="cmt"># ← everything below is a Pod spec</span>
+    <span class="yk">metadata</span>:
+      <span class="yk">labels</span>:
+        <span class="yk">app</span>: <span class="yv">api</span>               <span class="cmt"># MUST match selector.matchLabels</span>
+    <span class="yk">spec</span>:
+      <span class="yk">containers</span>:
+        - <span class="yk">name</span>: <span class="yv">api</span>
+          <span class="yk">image</span>: <span class="str">ghcr.io/acme/api:1.4.2</span>
+          <span class="yk">ports</span>:
+            - <span class="yk">name</span>: <span class="yv">http</span>
+              <span class="yk">containerPort</span>: <span class="yv">8080</span>
+          <span class="yk">resources</span>:
+            <span class="yk">requests</span>: { <span class="yk">cpu</span>: <span class="str">"100m"</span>, <span class="yk">memory</span>: <span class="str">"128Mi"</span> }
+            <span class="yk">limits</span>:   { <span class="yk">memory</span>: <span class="str">"256Mi"</span> }
+          <span class="yk">readinessProbe</span>:
+            <span class="yk">httpGet</span>: { <span class="yk">path</span>: <span class="str">/healthz</span>, <span class="yk">port</span>: <span class="yv">http</span> }
+            <span class="yk">periodSeconds</span>: <span class="yv">5</span></code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">selector is immutable</span>
+        <p>Once created, <code class="inl">spec.selector</code> cannot be changed. An apply that tries will be rejected
+        and your only fix is to delete and recreate the Deployment, which means downtime. Choose a stable, minimal
+        selector on day one (<code class="inl">app: api</code>), and put volatile things like
+        <code class="inl">version</code> in the template labels only.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="rollout">
+      <div class="sec-head"><span class="num">3</span><h2>How a rolling update actually moves</h2></div>
+      <p>You change the image tag and apply. Kubernetes creates a second ReplicaSet and walks the two counts in
+      opposite directions, bounded by two numbers.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Field</th><th>Meaning</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>maxSurge</code></td><td>How many pods above <code>replicas</code> may exist mid-rollout.</td><td>Higher = faster rollout, more peak resource use.</td></tr>
+          <tr><td><code>maxUnavailable</code></td><td>How many pods below <code>replicas</code> may be unavailable.</td><td><b>0</b> = never lose capacity. The safe production value.</td></tr>
+        </tbody>
+      </table></div>
+
+      <p>With <code class="inl">replicas: 3</code>, <code class="inl">maxSurge: 1</code>,
+      <code class="inl">maxUnavailable: 0</code>, the sequence is: start one new pod (4 total), wait for it to become
+      <b>Ready</b>, kill one old pod (3 total), repeat. Capacity never drops below three. Both values also accept
+      percentages, which is what you want once replica counts vary between environments.</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Zero-downtime depends entirely on your readiness probe</span>
+        <p>The rollout advances when a new pod reports <b>Ready</b>. With no readiness probe, "Ready" means "the
+        process started", so Kubernetes cheerfully kills a healthy old pod and sends traffic to a new one that is
+        still loading. <b>A rolling update without a readiness probe is a rolling outage.</b> That single sentence is
+        the most valuable thing in this module.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Recreate strategy</span>
+        <p><code class="inl">strategy.type: Recreate</code> kills every old pod before starting any new one. It causes
+        real downtime, and it is the correct choice when old and new versions genuinely cannot coexist: an
+        incompatible schema migration, or a single writer holding an exclusive lock on a volume.</p></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="control">
+      <div class="sec-head"><span class="num">4</span><h2>Driving a rollout from the CLI</h2></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">the deploy loop</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Ship a new version (edit the tag in git and apply; this is the quick way)</span>
+<span class="cmd">kubectl</span> set image deployment/api api=<span class="str">ghcr.io/acme/api:1.5.0</span>
+
+<span class="cmt"># Watch it. This BLOCKS until done and exits non-zero on failure,</span>
+<span class="cmt"># which is exactly what you want in a CI pipeline.</span>
+<span class="cmd">kubectl</span> rollout status deployment/api <span class="flag">--timeout</span>=<span class="str">120s</span>
+
+<span class="cmt"># It went wrong. Back to the previous revision, now.</span>
+<span class="cmd">kubectl</span> rollout undo deployment/api
+
+<span class="cmt"># Or to a specific one</span>
+<span class="cmd">kubectl</span> rollout history deployment/api
+<span class="cmd">kubectl</span> rollout undo deployment/api <span class="flag">--to-revision</span>=<span class="str">3</span>
+
+<span class="cmt"># Pause mid-rollout to inspect, then resume (a poor man's canary)</span>
+<span class="cmd">kubectl</span> rollout pause deployment/api
+<span class="cmd">kubectl</span> rollout resume deployment/api
+
+<span class="cmt"># Restart every pod without changing anything (picks up a new Secret/ConfigMap)</span>
+<span class="cmd">kubectl</span> rollout restart deployment/api
+
+<span class="cmt"># Scale</span>
+<span class="cmd">kubectl</span> scale deployment/api <span class="flag">--replicas</span>=<span class="str">5</span></code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Record your intent in git, not in the cluster</span>
+        <p><code class="inl">set image</code> is fine for a hotfix but it makes the cluster disagree with your
+        repository, and the next <code class="inl">apply</code> silently reverts it. In any real workflow the image tag
+        changes in a file, the file is reviewed, and CI runs <code class="inl">apply</code> then
+        <code class="inl">rollout status</code>. The cluster should never be the source of truth.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">progressDeadlineSeconds</span>
+        <p>If a rollout makes no progress for this long (default 600s), the Deployment is marked failed and
+        <code class="inl">rollout status</code> returns an error. It does <b>not</b> auto-roll-back. Your pipeline has to
+        notice the non-zero exit and call <code class="inl">undo</code> itself. Plenty of teams discover this during
+        their first bad deploy.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="probes">
+      <div class="sec-head"><span class="num">5</span><h2>The three probes</h2></div>
+      <p>Kubernetes cannot know whether your process is healthy. It only knows whether it is <i>running</i>. Probes
+      are how you tell it the difference, and each of the three answers a different question.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico green"><svg><use href="#i-net"/></svg></div>
+          <h4>readinessProbe</h4><p><b>Should traffic go here?</b> Fails: pod is removed from Service endpoints but keeps running. The one you must always set.</p></div>
+        <div class="card"><div class="ico red"><svg><use href="#i-heart"/></svg></div>
+          <h4>livenessProbe</h4><p><b>Is this process wedged?</b> Fails: the container is <b>killed and restarted</b>. Powerful and easy to misuse.</p></div>
+        <div class="card"><div class="ico amber"><svg><use href="#i-clock"/></svg></div>
+          <h4>startupProbe</h4><p><b>Has it finished booting?</b> While it runs, the other two are suspended. For slow-starting apps.</p></div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a probe set that will not hurt you</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">startupProbe</span>:                    <span class="cmt"># up to 30 x 5s = 150s to boot</span>
+  <span class="yk">httpGet</span>: { <span class="yk">path</span>: <span class="str">/healthz</span>, <span class="yk">port</span>: <span class="yv">http</span> }
+  <span class="yk">failureThreshold</span>: <span class="yv">30</span>
+  <span class="yk">periodSeconds</span>: <span class="yv">5</span>
+
+<span class="yk">readinessProbe</span>:                  <span class="cmt"># checks DEPENDENCIES too: DB, cache</span>
+  <span class="yk">httpGet</span>: { <span class="yk">path</span>: <span class="str">/readyz</span>, <span class="yk">port</span>: <span class="yv">http</span> }
+  <span class="yk">periodSeconds</span>: <span class="yv">5</span>
+  <span class="yk">failureThreshold</span>: <span class="yv">3</span>
+
+<span class="yk">livenessProbe</span>:                   <span class="cmt"># checks ONLY "is this process wedged"</span>
+  <span class="yk">httpGet</span>: { <span class="yk">path</span>: <span class="str">/healthz</span>, <span class="yk">port</span>: <span class="yv">http</span> }
+  <span class="yk">periodSeconds</span>: <span class="yv">10</span>
+  <span class="yk">failureThreshold</span>: <span class="yv">3</span>            <span class="cmt"># 30s of failure before a kill</span></code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">The outage amplifier</span>
+        <p>Never let a liveness probe check a <b>dependency</b>. If <code class="inl">/healthz</code> queries the
+        database and the database has a slow minute, every replica fails liveness, every replica is killed at once,
+        and a small database blip becomes a total outage with a thundering-herd restart on top. Liveness answers
+        "is <i>this</i> process stuck?" and nothing else. Dependencies belong in <b>readiness</b>, where failure only
+        removes you from load balancing until things recover.</p></div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Probe type</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><code>httpGet</code></td><td>Anything that serves HTTP. Any 2xx or 3xx is a pass. The default choice.</td></tr>
+          <tr><td><code>tcpSocket</code></td><td>Non-HTTP servers: databases, queues. Only proves the port is open.</td></tr>
+          <tr><td><code>exec</code></td><td>A command in the container; exit 0 passes. Most expensive: it forks a process every period.</td></tr>
+          <tr><td><code>grpc</code></td><td>Native gRPC health checking protocol, stable since v1.27.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="resources">
+      <div class="sec-head"><span class="num">6</span><h2>Requests and limits</h2></div>
+      <p>Two numbers per resource, doing completely different jobs. Conflating them is the second most common
+      production mistake in this module.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico blue"><svg><use href="#i-target"/></svg></div>
+          <h4>requests</h4><p><b>Scheduling.</b> "Reserve this much for me." The scheduler adds up requests to decide if a node has room. It is a guarantee of availability, not a cap.</p></div>
+        <div class="card"><div class="ico red"><svg><use href="#i-gauge"/></svg></div>
+          <h4>limits</h4><p><b>Enforcement.</b> "Never let me exceed this." CPU over limit is throttled. Memory over limit is <b>killed</b>, instantly, with no grace.</p></div>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Resource</th><th>Over the limit</th><th>Sensible practice</th></tr></thead>
+        <tbody>
+          <tr><td><b>CPU</b> (<code>100m</code> = 0.1 core)</td><td>Throttled. Slow, never killed. CPU is compressible.</td><td>Always request. Often <b>omit the limit</b>: throttling a healthy app to enforce a guess helps nobody.</td></tr>
+          <tr><td><b>Memory</b> (<code>128Mi</code>)</td><td><b>OOMKilled</b> immediately. Memory cannot be reclaimed gently.</td><td>Always set both, and set them <b>equal</b> for anything important.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>QoS classes, and who dies first</h3>
+      <p>Kubernetes derives a class from what you set, and uses it to pick eviction victims when a node runs short:</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Class</th><th>You set</th><th>Evicted</th></tr></thead>
+        <tbody>
+          <tr><td><b>Guaranteed</b></td><td>requests == limits, for every resource and container</td><td>Last. Use for anything that matters.</td></tr>
+          <tr><td><b>Burstable</b></td><td>requests set, limits higher or absent</td><td>Middle. The common case.</td></tr>
+          <tr><td><b>BestEffort</b></td><td>nothing set at all</td><td><b>First.</b> Never ship this.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">How to pick the numbers</span>
+        <p>Do not guess twice. Ship with a rough guess, then read real usage with
+        <code class="inl">kubectl top pod</code> over a normal day. Set the <b>memory request and limit equal</b>, at
+        roughly peak plus 25%. Set the <b>CPU request</b> at typical usage and leave the CPU limit off unless you are
+        deliberately protecting noisy neighbours. Revisit after any significant change.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Reading an OOMKill correctly</span>
+        <p><code class="inl">kubectl describe pod</code> shows <code class="inl">Last State: Terminated, Reason:
+        OOMKilled, Exit Code: 137</code>. That is the kernel, not Kubernetes, and it is not a bug in your app unless
+        your app really does leak. It means the container touched its memory limit. Raise the limit or fix the usage,
+        but note that the logs will show nothing: there is no warning before a SIGKILL.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="others">
+      <div class="sec-head"><span class="num">7</span><h2>The other workload controllers</h2></div>
+      <p>Deployment covers most of what you run. Four siblings cover the rest, and they all wrap the same pod template.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Kind</th><th>Guarantees</th><th>Use for</th></tr></thead>
+        <tbody>
+          <tr><td><b>Deployment</b></td><td>N interchangeable pods, rolling updates, rollback</td><td>Stateless services. Your default.</td></tr>
+          <tr><td><b>StatefulSet</b></td><td>Stable names (<code>db-0</code>, <code>db-1</code>), ordered start-up, one persistent volume per pod</td><td>Databases, queues, anything with identity. Module 05.</td></tr>
+          <tr><td><b>DaemonSet</b></td><td>Exactly one pod on every node, including new ones</td><td>Log collectors, node exporters, CNI agents.</td></tr>
+          <tr><td><b>Job</b></td><td>Run to successful completion N times, then stop</td><td>Migrations, batch work. Module 06.</td></tr>
+          <tr><td><b>CronJob</b></td><td>Creates a Job on a schedule</td><td>Backups, nightly reports. Module 06.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Default to Deployment</span>
+        <p>StatefulSet is slower to roll, harder to debug, and awkward to scale down. Reach for it only when you
+        genuinely need stable identity or per-pod storage. Plenty of teams put a stateless API in a StatefulSet
+        "because it feels more serious" and inherit the pain for nothing.</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: ship, break, roll back</h2></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: a full deploy cycle including a failed one</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Create a Deployment and watch the ownership chain appear</span>
+<span class="cmd">kubectl</span> create deployment api <span class="flag">--image</span>=<span class="str">nginx:1.26</span> <span class="flag">--replicas</span>=<span class="str">3</span>
+<span class="cmd">kubectl</span> get deploy,rs,pods
+
+<span class="cmt"># 2. A good rollout. Watch pods swap one at a time.</span>
+<span class="cmd">kubectl</span> set image deployment/api nginx=<span class="str">nginx:1.27</span>
+<span class="cmd">kubectl</span> rollout status deployment/api
+<span class="cmd">kubectl</span> get rs        <span class="cmt"># old RS is now 0, kept for rollback</span>
+
+<span class="cmt"># 3. A BAD rollout: an image that will never pull</span>
+<span class="cmd">kubectl</span> set image deployment/api nginx=<span class="str">nginx:9.9.9-nope</span>
+<span class="cmd">kubectl</span> rollout status deployment/api <span class="flag">--timeout</span>=<span class="str">40s</span>   <span class="cmt"># fails</span>
+<span class="cmd">kubectl</span> get pods    <span class="cmt"># note: the 3 OLD pods are still serving. maxUnavailable saved you.</span>
+
+<span class="cmt"># 4. Roll back and confirm</span>
+<span class="cmd">kubectl</span> rollout undo deployment/api
+<span class="cmd">kubectl</span> rollout status deployment/api
+<span class="cmd">kubectl</span> rollout history deployment/api
+
+<span class="cmt"># 5. Prove memory limits are enforced by the kernel, not politely</span>
+<span class="cmd">kubectl</span> run oom <span class="flag">--image</span>=<span class="str">polinux/stress</span> <span class="flag">--restart</span>=<span class="str">Never</span> \
+  <span class="flag">--limits</span>=<span class="str">memory=64Mi</span> <span class="flag">--</span> stress <span class="flag">--vm</span> 1 <span class="flag">--vm-bytes</span> 200M <span class="flag">--timeout</span> 30s
+<span class="cmd">kubectl</span> get pod oom
+<span class="cmd">kubectl</span> describe pod oom | grep <span class="flag">-A3</span> <span class="str">'Last State'</span>   <span class="cmt"># OOMKilled, exit 137</span>
+
+<span class="cmt"># 6. Clean up</span>
+<span class="cmd">kubectl</span> delete deployment api; <span class="cmd">kubectl</span> delete pod oom</code></pre></div>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You saw Deployment → ReplicaSet → Pod with your own eyes.</li>
+        <li><svg><use href="#i-checkbox"/></svg>A failed rollout did <b>not</b> take down the running version.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You rolled back in one command and read the revision history.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You produced a real OOMKill and found exit code 137.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can explain why liveness must not check the database.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">9</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Readiness or liveness: which do I set if I only set one?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><b>Readiness</b>, without hesitation. It gives you safe rolling updates and keeps traffic away
+        from pods that cannot serve. Liveness only helps with a genuinely wedged process that will never recover, which
+        is rarer than people assume, and a badly written liveness probe actively causes outages. Add liveness second,
+        conservatively.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Why did nothing happen when I applied my change?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Almost always because the <b>pod template did not change</b>. Editing a ConfigMap that the pods
+        mount does not touch the Deployment, so no new ReplicaSet is created and no pods restart. Either
+        <code class="inl">kubectl rollout restart</code>, or add a checksum annotation of the config into the pod
+        template so a config change becomes a template change (Module 04).</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="txt">Should I set a CPU limit?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Usually not, and this is a genuinely contested opinion. A CPU limit throttles your app even
+        when the node has idle cores, which turns spare capacity into latency for no benefit. Set CPU <i>requests</i>
+        so the scheduler places you correctly, and add a limit only in multi-tenant clusters where you must protect
+        neighbours from a runaway process. Memory is the opposite: always limit it.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">How do I do a canary or blue-green deploy?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Plain Kubernetes gives you a crude version for free: run two Deployments whose pods share a
+        Service selector label, and control the traffic split by their relative replica counts. Nine old pods and one
+        new pod is a 10% canary. Anything more precise (header-based routing, automated rollback on metrics) needs
+        Argo Rollouts, Flagger, or a service mesh. Out of scope here, and correctly so.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">Why is my pod Ready 0/1 but not restarting?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The readiness probe is failing while liveness passes, which is the system working exactly as
+        designed: the pod is alive but not serving, so it stays up and receives no traffic. Check the probe path,
+        the port, and whether the app is actually listening on <code class="inl">0.0.0.0</code>. Then check whether a
+        dependency your <code class="inl">/readyz</code> endpoint queries is down.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Deployments</a>
+        <a class="reflink" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Configure probes</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Resources</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>QoS classes</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes/module-01"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 01: Pods &amp; the Daily CLI</b></span></a>
+        <a href="/learn/kubernetes/module-03"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 03: Services, DNS &amp; Ingress</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 02 &middot; the 80/20 field guide.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

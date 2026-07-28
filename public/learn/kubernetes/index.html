@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes in Practice: The 80/20 Field Guide</title>
+<meta name="description" content="The 20% of Kubernetes you use 80% of the time: pods, deployments, services, ingress, config and secrets, storage, debugging, and production hardening. Eight hands-on modules.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sahilkumar.dev/learn/kubernetes/">
+<meta property="og:title" content="Kubernetes in Practice: The 80/20 Field Guide">
+<meta property="og:description" content="Eight hands-on modules covering the 20% of Kubernetes that carries 80% of real developer work: pods, deployments, services, ingress, config, storage, debugging, and production hardening.">
+<meta property="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Course","name":"Kubernetes in Practice: The 80/20 Field Guide","description":"Eight hands-on modules covering the 20% of Kubernetes that carries 80% of real developer work: pods, deployments, services, ingress, config and secrets, storage, debugging, and production hardening.","url":"https://sahilkumar.dev/learn/kubernetes/","inLanguage":"en","provider":{"@type":"Person","name":"Sahil Kumar","url":"https://sahilkumar.dev"},"hasCourseInstance":{"@type":"CourseInstance","courseMode":"online","courseWorkload":"PT12H"}}</script>
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+<style>
+  /* ── index-only: brand hero band + module grid ── */
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  .band{position:relative;overflow:hidden;background:linear-gradient(140deg,#326CE5 0%,#2350B4 55%,#183A80 100%);color:#fff}
+  .band::after{content:"";position:absolute;right:-90px;top:-70px;width:460px;height:460px;
+    background:rgba(255,255,255,.07);clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+  .band::before{content:"";position:absolute;right:150px;bottom:-190px;width:300px;height:300px;
+    background:rgba(255,255,255,.05);clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+  .band .wrap{position:relative;z-index:2;padding-top:62px;padding-bottom:62px;
+    display:grid;grid-template-columns:1.25fr .75fr;gap:44px;align-items:center}
+  @media(max-width:900px){.band .wrap{grid-template-columns:1fr;gap:26px;padding-top:44px;padding-bottom:46px}}
+
+  .band .kick{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.14em;text-transform:uppercase;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.28);padding:6px 14px;border-radius:999px}
+  .band h1{font-size:clamp(34px,5.6vw,54px);line-height:1.08;margin:20px 0 16px;
+    letter-spacing:-.025em;font-weight:800;color:#fff}
+  .band h1 span{color:#BBD1FA}
+  .band .deck{font-size:18px;line-height:1.7;font-weight:300;color:#DDE7FB;max-width:56ch;margin:0}
+  .band .deck b{color:#fff;font-weight:600}
+  .band .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+  .band .cta a{display:inline-flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;
+    padding:12px 20px;border-radius:6px;transition:all .18s var(--ease)}
+  .band .cta svg{width:17px;height:17px}
+  .band .cta .primary{background:#fff;color:var(--k8s-dark)}
+  .band .cta .primary:hover{background:#E6EEFD;transform:translateY(-1px)}
+  .band .cta .ghost{border:1px solid rgba(255,255,255,.45);color:#fff}
+  .band .cta .ghost:hover{background:rgba(255,255,255,.12)}
+  .band .facts{display:flex;flex-wrap:wrap;gap:22px;margin-top:30px;
+    border-top:1px solid rgba(255,255,255,.2);padding-top:20px}
+  .band .facts div{font-size:12.5px;color:#BBD1FA;letter-spacing:.04em}
+  .band .facts b{display:block;font-size:22px;color:#fff;font-weight:700;font-family:var(--mono);letter-spacing:-.01em}
+
+  .wheel{display:grid;place-items:center}
+  .wheel svg{width:100%;max-width:250px;height:auto;color:rgba(255,255,255,.9);
+    filter:drop-shadow(0 8px 26px rgba(0,0,0,.28))}
+  @media(max-width:900px){.wheel{display:none}}
+
+  /* ── the 80/20 strip ── */
+  .strip{background:var(--surface);border-bottom:1px solid var(--line)}
+  .strip .wrap{padding:30px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  @media(max-width:860px){.strip .wrap{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.strip .wrap{grid-template-columns:1fr}}
+  .strip .it{display:flex;gap:11px;align-items:flex-start}
+  .strip .it svg{width:19px;height:19px;color:var(--k8s);flex:none;margin-top:3px}
+  .strip .it b{display:block;font-size:14px;color:var(--fg);font-weight:700}
+  .strip .it p{margin:1px 0 0;font-size:13px;color:var(--fg-dim);line-height:1.55;max-width:none}
+
+  /* ── section title ── */
+  .sectitle{display:flex;align-items:center;gap:16px;margin:54px 0 6px}
+  .sectitle h2{white-space:nowrap;font-size:26px}
+  .sectitle .ln{flex:1;border-top:1px solid var(--line)}
+  .sectitle .ct{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--k8s-dark);background:var(--k8s-tint);border:1px solid var(--k8s-tint-2);padding:4px 11px;border-radius:999px}
+
+  /* ── module cards ── */
+  .mods{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0 10px}
+  @media(max-width:900px){.mods{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.mods{grid-template-columns:1fr}}
+  .mod{display:flex;flex-direction:column;gap:9px;padding:20px;background:#fff;color:var(--fg);
+    border:1px solid var(--line);border-radius:var(--radius-lg);transition:all .2s var(--ease)}
+  .mod:hover{border-color:var(--k8s);box-shadow:var(--shadow-2);transform:translateY(-2px)}
+  .mod .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .mod .no{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;background:var(--k8s);
+    width:30px;height:30px;display:grid;place-items:center;flex:none;
+    clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+  .mod .day{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-faint)}
+  .mod h3{margin:2px 0 0;font-size:17.5px;font-weight:700;line-height:1.25;color:var(--fg)}
+  .mod p{margin:0;font-size:13.4px;color:var(--fg-dim);line-height:1.62;flex:1;max-width:none}
+  .mod .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+  .mod .tags span{font-family:var(--mono);font-size:10.5px;color:var(--k8s-dark);background:var(--k8s-tint);
+    padding:3px 8px;border-radius:4px}
+  .mod .go{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;
+    color:var(--k8s);letter-spacing:.02em;margin-top:4px}
+  .mod .go svg{width:14px;height:14px;transition:transform .16s var(--ease)}
+  .mod:hover .go svg{transform:translateX(3px)}
+
+  /* ── prereq / how to read ── */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:26px 0 10px}
+  @media(max-width:760px){.split{grid-template-columns:1fr}}
+
+  /* ── page footer ── */
+  .foot{border-top:1px solid var(--line);margin-top:56px;background:var(--surface)}
+  .foot .wrap{padding:26px 24px 34px;display:flex;flex-wrap:wrap;gap:16px;
+    align-items:center;justify-content:space-between}
+  .foot .l b{display:block;font-size:15px;color:var(--fg);font-weight:700}
+  .foot .l{font-size:13px;color:var(--fg-dim)}
+</style>
+</head>
+<body>
+
+<script src="/learn/kubernetes/sprite.js"></script>
+
+<!-- ░░ top bar ░░ -->
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn" style="margin-right:6px">&larr; Learn</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; The 80/20 Field Guide</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">8 Modules</span>
+    <a class="pill" href="https://kubernetes.io/docs/" target="_blank" rel="noopener"><b>k8s docs</b></a>
+  </div>
+</header>
+
+<!-- ░░ hero band ░░ -->
+<section class="band">
+  <div class="wrap">
+    <div>
+      <span class="kick">A Hands-On Course &middot; Modules 00 &rarr; 07</span>
+      <h1>Kubernetes,<br>the <span>20% that runs 80%</span> of your work</h1>
+      <p class="deck">Kubernetes has hundreds of objects. You will use about fifteen of them, nearly every day.
+      This course teaches <b>only</b> those: pods, deployments, services, ingress, config, secrets, storage,
+      and the debugging playbook that turns a red <b>CrashLoopBackOff</b> into a fixed deploy in two minutes.</p>
+      <div class="cta">
+        <a class="primary" href="/learn/kubernetes/module-00"><svg><use href="#i-arrow"/></svg>Start with Module 00</a>
+        <a class="ghost" href="/learn/kubernetes/module-01"><svg><use href="#i-box"/></svg>Know the basics? Skip to 01</a>
+      </div>
+      <div class="facts">
+        <div><b>8</b>modules</div>
+        <div><b>~12h</b>hands-on</div>
+        <div><b>15</b>objects that matter</div>
+        <div><b>v1.34</b>current API</div>
+      </div>
+    </div>
+    <div class="wheel">
+      <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-label="Kubernetes helm wheel inside a heptagon">
+        <!-- heptagon shell -->
+        <path d="M100 8 173 42 191 121 141 185 59 185 9 121 27 42Z" stroke-width="4" opacity=".95"/>
+        <path d="M100 22 161 50 176 116 134 170 66 170 24 116 39 50Z" stroke-width="1.4" opacity=".4"/>
+        <!-- hub -->
+        <circle cx="100" cy="100" r="21" stroke-width="4"/>
+        <circle cx="100" cy="100" r="9" stroke-width="2" opacity=".55"/>
+        <!-- seven spokes with paddle tips -->
+        <g stroke-width="4">
+          <path d="M100 79V44"/><path d="M121 92l33-11"/><path d="M118 118l21 28"/>
+          <path d="M100 121v35"/><path d="M82 118l-21 28"/><path d="M79 92 46 81"/><path d="M92 82 72 52"/>
+        </g>
+        <g stroke-width="3.4" opacity=".92">
+          <path d="M90 44h20l-10-16Z"/><path d="m154 81 6 19 17-8Z"/><path d="m139 146-6 19 19 3Z"/>
+          <path d="M90 156h20l-10 17Z"/><path d="m61 146-19 4 6 18Z"/><path d="m46 81-17 11 17 9Z"/><path d="M72 52 58 39l-6 18Z"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ what you get strip ░░ -->
+<section class="strip">
+  <div class="wrap">
+    <div class="it"><svg><use href="#i-target"/></svg><div><b>Ruthless 80/20</b><p>Fifteen objects, one debugging playbook. No CRDs, no operators, no service mesh.</p></div></div>
+    <div class="it"><svg><use href="#i-terminal"/></svg><div><b>Hands-on every module</b><p>Run every command on a local kind or minikube cluster. Predict the output first.</p></div></div>
+    <div class="it"><svg><use href="#i-scale"/></svg><div><b>Real failure modes</b><p>Pending, ImagePullBackOff, OOMKilled, CrashLoopBackOff: cause and fix for each.</p></div></div>
+    <div class="it"><svg><use href="#i-check"/></svg><div><b>Production habits</b><p>Probes, requests and limits, RBAC, non-root containers, pinned digests.</p></div></div>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <div class="sectitle">
+    <h2>The Modules</h2>
+    <span class="ln"></span>
+    <span class="ct">00 &rarr; 07</span>
+  </div>
+
+  <div class="mods">
+
+    <a class="mod" href="/learn/kubernetes/module-00">
+      <div class="top"><span class="no">00</span><span class="day">Day 0</span></div>
+      <h3>Foundations &amp; the Cluster</h3>
+      <p>What Kubernetes actually is, why orchestration exists, the control plane and node components, and the reconciliation loop that makes the whole thing tick. Your first cluster and your first pod.</p>
+      <div class="tags"><span>control plane</span><span>kubectl</span><span>YAML anatomy</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-01">
+      <div class="top"><span class="no">01</span><span class="day">Day 1</span></div>
+      <h3>Pods &amp; the Daily CLI</h3>
+      <p>The pod, the only thing Kubernetes actually runs. Labels and selectors, the pod lifecycle, init containers and sidecars, and the ten kubectl commands you will type every working day.</p>
+      <div class="tags"><span>pods</span><span>labels</span><span>kubectl</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-02">
+      <div class="top"><span class="no">02</span><span class="day">Day 2</span></div>
+      <h3>Deployments &amp; Rollouts</h3>
+      <p>How you actually ship: ReplicaSets, rolling updates, rollback in one command, and the three probes plus resource requests and limits that decide whether your pod survives the night.</p>
+      <div class="tags"><span>deployments</span><span>probes</span><span>resources</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-03">
+      <div class="top"><span class="no">03</span><span class="day">Day 3</span></div>
+      <h3>Services, DNS &amp; Ingress</h3>
+      <p>Pod IPs die; services do not. ClusterIP, NodePort and LoadBalancer, cluster DNS names, the port / targetPort / nodePort confusion settled, and Ingress for real HTTP routing.</p>
+      <div class="tags"><span>services</span><span>DNS</span><span>ingress</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-04">
+      <div class="top"><span class="no">04</span><span class="day">Day 4</span></div>
+      <h3>Config &amp; Secrets</h3>
+      <p>Get configuration out of your image. ConfigMaps and Secrets, env vars versus mounted files, why Secrets are not encrypted by default, and how to make a config change actually restart your pods.</p>
+      <div class="tags"><span>configmap</span><span>secret</span><span>envFrom</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-05">
+      <div class="top"><span class="no">05</span><span class="day">Day 5</span></div>
+      <h3>Storage &amp; StatefulSets</h3>
+      <p>Data that outlives the pod. emptyDir versus persistent volumes, PVC and StorageClass dynamic provisioning, access modes, reclaim policies, and when a StatefulSet is the right answer.</p>
+      <div class="tags"><span>PVC</span><span>StorageClass</span><span>StatefulSet</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-06">
+      <div class="top"><span class="no">06</span><span class="day">Day 6</span></div>
+      <h3>Debugging &amp; Operations</h3>
+      <p>The five-step playbook for any broken pod, every common failure state and its actual cause, events, ephemeral debug containers, plus Jobs, CronJobs, namespaces and autoscaling.</p>
+      <div class="tags"><span>CrashLoopBackOff</span><span>events</span><span>HPA</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+    <a class="mod" href="/learn/kubernetes/module-07">
+      <div class="top"><span class="no">07</span><span class="day">Day 7</span></div>
+      <h3>Production &amp; Security</h3>
+      <p>What separates a demo from a deploy: RBAC and service accounts, security contexts, Pod Security Admission, disruption budgets, scheduling control, and packaging with Helm or Kustomize.</p>
+      <div class="tags"><span>RBAC</span><span>securityContext</span><span>Helm</span></div>
+      <span class="go">Read on<svg><use href="#i-arrow"/></svg></span>
+    </a>
+
+  </div>
+
+  <div class="split">
+    <div class="note info"><svg class="ic"><use href="#i-book"/></svg><span class="tag">How to read this course</span>
+      <p>Work the modules <b>in order</b>. Each one assumes the last. Reading is not enough: keep a local cluster
+      open in a second terminal and run every command, predicting the output before you press enter.
+      Kubernetes only becomes intuitive once you have watched the reconciliation loop fight you a few times.</p></div>
+    <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Prerequisite</span>
+      <p>You need working Docker knowledge first: images, containers, ports, volumes, and what a Dockerfile does.
+      Kubernetes schedules containers, it does not teach you what one is. If any of that is shaky,
+      run the <a href="/learn/docker">Docker course</a> first, then come back.</p></div>
+  </div>
+
+  <div class="note key" style="margin-bottom:8px"><svg class="ic"><use href="#i-bulb"/></svg><span class="tag">What is deliberately not here</span>
+    <p>Operators and CRDs, service meshes, custom schedulers, cluster installation from scratch, CNI internals,
+    and the full API surface. All real, all rare. They are the other 80% of Kubernetes that accounts for 20% of
+    the work, and every one of them is easier to learn once the objects in these eight modules are automatic.</p></div>
+
+</div>
+
+<!-- ░░ footer ░░ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="l">
+      <b>Kubernetes in Practice</b>
+      8 hands-on modules &middot; built for from-zero, visual learning
+    </div>
+    <div class="refs">
+      <a class="reflink" href="https://kubernetes.io/docs/home/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Kubernetes Docs</a>
+      <a class="reflink" href="https://kubernetes.io/docs/reference/kubectl/quick-reference/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>kubectl Cheat Sheet</a>
+      <a class="reflink" href="/learn/docker"><svg><use href="#i-ext"/></svg>Docker course</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

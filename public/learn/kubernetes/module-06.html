@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 06: Debugging &amp; Operations &middot; Kubernetes in Practice</title>
+<meta name="description" content="The five-step debugging playbook, every common pod failure state and its real cause, events, ephemeral debug containers, Jobs and CronJobs, namespaces and autoscaling.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-06">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Operations &nbsp;/&nbsp; Module 06</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 6</span>
+    <span class="pill"><b>~2h</b> · reference</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#playbook"><svg class="ti"><use href="#i-target"/></svg>The five-step playbook</a>
+      <a href="#states"><svg class="ti"><use href="#i-warn"/></svg>Every failure state</a>
+      <a href="#events"><svg class="ti"><use href="#i-search"/></svg>Events &amp; conditions</a>
+      <a href="#debugc"><svg class="ti"><use href="#i-terminal"/></svg>kubectl debug</a>
+      <a href="#nodes"><svg class="ti"><use href="#i-server"/></svg>When it is the node</a>
+      <a href="#jobs"><svg class="ti"><use href="#i-clock"/></svg>Jobs &amp; CronJobs</a>
+      <a href="#scaling"><svg class="ti"><use href="#i-scale"/></svg>Autoscaling</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">This is the module you will come back to. Section 2 is a lookup table worth keeping open during an incident.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Operations &middot; Kubernetes &middot; Day 6</span>
+      <h1>Module 06: <span class="grad">Debugging</span><br>&amp; Operations</h1>
+      <p class="lede">Everything so far assumed things work. They will not. The difference between an engineer who is
+      comfortable with Kubernetes and one who is not is almost entirely this: <em>a fixed order for finding out what
+      is wrong</em>, and knowing what each failure state actually means rather than guessing at it.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · reference-heavy</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Modules 01&ndash;05</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>diagnose in under 2 minutes</span>
+        <span class="chip"><svg><use href="#i-search"/></svg>plus Jobs &amp; HPA</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="playbook">
+      <div class="sec-head"><span class="num">1</span><h2>The five-step playbook</h2></div>
+      <p>Same five steps, every time, in this order. Do not skip ahead to logs: three quarters of failures never
+      produce a log line, because the container never started.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">run these in order, always</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. WHAT is broken? Status, restarts, age, node.</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-o</span> wide
+
+<span class="cmt"># 2. WHY does the cluster say it is broken? Events live at the bottom.</span>
+<span class="cmd">kubectl</span> describe pod POD
+
+<span class="cmt"># 3. WHAT did the app say? --previous is the crashed instance.</span>
+<span class="cmd">kubectl</span> logs POD
+<span class="cmd">kubectl</span> logs POD <span class="flag">--previous</span>
+<span class="cmd">kubectl</span> logs POD <span class="flag">-c</span> CONTAINER      <span class="cmt"># multi-container or init</span>
+
+<span class="cmt"># 4. WHAT is happening cluster-wide? Scheduling, evictions, image pulls.</span>
+<span class="cmd">kubectl</span> get events <span class="flag">--sort-by</span>=<span class="str">.lastTimestamp</span> <span class="flag">-A</span> | tail <span class="flag">-n</span> 25
+
+<span class="cmt"># 5. GO INSIDE, only now.</span>
+<span class="cmd">kubectl</span> exec <span class="flag">-it</span> POD <span class="flag">--</span> sh
+<span class="cmd">kubectl</span> debug <span class="flag">-it</span> POD <span class="flag">--image</span>=<span class="str">nicolaka/netshoot</span> <span class="flag">--target</span>=<span class="str">CONTAINER</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">describe before logs, always</span>
+        <p>An empty <code class="inl">logs</code> output tells you almost nothing, and that is the situation for
+        every scheduling failure, image pull failure, mount failure and config error. <b>describe</b> reports all of
+        them, in plain English, in its Events section. Reaching for logs first is the single most common wasted
+        minute in Kubernetes debugging.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="states">
+      <div class="sec-head"><span class="num">2</span><h2>Every failure state and what it really means</h2></div>
+      <p>The status column is a diagnosis if you can read it. This table is the module.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Status</th><th>Actually means</th><th>Usual cause &amp; fix</th></tr></thead>
+        <tbody>
+          <tr><td><b>Pending</b></td><td>No node accepted it. The scheduler could not place it.</td><td>Insufficient CPU/memory, a taint with no toleration, an unbound PVC, or nodeSelector matching nothing. <code>describe pod</code> states which.</td></tr>
+          <tr><td><b>ImagePullBackOff</b><br><b>ErrImagePull</b></td><td>The kubelet cannot fetch the image.</td><td>Typo in name or tag, private registry with no <code>imagePullSecrets</code>, wrong architecture, or rate limiting. Check the exact string in the events.</td></tr>
+          <tr><td><b>CrashLoopBackOff</b></td><td>Container starts, exits, restarts, with growing backoff.</td><td><b>Your process is exiting.</b> <code>logs --previous</code>. Missing env var, dependency unreachable at boot, or a command that simply completes.</td></tr>
+          <tr><td><b>CreateContainerConfigError</b></td><td>The container cannot be built from its config.</td><td>A referenced ConfigMap or Secret, or a specific key inside it, does not exist.</td></tr>
+          <tr><td><b>OOMKilled</b><br><small>exit code 137</small></td><td>The kernel killed it for exceeding its memory limit.</td><td>Raise <code>limits.memory</code> or fix the usage. No log line precedes it; there is no warning before SIGKILL.</td></tr>
+          <tr><td><b>Error</b><br><small>exit code 1</small></td><td>The process exited non-zero.</td><td>An application error. Read the logs.</td></tr>
+          <tr><td><b>Running, 0/1 Ready</b></td><td>Alive, but failing readiness.</td><td>Probe path, port, or a dependency the <code>/readyz</code> endpoint checks. It gets no traffic on purpose.</td></tr>
+          <tr><td><b>Init:0/2</b></td><td>An init container has not finished.</td><td><code>logs POD -c INITNAME</code>. Usually waiting on a dependency that will never arrive.</td></tr>
+          <tr><td><b>ContainerCreating</b> (stuck)</td><td>The kubelet is preparing it and cannot finish.</td><td>Volume will not mount, a multi-attach conflict on an RWO PVC, or a very slow image pull.</td></tr>
+          <tr><td><b>Terminating</b> (stuck)</td><td>Deletion is blocked.</td><td>The process ignores SIGTERM and the grace period is long, or a finalizer is waiting. Investigate before force-deleting.</td></tr>
+          <tr><td><b>Evicted</b></td><td>The node reclaimed it under pressure.</td><td>Node out of memory or disk. Pods with no resource requests go first: set them.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">The two exit codes worth memorising</span>
+        <p><b>137</b> = 128 + 9 = SIGKILL, which for a container almost always means OOMKilled or a failed liveness
+        probe. <b>143</b> = 128 + 15 = SIGTERM, meaning a normal shutdown request during a rollout or scale-down.
+        Seeing 143 in logs during a deploy is not a bug; it is the graceful path working.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="events">
+      <div class="sec-head"><span class="num">3</span><h2>Events and conditions</h2></div>
+      <p>Events are the cluster narrating itself: scheduling decisions, pulls, probe failures, evictions. They are
+      also the most under-used data in Kubernetes, largely because they expire.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">reading the cluster's own account of events</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Chronological, everywhere. The "what just happened" view.</span>
+<span class="cmd">kubectl</span> get events <span class="flag">-A</span> <span class="flag">--sort-by</span>=<span class="str">.lastTimestamp</span> | tail <span class="flag">-n</span> 30
+
+<span class="cmt"># Only the bad news</span>
+<span class="cmd">kubectl</span> get events <span class="flag">--field-selector</span> <span class="str">type=Warning</span>
+
+<span class="cmt"># Everything about one object</span>
+<span class="cmd">kubectl</span> get events <span class="flag">--field-selector</span> <span class="str">involvedObject.name=api-7d4f-x9k2</span>
+
+<span class="cmt"># Live stream while you reproduce the problem</span>
+<span class="cmd">kubectl</span> get events <span class="flag">-w</span></code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Events expire after about an hour</span>
+        <p>Default TTL is 60 minutes, so a failure from last night has left no trace by morning. This is precisely why
+        clusters ship events to a real logging system. If you are debugging something intermittent, start
+        <code class="inl">kubectl get events -w</code> <b>before</b> you reproduce it.</p></div>
+
+      <p>Conditions are the other half: structured booleans on the object itself, better for automation than the
+      human-readable status column.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">conditions, for scripts and for precision</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmd">kubectl</span> get pod POD <span class="flag">-o</span> <span class="str">jsonpath='{.status.conditions}'</span> | jq
+<span class="out">PodScheduled=True  Initialized=True  ContainersReady=False  Ready=False</span>
+
+<span class="cmt"># Block until something is true, instead of sleeping and hoping</span>
+<span class="cmd">kubectl</span> wait <span class="flag">--for</span>=<span class="str">condition=Ready</span> pod/POD <span class="flag">--timeout</span>=<span class="str">120s</span>
+<span class="cmd">kubectl</span> wait <span class="flag">--for</span>=<span class="str">condition=Available</span> deployment/api <span class="flag">--timeout</span>=<span class="str">120s</span></code></pre></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="debugc">
+      <div class="sec-head"><span class="num">4</span><h2>kubectl debug: tools without rebuilding the image</h2></div>
+      <p>Your production image is distroless, so <code class="inl">exec</code> finds no shell. That is correct
+      security, and it used to mean rebuilding a "debug" image to investigate anything. Ephemeral containers fixed it.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">three shapes of kubectl debug</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># A. Attach a toolbox container INTO a running pod. Shares its network</span>
+<span class="cmt">#    namespace, and with --target, its process namespace too.</span>
+<span class="cmd">kubectl</span> debug <span class="flag">-it</span> api-7d4f <span class="flag">--image</span>=<span class="str">nicolaka/netshoot</span> <span class="flag">--target</span>=<span class="str">api</span>
+<span class="cmt">#    now: dig, curl, ss, tcpdump, nslookup — against the real pod's network</span>
+
+<span class="cmt"># B. Copy a crash-looping pod and change the command, so it stays up</span>
+<span class="cmd">kubectl</span> debug api-7d4f <span class="flag">-it</span> <span class="flag">--copy-to</span>=<span class="str">api-debug</span> <span class="flag">--</span> sh
+<span class="cmt">#    same image, same env, same mounts — but a shell instead of the app</span>
+
+<span class="cmt"># C. Get a root shell ON a node (for node-level problems)</span>
+<span class="cmd">kubectl</span> debug node/dev-worker <span class="flag">-it</span> <span class="flag">--image</span>=<span class="str">busybox:1.36</span>
+<span class="cmt">#    the node's filesystem is mounted at /host</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Option B is the one that saves your afternoon</span>
+        <p>A CrashLoopBackOff you cannot reproduce locally is nearly impossible to inspect: the container is only
+        alive for a second at a time. <code class="inl">--copy-to</code> gives you a clone with identical image,
+        environment, secrets and volumes, but running a shell, so you can check what the app would have seen. That is
+        usually a missing env var or an unreadable mounted file, and it is visible in ten seconds.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="nodes">
+      <div class="sec-head"><span class="num">5</span><h2>When the problem is the node</h2></div>
+      <p>Sometimes nothing is wrong with your pod. Check the machine.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">node-level checks</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmd">kubectl</span> get nodes
+<span class="cmd">kubectl</span> describe node dev-worker
+<span class="cmt">#    Conditions: MemoryPressure, DiskPressure, PIDPressure, Ready</span>
+<span class="cmt">#    Allocated resources: how full it already is</span>
+<span class="cmt">#    Taints: what it refuses to run</span>
+
+<span class="cmt"># Live usage (needs metrics-server installed)</span>
+<span class="cmd">kubectl</span> top nodes
+<span class="cmd">kubectl</span> top pods <span class="flag">--sort-by</span>=<span class="str">memory</span> <span class="flag">-A</span>
+
+<span class="cmt"># Taking a node out of service safely, in the right order</span>
+<span class="cmd">kubectl</span> cordon dev-worker                    <span class="cmt"># no NEW pods land here</span>
+<span class="cmd">kubectl</span> drain dev-worker <span class="flag">--ignore-daemonsets</span> \
+  <span class="flag">--delete-emptydir-data</span>                       <span class="cmt"># evict existing pods politely</span>
+<span class="cmt"># ...maintenance...</span>
+<span class="cmd">kubectl</span> uncordon dev-worker</code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Taints and tolerations, in one line</span>
+        <p>A <b>taint</b> on a node repels pods; a matching <b>toleration</b> on a pod lets it stay anyway. That is how
+        control plane nodes stay free of your workloads, and how GPU nodes are reserved for jobs that need them.
+        A pod stuck Pending with "had untolerated taint" in its events is this, and only this.</p></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="jobs">
+      <div class="sec-head"><span class="num">6</span><h2>Jobs and CronJobs</h2></div>
+      <p>Not everything is a server. A <b>Job</b> runs pods until they succeed and then stops. A <b>CronJob</b> creates
+      Jobs on a schedule.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a migration Job and a nightly CronJob</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">batch/v1</span>
+<span class="yk">kind</span>: <span class="yv">Job</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">migrate</span> }
+<span class="yk">spec</span>:
+  <span class="yk">backoffLimit</span>: <span class="yv">3</span>              <span class="cmt"># retries before giving up</span>
+  <span class="yk">activeDeadlineSeconds</span>: <span class="yv">600</span>    <span class="cmt"># hard timeout for the whole Job</span>
+  <span class="yk">ttlSecondsAfterFinished</span>: <span class="yv">3600</span> <span class="cmt"># auto-clean 1h after it finishes</span>
+  <span class="yk">template</span>:
+    <span class="yk">spec</span>:
+      <span class="yk">restartPolicy</span>: <span class="yv">OnFailure</span>
+      <span class="yk">containers</span>:
+        - <span class="yk">name</span>: <span class="yv">migrate</span>
+          <span class="yk">image</span>: <span class="str">ghcr.io/acme/api:1.4.2</span>
+          <span class="yk">command</span>: [<span class="str">'./manage'</span>, <span class="str">'migrate'</span>]
+---
+<span class="yk">apiVersion</span>: <span class="yv">batch/v1</span>
+<span class="yk">kind</span>: <span class="yv">CronJob</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">nightly-backup</span> }
+<span class="yk">spec</span>:
+  <span class="yk">schedule</span>: <span class="str">"0 3 * * *"</span>            <span class="cmt"># 03:00 daily, cluster timezone</span>
+  <span class="yk">concurrencyPolicy</span>: <span class="yv">Forbid</span>       <span class="cmt"># never overlap with a slow previous run</span>
+  <span class="yk">successfulJobsHistoryLimit</span>: <span class="yv">3</span>
+  <span class="yk">failedJobsHistoryLimit</span>: <span class="yv">3</span>
+  <span class="yk">jobTemplate</span>:
+    <span class="yk">spec</span>:
+      <span class="yk">template</span>:
+        <span class="yk">spec</span>:
+          <span class="yk">restartPolicy</span>: <span class="yv">OnFailure</span>
+          <span class="yk">containers</span>:
+            - <span class="yk">name</span>: <span class="yv">backup</span>
+              <span class="yk">image</span>: <span class="str">ghcr.io/acme/backup:2.1</span></code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Four settings that turn a CronJob from a liability into a tool</span>
+        <p><code class="inl">concurrencyPolicy: Forbid</code> stops a slow run from stacking on the next one.
+        <code class="inl">activeDeadlineSeconds</code> stops a hung job running forever.
+        <code class="inl">ttlSecondsAfterFinished</code> stops completed pods accumulating for weeks. And
+        <b>make the job idempotent</b>, because a CronJob's guarantee is <i>at least once</i>, not exactly once.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="scaling">
+      <div class="sec-head"><span class="num">7</span><h2>Autoscaling</h2></div>
+      <p>Three different scalers, often confused with each other. Only the first is in the everyday 80/20.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico blue"><svg><use href="#i-scale"/></svg></div>
+          <h4>HPA</h4><p>Changes the <b>number of pods</b> based on CPU, memory or custom metrics. The one you will actually use.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-gauge"/></svg></div>
+          <h4>VPA</h4><p>Changes the <b>requests and limits</b> of pods. Useful for right-sizing; conflicts with HPA on the same metric.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-server"/></svg></div>
+          <h4>Cluster Autoscaler</h4><p>Changes the <b>number of nodes</b> when pods cannot be scheduled. Cloud only.</p></div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a horizontal pod autoscaler</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmd">kubectl</span> autoscale deployment api <span class="flag">--min</span>=<span class="str">2</span> <span class="flag">--max</span>=<span class="str">10</span> <span class="flag">--cpu-percent</span>=<span class="str">70</span>
+<span class="cmd">kubectl</span> get hpa <span class="flag">-w</span>
+
+<span class="cmt"># Equivalent, and version-controllable</span>
+<span class="yk">apiVersion</span>: <span class="yv">autoscaling/v2</span>
+<span class="yk">kind</span>: <span class="yv">HorizontalPodAutoscaler</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">api</span> }
+<span class="yk">spec</span>:
+  <span class="yk">scaleTargetRef</span>:
+    <span class="yk">apiVersion</span>: <span class="yv">apps/v1</span>
+    <span class="yk">kind</span>: <span class="yv">Deployment</span>
+    <span class="yk">name</span>: <span class="yv">api</span>
+  <span class="yk">minReplicas</span>: <span class="yv">2</span>
+  <span class="yk">maxReplicas</span>: <span class="yv">10</span>
+  <span class="yk">metrics</span>:
+    - <span class="yk">type</span>: <span class="yv">Resource</span>
+      <span class="yk">resource</span>:
+        <span class="yk">name</span>: <span class="yv">cpu</span>
+        <span class="yk">target</span>: { <span class="yk">type</span>: <span class="yv">Utilization</span>, <span class="yk">averageUtilization</span>: <span class="yv">70</span> }</code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">HPA needs two things you may not have</span>
+        <p>First, <b>metrics-server</b> must be running, or the HPA reports <code class="inl">&lt;unknown&gt;</code>
+        and never scales. Second, the target percentage is measured <b>against the CPU request</b>, so a pod with no
+        CPU request gives the HPA nothing to compute against. No requests, no autoscaling. This is one more reason
+        Module 02 insisted on setting them.</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: break five things, diagnose each</h2></div>
+      <p>Do not read ahead to the cause. For each one, run the playbook and name the fault before you fix it.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: five deliberate failures</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># FAULT 1 — a bad image reference</span>
+<span class="cmd">kubectl</span> run f1 <span class="flag">--image</span>=<span class="str">nginx:definitely-not-a-tag</span>
+
+<span class="cmt"># FAULT 2 — a process that exits immediately</span>
+<span class="cmd">kubectl</span> run f2 <span class="flag">--image</span>=<span class="str">busybox:1.36</span> <span class="flag">--</span> sh <span class="flag">-c</span> <span class="str">'echo boom; exit 1'</span>
+
+<span class="cmt"># FAULT 3 — a missing ConfigMap</span>
+<span class="cmd">kubectl</span> run f3 <span class="flag">--image</span>=<span class="str">busybox:1.36</span> <span class="flag">--overrides</span>=<span class="str">'{"spec":{"containers":[{"name":"f3","image":"busybox:1.36","command":["sleep","3600"],"envFrom":[{"configMapRef":{"name":"does-not-exist"}}]}]}}'</span>
+
+<span class="cmt"># FAULT 4 — unschedulable: asks for more CPU than any node has</span>
+<span class="cmd">kubectl</span> run f4 <span class="flag">--image</span>=<span class="str">nginx:1.27</span> <span class="flag">--overrides</span>=<span class="str">'{"spec":{"containers":[{"name":"f4","image":"nginx:1.27","resources":{"requests":{"cpu":"200"}}}]}}'</span>
+
+<span class="cmt"># FAULT 5 — memory limit far below what the process wants</span>
+<span class="cmd">kubectl</span> run f5 <span class="flag">--image</span>=<span class="str">polinux/stress</span> <span class="flag">--restart</span>=<span class="str">Never</span> \
+  <span class="flag">--limits</span>=<span class="str">memory=32Mi</span> <span class="flag">--</span> stress <span class="flag">--vm</span> 1 <span class="flag">--vm-bytes</span> 250M <span class="flag">--timeout</span> 60s
+
+<span class="cmt"># ── Now diagnose. For each pod, in order: ──</span>
+<span class="cmd">kubectl</span> get pods
+<span class="cmd">kubectl</span> describe pod f1 | tail <span class="flag">-n</span> 12
+<span class="cmd">kubectl</span> logs f2 <span class="flag">--previous</span>
+<span class="cmd">kubectl</span> describe pod f3 | grep <span class="flag">-i</span> <span class="str">-A3 'config'</span>
+<span class="cmd">kubectl</span> describe pod f4 | grep <span class="flag">-i</span> <span class="str">-A3 'events'</span>
+<span class="cmd">kubectl</span> describe pod f5 | grep <span class="flag">-A4</span> <span class="str">'Last State'</span>
+
+<span class="cmt"># Expected: 1 ImagePullBackOff · 2 CrashLoopBackOff · 3 CreateContainerConfigError</span>
+<span class="cmt">#           4 Pending/Insufficient cpu · 5 OOMKilled (137)</span>
+
+<span class="cmd">kubectl</span> delete pod f1 f2 f3 f4 f5 <span class="flag">--ignore-not-found</span></code></pre></div>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You named each of the five faults from <code class="inl">describe</code> alone.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You found exit code 137 and know which of the five produced it.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can recite the five-step playbook without looking.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You used <code class="inl">kubectl debug</code> at least once.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You know why an HPA shows <code class="inl">&lt;unknown&gt;</code>.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">9</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">A pod is stuck Terminating. Can I force it?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">You can (<code class="inl">--force --grace-period=0</code>) but find out why first. The API object
+        disappears while the container may keep running on the node, which for anything holding a volume or a lock is
+        worse than the stuck pod. Real causes: the app ignores SIGTERM, a finalizer is waiting on cleanup, or the node
+        is unreachable. Only the last genuinely justifies force.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">How do I see logs from a pod that no longer exists?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">You cannot, from Kubernetes. <code class="inl">kubectl logs</code> reads files on the node, and
+        they go when the pod does. <code class="inl">--previous</code> only reaches the immediately preceding
+        container of a <i>still-existing</i> pod. This gap is the entire argument for shipping logs off-cluster
+        (Loki, Elasticsearch, a cloud logging service) before you need them.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="txt">Everything looks healthy but the app is slow.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Check CPU throttling first: a container at its CPU limit is throttled, not killed, so every
+        Kubernetes-level indicator stays green while latency triples. <code class="inl">kubectl top pod</code> next to
+        the configured limit, and the <code class="inl">container_cpu_cfs_throttled_seconds_total</code> metric if you
+        have Prometheus. This is the most common "nothing is wrong but it is slow" cause.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">Why does my Job keep creating pods?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">It is retrying, because the pod exits non-zero, up to <code class="inl">backoffLimit</code>
+        (default 6). Each attempt is a new pod, which is why you see several. Read the logs of the <b>first</b> failed
+        pod, not the last: later attempts often fail differently because of partial state left by the earlier ones.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">What single command gives the best overview of a sick cluster?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><code class="inl">kubectl get pods -A --field-selector=status.phase!=Running</code> shows
+        everything that is not healthy, cluster-wide, in one screen. Follow it with
+        <code class="inl">kubectl get events -A --sort-by=.lastTimestamp | tail -30</code>. Those two commands
+        together answer "what is broken and what happened" in about five seconds.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/tasks/debug/debug-application/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Debug applications</a>
+        <a class="reflink" href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>kubectl debug</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>CronJobs</a>
+        <a class="reflink" href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>HPA</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes/module-05"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 05: Storage &amp; StatefulSets</b></span></a>
+        <a href="/learn/kubernetes/module-07"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 07: Production &amp; Security</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 06 &middot; the 80/20 field guide.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

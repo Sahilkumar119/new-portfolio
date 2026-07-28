@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 01: Pods &amp; the Daily CLI &middot; Kubernetes in Practice</title>
+<meta name="description" content="The pod: shared network and storage, lifecycle phases, labels and selectors, init containers and sidecars, and the ten kubectl commands you use every day.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-01">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Workloads &nbsp;/&nbsp; Module 01</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 1</span>
+    <span class="pill"><b>~1.5h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#recap"><svg class="ti"><use href="#i-cycle"/></svg>Where we left off</a>
+      <a href="#pod"><svg class="ti"><use href="#i-box"/></svg>What a pod is</a>
+      <a href="#lifecycle"><svg class="ti"><use href="#i-heart"/></svg>Phases &amp; restarts</a>
+      <a href="#labels"><svg class="ti"><use href="#i-tag"/></svg>Labels &amp; selectors</a>
+      <a href="#multi"><svg class="ti"><use href="#i-layers"/></svg>Init &amp; sidecars</a>
+      <a href="#cli"><svg class="ti"><use href="#i-terminal"/></svg>The daily CLI</a>
+      <a href="#inside"><svg class="ti"><use href="#i-search"/></svg>logs · exec · port-forward</a>
+      <a href="#bare"><svg class="ti"><use href="#i-warn"/></svg>Never ship bare pods</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">This module is muscle memory. Type every command instead of reading it.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Workloads &middot; Kubernetes &middot; Day 1</span>
+      <h1>Module 01: <span class="grad">Pods</span><br>&amp; the Daily CLI</h1>
+      <p class="lede">Module 00 gave Sahil the loop. Now the object that loop actually manipulates. The pod is the only
+      thing Kubernetes ever schedules, and <em>every</em> higher-level object you meet later exists to create pods on
+      your behalf. Get this one right and Deployments, Jobs and StatefulSets are all variations on a theme.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · hands-on heavy</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 00</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>pods + kubectl fluency</span>
+        <span class="chip"><svg><use href="#i-helm"/></svg>Kubernetes v1.34</span>
+      </div>
+    </div>
+
+    <!-- 0 -->
+    <section id="recap">
+      <div class="sec-head"><span class="num">0</span><h2>Where we left off</h2></div>
+      <p>Three sentences from Foundations carry into everything below:</p>
+      <div class="grid three">
+        <div class="card"><div class="ico blue"><svg><use href="#i-cycle"/></svg></div>
+          <h4>Desired state wins</h4><p>You declare; controllers reconcile. Your imperative actions are just noise the loop corrects.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-server"/></svg></div>
+          <h4>One door: the API server</h4><p>Every component reads and writes through it. Nothing talks peer to peer.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-file"/></svg></div>
+          <h4>Four fields, always</h4><p><code>apiVersion</code>, <code>kind</code>, <code>metadata</code>, <code>spec</code>. Kubernetes writes <code>status</code>.</p></div>
+      </div>
+    </section>
+
+    <!-- 1 -->
+    <section id="pod">
+      <div class="sec-head"><span class="num">1</span><h2>What a pod actually is</h2></div>
+      <p>A pod is <b>one or more containers that share a network namespace and can share storage, always scheduled
+      together onto one node</b>. It is the smallest thing Kubernetes will place. You never schedule a container;
+      you schedule a pod that happens to hold one.</p>
+
+      <p>Sharing a network namespace has a concrete consequence that trips people up: containers in the same pod
+      reach each other on <code class="inl">localhost</code>, and they share one IP and one port space. Two containers
+      in a pod cannot both bind port 8080. Containers in <i>different</i> pods, even on the same node, are on
+      separate IPs entirely.</p>
+
+      <div class="cluster">
+        <div class="plane cp">
+          <div class="ttl"><svg><use href="#i-box"/></svg>One pod &mdash; one IP, one lifecycle</div>
+          <div class="row">
+            <div class="comp hl">container: app<small>listens on :8080 &mdash; sees the sidecar at localhost:9090</small></div>
+            <div class="comp">container: log-shipper<small>listens on :9090 &mdash; reads the shared volume the app writes to</small></div>
+          </div>
+          <div class="row" style="margin-top:9px">
+            <div class="comp">shared: network namespace<small>one pod IP, one port space, localhost between containers</small></div>
+            <div class="comp">shared: volumes<small>any volume in the pod spec can be mounted by both containers</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The default is one container per pod</span>
+        <p>Multi-container pods are for <b>helpers that cannot live apart from the app</b>: a log shipper reading the
+        app's files, a proxy fronting it, a config reloader. If two containers could sensibly scale independently or
+        be restarted independently, they are two pods, not one. "Frontend and backend in one pod" is the classic
+        beginner mistake and it makes both unscalable.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Pods are cattle, and they are disposable</span>
+        <p>A pod is <b>never</b> repaired. If its node dies or it is evicted, it is deleted and a <i>new</i> pod with a
+        new name and a new IP appears. Nothing about a pod is stable except what you deliberately make stable
+        (a Service for the address, a PersistentVolumeClaim for the data). Write code that assumes it will be killed
+        at any moment, because it will be.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="lifecycle">
+      <div class="sec-head"><span class="num">2</span><h2>Phases, container states, and restarts</h2></div>
+      <p>Two different things are called "state" and confusing them wastes hours. The <b>pod phase</b> is a coarse
+      summary. The <b>container state</b> inside it is what actually tells you what went wrong.</p>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-created">Pending</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>scheduled +<br>image pulled</b></div>
+          <div class="state s-running">Running</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>exit 0</b></div>
+          <div class="state s-stopped">Succeeded</div>
+        </div>
+        <div class="flow">
+          <div class="state s-running">Running</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>exit ≠ 0</b></div>
+          <div class="state s-removed">Failed</div>
+          <div class="arrow"><svg><use href="#i-arrows"/></svg><b>restartPolicy:<br>Always</b></div>
+          <div class="state s-running">Running again</div>
+        </div>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Phase</th><th>Means</th><th>Look at</th></tr></thead>
+        <tbody>
+          <tr><td><b>Pending</b></td><td>Accepted, but not all containers are running. Usually unscheduled, or still pulling.</td><td><code>describe</code> events: insufficient resources? taints? image pull?</td></tr>
+          <tr><td><b>Running</b></td><td>Bound to a node, at least one container is up.</td><td>Restart count. Running with 47 restarts is not healthy.</td></tr>
+          <tr><td><b>Succeeded</b></td><td>All containers exited 0 and will not restart. Normal for Jobs.</td><td>Nothing. This is success.</td></tr>
+          <tr><td><b>Failed</b></td><td>At least one container exited non-zero and will not restart.</td><td><code>logs --previous</code> and the exit code.</td></tr>
+          <tr><td><b>Unknown</b></td><td>The node stopped reporting.</td><td>The node, not the pod.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>restartPolicy: three values, one that matters</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Value</th><th>Behaviour</th><th>Used by</th></tr></thead>
+        <tbody>
+          <tr><td><code>Always</code></td><td>Restart the container whenever it exits, success or failure.</td><td>The default. Deployments, anything long-lived.</td></tr>
+          <tr><td><code>OnFailure</code></td><td>Restart only on non-zero exit.</td><td>Jobs, batch work.</td></tr>
+          <tr><td><code>Never</code></td><td>Do not restart. Pod goes to Succeeded or Failed.</td><td>One-shot debugging pods.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">CrashLoopBackOff is not an error, it is a symptom</span>
+        <p>It means: the container starts, exits, and Kubernetes is restarting it with an exponential backoff
+        (10s, 20s, 40s, up to five minutes). <b>The pod is fine. Your process is exiting.</b> The cause is always in
+        the previous container's output: <code class="inl">kubectl logs POD --previous</code>. Usually a missing env
+        var, an unreachable dependency at startup, or a command that finishes immediately.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="labels">
+      <div class="sec-head"><span class="num">3</span><h2>Labels and selectors: the glue</h2></div>
+      <p>Kubernetes has no foreign keys. Objects find each other by <b>matching labels</b>, and that is the entire
+      linking mechanism in the system. A Service finds its pods by selector. A Deployment owns its pods by selector.
+      Your <code class="inl">kubectl get</code> filters use the same thing.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">labels are how everything connects</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Pods carry labels</span>
+<span class="yk">metadata</span>:
+  <span class="yk">labels</span>:
+    <span class="yk">app</span>: <span class="yv">checkout</span>
+    <span class="yk">tier</span>: <span class="yv">backend</span>
+    <span class="yk">env</span>: <span class="yv">prod</span>
+
+<span class="cmt"># A Service selects them</span>
+<span class="yk">spec</span>:
+  <span class="yk">selector</span>:
+    <span class="yk">app</span>: <span class="yv">checkout</span>      <span class="cmt"># every pod with this label is now a backend</span>
+
+<span class="cmt"># And so do you, on the command line</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-l</span> <span class="str">app=checkout</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-l</span> <span class="str">'env in (prod,staging),tier=backend'</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-l</span> <span class="str">'!canary'</span>              <span class="cmt"># label absent</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">--show-labels</span>            <span class="cmt"># see what is actually set</span>
+<span class="cmd">kubectl</span> label pod solo <span class="str">env=dev</span> <span class="flag">--overwrite</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The failure this explains</span>
+        <p>"My Service returns connection refused and there are no endpoints." Ninety percent of the time the Service
+        selector and the pod labels do not match, often by one character or a stale <code class="inl">version</code>
+        label. <code class="inl">kubectl get endpoints SERVICE</code> showing <code class="inl">&lt;none&gt;</code> is the
+        proof. Selectors are silent when they match nothing: no error, just emptiness.</p></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Labels versus annotations</span>
+        <p><b>Labels</b> are for selecting: short, indexed, queryable. <b>Annotations</b> are for attaching
+        information nothing selects on: build SHAs, ingress controller settings, tool metadata, a config checksum.
+        If you would never filter by it, it is an annotation.</p></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="multi">
+      <div class="sec-head"><span class="num">4</span><h2>Init containers and sidecars</h2></div>
+      <p>Two multi-container patterns are worth knowing because both are common and neither is obvious.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico amber"><svg><use href="#i-cycle"/></svg></div>
+          <h4>initContainers</h4><p>Run <b>to completion, in order, before</b> any app container starts. If one fails, the pod restarts it. Use for migrations, waiting on a dependency, fetching config.</p></div>
+        <div class="card"><div class="ico cyan"><svg><use href="#i-layers"/></svg></div>
+          <h4>Sidecars</h4><p>Run <b>alongside</b> the app for its whole life. Log shippers, proxies, secret refreshers. Declared as an init container with <code>restartPolicy: Always</code> since v1.29.</p></div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">pod-with-init.yaml</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">Pod</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">api</span>
+  <span class="yk">labels</span>: { <span class="yk">app</span>: <span class="yv">api</span> }
+<span class="yk">spec</span>:
+  <span class="yk">initContainers</span>:
+    - <span class="yk">name</span>: <span class="yv">wait-for-db</span>          <span class="cmt"># blocks until the DB answers</span>
+      <span class="yk">image</span>: <span class="str">busybox:1.36</span>
+      <span class="yk">command</span>: [<span class="str">'sh'</span>, <span class="str">'-c'</span>, <span class="str">'until nc -z db 5432; do sleep 2; done'</span>]
+  <span class="yk">containers</span>:
+    - <span class="yk">name</span>: <span class="yv">app</span>
+      <span class="yk">image</span>: <span class="str">ghcr.io/acme/api:1.4.2</span>
+      <span class="yk">ports</span>:
+        - <span class="yk">containerPort</span>: <span class="yv">8080</span>
+      <span class="yk">env</span>:
+        - <span class="yk">name</span>: <span class="yv">LOG_LEVEL</span>
+          <span class="yk">value</span>: <span class="str">"info"</span></code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">A stuck init container looks like a stuck pod</span>
+        <p>Status <code class="inl">Init:0/1</code> means your init container has not finished. The app logs are empty
+        because the app has not started. Read the right container:
+        <code class="inl">kubectl logs POD -c wait-for-db</code>. Forgetting <code class="inl">-c</code> is why people
+        think a pod is producing no output at all.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="cli">
+      <div class="sec-head"><span class="num">5</span><h2>The daily CLI</h2></div>
+      <p>Roughly ten commands account for nearly all real kubectl usage. These are those ten.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>kubectl get pods</code></td><td>List. <code>-o wide</code> adds node and IP, <code>-w</code> streams changes, <code>-A</code> spans namespaces.</td></tr>
+          <tr><td><code>kubectl describe pod NAME</code></td><td>Every field plus <b>events</b>. The single most useful debugging command.</td></tr>
+          <tr><td><code>kubectl logs NAME</code></td><td><code>-f</code> follow, <code>--previous</code> the crashed instance, <code>-c</code> a specific container.</td></tr>
+          <tr><td><code>kubectl exec -it NAME -- sh</code></td><td>Shell inside a running container. Note the <code>--</code>.</td></tr>
+          <tr><td><code>kubectl apply -f DIR/</code></td><td>Declare state, from a file or a whole directory.</td></tr>
+          <tr><td><code>kubectl delete pod NAME</code></td><td>Remove. <code>--force --grace-period=0</code> only when genuinely stuck.</td></tr>
+          <tr><td><code>kubectl port-forward pod/NAME 8080:80</code></td><td>Tunnel a local port to a pod. How you test before a Service exists.</td></tr>
+          <tr><td><code>kubectl get events --sort-by=.lastTimestamp</code></td><td>What the cluster has been doing lately. Answers "why is nothing happening?".</td></tr>
+          <tr><td><code>kubectl explain pod.spec.containers</code></td><td>Field docs, offline, correct for your version.</td></tr>
+          <tr><td><code>kubectl get pod NAME -o yaml</code></td><td>The full object as stored, including everything the cluster filled in.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Three flags that pay for themselves immediately</h3>
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">the ones you will use constantly</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Generate correct YAML instead of writing it from memory</span>
+<span class="cmd">kubectl</span> run api <span class="flag">--image</span>=<span class="str">nginx:1.27</span> <span class="flag">--dry-run</span>=<span class="str">client</span> <span class="flag">-o</span> yaml &gt; pod.yaml
+<span class="cmd">kubectl</span> create deployment api <span class="flag">--image</span>=<span class="str">nginx:1.27</span> <span class="flag">--dry-run</span>=<span class="str">client</span> <span class="flag">-o</span> yaml &gt; deploy.yaml
+
+<span class="cmt"># 2. Pull one field out with jsonpath, instead of grepping YAML</span>
+<span class="cmd">kubectl</span> get pod api <span class="flag">-o</span> <span class="str">jsonpath='{.status.podIP}'</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-o</span> <span class="str">jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}'</span>
+
+<span class="cmt"># 3. Alias it. You will type this thousands of times.</span>
+<span class="cmd">alias</span> k=kubectl
+<span class="cmd">source</span> &lt;(kubectl completion bash)   <span class="cmt"># or zsh</span>
+<span class="cmd">complete</span> <span class="flag">-o</span> default <span class="flag">-F</span> __start_kubectl k</code></pre></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="inside">
+      <div class="sec-head"><span class="num">6</span><h2>Looking inside: logs, exec, port-forward</h2></div>
+      <p>This trio is your entire local debugging kit until Module 06 adds the systematic playbook.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">debugging a live pod</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Follow logs live; --tail limits history</span>
+<span class="cmd">kubectl</span> logs <span class="flag">-f</span> <span class="flag">--tail</span>=<span class="str">100</span> api
+
+<span class="cmt"># The container CRASHED: this is the output that actually matters</span>
+<span class="cmd">kubectl</span> logs api <span class="flag">--previous</span>
+
+<span class="cmt"># Logs from every pod behind a label, at once</span>
+<span class="cmd">kubectl</span> logs <span class="flag">-l</span> <span class="str">app=api</span> <span class="flag">--tail</span>=<span class="str">20</span> <span class="flag">--prefix</span>
+
+<span class="cmt"># Shell in. The bare -- separates kubectl flags from the command.</span>
+<span class="cmd">kubectl</span> exec <span class="flag">-it</span> api <span class="flag">--</span> sh
+<span class="cmd">kubectl</span> exec api <span class="flag">--</span> env | sort        <span class="cmt"># one-shot, no TTY needed</span>
+
+<span class="cmt"># Reach the pod from your laptop with no Service involved</span>
+<span class="cmd">kubectl</span> port-forward pod/api <span class="str">8080:8080</span>
+<span class="cmt"># → curl localhost:8080 now hits the pod</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">port-forward is the fastest bisect in Kubernetes</span>
+        <p>App broken and you do not know which layer? Port-forward straight to the <b>pod</b>. If it works there, the
+        pod is fine and your problem is the Service, the selector, or the Ingress. If it fails there too, the problem
+        is inside the container. One command, half the search space gone.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Distroless images have no shell</span>
+        <p><code class="inl">exec -it -- sh</code> fails with "executable file not found" on a slim or distroless image,
+        and that is a good sign: your production image is small and has no shell to attack. Use
+        <code class="inl">kubectl debug</code> to attach a temporary container with real tools instead
+        (Module 06). Do not add a shell back to production just to debug it.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="bare">
+      <div class="sec-head"><span class="num">7</span><h2>Why you almost never write a bare Pod</h2></div>
+      <p>You have now written pod manifests, and you should stop. A bare pod is an <b>unmanaged</b> pod: nothing
+      declares that it should exist, so nothing recreates it.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>If this happens</th><th>Bare Pod</th><th>Pod owned by a Deployment</th></tr></thead>
+        <tbody>
+          <tr><td>Container exits fatally</td><td>Restarted in place, same node, forever</td><td>Same, plus replaced if the pod object dies</td></tr>
+          <tr><td>Node dies or drains</td><td><b>Gone.</b> Nothing recreates it.</td><td>Rescheduled onto a healthy node</td></tr>
+          <tr><td>You want three copies</td><td>Write three manifests by hand</td><td><code>replicas: 3</code></td></tr>
+          <tr><td>You want a new version</td><td>Delete and recreate, with downtime</td><td>Rolling update, with rollback</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">So what is a bare pod for?</span>
+        <p>Exactly two things: throwaway debugging (<code class="inl">kubectl run tmp --rm -it --image=busybox -- sh</code>)
+        and learning, which is what you just did. Everything you ship is wrapped in a controller. That is Module 02,
+        and the pod spec you just learned becomes the <code class="inl">template</code> section inside it, unchanged.</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">8</span><h2>Hands-on: pods, labels, and a deliberate crash</h2></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: run it, break it, read it</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. A pod, with a label, from a generated manifest</span>
+<span class="cmd">kubectl</span> run web <span class="flag">--image</span>=<span class="str">nginx:1.27</span> <span class="flag">--labels</span>=<span class="str">app=web,env=dev</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-o</span> wide <span class="flag">--show-labels</span>
+
+<span class="cmt"># 2. Reach it without a Service</span>
+<span class="cmd">kubectl</span> port-forward pod/web <span class="str">8080:80</span> &amp;
+curl <span class="flag">-s</span> localhost:8080 | head <span class="flag">-n</span> 4
+<span class="cmd">kill</span> %1
+
+<span class="cmt"># 3. Prove containers in a pod share localhost and one IP</span>
+<span class="cmd">kubectl</span> exec web <span class="flag">--</span> sh <span class="flag">-c</span> <span class="str">'hostname -i; wget -qO- localhost:80 | head -n1'</span>
+
+<span class="cmt"># 4. Now break something on purpose: an image that does not exist</span>
+<span class="cmd">kubectl</span> run broken <span class="flag">--image</span>=<span class="str">nginx:does-not-exist</span>
+<span class="cmd">kubectl</span> get pod broken
+<span class="cmd">kubectl</span> describe pod broken | tail <span class="flag">-n</span> 15   <span class="cmt"># read the EVENTS section</span>
+
+<span class="cmt"># 5. And a crash loop: a container that exits immediately</span>
+<span class="cmd">kubectl</span> run crasher <span class="flag">--image</span>=<span class="str">busybox:1.36</span> <span class="flag">--</span> sh <span class="flag">-c</span> <span class="str">'echo starting; exit 1'</span>
+<span class="cmd">kubectl</span> get pod crasher <span class="flag">-w</span>                <span class="cmt"># watch the backoff grow, Ctrl-C</span>
+<span class="cmd">kubectl</span> logs crasher <span class="flag">--previous</span>            <span class="cmt"># the output that explains it</span>
+
+<span class="cmt"># 6. Filter by label, then clean up by label</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-l</span> <span class="str">env=dev</span>
+<span class="cmd">kubectl</span> delete pod web broken crasher</code></pre></div>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You read an <b>Events</b> section and found the real cause of a failed pull.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You saw the restart backoff grow and read <code class="inl">--previous</code> logs.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You reached a pod through <code class="inl">port-forward</code> with no Service.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can explain why containers in one pod share an IP but pods do not.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can say why a bare pod is unsafe on a node failure.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">9</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Why does Kubernetes schedule pods instead of containers?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Because some containers genuinely must be co-located: they need the same localhost, the same
+        volume, and to live and die together. A log shipper on a different node is useless. The pod is the unit that
+        expresses "these are one deployable thing", and it keeps the scheduler's job simple: place one object, get a
+        whole cooperating set.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">My pod is Running but my app is unreachable.</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Running only means a process started. Check in this order: <b>port-forward to the pod</b>
+        (works? then the problem is the Service or Ingress), the app is bound to <code class="inl">0.0.0.0</code> and
+        not <code class="inl">127.0.0.1</code> (a container listening on loopback is unreachable from outside the pod),
+        and the Service selector matches the pod labels.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="txt">Does containerPort actually do anything?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Almost nothing functionally: it is documentation. Kubernetes does not block traffic to
+        undeclared ports. It matters for readability, for tooling, and because naming a port
+        (<code class="inl">name: http</code>) lets a Service target it by name instead of number, which survives the
+        number changing. Declare it anyway.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">What is the pause container I see on the node?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The infrastructure container that <i>holds</i> the pod's network namespace. It does nothing but
+        sleep, and your app containers join its namespace. That is the mechanism behind "containers in a pod share an
+        IP". You will never manage it, but seeing it on a node stops it being mysterious.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">Why did my pod get evicted?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The node ran out of something, usually memory or disk, and the kubelet reclaimed it. Pods with
+        no resource requests are evicted first, which is one of several reasons Module 02 insists on setting them.
+        <code class="inl">kubectl describe pod</code> shows the eviction reason, and
+        <code class="inl">kubectl describe node</code> shows the pressure condition that triggered it.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/pods/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Pods</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Pod lifecycle</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Labels &amp; selectors</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Sidecar containers</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes/module-00"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 00: Foundations</b></span></a>
+        <a href="/learn/kubernetes/module-02"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 02: Deployments &amp; Rollouts</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 01 &middot; the 80/20 field guide.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

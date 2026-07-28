@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 07: Production &amp; Security &middot; Kubernetes in Practice</title>
+<meta name="description" content="Namespaces and quotas, RBAC and service accounts, security contexts, Pod Security Admission, disruption budgets, scheduling control, and packaging with Helm or Kustomize.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-07">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Production &nbsp;/&nbsp; Module 07</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 7</span>
+    <span class="pill"><b>~2h</b> · the finish line</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#namespaces"><svg class="ti"><use href="#i-box"/></svg>Namespaces &amp; quotas</a>
+      <a href="#rbac"><svg class="ti"><use href="#i-users"/></svg>RBAC</a>
+      <a href="#sa"><svg class="ti"><use href="#i-key"/></svg>Service accounts</a>
+      <a href="#seccontext"><svg class="ti"><use href="#i-shield"/></svg>Security context</a>
+      <a href="#psa"><svg class="ti"><use href="#i-lock"/></svg>Pod Security Admission</a>
+      <a href="#availability"><svg class="ti"><use href="#i-heart"/></svg>Staying available</a>
+      <a href="#scheduling"><svg class="ti"><use href="#i-route"/></svg>Scheduling control</a>
+      <a href="#packaging"><svg class="ti"><use href="#i-layers"/></svg>Helm &amp; Kustomize</a>
+      <a href="#checklist"><svg class="ti"><use href="#i-check"/></svg>The checklist</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">The checklist in section 9 is the deliverable. Everything before it explains why each line is on it.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Production &middot; Kubernetes &middot; Day 7</span>
+      <h1>Module 07: <span class="grad">Production</span><br>&amp; Security</h1>
+      <p class="lede">Everything Sahil has built so far works. None of it is safe. Containers run as root, any pod can
+      call the API server, one runaway namespace can starve the cluster, and a node drain takes the service down.
+      This module closes those gaps, and ends with <em>the checklist</em> you run before anything reaches production.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · final module</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on everything</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>demo → deployable</span>
+        <span class="chip"><svg><use href="#i-shield"/></svg>RBAC + hardening</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="namespaces">
+      <div class="sec-head"><span class="num">1</span><h2>Namespaces, quotas, limit ranges</h2></div>
+      <p>A namespace is a name scope. On its own it is organisational, not protective. It becomes a real boundary once
+      you attach RBAC, quotas and network policies to it.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a namespace that cannot eat the cluster</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">ResourceQuota</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">team-quota</span>, <span class="yk">namespace</span>: <span class="yv">team-a</span> }
+<span class="yk">spec</span>:
+  <span class="yk">hard</span>:
+    <span class="yk">requests.cpu</span>: <span class="str">"10"</span>
+    <span class="yk">requests.memory</span>: <span class="str">"20Gi"</span>
+    <span class="yk">limits.memory</span>: <span class="str">"40Gi"</span>
+    <span class="yk">persistentvolumeclaims</span>: <span class="str">"10"</span>
+    <span class="yk">count/pods</span>: <span class="str">"50"</span>
+---
+<span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">LimitRange</span>            <span class="cmt"># defaults for pods that specify nothing</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">defaults</span>, <span class="yk">namespace</span>: <span class="yv">team-a</span> }
+<span class="yk">spec</span>:
+  <span class="yk">limits</span>:
+    - <span class="yk">type</span>: <span class="yv">Container</span>
+      <span class="yk">default</span>:        { <span class="yk">cpu</span>: <span class="str">"500m"</span>, <span class="yk">memory</span>: <span class="str">"512Mi"</span> }
+      <span class="yk">defaultRequest</span>: { <span class="yk">cpu</span>: <span class="str">"100m"</span>, <span class="yk">memory</span>: <span class="str">"128Mi"</span> }</code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">A ResourceQuota changes the rules for everyone in the namespace</span>
+        <p>Once a quota constrains CPU or memory, <b>every pod in that namespace must declare requests and limits</b>
+        or creation is rejected outright. That breaks existing manifests immediately, which is exactly why you pair a
+        quota with a LimitRange: the LimitRange supplies defaults so old workloads keep deploying while the quota does
+        its job.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="rbac">
+      <div class="sec-head"><span class="num">2</span><h2>RBAC</h2></div>
+      <p>Four objects, one sentence: a <b>Role</b> lists permissions, a <b>Binding</b> gives that Role to someone.
+      The only variation is whether the scope is one namespace or the whole cluster.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Object</th><th>Scope</th><th>Says</th></tr></thead>
+        <tbody>
+          <tr><td><b>Role</b></td><td>One namespace</td><td>"These verbs, on these resources"</td></tr>
+          <tr><td><b>ClusterRole</b></td><td>Cluster-wide</td><td>Same, but also covers cluster-scoped objects (nodes, PVs)</td></tr>
+          <tr><td><b>RoleBinding</b></td><td>One namespace</td><td>"This subject gets that Role, here"</td></tr>
+          <tr><td><b>ClusterRoleBinding</b></td><td>Cluster-wide</td><td>"This subject gets that ClusterRole, everywhere"</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">read-only access to pods, in one namespace</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">rbac.authorization.k8s.io/v1</span>
+<span class="yk">kind</span>: <span class="yv">Role</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">pod-reader</span>, <span class="yk">namespace</span>: <span class="yv">team-a</span> }
+<span class="yk">rules</span>:
+  - <span class="yk">apiGroups</span>: [<span class="str">""</span>]              <span class="cmt"># "" is the core group</span>
+    <span class="yk">resources</span>: [<span class="str">"pods"</span>, <span class="str">"pods/log"</span>]
+    <span class="yk">verbs</span>: [<span class="str">"get"</span>, <span class="str">"list"</span>, <span class="str">"watch"</span>]
+---
+<span class="yk">apiVersion</span>: <span class="yv">rbac.authorization.k8s.io/v1</span>
+<span class="yk">kind</span>: <span class="yv">RoleBinding</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">devs-read-pods</span>, <span class="yk">namespace</span>: <span class="yv">team-a</span> }
+<span class="yk">subjects</span>:
+  - <span class="yk">kind</span>: <span class="yv">ServiceAccount</span>
+    <span class="yk">name</span>: <span class="yv">ci-runner</span>
+    <span class="yk">namespace</span>: <span class="yv">team-a</span>
+<span class="yk">roleRef</span>:
+  <span class="yk">kind</span>: <span class="yv">Role</span>
+  <span class="yk">name</span>: <span class="yv">pod-reader</span>
+  <span class="yk">apiGroup</span>: <span class="yv">rbac.authorization.k8s.io</span></code></pre></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">the command that answers every RBAC question</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Can I?</span>
+<span class="cmd">kubectl</span> auth can-i delete pods <span class="flag">-n</span> team-a
+
+<span class="cmt"># Can THAT service account? (this is the one you actually want)</span>
+<span class="cmd">kubectl</span> auth can-i list secrets \
+  <span class="flag">--as</span>=<span class="str">system:serviceaccount:team-a:ci-runner</span> <span class="flag">-n</span> team-a
+
+<span class="cmt"># Everything a subject can do, in one listing</span>
+<span class="cmd">kubectl</span> auth can-i <span class="flag">--list</span> <span class="flag">--as</span>=<span class="str">system:serviceaccount:team-a:ci-runner</span></code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">cluster-admin is not a starting point</span>
+        <p>Binding <code class="inl">cluster-admin</code> to a service account "until we work out the permissions" is
+        how most clusters end up permanently over-privileged. Start with nothing, run the workload, read the
+        <code class="inl">Forbidden</code> errors, and add exactly those verbs. It takes twenty extra minutes once.
+        Pay particular attention to <code class="inl">secrets</code>: read access there is read access to every
+        credential in the namespace, and to <code class="inl">pods/exec</code>, which is equivalent.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="sa">
+      <div class="sec-head"><span class="num">3</span><h2>Service accounts</h2></div>
+      <p>Every pod runs as a ServiceAccount. If you do not name one, it gets <code class="inl">default</code> in its
+      namespace, and a token for it is mounted into the container at
+      <code class="inl">/var/run/secrets/kubernetes.io/serviceaccount</code>. Most applications never call the
+      Kubernetes API and should not carry that token at all.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">stop mounting API tokens into apps that do not need them</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">ServiceAccount</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">api</span> }
+<span class="yk">automountServiceAccountToken</span>: <span class="yv">false</span>   <span class="cmt"># default for this SA</span>
+---
+<span class="cmt"># ...or per pod, which overrides the SA setting</span>
+<span class="yk">spec</span>:
+  <span class="yk">serviceAccountName</span>: <span class="yv">api</span>
+  <span class="yk">automountServiceAccountToken</span>: <span class="yv">false</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why this matters more than it looks</span>
+        <p>An attacker who gets code execution in your container immediately looks for that token. With it, they can
+        do whatever the service account can do, from inside your network. Turning off automounting for every workload
+        that does not talk to the API removes that first step entirely, and costs one line.</p></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="seccontext">
+      <div class="sec-head"><span class="num">4</span><h2>securityContext: the five lines that matter</h2></div>
+      <p>By default a container runs as <b>root</b>, with a writable root filesystem, and the ability to gain new
+      privileges. None of that is needed by a typical application.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a hardened container, and nothing exotic</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">spec</span>:
+  <span class="yk">securityContext</span>:                   <span class="cmt"># pod level</span>
+    <span class="yk">runAsNonRoot</span>: <span class="yv">true</span>
+    <span class="yk">runAsUser</span>: <span class="yv">10001</span>
+    <span class="yk">fsGroup</span>: <span class="yv">10001</span>                   <span class="cmt"># group that owns mounted volumes</span>
+    <span class="yk">seccompProfile</span>: { <span class="yk">type</span>: <span class="yv">RuntimeDefault</span> }
+  <span class="yk">containers</span>:
+    - <span class="yk">name</span>: <span class="yv">api</span>
+      <span class="yk">image</span>: <span class="str">ghcr.io/acme/api@sha256:9f2c...</span>
+      <span class="yk">securityContext</span>:               <span class="cmt"># container level, wins on conflict</span>
+        <span class="yk">allowPrivilegeEscalation</span>: <span class="yv">false</span>
+        <span class="yk">readOnlyRootFilesystem</span>: <span class="yv">true</span>
+        <span class="yk">capabilities</span>:
+          <span class="yk">drop</span>: [<span class="str">"ALL"</span>]
+      <span class="yk">volumeMounts</span>:                  <span class="cmt"># give back only what must be writable</span>
+        - { <span class="yk">name</span>: <span class="yv">tmp</span>, <span class="yk">mountPath</span>: <span class="str">/tmp</span> }
+  <span class="yk">volumes</span>:
+    - <span class="yk">name</span>: <span class="yv">tmp</span>
+      <span class="yk">emptyDir</span>: {}</code></pre></div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Setting</th><th>Stops</th></tr></thead>
+        <tbody>
+          <tr><td><code>runAsNonRoot: true</code></td><td>Running as UID 0. The pod fails to start rather than silently running as root, which is the point.</td></tr>
+          <tr><td><code>readOnlyRootFilesystem: true</code></td><td>An attacker writing tools or a webshell into the image. Mount an emptyDir wherever the app genuinely writes.</td></tr>
+          <tr><td><code>allowPrivilegeEscalation: false</code></td><td>setuid binaries gaining privileges the parent did not have.</td></tr>
+          <tr><td><code>capabilities.drop: ["ALL"]</code></td><td>Every Linux capability. Add back only what you can name a reason for.</td></tr>
+          <tr><td><code>seccompProfile: RuntimeDefault</code></td><td>Most of the kernel syscall surface. Nearly free, and blocks whole classes of escape.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Two things that break when you turn these on</span>
+        <p><code class="inl">readOnlyRootFilesystem</code> breaks apps that write temp files, caches or PID files:
+        find the paths and mount an emptyDir at each. <code class="inl">runAsNonRoot</code> breaks images that assume
+        root, most commonly nginx binding port 80, since ports under 1024 need privileges. Use an unprivileged image
+        variant listening on 8080, and let the Service map 80 to it.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="psa">
+      <div class="sec-head"><span class="num">5</span><h2>Pod Security Admission</h2></div>
+      <p>Setting a good securityContext on your own pods is optional discipline. PSA makes it enforced policy at the
+      namespace level, and it is built in: no controller to install.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Level</th><th>Allows</th></tr></thead>
+        <tbody>
+          <tr><td><code>privileged</code></td><td>Everything. The default if you set nothing.</td></tr>
+          <tr><td><code>baseline</code></td><td>Blocks the well-known escapes: privileged containers, host namespaces, most hostPath mounts.</td></tr>
+          <tr><td><code>restricted</code></td><td>Enforces non-root, dropped capabilities, no privilege escalation, seccomp. The target for application namespaces.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">roll it out safely: warn first, enforce later</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Step 1: find out what WOULD break, breaking nothing</span>
+<span class="cmd">kubectl</span> label namespace team-a \
+  pod-security.kubernetes.io/warn=<span class="str">restricted</span> \
+  pod-security.kubernetes.io/audit=<span class="str">restricted</span>
+
+<span class="cmt"># Step 2: fix the manifests the warnings named, then enforce</span>
+<span class="cmd">kubectl</span> label namespace team-a \
+  pod-security.kubernetes.io/enforce=<span class="str">restricted</span> <span class="flag">--overwrite</span></code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Warn, then audit, then enforce</span>
+        <p>Enforcing <code class="inl">restricted</code> on a live namespace rejects every non-compliant pod
+        immediately, which during a rollout means an outage. The warn-and-audit labels give you the same list of
+        violations with zero risk. There is never a good reason to skip that step.</p></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="availability">
+      <div class="sec-head"><span class="num">6</span><h2>Staying available during disruption</h2></div>
+      <p>Your Deployment survives a crash. It does not automatically survive an <i>administrator</i>: a node drain for
+      an upgrade will happily evict all three of your replicas at once if nothing says otherwise.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">PodDisruptionBudget + graceful shutdown</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">policy/v1</span>
+<span class="yk">kind</span>: <span class="yv">PodDisruptionBudget</span>
+<span class="yk">metadata</span>: { <span class="yk">name</span>: <span class="yv">api</span> }
+<span class="yk">spec</span>:
+  <span class="yk">minAvailable</span>: <span class="yv">2</span>              <span class="cmt"># or maxUnavailable: 1</span>
+  <span class="yk">selector</span>:
+    <span class="yk">matchLabels</span>: { <span class="yk">app</span>: <span class="yv">api</span> }
+---
+<span class="cmt"># ...and in the pod spec, so shutdown is not abrupt</span>
+<span class="yk">spec</span>:
+  <span class="yk">terminationGracePeriodSeconds</span>: <span class="yv">45</span>
+  <span class="yk">containers</span>:
+    - <span class="yk">name</span>: <span class="yv">api</span>
+      <span class="yk">lifecycle</span>:
+        <span class="yk">preStop</span>:
+          <span class="yk">exec</span>: { <span class="yk">command</span>: [<span class="str">"sleep"</span>, <span class="str">"5"</span>] }   <span class="cmt"># let endpoints drain first</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why the preStop sleep is not a hack</span>
+        <p>When a pod is deleted, two things happen in parallel: the kubelet sends SIGTERM, and the endpoint controller
+        removes the pod from Service endpoints. They race, and kube-proxy on every node takes a moment to catch up, so
+        in-flight requests can arrive at a process already shutting down. A short preStop sleep lets endpoint removal
+        win the race. It is the standard fix for "we get 502s during every deploy".</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">A PDB can also block maintenance forever</span>
+        <p><code class="inl">minAvailable: 1</code> on a single-replica Deployment means a drain can never evict it,
+        and the node upgrade hangs. Budgets are a contract: they only work if you have enough replicas to honour
+        them. One replica plus a PDB is a deadlock, not a guarantee.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="scheduling">
+      <div class="sec-head"><span class="num">7</span><h2>Scheduling control</h2></div>
+      <p>Three mechanisms, from blunt to precise. In practice you use the last one and occasionally the first.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Mechanism</th><th>Says</th></tr></thead>
+        <tbody>
+          <tr><td><code>nodeSelector</code></td><td>"Only nodes with this label." Simple, exact, no flexibility.</td></tr>
+          <tr><td><b>Taints &amp; tolerations</b></td><td>Node side: "keep everything off me unless it tolerates this." For GPU nodes, dedicated pools, and control plane nodes.</td></tr>
+          <tr><td><b>Affinity / anti-affinity</b></td><td>Pod side, expressive: required or preferred, based on node labels or on where <i>other pods</i> already are.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">spread replicas across nodes, so one node loss is survivable</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">spec</span>:
+  <span class="yk">affinity</span>:
+    <span class="yk">podAntiAffinity</span>:
+      <span class="yk">preferredDuringSchedulingIgnoredDuringExecution</span>:
+        - <span class="yk">weight</span>: <span class="yv">100</span>
+          <span class="yk">podAffinityTerm</span>:
+            <span class="yk">topologyKey</span>: <span class="yv">kubernetes.io/hostname</span>
+            <span class="yk">labelSelector</span>:
+              <span class="yk">matchLabels</span>: { <span class="yk">app</span>: <span class="yv">api</span> }
+
+<span class="cmt"># Or the newer, simpler tool for exactly this job:</span>
+  <span class="yk">topologySpreadConstraints</span>:
+    - <span class="yk">maxSkew</span>: <span class="yv">1</span>
+      <span class="yk">topologyKey</span>: <span class="yv">topology.kubernetes.io/zone</span>
+      <span class="yk">whenUnsatisfiable</span>: <span class="yv">ScheduleAnyway</span>
+      <span class="yk">labelSelector</span>:
+        <span class="yk">matchLabels</span>: { <span class="yk">app</span>: <span class="yv">api</span> }</code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Prefer "preferred" over "required"</span>
+        <p><code class="inl">requiredDuringScheduling</code> anti-affinity on a three-replica Deployment in a
+        two-node cluster leaves one pod Pending forever. <code class="inl">preferred</code> spreads pods when it can
+        and still schedules when it cannot, which is almost always what you actually meant.</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section id="packaging">
+      <div class="sec-head"><span class="num">8</span><h2>Packaging: Helm and Kustomize</h2></div>
+      <p>Six environments times fifteen manifests is ninety files that drift. Two tools solve this, differently.</p>
+
+      <div class="grid two">
+        <div class="card"><div class="ico blue"><svg><use href="#i-layers"/></svg></div>
+          <h4>Kustomize</h4><p>Built into kubectl. A base plus overlays that <b>patch</b> it. No templating language, so what you read is still YAML. Best for your own apps across environments.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-helm"/></svg></div>
+          <h4>Helm</h4><p>Templated charts with a values file, versioned releases, rollback, and a huge public ecosystem. Best for <b>installing other people's software</b>.</p></div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">both, in the form you will actually use them</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Kustomize: overlays/prod/kustomization.yaml</span>
+<span class="yk">resources</span>: [<span class="str">../../base</span>]
+<span class="yk">namespace</span>: <span class="yv">prod</span>
+<span class="yk">images</span>:
+  - <span class="yk">name</span>: <span class="yv">ghcr.io/acme/api</span>
+    <span class="yk">newTag</span>: <span class="yv">1.5.0</span>
+<span class="yk">replicas</span>:
+  - { <span class="yk">name</span>: <span class="yv">api</span>, <span class="yk">count</span>: <span class="yv">6</span> }
+<span class="yk">configMapGenerator</span>:                 <span class="cmt"># name gets a content hash → auto rollout</span>
+  - <span class="yk">name</span>: <span class="yv">api-config</span>
+    <span class="yk">literals</span>: [<span class="str">LOG_LEVEL=warn</span>]
+
+<span class="cmt"># Apply, and always look before you leap</span>
+<span class="cmd">kubectl</span> kustomize overlays/prod         <span class="cmt"># render to stdout, review</span>
+<span class="cmd">kubectl</span> apply <span class="flag">-k</span> overlays/prod
+
+<span class="cmt"># Helm: installing something you did not write</span>
+<span class="cmd">helm</span> repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+<span class="cmd">helm</span> install ingress ingress-nginx/ingress-nginx \
+  <span class="flag">-n</span> ingress-nginx <span class="flag">--create-namespace</span> <span class="flag">-f</span> values.yaml
+<span class="cmd">helm</span> diff upgrade ingress ingress-nginx/ingress-nginx <span class="flag">-f</span> values.yaml
+<span class="cmd">helm</span> rollback ingress <span class="str">1</span></code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">And then GitOps</span>
+        <p>The end state most teams reach: git is the desired state, and Argo CD or Flux continuously applies it,
+        reporting drift when the cluster disagrees. No human runs <code class="inl">kubectl apply</code> against
+        production, and every change is a reviewed commit. It is beyond this course, but every habit here (declarative
+        manifests, pinned images, overlays per environment) is exactly what it requires.</p></div>
+    </section>
+
+    <!-- 9 -->
+    <section id="checklist">
+      <div class="sec-head"><span class="num">9</span><h2>The pre-production checklist</h2></div>
+      <p>Run this against any workload before it ships. Every line traces back to a module.</p>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg><b>Readiness probe set</b>, and it checks dependencies. Without it, rolling updates drop traffic. <i>(M02)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Liveness probe set, and it does not check dependencies.</b> <i>(M02)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Memory request and limit set and equal.</b> CPU request set. <i>(M02)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Image pinned</b> to a digest or an immutable tag. Never <code class="inl">latest</code>. <i>(M02)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Replicas ≥ 2</b> with anti-affinity or topology spread, plus a PDB. <i>(M07)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Service selector verified</b> against real pod labels; endpoints non-empty. <i>(M03)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Config and secrets injected</b>, not baked into the image. <i>(M04)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>runAsNonRoot, readOnlyRootFilesystem, drop ALL capabilities.</b> <i>(M07)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Dedicated ServiceAccount</b>, minimal RBAC, token automount off if unused. <i>(M07)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>terminationGracePeriod and preStop</b> tuned so deploys do not 502. <i>(M07)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Namespace has a quota and a LimitRange.</b> <i>(M07)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Logs shipped off-cluster</b> before you need them. <i>(M06)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>PVC reclaim policy checked</b>, and backups exist and have been restored once. <i>(M05)</i></li>
+        <li><svg><use href="#i-checkbox"/></svg><b>Rollback rehearsed.</b> You have run <code class="inl">rollout undo</code> deliberately, at least once. <i>(M02)</i></li>
+      </ul>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Where to go from here</span>
+        <p>You now know the fifteen objects that carry almost all day-to-day Kubernetes. The natural next steps, in
+        order of payoff: <b>GitOps</b> with Argo CD or Flux, <b>observability</b> with Prometheus and Grafana,
+        <b>Gateway API</b> as Ingress' successor, and then <b>operators and CRDs</b> when you have a problem that
+        genuinely needs one. Every one of them assumes exactly what these eight modules covered.</p></div>
+    </section>
+
+    <!-- 10 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">10</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Helm or Kustomize?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Kustomize for your own applications: no templating language, no <code class="inl">{{ }}</code> in
+        your YAML, and it is already in kubectl. Helm for installing third-party software, where the chart is the
+        distribution format and you only supply values. Using both is normal and not a contradiction: Helm for the
+        ingress controller and cert-manager, Kustomize for your services.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">How do I give a teammate access to only their namespace?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A RoleBinding in that namespace referencing the built-in <code class="inl">edit</code>
+        ClusterRole. Referencing a ClusterRole from a <i>RoleBinding</i> grants it only within that namespace, which is
+        the idiom people miss. Verify with <code class="inl">kubectl auth can-i --list --as=USER -n NAMESPACE</code>
+        rather than assuming.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="txt">My app breaks with readOnlyRootFilesystem. Do I give up?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">No: find where it writes and mount an emptyDir there. Run it once without the flag, then
+        <code class="inl">kubectl exec -- find / -newer /etc/hostname -type f 2&gt;/dev/null</code> to list what changed.
+        Usually it is <code class="inl">/tmp</code>, a cache directory, and a PID file. Three emptyDir mounts and you
+        are compliant.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">Why do I get 502s during every deploy?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The endpoint-removal race from section 6. Fix it with three things together: a
+        <code class="inl">preStop</code> sleep of a few seconds, an application that handles SIGTERM by draining
+        rather than exiting immediately, and <code class="inl">maxUnavailable: 0</code> on the rollout so capacity
+        never dips. Any one alone usually is not enough.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">Is a namespace a security boundary?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Only as far as you make it one. By itself it scopes names and nothing else: pods in different
+        namespaces can still reach each other over the network, and share the same nodes and kernel. It becomes a
+        boundary when you add RBAC, a ResourceQuota, NetworkPolicies and Pod Security Admission. For genuinely hostile
+        multi-tenancy, separate clusters remain the honest answer.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>RBAC</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/security/pod-security-admission/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Pod Security Admission</a>
+        <a class="reflink" href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Security context</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Disruptions &amp; PDBs</a>
+        <a class="reflink" href="https://kubectl.docs.kubernetes.io/references/kustomize/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Kustomize reference</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes/module-06"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 06: Debugging &amp; Operations</b></span></a>
+        <a href="/learn/kubernetes"><small>Finished →</small><span class="nx"><svg><use href="#i-helm"/></svg><b>Back to the course index</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 07 &middot; the 80/20 field guide.
+      That is the whole course. The checklist above is the part worth keeping.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

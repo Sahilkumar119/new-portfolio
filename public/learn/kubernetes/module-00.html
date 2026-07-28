@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 00: Foundations &amp; the Cluster &middot; Kubernetes in Practice</title>
+<meta name="description" content="What Kubernetes actually is: the reconciliation loop, control plane and node components, the shape of every object's YAML, and your first cluster.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-00">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Foundations &nbsp;/&nbsp; Module 00</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 0</span>
+    <span class="pill"><b>~1.5h</b> · conceptual</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#why"><svg class="ti"><use href="#i-help"/></svg>Why orchestration</a>
+      <a href="#what"><svg class="ti"><use href="#i-cycle"/></svg>The reconciliation loop</a>
+      <a href="#anatomy"><svg class="ti"><use href="#i-server"/></svg>Cluster anatomy</a>
+      <a href="#objects"><svg class="ti"><use href="#i-file"/></svg>Objects &amp; YAML shape</a>
+      <a href="#kubectl"><svg class="ti"><use href="#i-terminal"/></svg>kubectl, the one tool</a>
+      <a href="#trace"><svg class="ti"><use href="#i-route"/></svg>What apply really does</a>
+      <a href="#cluster"><svg class="ti"><use href="#i-box"/></svg>Get a cluster</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">Do not skim this one. Every confusing thing later in the course dissolves once the reconciliation loop is real to you.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Foundations &middot; Kubernetes &middot; Day 0</span>
+      <h1>Module 00: <span class="grad">Foundations</span><br>The Cluster &amp; the Loop</h1>
+      <p class="lede">Sahil has three containers running happily on one machine with Docker Compose. Then traffic triples,
+      the machine reboots at 2am, and nothing comes back up. This module is the answer to that night: <em>what
+      Kubernetes actually is</em>, the one loop that explains all of its behaviour, and the parts of a cluster you
+      will name in every interview you ever sit.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>1.5h</b> · concepts first</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>assumes Docker basics</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>mental model + first pod</span>
+        <span class="chip"><svg><use href="#i-helm"/></svg>Kubernetes v1.34</span>
+      </div>
+    </div>
+
+    <!-- 0 -->
+    <section id="why">
+      <div class="sec-head"><span class="num">0</span><h2>The problem orchestration solves</h2></div>
+      <p>Docker gave Sahil one great thing: a container that runs identically everywhere. It gave him nothing at all
+      for the questions that follow. Who restarts the container when it dies? What happens when one machine is not
+      enough? How does traffic find the three copies instead of the one? How do you deploy a new version without
+      going dark for thirty seconds?</p>
+      <p>Every one of those has an obvious manual answer and a terrible manual outcome. Orchestration is the decision
+      to stop answering them by hand.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico blue"><svg><use href="#i-heart"/></svg></div>
+          <h4>Self-healing</h4>
+          <p>Container dies, node dies, process hangs. Kubernetes notices and replaces it without paging anyone.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-scale"/></svg></div>
+          <h4>Scaling &amp; scheduling</h4>
+          <p>You say "five copies". It decides which machines have room and places them there.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-route"/></svg></div>
+          <h4>Stable networking</h4>
+          <p>Pods get new IPs constantly. A Service gives them one name and address that never moves.</p></div>
+      </div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Be honest about the cost</span>
+        <p>Kubernetes is not free. It adds a control plane, a YAML surface, and a genuinely steep first month.
+        For one small app on one machine, <b>Compose is the right answer</b> and reaching for Kubernetes is
+        resume-driven development. The break-even lands around: multiple services, more than one machine,
+        and a real uptime expectation.</p></div>
+    </section>
+
+    <!-- 1 -->
+    <section id="what">
+      <div class="sec-head"><span class="num">1</span><h2>What Kubernetes actually is</h2></div>
+      <p>Strip away every feature and one sentence remains:</p>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The whole system, in one line</span>
+        <p>Kubernetes is a <b>desired-state engine</b>. You declare what should be true. Controllers watch what
+        <b>is</b> true. When the two differ, they act to close the gap, forever, in a loop.</p></div>
+
+      <p>This is the single idea that makes the rest of Kubernetes predictable. You never tell Kubernetes to
+      <i>do</i> something. You tell it what the world should look like, and it works out the verbs. Delete a pod that
+      a Deployment owns and a new one appears within seconds, not because deletion failed but because you never
+      changed the desired state: you only disturbed the actual one.</p>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-created">Desired state<br><small style="font-family:var(--sans);font-weight:400">your YAML</small></div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>controller<br>compares</b></div>
+          <div class="state s-img">Diff</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>acts</b></div>
+          <div class="state s-running">Actual state<br><small style="font-family:var(--sans);font-weight:400">the cluster</small></div>
+        </div>
+        <div class="flow">
+          <div class="arrow"><svg><use href="#i-cycle"/></svg><b>and again, every few seconds, forever</b></div>
+        </div>
+      </div>
+
+      <h3>Imperative versus declarative, made concrete</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>You want</th><th>Imperative (Docker)</th><th>Declarative (Kubernetes)</th></tr></thead>
+        <tbody>
+          <tr><td>Three copies running</td><td>Run the command three times, watch them yourself</td><td><code>replicas: 3</code> in a file; the cluster maintains it</td></tr>
+          <tr><td>A copy dies</td><td>You notice, you restart it</td><td>Actual (2) ≠ desired (3), controller creates one</td></tr>
+          <tr><td>New version out</td><td>Stop old, start new, hope</td><td>Change the image tag; a rolling update happens</td></tr>
+          <tr><td>Node reboots</td><td>Everything on it is gone</td><td>Pods are rescheduled onto healthy nodes</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Why your deleted pod came back</span>
+        <p>The most common day-one confusion. <code class="inl">kubectl delete pod web-7d4</code> succeeds, and a pod named
+        <code class="inl">web-9x2</code> appears. Nothing is broken. You deleted an <b>actual</b> object while the
+        <b>desired</b> count stayed at three. To really remove it, change the desire: delete the Deployment, or scale it to zero.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="anatomy">
+      <div class="sec-head"><span class="num">2</span><h2>Cluster anatomy</h2></div>
+      <p>A cluster is two kinds of machine. The <b>control plane</b> decides. The <b>nodes</b> run your containers.
+      That is the whole split, and every component below belongs firmly to one side.</p>
+
+      <div class="cluster">
+        <div class="plane cp">
+          <div class="ttl"><svg><use href="#i-brain"/></svg>Control plane &mdash; the brain</div>
+          <div class="row">
+            <div class="comp hl">kube-apiserver<small>The only door in. Every read and write, from kubectl or from a controller, goes through it. Validates, authenticates, persists.</small></div>
+            <div class="comp">etcd<small>The database. A key-value store holding the entire cluster state. Lose etcd and you lose the cluster.</small></div>
+          </div>
+          <div class="row" style="margin-top:9px">
+            <div class="comp">kube-scheduler<small>Watches for pods with no node assigned, picks a node based on resources, affinity and taints, writes the choice back.</small></div>
+            <div class="comp">controller-manager<small>Runs the reconciliation loops: Deployment, ReplicaSet, Node, Job and dozens more.</small></div>
+          </div>
+        </div>
+        <div class="plane wn">
+          <div class="ttl"><svg><use href="#i-server"/></svg>Every node &mdash; the muscle</div>
+          <div class="row">
+            <div class="comp hl">kubelet<small>The agent on each machine. Asks the API server "what should run here?", tells the container runtime to make it so, and reports health back.</small></div>
+            <div class="comp">kube-proxy<small>Programs the node's network rules so Service IPs actually route to pod IPs.</small></div>
+            <div class="comp">container runtime<small>containerd or CRI-O. Actually pulls images and starts containers. This is where Docker's job ended up.</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">The one sentence to remember</span>
+        <p>Nothing talks to anything except through the <b>API server</b>. The scheduler does not phone the kubelet.
+        The kubelet does not phone the scheduler. They all read and write the API server, and etcd sits behind it.
+        That hub-and-spoke shape is why Kubernetes is extensible: a new controller is just another client.</p></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Where did Docker go?</span>
+        <p>Kubernetes removed the Docker-specific shim in v1.24. It now talks to any runtime implementing the
+        Container Runtime Interface, usually <b>containerd</b>, which is the same engine Docker itself uses underneath.
+        Your images are unaffected: they are OCI images, and Docker builds them fine. Nothing you learned about
+        Dockerfiles is wasted.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="objects">
+      <div class="sec-head"><span class="num">3</span><h2>Objects, and the shape every YAML shares</h2></div>
+      <p>Everything in Kubernetes is an object in the API. Pods, Services, Secrets, even Nodes. And every single one,
+      without exception, has the same four top-level fields. Learn this shape once and you can read any manifest
+      you will ever be handed.</p>
+
+      <div class="anat">
+        <span class="tok t1">apiVersion: apps/v1<span class="lbl">which API group + version</span></span>
+        <span class="tok t2">kind: Deployment<span class="lbl">what type of object</span></span>
+        <span class="tok t3">metadata:<span class="lbl">name, namespace, labels</span></span>
+        <span class="tok t4">spec:<span class="lbl">your desired state</span></span>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Field</th><th>What it is</th><th>Who writes it</th></tr></thead>
+        <tbody>
+          <tr><td><code>apiVersion</code></td><td>API group and version. <code>v1</code> for core objects (Pod, Service, ConfigMap), <code>apps/v1</code> for workloads.</td><td>You</td></tr>
+          <tr><td><code>kind</code></td><td>The object type. Capitalised, singular.</td><td>You</td></tr>
+          <tr><td><code>metadata</code></td><td>Identity: <code>name</code>, <code>namespace</code>, <code>labels</code>, <code>annotations</code>.</td><td>You</td></tr>
+          <tr><td><code>spec</code></td><td>The desired state. Everything specific to this kind lives here.</td><td>You</td></tr>
+          <tr><td><code>status</code></td><td>The observed state. Never write it.</td><td>Kubernetes</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">pod.yaml · the smallest real manifest</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">Pod</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">hello</span>
+  <span class="yk">labels</span>:
+    <span class="yk">app</span>: <span class="yv">hello</span>
+<span class="yk">spec</span>:
+  <span class="yk">containers</span>:
+    - <span class="yk">name</span>: <span class="yv">web</span>
+      <span class="yk">image</span>: <span class="str">nginx:1.27</span>
+      <span class="yk">ports</span>:
+        - <span class="yk">containerPort</span>: <span class="yv">80</span></code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">YAML will bite you before Kubernetes does</span>
+        <p>Indentation is two spaces, never tabs. A list item is <code class="inl">- </code> with a space.
+        <code class="inl">on</code>, <code class="inl">yes</code> and <code class="inl">no</code> parse as booleans, so
+        quote them when you mean strings. Port numbers are integers, image tags are strings, and
+        <code class="inl">"8080"</code> in a place expecting a number is a rejected manifest.</p></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="kubectl">
+      <div class="sec-head"><span class="num">4</span><h2>kubectl, your only tool</h2></div>
+      <p>One binary talks to the API server. Everything you do in this course goes through it. The verbs you need
+      on day one:</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Command</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td><code>kubectl apply -f file.yaml</code></td><td>Send desired state to the cluster. Creates or updates. <b>The command you will use most.</b></td></tr>
+          <tr><td><code>kubectl get pods</code></td><td>List objects. Add <code>-o wide</code> for node and IP, <code>-w</code> to watch live.</td></tr>
+          <tr><td><code>kubectl describe pod NAME</code></td><td>Full human-readable detail <b>plus recent events</b>. Your first debugging stop.</td></tr>
+          <tr><td><code>kubectl logs NAME</code></td><td>Container stdout/stderr.</td></tr>
+          <tr><td><code>kubectl delete -f file.yaml</code></td><td>Remove what that file declares.</td></tr>
+          <tr><td><code>kubectl explain pod.spec</code></td><td>Built-in field docs. Works offline, always matches your cluster version.</td></tr>
+          <tr><td><code>kubectl api-resources</code></td><td>Every object kind this cluster knows, with its short name and apiVersion.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Context and namespace: the two settings that cause the most damage</h3>
+      <p>A context is "which cluster, as which user, in which namespace". Running the right command against the wrong
+      context is the classic production incident, and it looks exactly like a successful command.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">know where you are before you type anything</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Which cluster am I pointed at right now?</span>
+<span class="cmd">kubectl</span> config current-context
+
+<span class="cmt"># List all contexts you have credentials for</span>
+<span class="cmd">kubectl</span> config get-contexts
+
+<span class="cmt"># Switch cluster, and set a default namespace so you stop typing -n</span>
+<span class="cmd">kubectl</span> config use-context kind-dev
+<span class="cmd">kubectl</span> config set-context <span class="flag">--current</span> <span class="flag">--namespace</span>=<span class="str">demo</span>
+
+<span class="cmt"># Everything in the cluster, all namespaces (the "what is even running" view)</span>
+<span class="cmd">kubectl</span> get all <span class="flag">-A</span></code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">Habit worth building today</span>
+        <p>Put the current context and namespace in your shell prompt (<code class="inl">kube-ps1</code>, or
+        starship's kubernetes module). It costs ten minutes once and removes an entire category of outage.
+        Sahil learned this by scaling a production deployment to zero while believing he was on staging.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="trace">
+      <div class="sec-head"><span class="num">5</span><h2>What <code style="font-size:.7em">kubectl apply</code> really does</h2></div>
+      <p>Be able to narrate this end to end. It is the most common interview question in the whole subject, and more
+      usefully, it tells you exactly where to look when a pod never starts.</p>
+
+      <ol>
+        <li><b>kubectl → API server.</b> Your YAML becomes an HTTP request. The API server authenticates you, checks
+        RBAC, validates the schema, runs admission controllers, and writes the object to <b>etcd</b>. At this instant
+        <code class="inl">kubectl</code> prints <code class="inl">created</code> and exits. Nothing is running yet.</li>
+        <li><b>Deployment controller</b> sees a Deployment with no matching ReplicaSet and creates one.</li>
+        <li><b>ReplicaSet controller</b> sees it needs 3 pods and has 0, so it creates 3 Pod objects. They have no
+        node assigned: their status is <b>Pending</b>.</li>
+        <li><b>Scheduler</b> watches for unassigned pods, filters nodes that could fit (resources, taints, affinity),
+        scores the survivors, and writes <code class="inl">nodeName</code> onto each pod.</li>
+        <li><b>kubelet</b> on that node sees a pod assigned to it, tells containerd to pull the image and start the
+        containers, then reports status back to the API server.</li>
+        <li><b>Status flows back.</b> Pending → ContainerCreating → Running. <code class="inl">kubectl get pods</code>
+        is just reading what the kubelet wrote.</li>
+      </ol>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Why this trace is a debugging tool</span>
+        <p>The stage a pod is stuck in tells you which component to blame. Stuck <b>Pending</b> means the scheduler
+        could not place it: no node has room, or a taint blocks it. Stuck <b>ContainerCreating</b> or
+        <b>ImagePullBackOff</b> means the scheduler did its job and the kubelet cannot: bad image name, missing
+        registry credentials, a volume that will not mount. You have narrowed the problem before reading a single log line.</p></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="cluster">
+      <div class="sec-head"><span class="num">6</span><h2>Get a cluster on your laptop</h2></div>
+      <p>You do not need a cloud account, and you should not learn on one. Pick one of these and move on.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico blue"><svg><use href="#i-box"/></svg></div>
+          <h4>kind</h4><p>Runs nodes as Docker containers. Fastest to start, trivial to throw away, easy multi-node. The recommendation for this course.</p></div>
+        <div class="card"><div class="ico green"><svg><use href="#i-server"/></svg></div>
+          <h4>minikube</h4><p>A single-node VM or container with useful addons (ingress, metrics-server, dashboard) one command away.</p></div>
+        <div class="card"><div class="ico violet"><svg><use href="#i-helm"/></svg></div>
+          <h4>Docker Desktop</h4><p>Already installed for many people. One checkbox in settings. Least control, least setup.</p></div>
+      </div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">a two-node cluster in about a minute</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># kind: nodes are containers, so Docker must be running</span>
+<span class="cmd">kind</span> create cluster <span class="flag">--name</span> dev
+
+<span class="cmt"># Or with a worker node, so scheduling is actually interesting</span>
+<span class="cmd">cat</span> <span class="str">&lt;&lt;EOF | kind create cluster --name dev --config=-</span>
+<span class="yk">kind</span>: <span class="yv">Cluster</span>
+<span class="yk">apiVersion</span>: <span class="yv">kind.x-k8s.io/v1alpha4</span>
+<span class="yk">nodes</span>:
+  - <span class="yk">role</span>: <span class="yv">control-plane</span>
+  - <span class="yk">role</span>: <span class="yv">worker</span>
+<span class="str">EOF</span>
+
+<span class="cmt"># Prove it works. kind wires up your kubeconfig automatically.</span>
+<span class="cmd">kubectl</span> get nodes
+<span class="out">NAME                STATUS   ROLES           AGE   VERSION</span>
+<span class="out">dev-control-plane   Ready    control-plane   47s   v1.34.0</span>
+<span class="out">dev-worker          Ready    &lt;none&gt;          31s   v1.34.0</span>
+
+<span class="cmt"># Done for the day? Delete the whole cluster, no residue.</span>
+<span class="cmd">kind</span> delete cluster <span class="flag">--name</span> dev</code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Local clusters are for learning, not lying to yourself</span>
+        <p>A local cluster fakes two things badly: <b>LoadBalancer</b> services (no cloud to provision one) and real
+        storage classes. Everything else in this course behaves identically. Module 03 shows the workaround for the
+        first, Module 05 for the second.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">7</span><h2>Hands-on: watch the loop fight you</h2></div>
+      <p>The point of this exercise is not to run nginx. It is to see, with your own eyes, that Kubernetes ignores
+      your actions and obeys only your declarations.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: desired state versus actual state</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. A bare pod. Nothing owns it, nothing protects it.</span>
+<span class="cmd">kubectl</span> run solo <span class="flag">--image</span>=<span class="str">nginx:1.27</span>
+<span class="cmd">kubectl</span> get pods
+
+<span class="cmt"># 2. Delete it. It stays dead: nothing declared that it should exist.</span>
+<span class="cmd">kubectl</span> delete pod solo
+<span class="cmd">kubectl</span> get pods
+
+<span class="cmt"># 3. Now a Deployment: a declaration of "3 of these should exist"</span>
+<span class="cmd">kubectl</span> create deployment web <span class="flag">--image</span>=<span class="str">nginx:1.27</span> <span class="flag">--replicas</span>=<span class="str">3</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">-w</span>          <span class="cmt"># watch them come up, then Ctrl-C</span>
+
+<span class="cmt"># 4. Kill one on purpose. Watch a replacement appear in seconds.</span>
+<span class="cmd">kubectl</span> delete pod <span class="str">"$(kubectl get pods -l app=web -o name | head -n1)"</span>
+<span class="cmd">kubectl</span> get pods
+
+<span class="cmt"># 5. Read the object Kubernetes wrote back at you: note .status</span>
+<span class="cmd">kubectl</span> get deployment web <span class="flag">-o</span> yaml | head <span class="flag">-n</span> 40
+
+<span class="cmt"># 6. Change the DESIRE, and the pods actually go away</span>
+<span class="cmd">kubectl</span> scale deployment web <span class="flag">--replicas</span>=<span class="str">0</span>
+<span class="cmd">kubectl</span> get pods
+
+<span class="cmt"># 7. Clean up</span>
+<span class="cmd">kubectl</span> delete deployment web</code></pre></div>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You watched a deleted pod get replaced, and can say exactly why.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can name the four control plane components and what each decides.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can name the three things on every node.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can write the four fields every manifest has, from memory.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You know which component to suspect when a pod is stuck Pending.</li>
+      </ul>
+    </section>
+
+    <!-- 8 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">8</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Is Kubernetes replacing Docker?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">No, and the two barely compete. Docker is how you <b>build</b> an image and run one container on
+        one machine. Kubernetes is how you <b>run</b> many containers across many machines. Kubernetes dropped the
+        Docker-specific runtime shim in v1.24 and speaks to containerd directly, but it still runs the exact OCI
+        images your <code class="inl">docker build</code> produces.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="txt">Why is everything YAML instead of a real language?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Because manifests are <b>data</b>, not instructions. Data can be diffed, reviewed in a pull
+        request, stored in git, and applied twice with the same result. That last property, idempotency, is what makes
+        <code class="inl">apply</code> safe to run in a loop. When YAML becomes painful at scale, the answer is a tool
+        that generates it (Kustomize, Helm) rather than a different runtime format.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">What is a namespace, really?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">A name scope inside one cluster, not a security boundary by itself. Two objects can share a
+        name if they are in different namespaces, and DNS, quotas and RBAC all key off it. Note that some objects are
+        <b>cluster-scoped</b> and live outside any namespace: Nodes, PersistentVolumes, StorageClasses, ClusterRoles.
+        <code class="inl">kubectl api-resources --namespaced=false</code> lists them.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">apply, create, or edit?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans"><b>apply</b> for everything real: declarative, idempotent, works from files in git.
+        <b>create</b> is imperative and fails if the object exists; it is handy for quick scratch objects and for
+        generating YAML with <code class="inl">--dry-run=client -o yaml</code>. <b>edit</b> opens the live object in
+        your editor and is a debugging tool only: your change vanishes the next time someone applies the file.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">How much of the API do I actually need?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Roughly fifteen kinds carry almost all day-to-day work: Pod, Deployment, ReplicaSet, Service,
+        Ingress, ConfigMap, Secret, Namespace, PersistentVolumeClaim, StatefulSet, DaemonSet, Job, CronJob,
+        ServiceAccount, and Role/RoleBinding. That list is this entire course. Everything else you can look up with
+        <code class="inl">kubectl explain</code> on the day you need it.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/overview/components/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Cluster components</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/overview/working-with-objects/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Objects &amp; spec/status</a>
+        <a class="reflink" href="https://kind.sigs.k8s.io/docs/user/quick-start/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>kind quick start</a>
+        <a class="reflink" href="https://kubernetes.io/docs/reference/kubectl/quick-reference/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>kubectl cheat sheet</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes"><small>← Course</small><span class="nx"><svg><use href="#i-back"/></svg><b>All modules</b></span></a>
+        <a href="/learn/kubernetes/module-01"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 01: Pods &amp; the Daily CLI</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 00 &middot; the 80/20 field guide.
+      Once every box above is ticked, move on to Module 01.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

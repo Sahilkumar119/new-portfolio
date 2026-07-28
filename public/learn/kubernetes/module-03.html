@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 03: Services, DNS &amp; Ingress &middot; Kubernetes in Practice</title>
+<meta name="description" content="Stable networking in Kubernetes: ClusterIP, NodePort and LoadBalancer, endpoints, cluster DNS names, the port/targetPort confusion settled, and Ingress routing.">
+<link rel="canonical" href="https://sahilkumar.dev/learn/kubernetes/module-03">
+<link rel="stylesheet" href="/learn/kubernetes/k8s.css">
+</head>
+<body>
+<script src="/learn/kubernetes/sprite.js"></script>
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <a class="pill" href="/learn/kubernetes" style="margin-right:6px">&larr; Course</a>
+    <div class="brand">
+      <span class="logo"><svg width="17" height="17"><use href="#i-helm"/></svg></span>
+      <span class="crumb"><b>Kubernetes</b> &nbsp;/&nbsp; Networking &nbsp;/&nbsp; Module 03</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="pill hideSm">Day 3</span>
+    <span class="pill"><b>~2h</b> · hands-on</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside>
+    <div class="label">On this page</div>
+    <nav id="toc">
+      <a href="#problem"><svg class="ti"><use href="#i-warn"/></svg>The moving-target problem</a>
+      <a href="#service"><svg class="ti"><use href="#i-net"/></svg>What a Service is</a>
+      <a href="#types"><svg class="ti"><use href="#i-layers"/></svg>The four types</a>
+      <a href="#ports"><svg class="ti"><use href="#i-route"/></svg>port vs targetPort</a>
+      <a href="#dns"><svg class="ti"><use href="#i-search"/></svg>Cluster DNS</a>
+      <a href="#ingress"><svg class="ti"><use href="#i-route"/></svg>Ingress</a>
+      <a href="#policy"><svg class="ti"><use href="#i-shield"/></svg>Headless &amp; NetworkPolicy</a>
+      <a href="#debug"><svg class="ti"><use href="#i-terminal"/></svg>Debugging the path</a>
+      <a href="#handson"><svg class="ti"><use href="#i-flask"/></svg>Hands-on</a>
+      <a href="#faq"><svg class="ti"><use href="#i-help"/></svg>Questions</a>
+    </nav>
+    <p class="scrollmsg">Networking is where most people get stuck. The debugging ladder in section 8 is the section to bookmark.</p>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <span class="eyebrow"><span class="dot"></span>Networking &middot; Kubernetes &middot; Day 3</span>
+      <h1>Module 03: <span class="grad">Services</span><br>DNS &amp; Ingress</h1>
+      <p class="lede">Sahil's three API pods are running perfectly and completely unreachable. Every pod has an IP,
+      every one of those IPs changes on restart, and no client can chase them. A Service is Kubernetes' answer:
+      <em>one name and one address that never move</em>, in front of a set of pods that constantly do.</p>
+      <div class="meta">
+        <span class="chip"><svg><use href="#i-clock"/></svg>~<b>2h</b> · hands-on heavy</span>
+        <span class="chip"><svg><use href="#i-brain"/></svg>builds on Module 02</span>
+        <span class="chip"><svg><use href="#i-target"/></svg>reach your app, for real</span>
+        <span class="chip"><svg><use href="#i-net"/></svg>Services + Ingress</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="problem">
+      <div class="sec-head"><span class="num">1</span><h2>The moving-target problem</h2></div>
+      <p>Kubernetes gives every pod its own routable IP, and any pod can reach any other pod's IP directly without
+      NAT. That sounds like it solves networking. It does not, for one reason: <b>pod IPs are ephemeral</b>. Every
+      restart, rollout, eviction and reschedule produces a new pod with a new address. Hard-coding one is writing
+      down a phone number that changes hourly.</p>
+
+      <div class="grid three">
+        <div class="card"><div class="ico red"><svg><use href="#i-cycle"/></svg></div>
+          <h4>IPs churn</h4><p>A rolling update replaces every address in the set within a minute.</p></div>
+        <div class="card"><div class="ico amber"><svg><use href="#i-scale"/></svg></div>
+          <h4>The set resizes</h4><p>Scale from 3 to 10 and seven new endpoints appear. Nobody told the client.</p></div>
+        <div class="card"><div class="ico blue"><svg><use href="#i-net"/></svg></div>
+          <h4>Someone must balance</h4><p>Even knowing all ten IPs, a client has to choose one, and skip the unhealthy ones.</p></div>
+      </div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">A Service is a stable front for an unstable set</span>
+        <p>It has a virtual IP that never changes for its whole life, a DNS name derived from its own name, and a
+        selector that continuously tracks which pods are currently healthy. Pods come and go behind it; the address
+        does not move.</p></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="service">
+      <div class="sec-head"><span class="num">2</span><h2>What a Service actually is</h2></div>
+      <p>A Service is not a proxy process sitting somewhere. There is no Service pod. It is a <b>set of routing rules</b>
+      that <code class="inl">kube-proxy</code> programs into every node's kernel (iptables or IPVS). Traffic to the
+      Service IP is rewritten to one of the current pod IPs before it leaves the node it started on.</p>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-created">client pod</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>api.demo<br>.svc</b></div>
+          <div class="state s-img">DNS → ClusterIP<br><small style="font-family:var(--sans);font-weight:400">10.96.0.42</small></div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>kernel<br>rewrite</b></div>
+          <div class="state s-running">one healthy<br>pod IP</div>
+        </div>
+      </div>
+
+      <p>The link from Service to pods is the <b>EndpointSlice</b>: a live list of pod IPs that currently match the
+      selector <i>and</i> pass their readiness probe. This is where Module 02's readiness probe pays off a second time.
+      A pod that fails readiness is silently pulled from this list and receives no traffic.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">service.yaml</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">v1</span>
+<span class="yk">kind</span>: <span class="yv">Service</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">api</span>
+<span class="yk">spec</span>:
+  <span class="yk">type</span>: <span class="yv">ClusterIP</span>
+  <span class="yk">selector</span>:
+    <span class="yk">app</span>: <span class="yv">api</span>              <span class="cmt"># must match the POD labels, not the Deployment's name</span>
+  <span class="yk">ports</span>:
+    - <span class="yk">name</span>: <span class="yv">http</span>
+      <span class="yk">port</span>: <span class="yv">80</span>             <span class="cmt"># the Service's own port</span>
+      <span class="yk">targetPort</span>: <span class="yv">http</span>     <span class="cmt"># the container's port, by NAME</span></code></pre></div>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">The number one Service bug</span>
+        <p>The selector must match the labels on the <b>pods</b>, which for a Deployment means
+        <code class="inl">spec.template.metadata.labels</code>, not the Deployment's own name or metadata.
+        A selector that matches nothing produces no error at all: just a Service with zero endpoints and a client
+        getting connection refused. Always verify with
+        <code class="inl">kubectl get endpointslices -l kubernetes.io/service-name=api</code>.</p></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="types">
+      <div class="sec-head"><span class="num">3</span><h2>The four types</h2></div>
+      <p>They are cumulative: NodePort is a ClusterIP plus a node port, LoadBalancer is a NodePort plus a cloud
+      load balancer.</p>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Type</th><th>Reachable from</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><b>ClusterIP</b><br><small>the default</small></td><td>Inside the cluster only</td><td>Almost always. Every internal service-to-service call.</td></tr>
+          <tr><td><b>NodePort</b></td><td>Any node IP on a high port (30000&ndash;32767)</td><td>Local clusters, bare metal, quick external access. Ugly ports, no TLS.</td></tr>
+          <tr><td><b>LoadBalancer</b></td><td>A real external IP</td><td>Cloud clusters. Provisions a cloud load balancer, and bills you for one <b>per Service</b>.</td></tr>
+          <tr><td><b>ExternalName</b></td><td>n/a &mdash; a DNS CNAME</td><td>Giving an external host (a managed database) an in-cluster name. No proxying at all.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Do not put a LoadBalancer on every service</span>
+        <p>Each one is a separate cloud load balancer with a separate bill and a separate IP. Ten HTTP services do not
+        need ten load balancers: they need <b>one</b> Ingress controller (itself behind a single LoadBalancer) routing
+        by hostname and path to ten ClusterIP services. That is what the next section is for.</p></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="ports">
+      <div class="sec-head"><span class="num">4</span><h2>port, targetPort, nodePort</h2></div>
+      <p>Three fields, three different machines, endless confusion. Read them right to left along the path a packet
+      takes.</p>
+
+      <div class="anat">
+        <span class="tok t4">nodePort: 30080<span class="lbl">on the NODE (external)</span></span>
+        <span class="tok t1">port: 80<span class="lbl">on the SERVICE (cluster-internal)</span></span>
+        <span class="tok t3">targetPort: 8080<span class="lbl">on the CONTAINER</span></span>
+      </div>
+
+      <div class="tablewrap"><table>
+        <thead><tr><th>Field</th><th>Lives on</th><th>Who dials it</th></tr></thead>
+        <tbody>
+          <tr><td><code>nodePort</code></td><td>Every node's IP</td><td>Anything outside the cluster. NodePort/LoadBalancer only.</td></tr>
+          <tr><td><code>port</code></td><td>The Service's ClusterIP</td><td>Other pods, via DNS: <code>http://api:80</code>.</td></tr>
+          <tr><td><code>targetPort</code></td><td>The container</td><td>kube-proxy, after rewriting. Defaults to <code>port</code> if omitted.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Use named ports</span>
+        <p>Set <code class="inl">name: http</code> on the container port and put <code class="inl">targetPort: http</code>
+        on the Service. Now the app can move from 8080 to 3000 with one edit to the Deployment, and every Service
+        pointing at it keeps working. Numeric targetPorts scattered across a repo are a refactor waiting to break.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="dns">
+      <div class="sec-head"><span class="num">5</span><h2>Cluster DNS: the part that feels like magic</h2></div>
+      <p>CoreDNS runs in the cluster and gives every Service an automatic name. Every pod's
+      <code class="inl">/etc/resolv.conf</code> points at it, with search domains configured so short names resolve.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">every form of a service name</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># Same namespace: just the service name</span>
+http://api
+
+<span class="cmt"># Another namespace: name.namespace</span>
+http://api.payments
+
+<span class="cmt"># Fully qualified (what the search path expands to)</span>
+http://api.payments.svc.cluster.local
+
+<span class="cmt">#      ^     ^        ^     ^</span>
+<span class="cmt">#      |     |        |     └── cluster domain</span>
+<span class="cmt">#      |     |        └──────── "svc": this is a Service</span>
+<span class="cmt">#      |     └───────────────── namespace</span>
+<span class="cmt">#      └─────────────────────── service name</span>
+
+<span class="cmt"># Prove it from inside the cluster</span>
+<span class="cmd">kubectl</span> run tmp <span class="flag">--rm</span> <span class="flag">-it</span> <span class="flag">--image</span>=<span class="str">busybox:1.36</span> <span class="flag">--restart</span>=<span class="str">Never</span> <span class="flag">--</span> \
+  sh <span class="flag">-c</span> <span class="str">'nslookup api; wget -qO- http://api'</span></code></pre></div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">This is why namespaces matter for more than tidiness</span>
+        <p>The same manifest deployed into <code class="inl">staging</code> and <code class="inl">prod</code> works
+        unchanged, because <code class="inl">http://api</code> resolves to the local namespace's Service in each.
+        Cross-namespace calls have to be explicit, which is a useful accident: a hardcoded short name can never
+        silently reach the wrong environment.</p></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Load balancing happens per connection</span>
+        <p>kube-proxy picks a backend when a connection is <b>established</b>, not per request. A client using HTTP
+        keep-alive or gRPC opens one long-lived connection and pins to a single pod, so scaling up sends it no extra
+        traffic. This surprises teams the first time they scale a gRPC service and see no improvement. The fixes are
+        client-side load balancing, a headless Service, or a proxy that understands HTTP/2.</p></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="ingress">
+      <div class="sec-head"><span class="num">6</span><h2>Ingress: one entry point, many services</h2></div>
+      <p>A Service gives you a layer-4 address. An Ingress gives you layer-7 HTTP routing: hostnames, paths, and TLS
+      termination, all through a single external IP.</p>
+
+      <div class="note danger"><svg class="ic"><use href="#i-danger"/></svg><span class="tag">An Ingress object does nothing on its own</span>
+        <p>It is only configuration. Something has to <i>read</i> it: an <b>ingress controller</b> (ingress-nginx,
+        Traefik, HAProxy, or a cloud one) running as pods in your cluster. Apply an Ingress to a cluster with no
+        controller installed and you get no error, no address, and no traffic. This is the most common
+        "my Ingress doesn't work" cause by a wide margin.</p></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">ingress.yaml · host and path routing with TLS</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">networking.k8s.io/v1</span>
+<span class="yk">kind</span>: <span class="yv">Ingress</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">web</span>
+<span class="yk">spec</span>:
+  <span class="yk">ingressClassName</span>: <span class="yv">nginx</span>      <span class="cmt"># WHICH controller handles this</span>
+  <span class="yk">tls</span>:
+    - <span class="yk">hosts</span>: [<span class="str">shop.example.com</span>]
+      <span class="yk">secretName</span>: <span class="yv">shop-tls</span>      <span class="cmt"># a Secret of type kubernetes.io/tls</span>
+  <span class="yk">rules</span>:
+    - <span class="yk">host</span>: <span class="str">shop.example.com</span>
+      <span class="yk">http</span>:
+        <span class="yk">paths</span>:
+          - <span class="yk">path</span>: <span class="str">/api</span>
+            <span class="yk">pathType</span>: <span class="yv">Prefix</span>
+            <span class="yk">backend</span>:
+              <span class="yk">service</span>:
+                <span class="yk">name</span>: <span class="yv">api</span>          <span class="cmt"># a ClusterIP Service</span>
+                <span class="yk">port</span>: { <span class="yk">number</span>: <span class="yv">80</span> }
+          - <span class="yk">path</span>: <span class="str">/</span>
+            <span class="yk">pathType</span>: <span class="yv">Prefix</span>
+            <span class="yk">backend</span>:
+              <span class="yk">service</span>:
+                <span class="yk">name</span>: <span class="yv">frontend</span>
+                <span class="yk">port</span>: { <span class="yk">number</span>: <span class="yv">80</span> }</code></pre></div>
+
+      <div class="life">
+        <div class="flow">
+          <div class="state s-created">internet</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>one LB</b></div>
+          <div class="state s-img">ingress<br>controller</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>/api</b></div>
+          <div class="state s-running">api svc</div>
+          <div class="arrow"><svg><use href="#i-arrow"/></svg><b>/</b></div>
+          <div class="state s-running">frontend svc</div>
+        </div>
+      </div>
+
+      <div class="note info"><svg class="ic"><use href="#i-info"/></svg><span class="tag">Ingress and its successor</span>
+        <p>Ingress is stable, universal, and slightly underpowered: anything beyond host and path routing lives in
+        controller-specific annotations, which are not portable. The <b>Gateway API</b> is the successor and fixes
+        exactly that, with proper typed objects for traffic splitting, headers and cross-namespace routing. Learn
+        Ingress first: it is what almost every existing cluster runs, and the concepts transfer directly.</p></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="policy">
+      <div class="sec-head"><span class="num">7</span><h2>Headless Services and NetworkPolicy</h2></div>
+
+      <h3>Headless: when you want the pod IPs, not a virtual one</h3>
+      <p>Set <code class="inl">clusterIP: None</code> and the Service gets no virtual IP. DNS then returns <b>all</b>
+      matching pod IPs instead of one address, and each pod gets its own DNS record. StatefulSets rely on this so
+      that <code class="inl">db-0.db</code> resolves to a specific replica. It is also how a client library does its
+      own load balancing across every backend.</p>
+
+      <h3>NetworkPolicy: a firewall for pods</h3>
+      <p>By default, <b>every pod can reach every other pod in the cluster</b>, across all namespaces. A NetworkPolicy
+      restricts that, selecting pods by label and declaring what ingress and egress is permitted.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">only the api may reach the database</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="yk">apiVersion</span>: <span class="yv">networking.k8s.io/v1</span>
+<span class="yk">kind</span>: <span class="yv">NetworkPolicy</span>
+<span class="yk">metadata</span>:
+  <span class="yk">name</span>: <span class="yv">db-allow-api</span>
+<span class="yk">spec</span>:
+  <span class="yk">podSelector</span>:
+    <span class="yk">matchLabels</span>: { <span class="yk">app</span>: <span class="yv">db</span> }     <span class="cmt"># these pods are protected</span>
+  <span class="yk">policyTypes</span>: [<span class="yv">Ingress</span>]
+  <span class="yk">ingress</span>:
+    - <span class="yk">from</span>:
+        - <span class="yk">podSelector</span>:
+            <span class="yk">matchLabels</span>: { <span class="yk">app</span>: <span class="yv">api</span> }
+      <span class="yk">ports</span>:
+        - <span class="yk">port</span>: <span class="yv">5432</span></code></pre></div>
+
+      <div class="note warn"><svg class="ic"><use href="#i-warn"/></svg><span class="tag">Two things that catch people</span>
+        <p>First, policies are <b>additive allow rules</b>: the moment any policy selects a pod, everything not
+        explicitly allowed is denied for that direction. Second, they do nothing at all unless your CNI plugin
+        implements them. Calico and Cilium do; a plain kind cluster with the default CNI does not, and your policy
+        will be silently ignored.</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section id="debug">
+      <div class="sec-head"><span class="num">8</span><h2>Debugging the path, in order</h2></div>
+      <p>When something is unreachable, walk the path from the inside out. Each step eliminates a layer, and you will
+      find the fault in under two minutes instead of guessing.</p>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">the networking ladder</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Is the app itself even up? Bypass everything.</span>
+<span class="cmd">kubectl</span> port-forward pod/api-abc123 <span class="str">8080:8080</span>
+<span class="cmt">#    fails → the container is the problem, stop here</span>
+
+<span class="cmt"># 2. Does the Service have endpoints? THE most common failure.</span>
+<span class="cmd">kubectl</span> get endpointslices <span class="flag">-l</span> <span class="str">kubernetes.io/service-name=api</span>
+<span class="cmt">#    empty → selector/label mismatch, OR every pod is failing readiness</span>
+
+<span class="cmt"># 3. Compare them directly</span>
+<span class="cmd">kubectl</span> get svc api <span class="flag">-o</span> <span class="str">jsonpath='{.spec.selector}'</span>; <span class="cmd">echo</span>
+<span class="cmd">kubectl</span> get pods <span class="flag">--show-labels</span>
+
+<span class="cmt"># 4. Does the Service work from inside the cluster?</span>
+<span class="cmd">kubectl</span> run tmp <span class="flag">--rm</span> <span class="flag">-it</span> <span class="flag">--image</span>=<span class="str">nicolaka/netshoot</span> <span class="flag">--restart</span>=<span class="str">Never</span> <span class="flag">--</span> \
+  sh <span class="flag">-c</span> <span class="str">'nslookup api; curl -sS -m5 http://api'</span>
+<span class="cmt">#    DNS fails → CoreDNS. curl fails → ports or targetPort wrong.</span>
+
+<span class="cmt"># 5. Only now look at the Ingress</span>
+<span class="cmd">kubectl</span> describe ingress web
+<span class="cmt">#    ADDRESS empty → no controller is claiming it (ingressClassName?)</span>
+<span class="cmd">kubectl</span> logs <span class="flag">-n</span> ingress-nginx deploy/ingress-nginx-controller <span class="flag">--tail</span>=<span class="str">50</span></code></pre></div>
+
+      <div class="note key"><svg class="ic"><use href="#i-key"/></svg><span class="tag">Empty endpoints is the answer 60% of the time</span>
+        <p>If you remember one command from this module, make it
+        <code class="inl">kubectl get endpointslices</code>. Empty means the Service is pointing at nothing, and there
+        are exactly two causes: labels do not match the selector, or the pods are not passing readiness. Both are
+        two minutes to fix once you know which.</p></div>
+    </section>
+
+    <!-- 9 -->
+    <section id="handson">
+      <div class="sec-head"><span class="num">9</span><h2>Hands-on: expose an app three ways</h2></div>
+
+      <div class="codeblock"><div class="bar"><div class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><span class="title">exercise: ClusterIP, DNS, NodePort, and a broken selector</span><span class="spacer"></span><button class="copybtn"><svg><use href="#i-copy"/></svg>Copy</button></div><pre><code><span class="cmt"># 1. Something to expose</span>
+<span class="cmd">kubectl</span> create deployment api <span class="flag">--image</span>=<span class="str">nginx:1.27</span> <span class="flag">--replicas</span>=<span class="str">3</span>
+<span class="cmd">kubectl</span> expose deployment api <span class="flag">--port</span>=<span class="str">80</span> <span class="flag">--target-port</span>=<span class="str">80</span>
+
+<span class="cmt"># 2. Confirm the Service found its pods</span>
+<span class="cmd">kubectl</span> get svc api
+<span class="cmd">kubectl</span> get endpointslices <span class="flag">-l</span> <span class="str">kubernetes.io/service-name=api</span>
+
+<span class="cmt"># 3. Reach it by DNS name from another pod</span>
+<span class="cmd">kubectl</span> run tmp <span class="flag">--rm</span> <span class="flag">-it</span> <span class="flag">--image</span>=<span class="str">busybox:1.36</span> <span class="flag">--restart</span>=<span class="str">Never</span> <span class="flag">--</span> \
+  sh <span class="flag">-c</span> <span class="str">'nslookup api; wget -qO- http://api | head -n4'</span>
+
+<span class="cmt"># 4. Watch endpoints change live as pods come and go</span>
+<span class="cmd">kubectl</span> get endpointslices <span class="flag">-l</span> <span class="str">kubernetes.io/service-name=api</span> <span class="flag">-w</span> &amp;
+<span class="cmd">kubectl</span> scale deployment api <span class="flag">--replicas</span>=<span class="str">5</span>
+<span class="cmd">kubectl</span> scale deployment api <span class="flag">--replicas</span>=<span class="str">2</span>
+<span class="cmd">kill</span> %1
+
+<span class="cmt"># 5. BREAK IT: point the selector at a label nothing has</span>
+<span class="cmd">kubectl</span> patch svc api <span class="flag">-p</span> <span class="str">'{"spec":{"selector":{"app":"typo"}}}'</span>
+<span class="cmd">kubectl</span> get endpointslices <span class="flag">-l</span> <span class="str">kubernetes.io/service-name=api</span>  <span class="cmt"># gone. no error anywhere.</span>
+<span class="cmd">kubectl</span> patch svc api <span class="flag">-p</span> <span class="str">'{"spec":{"selector":{"app":"api"}}}'</span>   <span class="cmt"># fixed</span>
+
+<span class="cmt"># 6. NodePort, for external access without a cloud</span>
+<span class="cmd">kubectl</span> patch svc api <span class="flag">-p</span> <span class="str">'{"spec":{"type":"NodePort"}}'</span>
+<span class="cmd">kubectl</span> get svc api      <span class="cmt"># note the 3xxxx port</span>
+
+<span class="cmt"># 7. Clean up</span>
+<span class="cmd">kubectl</span> delete svc api; <span class="cmd">kubectl</span> delete deployment api</code></pre></div>
+
+      <ul class="check">
+        <li><svg><use href="#i-checkbox"/></svg>You resolved a Service by short name from inside another pod.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You watched endpoints appear and vanish as replicas changed.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You broke a selector and saw that Kubernetes reported <b>nothing</b>.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can write the fully qualified DNS name of a Service from memory.</li>
+        <li><svg><use href="#i-checkbox"/></svg>You can explain why an Ingress with no controller stays address-less.</li>
+      </ul>
+    </section>
+
+    <!-- 10 -->
+    <section id="faq">
+      <div class="sec-head"><span class="num">10</span><h2>Questions people actually ask</h2></div>
+
+      <details>
+        <summary><span class="q">Q1</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">My Service returns connection refused. Where do I start?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Endpoints, always. <code class="inl">kubectl get endpointslices -l
+        kubernetes.io/service-name=NAME</code>. Empty means selector-versus-label mismatch or failing readiness
+        probes. Non-empty means the Service is fine and your problem is <code class="inl">targetPort</code>, or the
+        app binding <code class="inl">127.0.0.1</code> instead of <code class="inl">0.0.0.0</code>.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q2</span><span class="star"><svg><use href="#i-star"/></svg></span><span class="txt">Why is my LoadBalancer Service stuck at Pending?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Because nothing is there to provision one. Cloud clusters have a controller that creates a
+        real load balancer; a local kind or minikube cluster does not, so the external IP stays
+        <code class="inl">&lt;pending&gt;</code> forever. Locally, use NodePort, <code class="inl">minikube tunnel</code>,
+        or install MetalLB.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q3</span><span class="txt">Ingress or LoadBalancer?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">For HTTP or HTTPS, Ingress, nearly always: one external IP and one certificate setup serving
+        many services, routed by host and path. LoadBalancer is right for non-HTTP protocols (a TCP database port, a
+        game server) or when a service genuinely warrants its own dedicated address.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q4</span><span class="txt">Can I give a Service a fixed IP?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">You can pin <code class="inl">spec.clusterIP</code> to an address inside the service CIDR, but
+        do not. The DNS name is the stable contract and the whole point of the abstraction. Hardcoding an IP
+        reintroduces exactly the fragility Services exist to remove.</div>
+      </details>
+
+      <details>
+        <summary><span class="q">Q5</span><span class="txt">How do pods on different nodes reach each other at all?</span><svg class="chev"><use href="#i-chev"/></svg></summary>
+        <div class="ans">The CNI plugin (Calico, Cilium, Flannel and friends) builds a flat network across nodes, either
+        by routing pod subnets directly or by tunnelling with VXLAN. Kubernetes requires only that every pod can reach
+        every other pod without NAT; how that is achieved is the plugin's business. You almost never touch this layer,
+        which is exactly why it is out of the 80/20.</div>
+      </details>
+    </section>
+
+    <footer>
+      <h3><svg style="width:18px;height:18px;color:var(--k8s);vertical-align:-3px"><use href="#i-book"/></svg> References &amp; deeper reading</h3>
+      <div class="refs">
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Services</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>DNS for Services</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/services-networking/ingress/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Ingress</a>
+        <a class="reflink" href="https://kubernetes.io/docs/concepts/services-networking/network-policies/" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>NetworkPolicy</a>
+      </div>
+
+      <div class="next">
+        <a href="/learn/kubernetes/module-02"><small>← Previous</small><span class="nx"><svg><use href="#i-back"/></svg><b>Module 02: Deployments &amp; Rollouts</b></span></a>
+        <a href="/learn/kubernetes/module-04"><small>Next →</small><span class="nx"><svg><use href="#i-arrow"/></svg><b>Module 04: Config &amp; Secrets</b></span></a>
+      </div>
+      <p style="margin-top:24px;color:var(--fg-faint)">Kubernetes in Practice &middot; Module 03 &middot; the 80/20 field guide.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="/learn/kubernetes/course.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "id": 11,
+  "title": "Shortlist: Job-Fit Verdicts With Cited Evidence",
+  "description": "Paste a job description and get a STRONG FIT / STRETCH / SKIP verdict, the gaps, and a tailored intro draft. Every claimed match quotes a verbatim line from the resume, and a verify_citation function rejects any quote that is not actually there, so a hallucinated match fails instead of shipping. STRETCH roles wait in a human review queue before they move forward. Deployed as a Lemma pod (agent, function, workflow, board app), with the original FastAPI prototype kept for local runs.",
+  "technologies": ["JavaScript", "Python", "FastAPI", "RAG"],
+  "link": "https://github.com/Sahiljangra115/shortlist",
+  "github": "https://github.com/Sahiljangra115/shortlist",
+  "category": "AI & ML",
+  "type": "top"
+}

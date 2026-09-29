@@ -103,7 +103,7 @@ const syncBlogs = () => {
  * Generate XML Sitemap
  */
 const generateSitemap = (blogs) => {
-  let baseUrl = 'https://sahilkumar.dev';
+  let baseUrl = 'https://sahilkumar.tech';
   try {
     const resumePath = path.join(__dirname, '../src/settings/resume.json');
     if (fs.existsSync(resumePath)) {

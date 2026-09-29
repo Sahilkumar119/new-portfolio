@@ -31,7 +31,7 @@ export const socialLinks = [
   {
     network: "Portfolio",
     label: "Add another link",
-    url: "https://sahilkumar.dev",
+    url: "https://sahilkumar.tech",
     short: "++",
   },
 ];

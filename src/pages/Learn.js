@@ -8,7 +8,7 @@ import { COURSES } from "../components/learn/courses";
 import { CourseList } from "../components/learn/CourseList";
 import { CourseVisual } from "../components/learn/CourseVisual";
 
-const SITE = Resume.basics.url || "https://sahilkumar.dev";
+const SITE = Resume.basics.url || "https://sahilkumar.tech";
 
 const useStyles = makeStyles((theme) => ({
   root: {

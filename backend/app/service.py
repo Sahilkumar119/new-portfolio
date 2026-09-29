@@ -173,7 +173,7 @@ class AssistantService:
             return context[:900]
 
         system = (
-            "You are a friendly, intelligent, and conversational AI assistant for Sahil Kumar's personal portfolio website (sahilkumar.dev).\n"
+            "You are a friendly, intelligent, and conversational AI assistant for Sahil Kumar's personal portfolio website (sahilkumar.tech).\n"
             "Your goal is to help visitors learn about Sahil, his projects, experience, skills, and the blog posts he has written.\n\n"
             "Guidelines:\n"
             "1. For greetings, pleasantries, or general chat (e.g., 'hi', 'hello', 'who are you?', 'how are you?'), respond warmly and naturally as Sahil's AI assistant. Introduce yourself, invite them to ask questions about Sahil, and keep the tone conversational, helpful, and polite.\n"

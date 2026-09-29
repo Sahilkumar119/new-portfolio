@@ -11,7 +11,7 @@ export const logCredits = () => {
     ].join(";");
 
     return console.log(
-        `%c © ${new Date().getFullYear()} sahilkumar.dev ${pieceEmoji}`,
+        `%c © ${new Date().getFullYear()} sahilkumar.tech ${pieceEmoji}`,
         logStyle
     );
 };

@@ -1,0 +1,10 @@
+{
+  "id": 9,
+  "title": "Shrota: Timestamp-Grounded Transcripts for Code-Mixed Audio",
+  "description": "A pipeline that compiles multi-speaker Hindi/English lecture and podcast audio once into a frozen canonical transcript where every word carries start/end timestamps and a speaker label, then serves subtitles, cited chapter summaries and moment-level search from that single artifact. faster-whisper large-v3 with an OOM fallback ladder, a local WeSpeaker ONNX plus spectral-clustering diarizer (9.1% DER), and hybrid BM25 + BGE-M3 retrieval with cross-encoder rerank (80% Recall@5 on 60 gold questions), all sequenced to fit a 4 GB laptop GPU at 2.1 GB peak VRAM. Evaluation is fully generated and reports the misses honestly, including alignment drift and Hinglish WER.",
+  "technologies": ["Python", "faster-whisper", "FastAPI", "Pydantic", "BGE-M3", "ONNX"],
+  "link": "https://github.com/Sahiljangra115/shrota",
+  "github": "https://github.com/Sahiljangra115/shrota",
+  "category": "AI & ML",
+  "type": "top"
+}

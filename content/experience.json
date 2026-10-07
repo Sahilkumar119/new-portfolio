@@ -13,8 +13,8 @@
       "org": "TH!NKBOTS, DCRUST Murthal",
       "period": "Oct 2023 - Present",
       "points": [
-        "Coordinate club activities and mentor junior members on robotics fundamentals: Arduino programming, sensor integration, and project development.",
-        "Built club projects including a PID-controlled line follower and a multi-terrain gripper bot."
+        "Run club activities and mentor junior members on robotics fundamentals: Arduino programming, sensor integration, and project development.",
+        "Built club robots including a PID-controlled line follower and a multi-terrain gripper bot."
       ]
     },
     {
@@ -22,8 +22,8 @@
       "org": "IIT Bombay",
       "period": "2024, 2025",
       "points": [
-        "2024: Led autonomous warehouse drone development using ROS 2, OpenCV, and Gazebo simulation.",
-        "2025: Built a self-balancing lunar scout robot with PID/LQR control and Fusion 360 mechanical design."
+        "2024: Led the team building an autonomous warehouse drone in ROS 2, with OpenCV perception and Gazebo simulation.",
+        "2025: Led the build of a self-balancing lunar scout robot: PID and LQR control, mechanical design in Fusion 360."
       ]
     },
     {
@@ -31,20 +31,20 @@
       "org": "Ministry of Education, India",
       "period": "2024, 2025",
       "points": [
-        "2024: Team member on a water conservation cross-platform game built in Godot Engine.",
-        "2025: Team leader and campus event organizer, competing as a member alongside."
+        "2024: Team member on a cross-platform water-conservation game built in Godot.",
+        "2025: Led a team in the competition while organizing the campus round."
       ]
     }
   ],
   "achievements": [
     {
       "title": "IEEE YESIST12 2026 Finalist",
-      "detail": "Selected for the international final round in Indonesia with an AI-based cloud anomaly detection project.",
+      "detail": "Selected for the international final in Indonesia with an AI-based cloud anomaly detection project.",
       "year": "2026"
     },
     {
       "title": "Hackathon Finalist: Jewellery E-Commerce Platform",
-      "detail": "Built a full-stack e-commerce site for a jewellery business and reached the finalist round.",
+      "detail": "Next.js storefront with 3D product previews, Razorpay checkout, NextAuth sign-in and Playwright end-to-end tests. Finalist at the PIET hackathon.",
       "year": "2025"
     }
   ]

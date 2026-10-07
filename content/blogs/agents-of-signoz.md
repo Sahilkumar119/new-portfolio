@@ -133,11 +133,11 @@ Alert rule `error_swarm_test2` fired. Failed to export logs to 172.18.0.1:4317, 
 One evening of work turned a 3 AM page into a sixty-second automated report, using nothing but SigNoz's own alert engine, its Query API, and a single LLM call. The alert still fires, it just wakes the right agent now.
 
 ### Resources
-* [Configure a webhook notification channel](https://signoz.io/docs/alerts-management/notification-channel/webhook/) — how I got the alert firing at my receiver in the first place.
-* [SigNoz API reference](https://signoz.io/api-reference/) — the Query API (v5, `query_range`) my receiver calls to pull traces, logs, and metrics after the webhook wakes it up.
-* [GitHub issue #11206](https://github.com/SigNoz/signoz/issues/11206) — someone else hit the same "webhook payload is just a link" wall and filed a feature request to enrich it directly. Worth a thumbs-up if you've felt this too.
-* [OpenTelemetry Python docs](https://opentelemetry.io) — the SDK instrumenting the demo service that trips the alert.
-* [Full receiver code](https://github.com/Sahiljangra115/Signoz-hackathon) — everything above, in a repo you can clone and break.
+* [Configure a webhook notification channel](https://signoz.io/docs/alerts-management/notification-channel/webhook/): how I got the alert firing at my receiver in the first place.
+* [SigNoz API reference](https://signoz.io/api-reference/): the Query API (v5, `query_range`) my receiver calls to pull traces, logs, and metrics after the webhook wakes it up.
+* [GitHub issue #11206](https://github.com/SigNoz/signoz/issues/11206): someone else hit the same "webhook payload is just a link" wall and filed a feature request to enrich it directly. Worth a thumbs-up if you've felt this too.
+* [OpenTelemetry Python docs](https://opentelemetry.io): the SDK instrumenting the demo service that trips the alert.
+* [Full receiver code](https://github.com/Sahiljangra115/Signoz-hackathon): everything above, in a repo you can clone and break.
 
 ---
 

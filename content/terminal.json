@@ -1,7 +1,7 @@
 {
   "user": "sahil",
   "host": "archlinux",
-  "about": "AI/ML Engineer | Systems Builder | Linux Enthusiast\nI build AI systems from scratch: speech pipelines, RAG, TinyML, autonomous robots.\nArch Linux is my daily driver because absolute control is beautiful.",
+  "about": "Sahil Kumar. AI/ML engineer, final-year B.Tech ECE (AI/ML) at DCRUST.\nBuilds ML systems end to end: model, pipeline, API, and the firmware when there is hardware.\nPrefers writing the thing from scratch once, to learn what the library was hiding.\nDaily driver: Arch Linux, Neovim, tmux, zsh. Yes, btw.",
   "skills": [
     "> Core      : Python, Go, C/C++, CUDA, TypeScript",
     "> ML / AI   : PyTorch, Transformers, LangGraph, Ollama, ONNX Runtime",
@@ -10,5 +10,54 @@
     "> Systems   : FastAPI, Docker, Kubernetes, Redis, PostgreSQL, GitLab CI",
     "> Embedded  : ESP-IDF, FreeRTOS, micro-ROS / ROS 2, ESP32-S3",
     "> OS        : Linux (Arch, Debian), Shell Scripting"
+  ],
+  "now": "Currently building:\n  * mini-inference-engine  LLM serving from scratch: paged KV cache, continuous batching,\n                           chunked prefill, Triton kernels. Qwen2.5-0.5B on a 4 GB GPU.\n  * straightline           Flow matching from scratch: DiT backbone, reflow, MeanFlow,\n                           an honest quality-vs-NFE table on CIFAR-10.\nBoth are in progress. The READMEs track which phases are done.",
+  "fetch": [
+    [
+      "OS",
+      "Arch Linux x86_64"
+    ],
+    [
+      "Host",
+      "DCRUST, B.Tech ECE (AI/ML)"
+    ],
+    [
+      "Role",
+      "AI/ML engineer"
+    ],
+    [
+      "Shell",
+      "zsh"
+    ],
+    [
+      "Editor",
+      "neovim + tmux"
+    ],
+    [
+      "GPU",
+      "RTX 2050, 4 GB (everything has to fit)"
+    ],
+    [
+      "Langs",
+      "Python, Go, C/C++, CUDA"
+    ],
+    [
+      "Focus",
+      "speech, retrieval, on-device ML"
+    ],
+    [
+      "Building",
+      "an LLM serving engine (see now.txt)"
+    ]
+  ],
+  "fortunes": [
+    "Talk is cheap. Show me the code.  (Linus Torvalds)",
+    "Premature optimization is the root of all evil.  (Donald Knuth)",
+    "All models are wrong, but some are useful.  (George Box)",
+    "Simplicity is prerequisite for reliability.  (Edsger W. Dijkstra)",
+    "There are only two hard things in Computer Science: cache invalidation and naming things.  (Phil Karlton)",
+    "Make it work, make it right, make it fast.  (Kent Beck)",
+    "If your eval only reports the wins, it is a demo, not an eval.",
+    "It works on my 4 GB GPU. Ship it."
   ]
 }

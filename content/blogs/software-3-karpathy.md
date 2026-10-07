@@ -27,7 +27,7 @@ Karpathy's breakdown is brilliant in its simplicity. I believe he's nailed it:
 - **Software 2.0:** This was the deep learning revolution. The "program" isn't our script; it's the millions of weights in a trained neural network. We became curators of data, not just writers of logic.
 - **Software 3.0:** This is the new frontier, and it's powered by LLMs. Here, the computer itself is a general purpose reasoning engine. And the programming language? **English.** A simple prompt is now a program.
 
-## LLMs Aren't Just Tools—They're a New Kind of OS
+## LLMs Aren't Just Tools. They're a New Kind of OS
 
 This is the part that really clicked for me. Karpathy suggests we stop thinking of LLMs as just another API. We should see them as a new kind of Operating System.
 
@@ -35,11 +35,11 @@ This is the part that really clicked for me. Karpathy suggests we stop thinking 
 - The **Context Window** is its RAM.
 - **Prompting** is like using the command line.
 
-We're basically back in the 1960s mainframe era—compute is expensive, centralized, and we're all just "time sharing" on a massive, intelligent machine. From this perspective, it all makes sense.
+We're basically back in the 1960s mainframe era: compute is expensive, centralized, and we're all just "time sharing" on a massive, intelligent machine. From this perspective, it all makes sense.
 
 ## The Superhuman Intern with Amnesia
 
-So, what are we programming? Karpathy calls LLMs "people spirits"—stochastic simulations of humans. I agree, and that means they come with some serious quirks.
+So, what are we programming? Karpathy calls LLMs "people spirits": stochastic simulations of humans. I agree, and that means they come with some serious quirks.
 
 They have superpowers (encyclopedic knowledge) but also huge deficits: they hallucinate, are terrible at simple logic, and, most importantly, **they have no long term memory.** Every conversation starts from scratch. They are brilliant but flawed, like a superhuman intern who forgets everything every morning.
 
@@ -49,7 +49,7 @@ So, if full automation is still a long way off, what's our job now?
 
 Karpathy's answer is perfect: we should be building **Iron Man suits, not an army of Iron Man robots.**
 
-We need to create tools that *augment* humans, not replace them. Think of the coding assistant Cursor—it gives the developer an "autonomy slider." You can ask for a little help or a lot, but you are always in control.
+We need to create tools that *augment* humans, not replace them. Think of the coding assistant Cursor. It gives the developer an "autonomy slider." You can ask for a little help or a lot, but you are always in control.
 
 The goal is to speed up the **generation verification loop**. Let the AI generate, but make it incredibly fast and easy for a human to verify. This is where great UI/UX becomes more important than ever. A visual diff in a code editor is infinitely better than a wall of text from a chatbot.
 

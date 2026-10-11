@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Tooltip, Zoom } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Resume from '../../settings/resume.json';
-// Ask AI button disabled — rail re-centers on its own when MorphPanel is gone.
+// Ask AI button disabled, rail re-centers on its own when MorphPanel is gone.
 // import { MorphPanel } from '../ui/ai-input';
 
 const useStyles = makeStyles(() => ({

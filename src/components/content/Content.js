@@ -11,6 +11,8 @@ const useStyles = makeStyles(() => ({
         paddingLeft: "clamp(4rem, 8vw, 8rem)",
         paddingRight: "clamp(4rem, 8vw, 8rem)",
         maxWidth: "680px",
+        // Keeps the CTAs clear of the fixed Resume button on short screens.
+        paddingBottom: "5rem",
         zIndex: 10,
         "@media (max-width: 768px)": {
             paddingLeft: "1.5rem",
@@ -24,7 +26,7 @@ const useStyles = makeStyles(() => ({
         display: "flex",
         alignItems: "center",
         gap: "10px",
-        marginBottom: "2rem",
+        marginBottom: "1.5rem",
         animation: "fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
     },
     eyebrowDot: {
@@ -46,16 +48,8 @@ const useStyles = makeStyles(() => ({
 
     // Name headline
     headlineWrapper: {
-        marginBottom: "2rem",
+        marginBottom: "1.5rem",
         animation: "fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both",
-    },
-    greeting: {
-        display: "block",
-        fontSize: "clamp(0.85rem, 1.8vw, 1rem)",
-        fontWeight: 400,
-        color: "var(--text-secondary)",
-        letterSpacing: "0.01em",
-        "& p": { margin: 0 },
     },
     name: {
         display: "block",
@@ -64,10 +58,10 @@ const useStyles = makeStyles(() => ({
         letterSpacing: "-0.04em",
         lineHeight: 1.0,
         color: "var(--text-primary)",
-        "& p": { margin: 0 },
+        margin: 0,
     },
 
-    // Clean typographic meta — no boxes, no pills
+    // Role + location as one plain typographic line
     metaRow: {
         display: "flex",
         alignItems: "center",
@@ -119,26 +113,26 @@ const useStyles = makeStyles(() => ({
         letterSpacing: "-0.005em",
         margin: 0,
     },
-    locationRow: {
+    nowRow: {
         display: "flex",
-        alignItems: "center",
-        gap: "7px",
+        alignItems: "baseline",
+        gap: "10px",
         marginTop: "1.1rem",
         paddingTop: "1.1rem",
         borderTop: "1px solid var(--divider)",
     },
-    locationPin: {
-        width: "12px",
-        height: "12px",
-        color: "var(--text-tertiary)",
+    nowLabel: {
         flexShrink: 0,
-    },
-    locationText: {
         fontSize: "0.7rem",
-        fontWeight: 500,
-        letterSpacing: "0.05em",
+        fontWeight: 600,
+        letterSpacing: "0.14em",
         textTransform: "uppercase",
-        color: "var(--text-tertiary)",
+        color: "var(--accent-primary)",
+    },
+    nowText: {
+        fontSize: "0.85rem",
+        lineHeight: 1.5,
+        color: "var(--text-secondary)",
     },
 
     // CTAs
@@ -234,19 +228,15 @@ export const Content = () => {
         <main className={classes.wrapper}>
             <div className={classes.eyebrow}>
                 <span className={classes.eyebrowDot} />
-                <span className={classes.eyebrowText}>Available for opportunities</span>
+                <span className={classes.eyebrowText}>Open to ML engineering roles</span>
             </div>
 
             <div className={classes.headlineWrapper}>
-                <span className={classes.greeting}>
-                    <TextDecrypt text={Resume.basics.x_title} />
-                </span>
-                <span className={classes.name}>
+                <h1 className={classes.name}>
                     <TextDecrypt text={`${FirstName} ${LastName || ""}`} />
-                </span>
+                </h1>
             </div>
 
-            {/* Role + location — clean typographic line, no chips */}
             <div className={classes.metaRow}>
                 <span className={classes.metaText}>{Resume.basics.job}</span>
                 <span className={classes.metaDivider} />
@@ -254,13 +244,10 @@ export const Content = () => {
             </div>
 
             <div className={classes.bioCard}>
-                <p className={classes.bioText}>{Resume.basics.description}</p>
-                <div className={classes.locationRow}>
-                    <svg className={classes.locationPin} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    <span className={classes.locationText}>{Resume.basics.location.country}</span>
+                <p className={classes.bioText}>{Resume.basics.summary}</p>
+                <div className={classes.nowRow}>
+                    <span className={classes.nowLabel}>Now</span>
+                    <span className={classes.nowText}>{Resume.basics.now}</span>
                 </div>
             </div>
 

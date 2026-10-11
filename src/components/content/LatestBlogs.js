@@ -306,12 +306,12 @@ export const LatestBlogs = () => {
         >
             <Container maxWidth="md">
                 <header className={classes.header}>
-                    <span className={classes.eyebrow}>Writing</span>
-                    <h2 className={classes.title}>Latest Explorations</h2>
+                    <span className={classes.eyebrow}>Blog</span>
+                    <h2 className={classes.title}>Recent Writing</h2>
                 </header>
 
                 {(!Array.isArray(blogs) || blogs.length === 0) ? (
-                    <p className={classes.emptyState}>No posts yet — check back soon.</p>
+                    <p className={classes.emptyState}>No posts yet. Check back soon.</p>
                 ) : (
                     <div className={classes.list} role="list">
                         {blogs.map((blog, i) => (

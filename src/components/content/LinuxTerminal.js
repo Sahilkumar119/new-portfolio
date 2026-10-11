@@ -6,6 +6,7 @@ import { topProjects, stepProjects } from "../../data/projects";
 import { certifications } from "../../data/certifications";
 import { terminalData } from "../../data/terminal";
 import { education, experience, achievements } from "../../data/experience";
+import Resume from "../../settings/resume.json";
 
 // Single source of truth is content/terminal.json, transformed by npm run sync.
 const USER = terminalData.user;
@@ -15,6 +16,45 @@ const PROMPT_USER_HOST = `${USER}@${HOST}`;
 
 const ABOUT_TXT = terminalData.about;
 const SKILLS_TXT = terminalData.skills.join("\n");
+const NOW_TXT = terminalData.now;
+const FORTUNES = terminalData.fortunes;
+
+// neofetch's arch_small logo
+const ARCH_LOGO = [
+    "      /\\",
+    "     /  \\",
+    "    /\\   \\",
+    "   /      \\",
+    "  /   ,,   \\",
+    " /   |  |  -\\",
+    "/_-''    ''-_\\",
+].join("\n");
+const PALETTE = ["#1e293b", "#f87171", "#10b981", "#fbbf24", "#3b82f6", "#c084fc", "#22d3ee", "#e2e8f0"];
+
+const COMMANDS = [
+    ["help", "show this message"],
+    ["ls [path]", "list directory contents"],
+    ["cd <path>", "change directory"],
+    ["cat <file>", "print file contents"],
+    ["pwd", "print working directory"],
+    ["neofetch", "system info, the important kind"],
+    ["now", "what I am building right now"],
+    ["fortune", "a random line worth remembering"],
+    ["whoami", "who am i"],
+    ["contact", "how to reach me"],
+    ["history", "commands you have run"],
+    ["echo <text>", "print text"],
+    ["uname [-a]", "kernel info"],
+    ["date", "print the date"],
+    ["clear", "clear the terminal (or Ctrl+L)"],
+];
+const COMMAND_NAMES = [...COMMANDS.map(([c]) => c.split(" ")[0]), "sudo", "exit", "vim"];
+
+const INITIAL_HISTORY = [
+    { type: "prompt", cwd: HOME, text: "neofetch" },
+    { type: "fetch" },
+    { type: "muted", text: "Type `help` for commands. Tab completes, arrow keys walk history." },
+];
 
 function buildFs() {
     const blogsDir = {};
@@ -49,6 +89,7 @@ function buildFs() {
 
     return {
         "about.txt": ABOUT_TXT,
+        "now.txt": NOW_TXT,
         "skills.txt": SKILLS_TXT,
         "experience.txt": experienceTxt,
         "blogs": blogsDir,
@@ -111,6 +152,10 @@ const useStyles = makeStyles(() => ({
         paddingLeft: "clamp(4rem, 8vw, 8rem)",
         paddingRight: "clamp(4rem, 8vw, 8rem)",
         position: "relative",
+        "@media (max-width: 768px)": {
+            paddingLeft: "1rem",
+            paddingRight: "1rem",
+        },
     },
     terminalBox: {
         position: "relative",
@@ -174,6 +219,7 @@ const useStyles = makeStyles(() => ({
         padding: "1.25rem 1.5rem",
         fontSize: "0.92rem",
         lineHeight: 1.6,
+        "@media (max-width: 600px)": { fontSize: "0.78rem", padding: "1rem" },
         scrollbarWidth: "thin",
         scrollbarColor: "rgba(255,255,255,0.18) transparent",
         "&::-webkit-scrollbar": { width: "8px" },
@@ -197,6 +243,24 @@ const useStyles = makeStyles(() => ({
     out: { color: "#cbd5e1" },
     err: { color: "#f87171" },
     muted: { color: "#94a3b8" },
+    fetch: {
+        display: "flex",
+        gap: "2.5ch",
+        margin: "0.25rem 0 0.75rem",
+    },
+    fetchLogo: {
+        margin: 0,
+        font: "inherit",
+        lineHeight: 1.35,
+        color: "#1793d1",
+        fontWeight: 700,
+        "@media (max-width: 600px)": { display: "none" },
+    },
+    fetchInfo: { minWidth: 0 },
+    fetchKey: { color: "#1793d1", fontWeight: 600 },
+    fetchRule: { color: "#475569" },
+    palette: { display: "flex", marginTop: "0.5rem" },
+    swatch: { width: "2.2ch", height: "1em" },
     cursor: {
         display: "inline-block",
         width: "0.5ch",
@@ -228,9 +292,7 @@ export const LinuxTerminal = () => {
     const fs = useMemo(buildFs, []);
 
     const [cwd, setCwd] = useState(HOME);
-    const [history, setHistory] = useState([
-        { type: "out", text: `Welcome to ${PROMPT_USER_HOST}. Type \`help\` to see what you can do.` },
-    ]);
+    const [history, setHistory] = useState(INITIAL_HISTORY);
     const [input, setInput] = useState("");
     const [cmdLog, setCmdLog] = useState([]);
     const [logIdx, setLogIdx] = useState(-1);
@@ -272,15 +334,8 @@ export const LinuxTerminal = () => {
         switch (cmd) {
             case "help":
                 lines.push({ type: "out", text: "Available commands:" });
-                lines.push({ type: "out", text: "  help                 show this message" });
-                lines.push({ type: "out", text: "  pwd                  print working directory" });
-                lines.push({ type: "out", text: "  ls [path]            list directory contents" });
-                lines.push({ type: "out", text: "  cd <path>            change directory" });
-                lines.push({ type: "out", text: "  cat <file>           print file contents" });
-                lines.push({ type: "out", text: "  whoami               who am i" });
-                lines.push({ type: "out", text: "  neofetch             print skill summary" });
-                lines.push({ type: "out", text: "  clear                clear the terminal" });
-                lines.push({ type: "muted", text: "Hint: try `cd blogs` then `ls` then `cat <file>`." });
+                COMMANDS.forEach(([c, d]) => lines.push({ type: "out", text: `  ${c.padEnd(18)} ${d}` }));
+                lines.push({ type: "muted", text: "Hint: try `cd projects`, `ls`, then `cat` a file. There are a few easter eggs." });
                 break;
             case "pwd":
                 lines.push({ type: "out", text: cwd });
@@ -289,17 +344,60 @@ export const LinuxTerminal = () => {
                 lines.push({ type: "out", text: USER });
                 break;
             case "neofetch":
-                lines.push({ type: "out", text: SKILLS_TXT });
+                lines.push({ type: "fetch" });
+                break;
+            case "now":
+                lines.push({ type: "out", text: NOW_TXT });
+                break;
+            case "fortune":
+                lines.push({ type: "out", text: FORTUNES[Math.floor(Math.random() * FORTUNES.length)] });
+                break;
+            case "contact":
+                lines.push({ type: "out", text: `email    : ${Resume.basics.email}` });
+                Resume.basics.profiles
+                    .filter((p) => p.network !== "Email")
+                    .forEach((p) => lines.push({ type: "out", text: `${p.network.toLowerCase().padEnd(9)}: ${p.url}` }));
+                break;
+            case "history":
+                [...cmdLog, raw].forEach((c, i) => lines.push({ type: "out", text: `${String(i + 1).padStart(4)}  ${c}` }));
+                break;
+            case "echo":
+                lines.push({ type: "out", text: arg });
+                break;
+            case "uname":
+                lines.push({ type: "out", text: args.includes("-a") ? `Linux ${HOST} x86_64 GNU/Linux` : "Linux" });
+                break;
+            case "date":
+                lines.push({ type: "out", text: new Date().toString() });
+                break;
+            case "sudo":
+                lines.push({ type: "err", text: `${USER} is not in the sudoers file. This incident will be reported.` });
+                break;
+            case "exit":
+            case "logout":
+                lines.push({ type: "muted", text: "There is no exit, only `clear`." });
+                break;
+            case "vim":
+            case "vi":
+            case "nvim":
+            case "nano":
+            case "emacs":
+                lines.push({ type: "muted", text: `${cmd}: read-only session. You would never get out anyway. Try \`cat\`.` });
+                break;
+            case "rm":
+                lines.push({ type: "err", text: "rm: cannot remove: Read-only file system (nice try)" });
                 break;
             case "ls": {
-                const target = arg ? resolvePath(cwd, arg) : cwd;
+                // flags like -la are accepted and ignored
+                const lsArg = args.filter((a) => !a.startsWith("-")).join(" ");
+                const target = lsArg ? resolvePath(cwd, lsArg) : cwd;
                 const node = lookup(fs, target);
                 if (node === null) {
-                    lines.push({ type: "err", text: `ls: cannot access '${arg || target}': No such file or directory` });
+                    lines.push({ type: "err", text: `ls: cannot access '${lsArg || target}': No such file or directory` });
                     break;
                 }
                 if (!isDir(node)) {
-                    lines.push({ type: "out", text: arg || target.split("/").pop() });
+                    lines.push({ type: "out", text: lsArg || target.split("/").pop() });
                     break;
                 }
                 const names = Object.keys(node).sort();
@@ -355,9 +453,47 @@ export const LinuxTerminal = () => {
 
         setHistory((h) => [...h, echo, ...lines]);
         if (nextCwd !== cwd) setCwd(nextCwd);
-    }, [cwd, fs]);
+    }, [cwd, fs, cmdLog]);
+
+    // Completes the command name, or the last path argument against the
+    // virtual fs. Multiple matches fill the common prefix and list them.
+    const complete = useCallback(() => {
+        const parts = input.split(" ");
+        const last = parts[parts.length - 1];
+        let candidates;
+        let prefix = last;
+        let dirPart = "";
+        if (parts.length === 1) {
+            candidates = COMMAND_NAMES;
+        } else {
+            const slash = last.lastIndexOf("/");
+            dirPart = slash >= 0 ? last.slice(0, slash + 1) : "";
+            prefix = last.slice(slash + 1);
+            const node = lookup(fs, resolvePath(cwd, dirPart || "."));
+            if (!isDir(node)) return;
+            candidates = Object.keys(node).map((n) => (isDir(node[n]) ? `${n}/` : n));
+        }
+        const matches = candidates.filter((c) => c.startsWith(prefix)).sort();
+        if (matches.length === 0) return;
+        let common = matches[0];
+        matches.forEach((m) => {
+            while (!m.startsWith(common)) common = common.slice(0, -1);
+        });
+        const done = matches.length === 1 && !common.endsWith("/") ? `${common} ` : common;
+        parts[parts.length - 1] = dirPart + done;
+        setInput(parts.join(" "));
+        if (matches.length > 1 && common === prefix) {
+            setHistory((h) => [...h, { type: "prompt", cwd, text: input }, { type: "out", text: matches.join("  ") }]);
+        }
+    }, [input, fs, cwd]);
 
     const onKeyDown = useCallback((e) => {
+        // Only trap Tab while typing, so keyboard users can still tab past the terminal.
+        if (e.key === "Tab" && input.length > 0 && !e.shiftKey) {
+            e.preventDefault();
+            complete();
+            return;
+        }
         if (e.key === "Enter") {
             e.preventDefault();
             const raw = input;
@@ -394,7 +530,7 @@ export const LinuxTerminal = () => {
             e.preventDefault();
             setHistory([]);
         }
-    }, [input, logIdx, cmdLog, run]);
+    }, [input, logIdx, cmdLog, run, complete]);
 
     const renderLine = useCallback((entry, idx) => {
         if (entry.type === "prompt") {
@@ -405,6 +541,27 @@ export const LinuxTerminal = () => {
                     <span className={classes.path}>{displayCwd(entry.cwd)}</span>
                     <span>$ </span>
                     <span className={classes.line}>{entry.text}</span>
+                </div>
+            );
+        }
+        if (entry.type === "fetch") {
+            const packages = `${topProjects.length + stepProjects.length} projects, ${Object.keys(blogPosts).length} posts (pacman)`;
+            const rows = [...terminalData.fetch.slice(0, 3), ["Packages", packages], ...terminalData.fetch.slice(3)];
+            return (
+                <div key={idx} className={classes.fetch}>
+                    <pre className={classes.fetchLogo} aria-hidden="true">{ARCH_LOGO}</pre>
+                    <div className={classes.fetchInfo}>
+                        <div><span className={classes.user}>{USER}</span>@<span className={classes.user}>{HOST}</span></div>
+                        <div className={classes.fetchRule}>{"-".repeat(USER.length + HOST.length + 1)}</div>
+                        {rows.map(([k, v]) => (
+                            <div key={k} className={`${classes.line} ${classes.out}`}>
+                                <span className={classes.fetchKey}>{k}</span>: {v}
+                            </div>
+                        ))}
+                        <div className={classes.palette} aria-hidden="true">
+                            {PALETTE.map((c) => <span key={c} className={classes.swatch} style={{ background: c }} />)}
+                        </div>
+                    </div>
                 </div>
             );
         }

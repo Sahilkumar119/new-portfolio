@@ -143,7 +143,7 @@ export const Certifications = () => {
             className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
         >
             <div className={classes.header}>
-                <span className={classes.eyebrow}>Verified Credentials</span>
+                <span className={classes.eyebrow}>Coursework</span>
                 <h2 className={classes.title}>Certifications</h2>
             </div>
             

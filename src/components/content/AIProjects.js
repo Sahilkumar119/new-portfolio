@@ -16,6 +16,10 @@ const useStyles = makeStyles(() => ({
         paddingLeft: "clamp(4rem, 8vw, 8rem)",
         paddingRight: "clamp(4rem, 8vw, 8rem)",
         position: "relative",
+        "@media (max-width: 768px)": {
+            paddingLeft: "1.5rem",
+            paddingRight: "1.5rem",
+        },
     },
     header: {
         marginBottom: "2rem",
@@ -354,7 +358,7 @@ export const AIProjects = () => {
             className={`${classes.section} reveal-section${visible ? " is-visible" : ""}`}
         >
             <div className={classes.header}>
-                <span className={classes.eyebrow}>Architecture &amp; Algorithms</span>
+                <span className={classes.eyebrow}>Built from scratch, measured honestly</span>
                 <h2 className={classes.title}>Selected Projects</h2>
             </div>
 

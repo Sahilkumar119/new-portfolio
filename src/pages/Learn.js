@@ -121,7 +121,7 @@ export const Learn = () => {
   // Warm the cache + force-decode every course logo once on mount. The logos
   // render as CSS masks (see CourseVisual); if the SVG isn't decoded before
   // first reveal the mask paints at the SVG's tiny intrinsic size, then snaps
-  // to `mask-size: contain` once decode finishes — the "small then enlarges"
+  // to `mask-size: contain` once decode finishes, the "small then enlarges"
   // flash. Preloading removes that gap.
   useEffect(() => {
     COURSES.forEach((c) => {
@@ -167,7 +167,7 @@ export const Learn = () => {
         <title>Learn | {Resume.basics.name}</title>
         <meta
           name="description"
-          content="Hands-on engineering courses by Sahil Kumar — Docker, SQL, Linux, and LangGraph, with Kubernetes, Git, and System Design on the way."
+          content="Hands-on engineering courses by Sahil Kumar: Docker, SQL, Linux, and LangGraph, with Kubernetes, Git, and System Design on the way."
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE}/learn`} />
@@ -177,7 +177,7 @@ export const Learn = () => {
         <meta property="og:title" content={`Learn | ${Resume.basics.name}`} />
         <meta
           property="og:description"
-          content="Hands-on engineering courses — Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
+          content="Hands-on engineering courses: Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
         />
         <meta property="og:image" content={`${SITE}/social-image.png`} />
 
@@ -185,11 +185,11 @@ export const Learn = () => {
         <meta property="twitter:title" content={`Learn | ${Resume.basics.name}`} />
         <meta
           property="twitter:description"
-          content="Hands-on engineering courses — Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
+          content="Hands-on engineering courses: Docker, SQL, Linux, LangGraph, Kubernetes, Git, System Design."
         />
         <meta property="twitter:image" content={`${SITE}/social-image.png`} />
 
-        {/* Inter — the bpowell-style display face for the names. */}
+        {/* Inter, the bpowell-style display face for the names. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" />
         <link

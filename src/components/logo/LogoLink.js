@@ -44,7 +44,7 @@ export const LogoLink = () => {
             <Tooltip title={Resume.basics.name} placement="right" TransitionComponent={Zoom} arrow>
                 <a
                     href={Resume.basics.url}
-                    aria-label={`${Resume.basics.name} — home`}
+                    aria-label={`${Resume.basics.name}, home`}
                     className={classes.link}
                     rel="noopener noreferrer"
                 >

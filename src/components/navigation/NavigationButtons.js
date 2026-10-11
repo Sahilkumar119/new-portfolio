@@ -31,6 +31,7 @@ const useStyles = makeStyles(() => ({
         // Pills differ in width; flush their right edges to the rail.
         alignItems: "flex-end",
         gap: "12px",
+        "@media (max-height: 860px)": { gap: "6px" },
         zIndex: 9999,
         animation: "slideInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both",
     },
@@ -58,6 +59,12 @@ const useStyles = makeStyles(() => ({
             color: "var(--text-primary)",
             transform: "translateX(-4px)",
             textDecoration: "none",
+        },
+        // Seven vertical pills outgrow short laptop screens and cover the
+        // theme toggle, so they compact below 860px of height.
+        "@media (max-height: 860px)": {
+            padding: "10px 7px",
+            fontSize: "0.72rem",
         },
     },
     pillActive: {

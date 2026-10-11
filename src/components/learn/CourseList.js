@@ -4,9 +4,9 @@ import { makeStyles } from "@material-ui/core/styles";
 // The giant stacked list of course names (bpowell-style).
 //
 // Active item is driven by TWO inputs ("both" mode):
-//   1. Scroll position — the name nearest the viewport centre wins. This is the
+//   1. Scroll position: the name nearest the viewport centre wins. This is the
 //      source of truth and is the only path on touch devices.
-//   2. Hover — on pointer/hover-capable devices, hovering a name activates it.
+//   2. Hover: on pointer/hover-capable devices, hovering a name activates it.
 //      On mouse-leave we recompute from scroll so it never sticks.
 const useStyles = makeStyles((theme) => ({
   list: {

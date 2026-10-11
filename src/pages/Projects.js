@@ -67,8 +67,7 @@ const useStyles = makeStyles(() => ({
         letterSpacing: "-0.04em",
         lineHeight: 1.0,
         color: "var(--text-primary)",
-        marginBottom: "0.75rem",
-        "& p": { margin: 0 },
+        margin: "0 0 0.75rem",
     },
     pageSubtitle: {
         fontSize: "1rem",
@@ -110,7 +109,7 @@ const useStyles = makeStyles(() => ({
         },
     },
 
-    // Project card — glass but restrained
+    // Project card, glass but restrained
     card: {
         position: "relative",
         background: "var(--glass-bg)",
@@ -152,7 +151,7 @@ const useStyles = makeStyles(() => ({
         marginBottom: "1.25rem",
     },
 
-    // Tech stack — just plain text tokens, no chip boxes
+    // Tech stack, just plain text tokens, no chip boxes
     techRow: {
         display: "flex",
         flexWrap: "wrap",
@@ -290,16 +289,16 @@ export const Projects = () => {
             <Container className={classes.content} maxWidth="lg" component="main">
                 <header className={classes.pageHeader}>
                     <span className={classes.pageEyebrow}>Selected work</span>
-                    <div className={classes.pageTitle}>
+                    <h1 className={classes.pageTitle}>
                         <TextDecrypt text="Projects" />
-                    </div>
+                    </h1>
                     <p className={classes.pageSubtitle}>
-                        A journey through code, creativity, and continuous learning.
+                        Speech, retrieval, on-device ML, robotics and graphics. Every project links to its code, and most report what did not work.
                     </p>
                 </header>
 
                 {allEmpty ? (
-                    <p className={classes.emptyState}>Projects coming soon — check back later.</p>
+                    <p className={classes.emptyState}>Projects coming soon. Check back later.</p>
                 ) : (
                     <>
                         {topProjects.length > 0 && (

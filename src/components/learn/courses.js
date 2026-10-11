@@ -1,6 +1,6 @@
 // Course catalogue for the /learn page.
 //
-// Hand-authored config (NOT a generated `src/data/` file — safe to edit).
+// Hand-authored config (NOT a generated `src/data/` file: safe to edit).
 // Each course drives one giant name in the scroll list, its accent colour,
 // the page tint when it's active, and the logo that slides in from the side.
 //
@@ -19,7 +19,7 @@ export const COURSES = [
     tint: "#e9f2fc",
     text: "#0a1a2f",
     blurb:
-      "Containers from first principles — images, Dockerfiles, volumes, networking, Compose, registries, and security. Eight hands-on modules.",
+      "Containers from first principles: images, Dockerfiles, volumes, networking, Compose, registries, and security. Eight hands-on modules.",
     status: "live",
     href: "/learn/docker",
     logo: "/images/learn/docker.svg",
@@ -31,7 +31,7 @@ export const COURSES = [
     tint: "#fbf3e6",
     text: "#2a1c05",
     blurb:
-      "Query data like you mean it — joins, aggregation, subqueries and CTEs, window functions, and the indexing intuition behind fast queries. Six hands-on modules.",
+      "Query data like you mean it: joins, aggregation, subqueries and CTEs, window functions, and the indexing intuition behind fast queries. Six hands-on modules.",
     status: "live",
     href: "/learn/sql",
     logo: "/images/learn/sql.svg",
@@ -43,7 +43,7 @@ export const COURSES = [
     tint: "#e8f0ff",
     text: "#0a1733",
     blurb:
-      "Live in the terminal — navigating the filesystem, finding things, permissions, processes, packages, networking, services, and the shell. One field guide, eleven sections.",
+      "Live in the terminal: navigating the filesystem, finding things, permissions, processes, packages, networking, services, and the shell. One field guide, eleven sections.",
     status: "live",
     href: "/learn/linux",
     logo: "/images/learn/linux.svg",
@@ -56,7 +56,7 @@ export const COURSES = [
     tint: "#e7f8f5",
     text: "#07251f",
     blurb:
-      "Build production agents with graphs — state, persistence, human-in-the-loop, multi-agent orchestration, and interview-grade system design patterns. Five practical modules.",
+      "Build production agents with graphs: state, persistence, human-in-the-loop, multi-agent orchestration, and interview-grade system design patterns. Five practical modules.",
     status: "live",
     href: "/learn/langgraph",
     logo: "/images/learn/langgraph.svg",
@@ -68,7 +68,7 @@ export const COURSES = [
     tint: "#e9edfb",
     text: "#0a1430",
     blurb:
-      "The 20% of Kubernetes that carries 80% of the work — pods, deployments and rollouts, services and ingress, config and secrets, storage, the debugging playbook, and production hardening. Eight hands-on modules.",
+      "The 20% of Kubernetes that carries 80% of the work: pods, deployments and rollouts, services and ingress, config and secrets, storage, the debugging playbook, and production hardening. Eight hands-on modules.",
     status: "live",
     href: "/learn/kubernetes",
     logo: "/images/learn/kubernetes.svg",
@@ -92,7 +92,7 @@ export const COURSES = [
     tint: "#f1ecfb",
     text: "#1a0f30",
     blurb:
-      "Design systems that scale — load balancing, caching, sharding, queues, and the trade-offs behind them.",
+      "Design systems that scale: load balancing, caching, sharding, queues, and the trade-offs behind them.",
     status: "soon",
     logo: "/images/learn/system-design.svg",
   },

@@ -309,7 +309,7 @@ export function MorphPanel() {
       `}</style>
       <FormContext.Provider value={ctx}>
         <div ref={wrapperRef} style={{ position: 'relative', width: showForm ? FORM_WIDTH : 116, height: 44, overflow: 'visible', transition: 'width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-          {/* Dock bar (the pill button) — animated by framer-motion */}
+          {/* Dock bar (the pill button), animated by framer-motion */}
           <motion.div
             data-panel
             className={cx('bg-background relative z-10 flex flex-col items-center border')}
@@ -332,7 +332,7 @@ export function MorphPanel() {
             <DockBar />
           </motion.div>
 
-          {/* Form panel — sits OUTSIDE motion.div so it's never clipped */}
+          {/* Form panel, sits OUTSIDE motion.div so it's never clipped */}
           <InputForm ref={textareaRef} onSuccess={handleSuccess} />
         </div>
       </FormContext.Provider>

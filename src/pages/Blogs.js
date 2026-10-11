@@ -67,8 +67,7 @@ const useStyles = makeStyles(() => ({
         letterSpacing: "-0.04em",
         lineHeight: 1.0,
         color: "var(--text-primary)",
-        marginBottom: "0.75rem",
-        "& p": { margin: 0 },
+        margin: "0 0 0.75rem",
     },
     pageSubtitle: {
         fontSize: "1rem",
@@ -85,7 +84,7 @@ const useStyles = makeStyles(() => ({
         gap: "1px",
     },
 
-    // Blog entry — editorial list format, not a card grid
+    // Blog entry, editorial list format, not a card grid
     entry: {
         display: "block",
         textDecoration: "none",
@@ -211,16 +210,16 @@ export const Blogs = () => {
             <Container className={classes.content} maxWidth="md" component="main">
                 <header className={classes.pageHeader}>
                     <span className={classes.pageEyebrow}>Writing</span>
-                    <div className={classes.pageTitle}>
+                    <h1 className={classes.pageTitle}>
                         <TextDecrypt text="Blog" />
-                    </div>
+                    </h1>
                     <p className={classes.pageSubtitle}>
-                        Thoughts, tutorials, and explorations on my learning journey.
+                        Notes from building things: robotics middleware, observability, and how language models actually behave.
                     </p>
                 </header>
 
                 {blogs.length === 0 ? (
-                    <p className={classes.emptyState}>No posts yet — check back soon.</p>
+                    <p className={classes.emptyState}>No posts yet. Check back soon.</p>
                 ) : (
                     <div className={classes.list} role="list">
                         {blogs.map((blog) => (

@@ -362,7 +362,10 @@ const syncTerminal = () => {
       user: rawTerminal.user || 'sahil',
       host: rawTerminal.host || 'archlinux',
       about: rawTerminal.about || '',
-      skills: Array.isArray(rawTerminal.skills) ? rawTerminal.skills : []
+      skills: Array.isArray(rawTerminal.skills) ? rawTerminal.skills : [],
+      now: rawTerminal.now || '',
+      fetch: Array.isArray(rawTerminal.fetch) ? rawTerminal.fetch : [],
+      fortunes: Array.isArray(rawTerminal.fortunes) ? rawTerminal.fortunes : []
     };
     fs.writeFileSync(path.join(DATA_DIR, 'terminal.js'), `export const terminalData = ${JSON.stringify(terminal, null, 2)};\n`);
     console.log(`Successfully synced terminal data.`);

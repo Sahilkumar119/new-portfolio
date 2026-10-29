@@ -6,16 +6,18 @@ const useStyles = makeStyles(() => ({
     wrapper: {
         position: "fixed",
         top: "auto",
-        bottom: "2.5rem",
-        left: "clamp(4rem, 8vw, 8rem)",
+        bottom: "1.25rem",
+        left: "1.25rem",
         zIndex: 9999,
+        // Desktop carries Resume in the left SocialIcons rail.
+        "@media (min-width: 960px)": { display: "none" },
         animation: "fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both",
     },
     link: {
         display: "inline-flex",
         alignItems: "center",
         gap: "10px",
-        padding: "12px 24px",
+        padding: "10px 18px",
         borderRadius: "24px",
         background: "var(--matte-turquoise)",
         backdropFilter: "blur(20px) saturate(180%)",
@@ -27,7 +29,6 @@ const useStyles = makeStyles(() => ({
         fontSize: "0.85rem",
         fontWeight: 500,
         letterSpacing: "0.01em",
-        fontFamily: "'SF Mono','Fira Code','Fira Mono','Roboto Mono',monospace",
         transition: "all 240ms cubic-bezier(0.34, 1.56, 0.64, 1)",
         "&:hover": {
             transform: "translateY(-2px)",

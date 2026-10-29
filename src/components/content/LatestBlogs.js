@@ -13,23 +13,14 @@ const useStyles = makeStyles(() => ({
         justifyContent: "flex-start",
         paddingTop: "8rem",
         paddingBottom: "4rem",
-        paddingLeft: "clamp(4rem, 8vw, 8rem)",
-        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
         position: "relative",
     },
     header: {
         marginBottom: "3rem",
         textAlign: "center",
         flexShrink: 0,
-    },
-    eyebrow: {
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        color: "var(--accent-primary)",
-        display: "block",
-        marginBottom: "0.75rem",
     },
     title: {
         fontSize: "clamp(2.5rem, 6vw, 4rem)",
@@ -306,7 +297,6 @@ export const LatestBlogs = () => {
         >
             <Container maxWidth="md">
                 <header className={classes.header}>
-                    <span className={classes.eyebrow}>Blog</span>
                     <h2 className={classes.title}>Recent Writing</h2>
                 </header>
 

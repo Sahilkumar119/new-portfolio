@@ -1,0 +1,10 @@
+{
+  "id": 14,
+  "title": "Delhi Bus Stream: Real-Time Arrival Prediction on Kafka",
+  "description": "GTFS-realtime protobuf into Kafka, a per-vehicle feature engine, a Feast online/offline store with exact parity, and gradient-boosted models for ETA and bus bunching. On a simulated Delhi network the ETA error is 11.2 s MAE against 18.7 s for schedule plus current delay, scoring runs at 94 ms p95 end to end, and a 132,000-message overload backlog drains with nothing lost. The live Delhi OTD feed (about 5,000 vehicles) is ingested and profiled, but every accuracy number is simulator-only for now.",
+  "technologies": ["Python", "Kafka", "Feast", "scikit-learn", "Protobuf"],
+  "link": "https://github.com/Sahiljangra115/delhi-bus-stream",
+  "github": "https://github.com/Sahiljangra115/delhi-bus-stream",
+  "category": "Data & MLOps",
+  "type": "top"
+}

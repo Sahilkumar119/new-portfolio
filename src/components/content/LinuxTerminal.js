@@ -149,8 +149,8 @@ const useStyles = makeStyles(() => ({
         justifyContent: "center",
         paddingTop: "6rem",
         paddingBottom: "6rem",
-        paddingLeft: "clamp(4rem, 8vw, 8rem)",
-        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
         position: "relative",
         "@media (max-width: 768px)": {
             paddingLeft: "1rem",

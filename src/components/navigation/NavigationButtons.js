@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 
@@ -67,10 +66,12 @@ const useStyles = makeStyles(() => ({
             fontSize: "0.72rem",
         },
     },
+    // Solid fill: accent text on the teal-tinted glass read at ~1.5:1.
     pillActive: {
-        color: "var(--accent-primary)",
-        background: "var(--glass-bg-hover)",
-        borderColor: "rgba(10,132,255,0.25)",
+        color: "#fff",
+        background: "var(--accent-primary)",
+        borderColor: "transparent",
+        "&:hover": { color: "#fff", background: "var(--accent-primary)" },
     },
 }));
 
@@ -90,22 +91,29 @@ export const NavigationButtons = () => {
             }
             setActiveHash(current);
         };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
+        // One layout read per frame at most, not per scroll event.
+        let frame = 0;
+        const onScroll = () => {
+            if (frame) return;
+            frame = requestAnimationFrame(() => { frame = 0; handleScroll(); });
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            cancelAnimationFrame(frame);
+        };
     }, []);
 
     return (
         <nav className={classes.nav} aria-label="Main navigation">
             {NAV_LINKS.map(({ label, to, route }) =>
                 route ? (
-                    <Tooltip title={label} placement="left" arrow key={to}>
-                        <Link to={to} className={classes.pill}>
-                            {label}
-                        </Link>
-                    </Tooltip>
+                    <Link key={to} to={to} className={classes.pill}>
+                        {label}
+                    </Link>
                 ) : (
-                    <Tooltip title={label} placement="left" arrow key={to}>
                         <a
+                            key={to}
                             href={to}
                             onClick={(e) => {
                                 // Already on home: intercept for a smooth scroll.
@@ -118,10 +126,10 @@ export const NavigationButtons = () => {
                                 window.history.pushState(null, '', to);
                             }}
                             className={`${classes.pill} ${activeHash === to ? classes.pillActive : ""}`}
+                            aria-current={activeHash === to ? "location" : undefined}
                         >
                             {label}
                         </a>
-                    </Tooltip>
                 )
             )}
         </nav>

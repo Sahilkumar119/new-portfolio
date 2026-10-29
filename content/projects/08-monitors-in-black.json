@@ -1,0 +1,10 @@
+{
+  "id": 15,
+  "title": "Monitors in Black: Self-Verifying Incident Response for LLM Services",
+  "description": "Built for the Agents of SigNoz hackathon. A SigNoz alert fires on one of six injected LLM-service failures (latency, error bursts, token bloat, memory growth, retry loops, lost traffic). Four agents read traces, logs and metrics through the SigNoz API and apply a fix only from a hard allowlist at 0.6 confidence or higher. A case closes only after two clean telemetry readings, so a fix that cannot be verified goes to a human instead of being marked resolved.",
+  "technologies": ["Python", "FastAPI", "OpenTelemetry", "SigNoz", "React"],
+  "link": "https://github.com/Sahiljangra115/Signoz-hackathon",
+  "github": "https://github.com/Sahiljangra115/Signoz-hackathon",
+  "category": "AI & ML",
+  "type": "top"
+}

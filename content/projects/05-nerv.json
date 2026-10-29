@@ -1,8 +1,14 @@
 {
   "id": 10,
   "title": "NERV: Local LLM Agent Orchestrator",
-  "description": "Splits one query into typed subtasks, routes each to the local model best suited to it (a code model for debugging, a general model for explanation), runs them in dependency order and merges the results. Planner output is Pydantic-validated with retry and a safe fallback, routing is deterministic and unit-tested, and a 20-task harness benchmarks the whole thing against a single model, because orchestration costs extra LLM calls and has to earn them. Ollama only, no cloud APIs.",
-  "technologies": ["Python", "Ollama", "Pydantic", "pytest"],
+  "description": "Splits one query into typed subtasks, routes each to the local model best suited to it (a code model for debugging, a general model for explanation), runs them in dependency order and merges the results. v1.1 replaces the LLM planner with a trained MiniLM router: 0.89 grouped cross-validation accuracy, 18/20 on held-out bench tasks, and about 7 ms to plan where the LLM planner took about 45 s. Planner output is Pydantic-validated with a safe fallback, and routing is deterministic and unit-tested. Ollama only, no cloud APIs.",
+  "technologies": [
+    "Python",
+    "Ollama",
+    "Pydantic",
+    "MiniLM",
+    "pytest"
+  ],
   "link": "https://github.com/Sahiljangra115/nerv-orchestrator",
   "github": "https://github.com/Sahiljangra115/nerv-orchestrator",
   "category": "AI & ML",

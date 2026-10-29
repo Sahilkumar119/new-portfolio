@@ -11,22 +11,13 @@ const useStyles = makeStyles(() => ({
         justifyContent: "center",
         paddingTop: "6rem",
         paddingBottom: "6rem",
-        paddingLeft: "clamp(4rem, 8vw, 8rem)",
-        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
         position: "relative",
     },
     header: {
         marginBottom: "4rem",
         textAlign: "center",
-    },
-    eyebrow: {
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        color: "var(--accent-tertiary)",
-        display: "block",
-        marginBottom: "1rem",
     },
     title: {
         fontSize: "clamp(2rem, 5vw, 3.5rem)",
@@ -143,7 +134,6 @@ export const Certifications = () => {
             className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
         >
             <div className={classes.header}>
-                <span className={classes.eyebrow}>Coursework</span>
                 <h2 className={classes.title}>Certifications</h2>
             </div>
             

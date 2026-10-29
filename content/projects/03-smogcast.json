@@ -1,0 +1,10 @@
+{
+  "id": 13,
+  "title": "Smogcast: Self-Monitoring PM2.5 Forecasts for Delhi NCR",
+  "description": "24 h and 48 h PM2.5 forecasts where the platform matters more than the model: an outage-safe hourly collector, PSI/KS drift checks, drift-triggered retraining behind a promotion gate, a registry with canary deploys and 0.06 s rollback, MLflow tracking and a FastAPI server exporting Prometheus metrics. The model beats persistence by 10% at 24 h (26.4 vs 29.4 µg/m³ MAE) on CAMS model data. A 120-week walk-forward replay found drift-triggered retraining did not beat blind 28-day refits, and the README says so.",
+  "technologies": ["Python", "scikit-learn", "FastAPI", "MLflow", "Prometheus"],
+  "link": "https://github.com/Sahiljangra115/smogcast",
+  "github": "https://github.com/Sahiljangra115/smogcast",
+  "category": "Data & MLOps",
+  "type": "top"
+}

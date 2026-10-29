@@ -8,8 +8,8 @@ const useStyles = makeStyles(() => ({
     wrapper: {
         marginTop: "auto",
         marginBottom: "auto",
-        paddingLeft: "clamp(4rem, 8vw, 8rem)",
-        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
         maxWidth: "680px",
         // Keeps the CTAs clear of the fixed Resume button on short screens.
         paddingBottom: "5rem",

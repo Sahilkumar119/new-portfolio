@@ -18,26 +18,22 @@
       {
         "network": "Email",
         "username": "sahil115jangid@gmail.com",
-        "url": "mailto:sahil115jangid@gmail.com",
-        "x_icon": "far fa-envelope"
+        "url": "mailto:sahil115jangid@gmail.com"
       },
       {
         "network": "LinkedIn",
         "username": "Sahil Kumar",
-        "url": "https://www.linkedin.com/in/sahilkumar119/",
-        "x_icon": "fab fa-linkedin-in"
+        "url": "https://www.linkedin.com/in/sahilkumar119/"
       },
       {
         "network": "GitHub",
         "username": "Sahiljangra115",
-        "url": "https://github.com/Sahiljangra115",
-        "x_icon": "fab fa-github"
+        "url": "https://github.com/Sahiljangra115"
       },
       {
         "network": "Dev.to",
         "username": "archie_btw",
-        "url": "https://dev.to/archie_btw",
-        "x_icon": "fab fa-dev"
+        "url": "https://dev.to/archie_btw"
       }
     ]
   }

@@ -1,0 +1,10 @@
+{
+  "id": 12,
+  "title": "Credit Risk Policy: From Default Model to Lending Decision",
+  "description": "A default model on the seven-table Home Credit dataset (307,511 applications) turned into a cost-based approval policy. 59 features in tested DuckDB SQL, a WoE scorecard benchmarked against LightGBM and CatBoost on time-ordered splits, and an isotonic-calibrated LightGBM at 0.782 test AUC. The chosen cutoff approves 91% of applicants and earns 5.7% more than approve-all, with fairness, reject-inference and A/B sizing checks. Margin and loss assumptions are stated, and the dataset's dates are synthetic, so real drift is not tested.",
+  "technologies": ["Python", "DuckDB", "SQL", "LightGBM", "CatBoost", "FastAPI"],
+  "link": "https://github.com/Sahiljangra115/credit-risk-policy",
+  "github": "https://github.com/Sahiljangra115/credit-risk-policy",
+  "category": "Data & MLOps",
+  "type": "top"
+}

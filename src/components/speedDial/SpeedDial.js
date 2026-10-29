@@ -2,6 +2,7 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { SpeedDial, SpeedDialIcon, SpeedDialAction } from "@material-ui/lab";
 import Resume from "../../settings/resume.json";
+import { Icon } from "../content/icons";
 
 const useStyles = makeStyles(() => ({
     speedDial: {
@@ -28,7 +29,6 @@ const useStyles = makeStyles(() => ({
     },
     icon: {
         color: "var(--text-primary)",
-        fontSize: "0.88rem",
     },
 }));
 
@@ -36,9 +36,9 @@ const useStyles = makeStyles(() => ({
 // /projects, /blog and /learn are unreachable from a phone. Plain hrefs on
 // purpose: a full navigation is predictable and needs no router plumbing.
 const PAGES = [
-    { label: "All Projects", url: "/projects", icon: "fas fa-folder-open" },
-    { label: "All Posts", url: "/blog", icon: "fas fa-newspaper" },
-    { label: "Learn", url: "/learn", icon: "fas fa-graduation-cap" },
+    { label: "All Projects", url: "/projects", icon: "Projects" },
+    { label: "All Posts", url: "/blog", icon: "Posts" },
+    { label: "Learn", url: "/learn", icon: "Learn" },
 ];
 
 export const SpeedDials = () => {
@@ -58,7 +58,7 @@ export const SpeedDials = () => {
             {PAGES.map((page) => (
                 <SpeedDialAction
                     key={page.url}
-                    icon={<i className={`${page.icon} ${classes.icon}`} aria-hidden="true" />}
+                    icon={<Icon name={page.icon} className={classes.icon} />}
                     tooltipTitle={page.label}
                     onClick={() => setOpen(false)}
                     href={page.url}
@@ -67,7 +67,7 @@ export const SpeedDials = () => {
             {Resume.basics.profiles.map((action) => (
                 <SpeedDialAction
                     key={action.network}
-                    icon={<i className={`${action.x_icon} ${classes.icon}`} aria-hidden="true" />}
+                    icon={<Icon name={action.network} className={classes.icon} />}
                     tooltipTitle={action.network}
                     onClick={() => setOpen(false)}
                     href={action.url}

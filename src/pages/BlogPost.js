@@ -26,7 +26,7 @@ const useStyles = makeStyles(() => ({
         width: "clamp(400px,60vw,900px)", height: "clamp(400px,60vw,900px)",
         borderRadius: "50%",
         background: "radial-gradient(circle, var(--glow-blue) 0%, transparent 70%)",
-        filter: "blur(60px)", zIndex: 0, pointerEvents: "none",
+        zIndex: 0, pointerEvents: "none",
         animation: "$glowPulse 9s ease-in-out infinite",
     },
     glowPurple: {
@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
         width: "clamp(300px,50vw,700px)", height: "clamp(300px,50vw,700px)",
         borderRadius: "50%",
         background: "radial-gradient(circle, var(--glow-purple) 0%, transparent 70%)",
-        filter: "blur(60px)", zIndex: 0, pointerEvents: "none",
+        zIndex: 0, pointerEvents: "none",
         animation: "$glowPulse 11s ease-in-out 2s infinite",
     },
     "@keyframes glowPulse": {

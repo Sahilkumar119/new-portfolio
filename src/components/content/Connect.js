@@ -12,23 +12,14 @@ const useStyles = makeStyles(() => ({
         justifyContent: "center",
         paddingTop: "6rem",
         paddingBottom: "6rem",
-        paddingLeft: "clamp(4rem, 8vw, 8rem)",
-        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
         position: "relative",
         "@media (max-width: 768px)": {
             paddingLeft: "1.5rem",
             paddingRight: "1.5rem",
         },
         textAlign: "center",
-    },
-    eyebrow: {
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        color: "var(--accent-primary)",
-        display: "block",
-        marginBottom: "1.5rem",
     },
     title: {
         fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
@@ -138,7 +129,6 @@ export const Connect = () => {
             ref={sectionRef}
             className={`${classes.section} reveal-section${visible ? ' is-visible' : ''}`}
         >
-            <span className={classes.eyebrow}>Contact</span>
             <h2 className={classes.title}>Let's talk.</h2>
             <p className={classes.subtitle}>
                 I'm looking for ML engineering roles and research collaborations, especially in speech, retrieval and on-device inference. If you're hiring, building something similar, or want to argue about a design choice in one of my repos, email is the fastest way to reach me.

@@ -13,8 +13,8 @@ const useStyles = makeStyles(() => ({
         justifyContent: "flex-start",
         paddingTop: "8rem",
         paddingBottom: "4rem",
-        paddingLeft: "clamp(4rem, 8vw, 8rem)",
-        paddingRight: "clamp(4rem, 8vw, 8rem)",
+        paddingLeft: "var(--section-px)",
+        paddingRight: "var(--section-px)",
         position: "relative",
         "@media (max-width: 768px)": {
             paddingLeft: "1.5rem",
@@ -26,14 +26,10 @@ const useStyles = makeStyles(() => ({
         textAlign: "center",
         flexShrink: 0,
     },
-    eyebrow: {
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        color: "var(--accent-primary)",
-        display: "block",
-        marginBottom: "1rem",
+    lede: {
+        fontSize: "1rem",
+        color: "var(--text-tertiary)",
+        margin: "0.75rem 0 0",
     },
     title: {
         fontSize: "clamp(2rem, 5vw, 3.5rem)",
@@ -170,8 +166,8 @@ const useStyles = makeStyles(() => ({
         marginTop: "auto",
     },
     techToken: {
-        fontSize: "0.68rem",
-        fontFamily: "'SF Mono', monospace",
+        fontSize: "0.72rem",
+        fontFamily: "'SF Mono', ui-monospace, Menlo, Consolas, monospace",
         color: "var(--accent-primary)",
         background: "rgba(10, 132, 255, 0.1)",
         padding: "3px 7px",
@@ -358,8 +354,8 @@ export const AIProjects = () => {
             className={`${classes.section} reveal-section${visible ? " is-visible" : ""}`}
         >
             <div className={classes.header}>
-                <span className={classes.eyebrow}>Built from scratch, measured honestly</span>
                 <h2 className={classes.title}>Selected Projects</h2>
+                <p className={classes.lede}>Built from scratch, measured honestly, misses included.</p>
             </div>
 
             {/* Toggle buttons, not a tablist: there is no tabpanel to point at,
